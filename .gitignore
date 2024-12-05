@@ -1,0 +1,26 @@
+# Dependency
+node_modules
+
+# System
+.DS_Store
+
+# Log
+*.log
+
+# IDE
+/.idea
+
+# Build
+*.tgz
+/dist
+/out
+
+# Test
+/coverage
+
+# Env
+.env
+.env.*.local
+
+# Wireit
+.wireit
