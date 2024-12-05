@@ -1,0 +1,110 @@
+{
+  "name": "oniichan",
+  "displayName": "Oniichan",
+  "description": "谁不爱写代码的时候有个可靠的欧尼酱陪着你呢",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "oniichan.semanticRewrite",
+        "title": "Semantic rewrite current line",
+        "category": "Rewrite",
+        "enablement": "!editorHasMultipleSelections && !editorReadonly && !isInDiffEditor"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "oniichan.semanticRewrite",
+        "key": "alt+shift+r",
+        "mac": "command+shift+r"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Model Configuration",
+        "properties": {
+          "oniichan.model.anthropicApiKey": {
+            "type": "string",
+            "description": "You must provide an Anthropic API key to use this extension."
+          },
+          "oniichan.model.anthropicBaseUrl": {
+            "type": "string",
+            "default": "https://api.anthropic.com",
+            "description": "Override default Anthropic base URL, such as using API2D."
+          }
+        }
+      },
+      {
+        "title": "Semantic Rewrite",
+        "properties": {
+          "oniichan.semanticRewrite.triggerType": {
+            "type": "string",
+            "enum": [
+              "Manual",
+              "Automatic"
+            ],
+            "markdownEnumDescriptions": [
+              "Triggers manually by keyboard shortcut or command",
+              "Triggers when a new line is typed into editor"
+            ],
+            "default": "Manual",
+            "description": "How semantic rewrite is triggered."
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "prepare": "husky",
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.mjs",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.mjs --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.mjs --production",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 src",
+    "ci": "npm ci && npm run compile"
+  },
+  "homepage": "https://github.com/otakustay/oniichan",
+  "bugs": {
+    "url": "https://github.com/otakustay/oniichan/issues"
+  },
+  "author": "otakustay <otakustay@gmail.com> (https://github.com/otakustay)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/otakustay/oniichan"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.16.0",
+    "@otakustay/async-iterator": "^1.1.1",
+    "@otakustay/text-pin": "^1.0.0",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "dedent": "^1.5.3",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.13.0",
+    "eventsource-parser": "^3.0.0",
+    "husky": "^9.1.7",
+    "npm-run-all": "^4.1.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.17.0"
+  }
+}
