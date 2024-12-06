@@ -16,55 +16,16 @@ Oniichan使用Claude大模型进行代码生成（具体使用`claude-3-5-sonnet
 
 如果你使用一些代理服务，可以通过修改`oniichan.model.anthropicBaseUrl`来指定请求的路径，我个人使用[API2D](https://api2d.com/)服务，对应的配置值为`https://oa.api2d.net/claude/v1`。
 
+更多细节请参考[安装配置文档](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE)。
+
 ## 功能
 
-### 语义化重写
+### 语义化改写
 
-语义化重写可以使你在代码中以非常简单、凌乱的文本表达自己的诉求，并通过大模型帮你改写成符合语义规范的代码（视频中我使用快捷键触发了重写）。
+语义化改写可以使你在代码中以非常简单、凌乱的文本表达自己的诉求，并通过大模型帮你改写成符合语义规范的代码（视频中我使用快捷键触发了改写）。
 
 ![Semantic rewrite demo](https://raw.githubusercontent.com/otakustay/oniichan/master/assets/semantic-rewrite-styled.gif)
 
-从视频中你可以看到，只要能大致讲明白要什么样的CSS，语义化重写就能很快地帮你转换代码，在运行过程中你甚至可以继续去写其它的代码。
+从视频中你可以看到，只要能大致讲明白要什么样的CSS，语义化改写就能很快地帮你转换代码，在运行过程中你甚至可以继续去写其它的代码。
 
-再举一个例子，我有一个单元测试的文件：
-
-```ts
-import {expect, test} from 'vitest';
-import {chunk} from '../chunk.js';
-
-async function* generate() {
-    yield 1;
-    await Promise.resolve();
-    yield 2;
-    yield 3;
-    await Promise.resolve();
-    yield 4;
-    yield 5;
-}
-test('chunk with size 2', async () => {
-    const iterable = chunk(generate(), 2);
-    const iterator = iterable[Symbol.asyncIterator]();
-    await expect(iterator.next()).resolves.toEqual({value: [1, 2], done: false});
-    await expect(iterator.next()).resolves.toEqual({value: [3, 4], done: false});
-    await expect(iterator.next()).resolves.toEqual({value: [5], done: false});
-    await expect(iterator.next()).resolves.toEqual({value: undefined, done: true});
-});
-
-tst size < 0 // <-- 在这一行触发
-```
-
-非常简单的说明一下我要添加一个测试用例，然后执行`Semantic rewrite current line`这个命令，它就会变成这样的代码：
-
-```ts
-test('chunk with negative size', async () => {
-    expect(() => chunk(generate(), -1)).toThrow();
-});
-```
-
-还是比较能满足实际代码的需要的。
-
-### 触发方式
-
-- 你可以使用`CMD+SHIFT+P`打开命令面板，找到`Semantic rewrite current line`来触发语义化重写。
-- 默认的快捷键是`CMD+SHIFT+R`，需要修改的话，在快捷键配置中找到`oniichan.semanticRewrite`修改即可。
-- 如果在设置中，`oniichan.semanticRewrite.triggerType`这个配置的值是`Automatic`，那么在一行末尾敲回车的时候，会自动在这一行触发重写，这可能会导致更多不需要重写的代码发送给模型，消耗你的钱包，还请小心。
+更多使用方法及相关配置请参考[语义化改写文档](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99)。
