@@ -1,4 +1,5 @@
-import {window, TextEditor, Range, DecorationRenderOptions, Position, OverviewRulerLane, ThemeColor} from 'vscode';
+import {window, Range, DecorationRenderOptions, Position, OverviewRulerLane, ThemeColor} from 'vscode';
+import {TextEditorReference} from '../utils/editor';
 
 const decorationOptions: DecorationRenderOptions = {
     overviewRulerColor: new ThemeColor('editorOverviewRuler.infoForeground'),
@@ -17,16 +18,22 @@ interface LoadingState {
 export class LineLoadingManager {
     private readonly lineLoadingState = new Map<number, LoadingState>();
 
-    private readonly editor: TextEditor;
+    private readonly editorReference: TextEditorReference;
 
     private timer: ReturnType<typeof setInterval> | null = null;
 
-    constructor(editor: TextEditor) {
-        this.editor = editor;
+    constructor(uri: string) {
+        this.editorReference = new TextEditorReference(uri);
     }
 
     add(line: number) {
-        const lineText = this.editor.document.lineAt(line).text;
+        const editor = this.editorReference.getTextEditorWhenActive();
+
+        if (!editor) {
+            return;
+        }
+
+        const lineText = editor.document.lineAt(line).text;
         this.lineLoadingState.set(
             line,
             {
@@ -78,17 +85,21 @@ export class LineLoadingManager {
     }
 
     private updateLoadingState() {
-        const ranges: Range[] = [];
+        const editor = this.editorReference.getTextEditorWhenActive();
 
-        for (const [line, state] of this.lineLoadingState) {
-            const start = state.index;
-            const end = Math.min(state.lineLength, start + state.highlightRange);
-            const range = new Range(new Position(line, start), new Position(line, end));
-            state.index = (state.index + 1) % (state.lineLength - 1);
-            ranges.push(range);
+        if (editor) {
+            const ranges: Range[] = [];
+
+            for (const [line, state] of this.lineLoadingState) {
+                const start = state.index;
+                const end = Math.min(state.lineLength, start + state.highlightRange);
+                const range = new Range(new Position(line, start), new Position(line, end));
+                state.index = (state.index + 1) % (state.lineLength - 1);
+                ranges.push(range);
+            }
+
+            editor.setDecorations(decorationType, ranges);
         }
-
-        this.editor.setDecorations(decorationType, ranges);
 
         if (this.timer) {
             this.timer = setTimeout(() => this.updateLoadingState(), 40);

@@ -1,21 +1,28 @@
-import {TextEditor, TextDocumentContentChangeEvent} from 'vscode';
+import {TextDocumentContentChangeEvent} from 'vscode';
 import {LineLoadingManager} from '../../ui/lineLoading';
 import {LineWorker} from './worker';
+import {TextEditorReference} from '../../utils/editor';
 
 export class LineTrack {
     private readonly workers = new Set<LineWorker>();
 
-    private readonly editor: TextEditor;
+    private readonly editorReference: TextEditorReference;
 
     private readonly loading: LineLoadingManager;
 
-    constructor(editor: TextEditor) {
-        this.editor = editor;
-        this.loading = new LineLoadingManager(editor);
+    constructor(uri: string) {
+        this.editorReference = new TextEditorReference(uri);
+        this.loading = new LineLoadingManager(uri);
     }
 
     async push(line: number) {
-        const worker = new LineWorker(line, this.editor, this.loading);
+        const editor = this.editorReference.getTextEditor();
+
+        if (!editor) {
+            return;
+        }
+
+        const worker = new LineWorker(editor.document, line, this.loading);
         this.workers.add(worker);
         await worker.run().catch(() => {});
         this.workers.delete(worker);
@@ -24,7 +31,7 @@ export class LineTrack {
     updateTrack(changes: readonly TextDocumentContentChangeEvent[]) {
         for (const change of changes) {
             for (const worker of this.workers) {
-                worker.applyEdit(change.range, change.text);
+                worker.applyUserEdit(change.range, change.text);
             }
         }
     }

@@ -1,4 +1,4 @@
-import {window, Disposable, TextEditor, commands, workspace, TextDocument, TextDocumentChangeEvent} from 'vscode';
+import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeEvent} from 'vscode';
 import {LineTrack} from './track';
 import {getSemanticRewriteConfiguration} from '../../utils/config';
 
@@ -10,7 +10,7 @@ function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
 export class SemanticRewriteCommand extends Disposable {
     private readonly disopsable: Disposable;
 
-    private readonly tracks = new Map<TextDocument, LineTrack>();
+    private readonly tracks = new Map<string, LineTrack>();
 
     constructor() {
         super(() => void this.disopsable.dispose());
@@ -34,7 +34,7 @@ export class SemanticRewriteCommand extends Disposable {
                         return;
                     }
 
-                    const track = this.tracks.get(event.document);
+                    const track = this.tracks.get(event.document.uri.toString());
                     track?.updateTrack(event.contentChanges);
 
                     if (getSemanticRewriteConfiguration().triggerType !== 'Automatic') {
@@ -56,8 +56,9 @@ export class SemanticRewriteCommand extends Disposable {
     }
 
     private async executeSemanticRewrite(editor: TextEditor) {
-        const lineTrack = this.tracks.get(editor.document) ?? new LineTrack(editor);
-        this.tracks.set(editor.document, lineTrack);
+        const uri = editor.document.uri.toString();
+        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri);
+        this.tracks.set(uri, lineTrack);
         await lineTrack.push(editor.selection.active.line);
     }
 }
