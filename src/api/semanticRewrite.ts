@@ -1,6 +1,6 @@
 import path from 'node:path';
 import dedent from 'dedent';
-import {chat, ChatMessagePayload} from './model';
+import {ChatMessagePayload, createModelAccess} from './model';
 
 function createPrompt(file: string, codeBefore: string, codeAfter: string, hint: string) {
     const before = codeBefore.trim()
@@ -44,11 +44,12 @@ function createPrompt(file: string, codeBefore: string, codeAfter: string, hint:
 
 export default {
     rewrite: async (file: string, codeBefore: string, codeAfter: string, hint: string): Promise<string> => {
+        const model = createModelAccess();
         const prompt = createPrompt(file, codeBefore, codeAfter, hint);
         const messages: ChatMessagePayload[] = [
             {role: 'user', content: prompt},
         ];
-        const text = await chat(messages);
+        const text = await model.chat(messages);
 
         const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
         const codeBlocks = text.match(codeBlockRegex);

@@ -66,7 +66,7 @@ export class LineWorker {
             }
         }
         catch (ex) {
-            throw new Error(`Semantic rewrite failed: ${ex instanceof Error ? ex.message : ex}`)
+            throw new Error(`Semantic rewrite failed: ${ex instanceof Error ? ex.message : ex}`);
         }
         finally {
             this.hideLoading();

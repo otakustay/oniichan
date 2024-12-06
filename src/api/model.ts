@@ -2,6 +2,7 @@
 // import {createParser, EventSourceMessage} from 'eventsource-parser';
 import {Anthropic} from '@anthropic-ai/sdk';
 import {getModelConfiguration} from '../utils/config';
+import {notifyNotConfgured} from '../ui/notConfigured';
 
 export interface ChatMessagePayload {
     role: 'user' | 'assistant';
@@ -43,9 +44,7 @@ export interface ChatMessagePayload {
 //     return controller.toIterable();
 // }
 
-export async function chat(messages: ChatMessagePayload[]): Promise<string> {
-    const config = getModelConfiguration()
-    const client = new Anthropic({apiKey: config.apiKey, baseURL: config.baseUrl});
+async function chat(client: Anthropic, messages: ChatMessagePayload[]): Promise<string> {
     const params: Anthropic.MessageCreateParams = {
         model: 'claude-3-5-sonnet-latest',
         max_tokens: 100,
@@ -53,4 +52,36 @@ export async function chat(messages: ChatMessagePayload[]): Promise<string> {
     };
     const result = await client.messages.create(params);
     return result.content.filter(v => v.type === 'text').map(v => v.text).join('\n\n');
+}
+
+type ModelCall<P extends any[], R> = (client: Anthropic, ...args: P) => Promise<R>;
+
+type UserModelCall<P extends any[], R> = (...args: P) => Promise<R>;
+
+function withModelClient<P extends any[], R>(fn: ModelCall<P, R>): UserModelCall<P, R> {
+    const state = {retry: 0};
+    const implement = async (...args: P): Promise<R> => {
+        const config = getModelConfiguration();
+
+        if (config.apiKey) {
+            const client = new Anthropic({apiKey: config.apiKey, baseURL: config.baseUrl});
+            return fn(client, ...args);
+        }
+
+        const isApiKeyConfigured = await notifyNotConfgured();
+
+        if (!isApiKeyConfigured || state.retry >= 1) {
+            throw new Error('Anthropic API key not configured');
+        }
+
+        state.retry++;
+        return implement(...args);
+    };
+    return implement;
+}
+
+export function createModelAccess() {
+    return {
+        chat: withModelClient(chat),
+    };
 }

@@ -1,6 +1,6 @@
 {
-  "name": "oniichan",
-  "displayName": "Oniichan",
+  "name": "otakustay.oniichan",
+  "displayName": "Oniichan Coding Assistant",
   "description": "谁不爱写代码的时候有个可靠的欧尼酱陪着你呢",
   "version": "0.0.1",
   "engines": {
