@@ -14,6 +14,7 @@ node_modules
 *.tgz
 /dist
 /out
+*.vsix
 
 # Test
 /coverage
