@@ -4,6 +4,7 @@ out/**
 node_modules/**
 src/**
 assets/**
+!assets/icon.png
 .gitignore
 esbuild.mjs
 commitlint.config.mjs

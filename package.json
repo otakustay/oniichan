@@ -13,6 +13,7 @@
   "activationEvents": [
     "onLanguage"
   ],
+  "icon": "assets/icon.png",
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
