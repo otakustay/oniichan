@@ -1,4 +1,4 @@
-# Oniichan
+# Oniichan Coding Assistant
 
 Oniichan (おにいちゃん，欧尼酱)是我个人完全按照自己的喜好开发的一款VSCode插件，我试图将我在使用大模型辅助开发领域的创意实现在插件中。
 
@@ -10,11 +10,11 @@ Oniichan (おにいちゃん，欧尼酱)是我个人完全按照自己的喜好
 
 ## 配置
 
-Oniichan使用Claude大模型进行代码生成（具体使用`claude-3-5-sonnet-latest`），因此你需要配置Claude的API密钥才能使用插件。
+Oniichan使用大模型进行代码生成，支持OpenAI（ChatGPT、OpenRouter等服务）与Anthropic（Claude等服务）两种形式，你需要有自己的API Key。
 
-在配置项中，你可以找到`oniichan.model.anthropicApiKey`填入你的Claude API密钥。
+在配置项中，你可以搜索`oniichan.model`并填入相关的配置，包括API形式、入口URL、API Key、模型名称等。
 
-如果你使用一些代理服务，可以通过修改`oniichan.model.anthropicBaseUrl`来指定请求的路径，我个人使用[API2D](https://api2d.com/)服务，对应的配置值为`https://oa.api2d.net/claude/v1`。
+如果你使用一些代理服务，可以通过修改`oniichan.model.baseUrl`来指定请求的路径，例如我个人使用[API2D](https://api2d.com/)服务，并调用Claude的模型，则对应的配置值为`https://oa.api2d.net/claude/v1`。
 
 更多细节请参考[安装配置文档](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE)。
 

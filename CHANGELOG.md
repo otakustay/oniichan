@@ -16,3 +16,9 @@
 ### Fixed
 
 - 切换编辑器标签页后，插件的语义化改写功能不会再莫名其妙失效了。
+
+## [1.1.0] - 2024-12-07
+
+### Added
+
+- 支持了使用OpenAI或Anthropic形式的API，并可以自选模型，使用ChatGPT、Claude或者三方OpenRouter都毫无压力。
