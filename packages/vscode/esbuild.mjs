@@ -41,6 +41,9 @@ try {
         outfile: 'dist/extension.js',
         external: ['vscode'],
         logLevel: 'silent',
+        loader: {
+            '.prompt': 'text',
+        },
         plugins: [
             /* add to the end of plugins array */
             esbuildProblemMatcherPlugin,

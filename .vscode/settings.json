@@ -8,5 +8,8 @@
     "dist": true
   },
   "typescript.tsc.autoDetect": "off",
-  "editor.defaultFormatter": "dprint.dprint"
+  "editor.defaultFormatter": "dprint.dprint",
+  "files.associations": {
+    "*.prompt": "mustache"
+  }
 }

@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "dprint.dprint",
     "connor4312.esbuild-problem-matchers",
-    "ms-vscode.extension-test-runner"
+    "ms-vscode.extension-test-runner",
+    "imgildev.vscode-mustache-snippets"
   ]
 }

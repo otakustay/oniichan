@@ -103,15 +103,9 @@
   "devDependencies": {
     "@oniichan/shared": "workspace:*",
     "@otakustay/text-pin": "^1.0.0",
-    "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.95.0",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1",
-    "dedent": "^1.5.3",
     "esbuild": "^0.24.0",
-    "eventsource-parser": "^3.0.0",
-    "npm-run-all": "^4.1.5",
-    "tsx": "^4.19.2"
+    "eventsource-parser": "^3.0.0"
   }
 }
