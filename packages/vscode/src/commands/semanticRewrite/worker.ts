@@ -59,6 +59,7 @@ export class LineWorker {
             await this.applyRewrite(code, hint);
         }
         catch (ex) {
+            console.error(ex);
             throw new Error(`Semantic rewrite failed: ${ex instanceof Error ? ex.message : ex}`);
         }
         finally {

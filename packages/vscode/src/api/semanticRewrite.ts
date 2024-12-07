@@ -1,6 +1,7 @@
 import path from 'node:path';
 import dedent from 'dedent';
-import {ChatMessagePayload, createModelAccess} from './model';
+import {ChatMessagePayload} from '@oniichan/shared/model';
+import {createModelAccess} from './model';
 
 function createPrompt(file: string, codeBefore: string, codeAfter: string, hint: string) {
     const before = codeBefore.trim()
@@ -44,7 +45,7 @@ function createPrompt(file: string, codeBefore: string, codeAfter: string, hint:
 
 export default {
     rewrite: async (file: string, codeBefore: string, codeAfter: string, hint: string): Promise<string> => {
-        const model = createModelAccess();
+        const model = await createModelAccess();
         const prompt = createPrompt(file, codeBefore, codeAfter, hint);
         const messages: ChatMessagePayload[] = [
             {role: 'user', content: prompt},

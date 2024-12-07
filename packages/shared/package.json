@@ -12,5 +12,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "openai": "^4.76.0"
+  }
 }
