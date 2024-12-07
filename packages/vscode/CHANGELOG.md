@@ -22,3 +22,9 @@
 ### Added
 
 - 支持了使用OpenAI或Anthropic形式的API，并可以自选模型，使用ChatGPT、Claude或者三方OpenRouter都毫无压力。
+
+## [1.1.1] - 2024-12-07
+
+### Fixed
+
+- 汗流浃背地赶紧修复了一处日志会把你的API Key打印出来的问题。
