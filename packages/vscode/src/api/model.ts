@@ -4,8 +4,6 @@ import {createModelClient} from '@oniichan/shared/model';
 
 export async function createModelAccess(triggerUserConfigure = true) {
     const config = getModelConfiguration();
-    console.log(config);
-
     if (isModelConfigurationValid(config)) {
         return createModelClient(config);
     }
