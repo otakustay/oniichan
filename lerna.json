@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "1.0.1",
+  "npmClient": "pnpm",
+  "command": {
+    "version": {
+      "allowBranch": "master",
+      "conventionalCommits": true,
+      "changelog": false,
+      "push": false,
+      "gitTagVersion": false,
+      "message": "chore: release %v"
+    }
+  }
+}
