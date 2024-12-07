@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "module": "Node16",
+    "module": "NodeNext",
     "target": "ES2022",
     "lib": [
       "ES2022"
     ],
+    "esModuleInterop": true,
     "sourceMap": true,
-    "rootDir": "src",
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": true,
+    "declaration": true
   }
 }

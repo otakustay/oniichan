@@ -2,7 +2,14 @@ interface LanguageConfig {
     comment: string[];
 }
 
-const languages: Record<string, LanguageConfig | undefined> = {};
+const languages: Record<string, LanguageConfig | undefined> = {
+    javascript: {
+        comment: ['//'],
+    },
+    typescript: {
+        comment: ['//'],
+    },
+};
 
 export function isComment(line: string, languageId: string): boolean {
     const config = languages[languageId];

@@ -12,9 +12,8 @@ node_modules
 
 # Build
 *.tgz
-/dist
-/out
 *.vsix
+/packages/**/dist
 
 # Test
 /coverage
@@ -23,5 +22,5 @@ node_modules
 .env
 .env.*.local
 
-# Wireit
-.wireit
+# Nx
+.nx

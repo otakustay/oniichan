@@ -1,7 +1,7 @@
 import {Range, TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import semanticRewriteApi from '../../api/semanticRewrite';
-import {isComment} from '../../utils/language';
+import {isComment} from '@oniichan/shared/language';
 import {LineLoadingManager} from '../../ui/lineLoading';
 import {TextEditorReference} from '../../utils/editor';
 

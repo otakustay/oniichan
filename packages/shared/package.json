@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "@oniichan/shared",
+  "version": "1.0.1",
+  "description": "Shared elements without any platform dependencies",
+  "exports": {
+    "./*": "./dist/*.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 --fix src"
+  },
+  "files": [
+    "dist"
+  ]
+}
