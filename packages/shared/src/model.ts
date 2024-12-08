@@ -66,8 +66,18 @@ function validateModelConfiguration(config: ModelConfiguration): void {
     }
 }
 
+export interface ModelUsage {
+    inputTokens: number | null;
+    outputTokens: number | null;
+}
+
+export interface ModelResponseMeta {
+    model: string;
+    usage: ModelUsage;
+}
+
 export interface ModelClient {
-    chat: (messages: ChatMessagePayload[]) => Promise<string>;
+    chat: (messages: ChatMessagePayload[]) => Promise<[string, ModelResponseMeta]>;
 }
 
 export function createModelClient(config: ModelConfiguration): ModelClient {
@@ -85,7 +95,16 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                     max_tokens: 1000,
                 };
                 const result = await client.messages.create(params);
-                return result.content.filter(v => v.type === 'text').map(v => v.text).join('\n\n');
+                return [
+                    result.content.filter(v => v.type === 'text').map(v => v.text).join('\n\n'),
+                    {
+                        model: modelName,
+                        usage: {
+                            inputTokens: result.usage.input_tokens,
+                            outputTokens: result.usage.output_tokens,
+                        },
+                    },
+                ];
             },
         };
     }
@@ -98,7 +117,16 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                     model: modelName,
                     max_tokens: 1000,
                 });
-                return response.choices[0]?.message?.content ?? '';
+                return [
+                    response.choices[0]?.message?.content ?? '',
+                    {
+                        model: modelName,
+                        usage: {
+                            inputTokens: response.usage?.prompt_tokens ?? null,
+                            outputTokens: response.usage?.completion_tokens ?? null,
+                        },
+                    },
+                ];
             },
         };
     }

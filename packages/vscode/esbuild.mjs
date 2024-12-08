@@ -41,6 +41,12 @@ try {
         outfile: 'dist/extension.js',
         external: ['vscode'],
         logLevel: 'silent',
+        banner: {
+            js: 'const _importMetaUrl=require(\'url\').pathToFileURL(__filename)',
+        },
+        define: {
+            'import.meta.url': '_importMetaUrl',
+        },
         loader: {
             '.prompt': 'text',
         },

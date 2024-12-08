@@ -20,9 +20,14 @@
     "commands": [
       {
         "command": "oniichan.semanticRewrite",
-        "title": "Semantic rewrite current line",
-        "category": "Rewrite",
+        "title": "Semantic Rewrite Current Line",
+        "category": "Oniichan",
         "enablement": "!editorHasMultipleSelections && !editorReadonly && !isInDiffEditor"
+      },
+      {
+        "command": "oniichan.openDataFolder",
+        "title": "Open Oniichan Data Folder",
+        "category": "Oniichan"
       }
     ],
     "keybindings": [
@@ -102,10 +107,14 @@
   },
   "devDependencies": {
     "@oniichan/shared": "workspace:*",
+    "@oniichan/storage": "workspace:*",
     "@otakustay/text-pin": "^1.0.0",
-    "@types/node": "22.x",
+    "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
     "esbuild": "^0.24.0",
     "eventsource-parser": "^3.0.0"
+  },
+  "dependencies": {
+    "open": "^10.1.0"
   }
 }

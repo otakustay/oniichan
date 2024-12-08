@@ -5,7 +5,8 @@
       "label": "watch",
       "dependsOn": [
         "npm: watch:vscode",
-        "npm: watch:shared"
+        "npm: watch:shared",
+        "npm: watch:storage"
       ],
       "presentation": {
         "reveal": "never"
@@ -34,6 +35,18 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:shared",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:storage",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:storage",
       "presentation": {
         "group": "watch",
         "reveal": "never"

@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "@oniichan/storage",
+  "version": "1.1.1",
+  "description": "Implement for various types of storage",
+  "exports": {
+    "./*": "./dist/*.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 --fix src"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@oniichan/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.x"
+  }
+}
