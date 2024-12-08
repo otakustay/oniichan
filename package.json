@@ -11,7 +11,7 @@
     "lint": "nx affected -t lint",
     "build": "nx affected -t build",
     "preversion": "npm run ci",
-    "release": "lerna version",
+    "release": "sh scripts/release.sh",
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",
     "watch:vscode": "cd packages/vscode && node esbuild.mjs --watch",
     "watch:shared": "cd packages/shared && tsc -p tsconfig.build.json --watch",

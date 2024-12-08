@@ -10,8 +10,5 @@
 ## 发布流程
 
 1. 更新`packages/vscode/CHANGELOG.md`手动维护更新日志。
-2. 运行`npm run release`自动更新版本号。
-3. 执行`git add .`添加修改。
-4. 执行`git commit -m "chore: release x.x.x`提交修改。
-5. 执行`git tag vx.x.x`打上标签。
-6. 在`packages/vscode`目录下执行`vsce publish`发布。
+2. 运行`npm run release`自动更新版本号并生成提交与标签。
+3. 在`packages/vscode`目录下执行`vsce publish`发布。
