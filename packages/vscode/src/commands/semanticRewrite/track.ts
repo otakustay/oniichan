@@ -1,7 +1,8 @@
 import {TextDocumentContentChangeEvent} from 'vscode';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {LineLoadingManager} from '../../ui/lineLoading';
-import {LineWorker} from './worker';
 import {TextEditorReference} from '../../utils/editor';
+import {LineWorker} from './worker';
 
 export class LineTrack {
     private readonly workers = new Set<LineWorker>();
@@ -15,14 +16,14 @@ export class LineTrack {
         this.loading = new LineLoadingManager(uri);
     }
 
-    async push(line: number) {
+    async push(line: number, telemetry: FunctionUsageTelemetry) {
         const editor = this.editorReference.getTextEditor();
 
         if (!editor) {
             return;
         }
 
-        const worker = new LineWorker(editor.document, line, this.loading);
+        const worker = new LineWorker(editor.document, line, {loadingManager: this.loading, telemetry});
         this.workers.add(worker);
         await worker.run().catch(() => {});
         this.workers.delete(worker);

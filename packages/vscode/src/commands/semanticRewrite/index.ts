@@ -1,4 +1,5 @@
 import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeEvent} from 'vscode';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {LineTrack} from './track';
 import {getSemanticRewriteConfiguration} from '../../utils/config';
 
@@ -25,7 +26,7 @@ export class SemanticRewriteCommand extends Disposable {
                         return;
                     }
 
-                    await this.executeSemanticRewrite(editor);
+                    await this.executeSemanticRewrite(editor, 'command');
                 }
             ),
             workspace.onDidChangeTextDocument(
@@ -49,16 +50,17 @@ export class SemanticRewriteCommand extends Disposable {
                         return;
                     }
 
-                    await this.executeSemanticRewrite(window.activeTextEditor);
+                    await this.executeSemanticRewrite(window.activeTextEditor, 'automatic');
                 }
             )
         );
     }
 
-    private async executeSemanticRewrite(editor: TextEditor) {
+    private async executeSemanticRewrite(editor: TextEditor, trigger: string) {
+        const telemetry = new FunctionUsageTelemetry(crypto.randomUUID(), 'semanticRewrite', {trigger});
         const uri = editor.document.uri.toString();
         const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri);
         this.tracks.set(uri, lineTrack);
-        await lineTrack.push(editor.selection.active.line);
+        await lineTrack.push(editor.selection.active.line, telemetry);
     }
 }
