@@ -109,6 +109,7 @@
     "@oniichan/shared": "workspace:*",
     "@oniichan/server": "workspace:*",
     "@oniichan/storage": "workspace:*",
+    "@oniichan/web": "workspace:*",
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",

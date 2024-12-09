@@ -15,10 +15,24 @@ const config: Configuration = {
         alias: {
             '@': path.resolve(__dirname, 'src'),
         },
-        extensions: ['...', '.tsx', '.ts'],
+        extensions: ['...', '.ts', '.tsx'],
     },
     module: {
         rules: [
+            {
+                test: /\.ts$/,
+                use: {
+                    loader: 'builtin:swc-loader',
+                    options: {
+                        jsc: {
+                            parser: {
+                                syntax: 'typescript',
+                            },
+                        },
+                    },
+                },
+                type: 'javascript/auto',
+            },
             {
                 test: /\.tsx$/,
                 use: {

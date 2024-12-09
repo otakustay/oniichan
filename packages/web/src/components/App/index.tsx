@@ -1,3 +1,10 @@
+import ClientProvider from '@/components/ClientProvider';
+import ModelTelemetry from '../ModelTelemetry';
+
 export default function App() {
-    return <h1>Hello World!</h1>;
+    return (
+        <ClientProvider>
+            <ModelTelemetry />
+        </ClientProvider>
+    );
 }
