@@ -1,11 +1,13 @@
 import {ExtensionContext} from 'vscode';
-import {SemanticRewriteCommand} from './commands/semanticRewrite';
-import {OpenDataFolderCommand} from './commands/debug';
+import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
+import {OpenDataFolderCommand} from './capabilities/debug';
+import {WebAppServer} from './capabilities/server';
 
 export function activate(context: ExtensionContext) {
     context.subscriptions.push(
         new SemanticRewriteCommand(),
-        new OpenDataFolderCommand()
+        new OpenDataFolderCommand(),
+        new WebAppServer()
     );
 }
 

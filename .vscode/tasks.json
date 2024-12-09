@@ -6,7 +6,9 @@
       "dependsOn": [
         "npm: watch:vscode",
         "npm: watch:shared",
-        "npm: watch:storage"
+        "npm: watch:storage",
+        "npm: watch:server",
+        "npm: watch:web"
       ],
       "presentation": {
         "reveal": "never"
@@ -47,6 +49,30 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:storage",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:server",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:server",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:web",
+      "group": "build",
+      "problemMatcher": "$ts-webpack-watch",
+      "isBackground": true,
+      "label": "npm: watch:web",
       "presentation": {
         "group": "watch",
         "reveal": "never"

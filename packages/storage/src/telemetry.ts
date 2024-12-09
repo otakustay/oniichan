@@ -178,3 +178,8 @@ export class FunctionUsageTelemetry {
         }
     }
 }
+
+export async function* readModelTelemetry() {
+    await using store = await createJsonlStore<ModelUsageRecord>('model-usage', {allowMockOnFail: true});
+    yield* store.read();
+}

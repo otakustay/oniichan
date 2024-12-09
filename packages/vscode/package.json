@@ -107,6 +107,7 @@
   },
   "devDependencies": {
     "@oniichan/shared": "workspace:*",
+    "@oniichan/server": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",

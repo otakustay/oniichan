@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "name": "@oniichan/web",
+  "version": "1.2.0",
+  "description": "Web app for Oniichan Coding Assistant",
+  "scripts": {
+    "build": "rspack build && tsc --noEmit",
+    "watch": "rspack build --watch",
+    "lint": "eslint --max-warnings=0 --fix src",
+    "start": "rspack serve"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@emotion/css": "^11.13.5",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@oniichan/server": "workspace:*",
+    "@oniichan/storage": "workspace:*",
+    "@otakustay/ipc": "^1.0.1",
+    "@rspack/cli": "^1.1.5",
+    "@rspack/core": "^1.1.5",
+    "@rspack/plugin-react-refresh": "^1.0.0",
+    "@types/mustache": "^4.2.5",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "esbuild": "^0.24.0",
+    "esbuild-register": "^3.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-refresh": "^0.16.0"
+  }
+}

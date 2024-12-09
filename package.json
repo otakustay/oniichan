@@ -15,7 +15,9 @@
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",
     "watch:vscode": "cd packages/vscode && node esbuild.mjs --watch",
     "watch:shared": "cd packages/shared && tsc -p tsconfig.build.json --watch",
-    "watch:storage": "cd packages/storage && tsc -p tsconfig.build.json --watch"
+    "watch:storage": "cd packages/storage && tsc -p tsconfig.build.json --watch",
+    "watch:server": "cd packages/server && tsc -p tsconfig.build.json --watch",
+    "watch:web": "cd packages/web && npm run watch"
   },
   "homepage": "https://github.com/otakustay/oniichan",
   "bugs": {
