@@ -63,8 +63,7 @@ export class LineWorker {
             return {type: 'abort', reason: 'Current line is empty or comment'};
         }
 
-        // TODO: We need a fix when `this.line` is `0`
-        const codeBefore = document.getText(new Range(0, 0, this.line - 1, Infinity));
+        const codeBefore = document.getText(new Range(0, 0, this.line, 0));
         const codeAfter = document.getText(new Range(this.line + 1, 0, Infinity, Infinity));
         this.telemetry.setTelemetryData('inputCodeBefore', codeBefore);
         this.telemetry.setTelemetryData('inputCodeAfter', codeAfter);
