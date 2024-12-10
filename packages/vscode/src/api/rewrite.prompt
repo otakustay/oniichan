@@ -34,6 +34,13 @@ The pseudo-code for the code to be generated at the cursor position is as follow
 {{hint}}
 ```
 
+{{#snippets}}
+{{title}}
+
+{{content}}
+
+{{/snippets}}
+
 Please note it is possible that some part of the code before or after cursor is also pseudo-code, you need to judge its effect or ignore this part.
 
 You should generate the final code to be inserted at the cursor position according to this pseudo-code, and meet the following requirements:

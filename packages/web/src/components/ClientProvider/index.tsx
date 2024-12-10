@@ -20,7 +20,6 @@ export default function ClientProvider({children}: Props) {
     useEffect(
         () => {
             const isVscode = location.protocol === 'vscode-webview:';
-            console.log('isVscode: ', isVscode);
 
             if (isVscode) {
                 const port = new VscodeMessagePort();

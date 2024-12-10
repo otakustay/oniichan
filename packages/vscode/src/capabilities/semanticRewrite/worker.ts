@@ -6,6 +6,7 @@ import {isComment} from '@oniichan/shared/language';
 import semanticRewriteApi from '../../api/semanticRewrite';
 import {LineLoadingManager} from '../../ui/lineLoading';
 import {TextEditorReference} from '../../utils/editor';
+import {retrieveEnhancedContext} from './rag';
 
 interface TextPosition {
     line: number;
@@ -71,8 +72,9 @@ export class LineWorker {
         this.showLoading();
 
         try {
+            const snippets = retrieveEnhancedContext({documentUri: document.uri, line: this.line, hint});
             const code = await semanticRewriteApi.rewrite(
-                {file: document.fileName, codeBefore, codeAfter, hint},
+                {file: document.fileName, codeBefore, codeAfter, hint, snippets},
                 this.telemetry
             );
             this.telemetry.setTelemetryData('outputCode', code);

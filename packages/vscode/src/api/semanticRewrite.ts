@@ -5,16 +5,23 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {createModelAccess} from './model';
 import rewriteTemplate from './rewrite.prompt';
 
+export interface EnhancedContextSnippet {
+    label: string;
+    title: string;
+    content: string;
+}
+
 export interface SemanticRewritePayload {
     file: string;
     codeBefore: string;
     codeAfter: string;
     hint: string;
+    snippets: EnhancedContextSnippet[];
 }
 
 export default {
     rewrite: async (paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> => {
-        const {file, codeBefore, codeAfter, hint} = paylod;
+        const {file, codeBefore, codeAfter, hint, snippets} = paylod;
         const model = await createModelAccess();
         const prompt = renderPrompt(
             rewriteTemplate,
@@ -23,6 +30,7 @@ export default {
                 codeBefore,
                 codeAfter,
                 hint,
+                snippets,
                 extension: path.extname(file),
             }
         );
