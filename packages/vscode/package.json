@@ -28,6 +28,11 @@
         "command": "oniichan.openDataFolder",
         "title": "Open Oniichan Data Folder",
         "category": "Oniichan"
+      },
+      {
+        "command": "oniichan.openWebview",
+        "title": "Open Oniichan Webview",
+        "category": "Oniichan"
       }
     ],
     "keybindings": [
@@ -117,6 +122,7 @@
     "eventsource-parser": "^3.0.0"
   },
   "dependencies": {
+    "@otakustay/ipc": "^1.0.1",
     "open": "^10.1.0"
   }
 }

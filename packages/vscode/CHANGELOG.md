@@ -1,5 +1,11 @@
 # Change Log
 
+## [UNRELEASED]
+
+### Added
+
+- 内置了一个`Open Oniichan Webview`命令打开Web面板，但我相信你不会需要这个的。
+
 ## [1.3.0] - 2024-12-09
 
 ### Added

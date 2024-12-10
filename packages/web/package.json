@@ -27,6 +27,7 @@
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "^19.0.1",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/vscode-webview": "^1.57.5",
     "esbuild": "^0.24.0",
     "esbuild-register": "^3.6.0",
     "huse": "^2.0.4",

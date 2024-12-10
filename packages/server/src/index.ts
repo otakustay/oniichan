@@ -8,6 +8,8 @@ import {ExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
 import {IpcServer} from './server';
 
+export {IpcServer};
+
 function isExecutionMesssage(message: any): message is ExecutionMessage {
     return 'taskId' in message;
 }
@@ -50,7 +52,7 @@ export interface ServerInit {
     staticDirectory: string;
 }
 
-export class Server extends EventEmitter<ServerEventMap> {
+export class WebAppServer extends EventEmitter<ServerEventMap> {
     port: number | null = null;
 
     private readonly app: FastifyInstance;
