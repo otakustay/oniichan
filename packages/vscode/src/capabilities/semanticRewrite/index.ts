@@ -1,7 +1,8 @@
 import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {LineTrack} from './track';
+import {getLanguageConfig} from '@oniichan/shared/language';
 import {getSemanticRewriteConfiguration} from '../../utils/config';
+import {LineTrack} from './track';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     const changedText = event.contentChanges.at(-1)?.text ?? '';
@@ -50,10 +51,44 @@ export class SemanticRewriteCommand extends Disposable {
                         return;
                     }
 
+                    if (!this.isContextSuitableForAutomaticTrigger(window.activeTextEditor)) {
+                        return;
+                    }
+
                     await this.executeSemanticRewrite(window.activeTextEditor, 'automatic');
                 }
             )
         );
+    }
+
+    private isContextSuitableForAutomaticTrigger(editor: TextEditor) {
+        if (editor.document.lineCount > 400) {
+            return false;
+        }
+
+        for (let i = 0; i < editor.document.lineCount; i++) {
+            const line = editor.document.lineAt(i);
+            if (line.range.end.character > 300) {
+                return false;
+            }
+        }
+
+        const hint = editor.document.lineAt(editor.selection.active.line).text;
+        const language = getLanguageConfig(editor.document.languageId);
+
+        if (language.isComment(hint)) {
+            return false;
+        }
+
+        if (!language.endsWithIdentifier(hint)) {
+            return false;
+        }
+
+        if (language.includesKeywordOnly(hint)) {
+            return false;
+        }
+
+        return true;
     }
 
     private async executeSemanticRewrite(editor: TextEditor, trigger: string) {

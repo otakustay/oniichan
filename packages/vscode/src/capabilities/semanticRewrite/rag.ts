@@ -1,6 +1,6 @@
 import {languages, Range, Uri} from 'vscode';
 import {EnhancedContextSnippet} from '../../api/semanticRewrite';
-import {isLineEndsWithIdentifier} from '@oniichan/shared/language';
+import {getLanguageConfig} from '@oniichan/shared/language';
 
 function isRangeAtLine(range: Range, line: number) {
     return range.isSingleLine && range.start.line === line;
@@ -8,12 +8,14 @@ function isRangeAtLine(range: Range, line: number) {
 
 export interface RagInput {
     documentUri: Uri;
+    languageId: string;
     line: number;
     hint: string;
 }
 
 export function retrieveEnhancedContext(input: RagInput): EnhancedContextSnippet[] {
-    if (isLineEndsWithIdentifier(input.hint)) {
+    const language = getLanguageConfig(input.languageId);
+    if (language.endsWithIdentifier(input.hint)) {
         return [];
     }
 

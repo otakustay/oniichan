@@ -2,11 +2,11 @@ import {Range, TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {isComment} from '@oniichan/shared/language';
+import {getLanguageConfig} from '@oniichan/shared/language';
 import semanticRewriteApi from '../../api/semanticRewrite';
 import {LineLoadingManager} from '../../ui/lineLoading';
 import {TextEditorReference} from '../../utils/editor';
-import {retrieveEnhancedContext} from './rag';
+import {RagInput, retrieveEnhancedContext} from './rag';
 
 interface TextPosition {
     line: number;
@@ -59,8 +59,9 @@ export class LineWorker {
         }
 
         const document = editor.document;
+        const language = getLanguageConfig(document.languageId);
 
-        if (!hint || isComment(hint, document.languageId)) {
+        if (!hint || language.isComment(hint)) {
             return {type: 'abort', reason: 'Current line is empty or comment'};
         }
 
@@ -72,7 +73,13 @@ export class LineWorker {
         this.showLoading();
 
         try {
-            const snippets = retrieveEnhancedContext({documentUri: document.uri, line: this.line, hint});
+            const input: RagInput = {
+                documentUri: document.uri,
+                line: this.line,
+                languageId: editor.document.languageId,
+                hint,
+            };
+            const snippets = retrieveEnhancedContext(input);
             const code = await semanticRewriteApi.rewrite(
                 {file: document.fileName, codeBefore, codeAfter, hint, snippets},
                 this.telemetry
