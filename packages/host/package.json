@@ -1,10 +1,10 @@
 {
   "private": true,
-  "name": "@oniichan/storage",
+  "name": "@oniichan/host",
   "version": "1.4.0",
-  "description": "Implement for various types of storage",
+  "description": "Host and expose VSCode API to consumers via IPC",
   "exports": {
-    "./*": "./dist/*.js"
+    ".": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -14,10 +14,11 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "@oniichan/shared": "workspace:*"
-  },
   "devDependencies": {
-    "@types/node": "20.x"
+    "@types/vscode": "^1.95.0"
+  },
+  "dependencies": {
+    "@oniichan/shared": "workspace:*",
+    "@otakustay/ipc": "^2.1.1"
   }
 }

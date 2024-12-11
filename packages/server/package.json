@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint --max-warnings=0 --fix src"
+    "lint": "eslint --max-warnings=0 --fix src",
+    "watch": "tsc -p tsconfig.build.json --watch"
   },
   "files": [
     "dist"
@@ -20,8 +21,8 @@
     "@fastify/websocket": "^11.0.1",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
-    "@otakustay/ipc": "^1.0.1",
-    "detect-port": "^2.0.1",
+    "@otakustay/ipc": "^2.1.1",
+    "detect-port": "^2.1.0",
     "fastify": "^5.1.0"
   },
   "devDependencies": {

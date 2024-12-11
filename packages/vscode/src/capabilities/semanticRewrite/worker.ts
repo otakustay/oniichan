@@ -2,11 +2,10 @@ import {Range, TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {getLanguageConfig} from '@oniichan/shared/language';
-import semanticRewriteApi from '../../api/semanticRewrite';
 import {LineLoadingManager} from '../../ui/lineLoading';
 import {TextEditorReference} from '../../utils/editor';
-import {RagInput, retrieveEnhancedContext} from './rag';
+import {Kernel} from '../../kernel';
+import {SemanticRewriteRequest} from '@oniichan/kernel';
 
 interface TextPosition {
     line: number;
@@ -21,6 +20,7 @@ interface TextRange {
 export interface LineWorkerHelper {
     loadingManager: LineLoadingManager;
     telemetry: FunctionUsageTelemetry;
+    kernel: Kernel;
 }
 
 export class LineWorker {
@@ -36,12 +36,15 @@ export class LineWorker {
 
     private readonly loadingManager: LineLoadingManager;
 
+    private readonly kernel: Kernel;
+
     constructor(document: TextDocument, line: number, helper: LineWorkerHelper) {
         this.line = line;
         this.editorReference = new TextEditorReference(document.uri.toString());
         this.hint = document.lineAt(line).text;
         this.pin = new LinePin(line, this.hint.length);
         this.loadingManager = helper.loadingManager;
+        this.kernel = helper.kernel;
         this.telemetry = helper.telemetry;
         this.telemetry.setTelemetryData('inputHint', this.hint);
     }
@@ -59,35 +62,27 @@ export class LineWorker {
         }
 
         const document = editor.document;
-        const language = getLanguageConfig(document.languageId);
-
-        if (!hint || language.isComment(hint)) {
-            return {type: 'abort', reason: 'Current line is empty or comment'};
-        }
-
-        const codeBefore = document.getText(new Range(0, 0, this.line, 0));
-        const codeAfter = document.getText(new Range(this.line + 1, 0, Infinity, Infinity));
-        this.telemetry.setTelemetryData('inputCodeBefore', codeBefore);
-        this.telemetry.setTelemetryData('inputCodeAfter', codeAfter);
-
-        this.showLoading();
-
         try {
-            const input: RagInput = {
-                documentUri: document.uri,
+            const request: SemanticRewriteRequest = {
+                documentUri: document.uri.toString(),
+                file: document.fileName,
                 line: this.line,
-                languageId: editor.document.languageId,
-                hint,
             };
-            const snippets = retrieveEnhancedContext(input);
-            const code = await semanticRewriteApi.rewrite(
-                {file: document.fileName, codeBefore, codeAfter, hint, snippets},
-                this.telemetry
-            );
-            this.telemetry.setTelemetryData('outputCode', code);
-            // Do not pass `editor` down, it is possible that editor is switched while the request is running
-            const result = await this.applyRewrite(code, hint);
-            return result;
+            for await (const entry of this.kernel.callStreaming(this.telemetry.getUuid(), 'semanticRewrite', request)) {
+                switch (entry.type) {
+                    case 'loading':
+                        this.showLoading();
+                        break;
+                    case 'telemetryData':
+                        this.telemetry.setTelemetryData(entry.key, entry.value);
+                        break;
+                    case 'abort':
+                        return {type: 'abort', reason: entry.reason};
+                    case 'result':
+                        return await this.applyRewrite(entry.code, hint);
+                }
+            }
+            throw new Error('No result form kernel');
         }
         catch (ex) {
             throw new Error(`Semantic rewrite failed: ${stringifyError(ex)}`, {cause: ex});

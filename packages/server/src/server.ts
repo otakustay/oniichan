@@ -7,4 +7,8 @@ export class IpcServer extends Server<Protocol> {
     protected initializeHandlers(): void {
         this.registerHandler(ModelTelemetryHandler);
     }
+
+    protected async createContext() {
+        return null;
+    }
 }

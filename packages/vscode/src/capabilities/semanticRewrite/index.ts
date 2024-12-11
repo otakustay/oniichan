@@ -1,7 +1,9 @@
 import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {getLanguageConfig} from '@oniichan/shared/language';
+import {newUuid} from '@oniichan/shared/id';
 import {getSemanticRewriteConfiguration} from '../../utils/config';
+import {Kernel} from '../../kernel';
 import {LineTrack} from './track';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
@@ -14,8 +16,12 @@ export class SemanticRewriteCommand extends Disposable {
 
     private readonly tracks = new Map<string, LineTrack>();
 
-    constructor() {
+    private readonly kernel: Kernel;
+
+    constructor(kernel: Kernel) {
         super(() => void this.disopsable.dispose());
+
+        this.kernel = kernel;
 
         this.disopsable = Disposable.from(
             commands.registerCommand(
@@ -92,9 +98,10 @@ export class SemanticRewriteCommand extends Disposable {
     }
 
     private async executeSemanticRewrite(editor: TextEditor, trigger: string) {
-        const telemetry = new FunctionUsageTelemetry(crypto.randomUUID(), 'semanticRewrite', {trigger});
+        const telemetry = new FunctionUsageTelemetry(newUuid(), 'semanticRewrite', {trigger});
+        telemetry.setTelemetryData('trigger', trigger);
         const uri = editor.document.uri.toString();
-        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri);
+        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri, this.kernel);
         this.tracks.set(uri, lineTrack);
         await lineTrack.push(editor.selection.active.line, telemetry);
     }

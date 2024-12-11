@@ -1,0 +1,28 @@
+{
+  "private": true,
+  "name": "@oniichan/kernel",
+  "version": "1.4.0",
+  "description": "Contains core logic for all capabilities with VSCode API decoupled",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 --fix src",
+    "watch": "tsc-watch -p tsconfig.build.json --onSuccess 'cpy \"./**/*.prompt\" ../dist --cwd=src'"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@oniichan/host": "workspace:*",
+    "@oniichan/shared": "workspace:*",
+    "@oniichan/storage": "workspace:*",
+    "@otakustay/ipc": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "cpy-cli": "^5.0.0",
+    "tsc-watch": "^6.2.1"
+  }
+}

@@ -97,6 +97,7 @@
   "scripts": {
     "lint": "eslint --max-warnings=0 --fix src",
     "build": "npm run check-types && node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
     "check-types": "tsc --noEmit",
     "vscode:prepublish": "npm run package",
     "package": "npm run check-types && npm run lint && node esbuild.mjs --production"
@@ -111,6 +112,8 @@
     "url": "https://github.com/otakustay/oniichan"
   },
   "devDependencies": {
+    "@oniichan/host": "workspace:*",
+    "@oniichan/kernel": "workspace:*",
     "@oniichan/server": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
@@ -118,11 +121,10 @@
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
-    "esbuild": "^0.24.0",
-    "eventsource-parser": "^3.0.0"
+    "esbuild": "^0.24.0"
   },
   "dependencies": {
-    "@otakustay/ipc": "^1.0.1",
+    "@otakustay/ipc": "^2.1.1",
     "open": "^10.1.0"
   }
 }

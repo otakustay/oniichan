@@ -13,10 +13,12 @@
     "preversion": "npm run ci",
     "release": "sh scripts/release.sh",
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",
-    "watch:vscode": "cd packages/vscode && node esbuild.mjs --watch",
-    "watch:shared": "cd packages/shared && tsc -p tsconfig.build.json --watch",
-    "watch:storage": "cd packages/storage && tsc -p tsconfig.build.json --watch",
-    "watch:server": "cd packages/server && tsc -p tsconfig.build.json --watch",
+    "watch:vscode": "cd packages/vscode && npm run watch",
+    "watch:shared": "cd packages/shared && npm run watch",
+    "watch:storage": "cd packages/storage && npm run watch",
+    "watch:server": "cd packages/server && npm run watch",
+    "watch:host": "cd packages/host && npm run watch",
+    "watch:kernel": "cd packages/kernel && npm run watch",
     "watch:web": "cd packages/web && npm run watch"
   },
   "homepage": "https://github.com/otakustay/oniichan",
@@ -34,9 +36,9 @@
     "eslint": "^9.16.0",
     "husky": "^9.1.7",
     "lerna": "^8.1.9",
-    "nx": "^20.2.1",
+    "nx": "^20.2.2",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.17.0"
+    "typescript-eslint": "^8.18.0"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }

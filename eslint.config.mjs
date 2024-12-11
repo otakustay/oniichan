@@ -33,6 +33,7 @@ export default ts.config(
                     ignoreVoidOperator: true,
                 },
             ],
+            '@typescript-eslint/require-await': 'off',
         },
     }
 );

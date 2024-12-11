@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint --max-warnings=0 --fix src"
+    "lint": "eslint --max-warnings=0 --fix src",
+    "watch": "tsc -p tsconfig.build.json --watch"
   },
   "files": [
     "dist"
@@ -16,7 +17,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "mustache": "^4.2.0",
-    "openai": "^4.76.0"
+    "openai": "^4.76.1"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.5"

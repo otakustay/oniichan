@@ -8,7 +8,9 @@
         "npm: watch:shared",
         "npm: watch:storage",
         "npm: watch:server",
-        "npm: watch:web"
+        "npm: watch:web",
+        "npm: watch:host",
+        "npm: watch:kernel"
       ],
       "presentation": {
         "reveal": "never"
@@ -73,6 +75,30 @@
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "label": "npm: watch:web",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:host",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:host",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:kernel",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:kernel",
       "presentation": {
         "group": "watch",
         "reveal": "never"

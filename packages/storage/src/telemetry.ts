@@ -1,7 +1,7 @@
-import crypto from 'node:crypto';
 import {stringifyError} from '@oniichan/shared/string';
-import {createJsonlStore} from './jsonl';
 import {ChatMessagePayload, ModelResponseMeta} from '@oniichan/shared/model';
+import {newUuid} from '@oniichan/shared/id';
+import {createJsonlStore} from './jsonl';
 
 export interface ModelUsageRecord {
     uuid: string;
@@ -107,6 +107,10 @@ export class FunctionUsageTelemetry {
         }
     }
 
+    getUuid() {
+        return this.uuid;
+    }
+
     start() {
         this.startTime = new Date();
     }
@@ -131,7 +135,7 @@ export class FunctionUsageTelemetry {
     }
 
     createModelTelemetry(uuid?: string) {
-        const telemetry = new ModelUsageTelemetry(uuid ?? crypto.randomUUID(), this.uuid);
+        const telemetry = new ModelUsageTelemetry(newUuid(uuid), this.uuid);
         return telemetry;
     }
 

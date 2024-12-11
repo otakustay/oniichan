@@ -2,7 +2,7 @@ import path from 'node:path';
 import {ChatMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {createModelAccess} from './model';
+import {EditorHost} from '../../host';
 import rewriteTemplate from './rewrite.prompt';
 
 export interface EnhancedContextSnippet {
@@ -19,10 +19,16 @@ export interface SemanticRewritePayload {
     snippets: EnhancedContextSnippet[];
 }
 
-export default {
-    rewrite: async (paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> => {
+export class SemanticRewriteApi {
+    private readonly editorHost: EditorHost;
+
+    constructor(editorHost: EditorHost) {
+        this.editorHost = editorHost;
+    }
+
+    async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
         const {file, codeBefore, codeAfter, hint, snippets} = paylod;
-        const model = await createModelAccess();
+        const model = this.editorHost.getModelAccess();
         const prompt = renderPrompt(
             rewriteTemplate,
             {
@@ -46,5 +52,5 @@ export default {
             ? codeBlocks.map(block => block.replace(/```(?:\w+\n)?|```/g, '')).join('\n')
             : text;
         return code;
-    },
-};
+    }
+}
