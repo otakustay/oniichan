@@ -48,7 +48,7 @@ interface GetContextOk {
     languageId: string;
 }
 
-export interface EnhanceContextInput {
+interface EnhanceContextInput {
     documentUri: string;
     languageId: string;
     line: number;

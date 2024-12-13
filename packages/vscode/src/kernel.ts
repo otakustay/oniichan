@@ -19,13 +19,15 @@ async function createEditorHost() {
     return editorHost;
 }
 
-export type Kernel = Client<KernelProtocol>;
+export class KernelClient extends Client<KernelProtocol> {
+    static readonly containerKey = 'KernelClient';
+}
 
-export async function createKernelClient(): Promise<Kernel> {
+export async function createKernelClient(): Promise<KernelClient> {
     const editorHost = await createEditorHost();
     const server = new KernelServer(editorHost);
     const kernelPort = new DirectPort();
     await server.connect(kernelPort);
-    const kernelClient = new Client<KernelProtocol>(kernelPort);
+    const kernelClient = new KernelClient(kernelPort);
     return kernelClient;
 }

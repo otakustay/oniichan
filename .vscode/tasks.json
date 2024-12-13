@@ -28,7 +28,6 @@
       "isBackground": true,
       "label": "npm: watch:vscode",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -40,7 +39,6 @@
       "isBackground": true,
       "label": "npm: watch:shared",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -52,7 +50,6 @@
       "isBackground": true,
       "label": "npm: watch:storage",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -64,7 +61,6 @@
       "isBackground": true,
       "label": "npm: watch:server",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -76,7 +72,6 @@
       "isBackground": true,
       "label": "npm: watch:web",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -88,7 +83,6 @@
       "isBackground": true,
       "label": "npm: watch:host",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     },
@@ -100,7 +94,6 @@
       "isBackground": true,
       "label": "npm: watch:kernel",
       "presentation": {
-        "group": "watch",
         "reveal": "never"
       }
     }

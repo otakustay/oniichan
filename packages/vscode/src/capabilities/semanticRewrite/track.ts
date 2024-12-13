@@ -1,23 +1,26 @@
 import {TextDocumentContentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {LineLoadingManager} from '../../ui/lineLoading';
+import {DependencyContainer} from '@oniichan/shared/container';
 import {TextEditorReference} from '../../utils/editor';
-import {Kernel} from '../../kernel';
+import {KernelClient} from '../../kernel';
+import {LoadingManager} from '../../ui/loading';
 import {LineWorker} from './worker';
+
+interface Dependency {
+    [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
+}
 
 export class LineTrack {
     private readonly workers = new Set<LineWorker>();
 
     private readonly editorReference: TextEditorReference;
 
-    private readonly loading: LineLoadingManager;
+    private readonly container: DependencyContainer<Dependency>;
 
-    private readonly kernel: Kernel;
-
-    constructor(uri: string, kernel: Kernel) {
+    constructor(uri: string, container: DependencyContainer<Dependency>) {
         this.editorReference = new TextEditorReference(uri);
-        this.loading = new LineLoadingManager(uri);
-        this.kernel = kernel;
+        this.container = container;
     }
 
     async push(line: number, telemetry: FunctionUsageTelemetry) {
@@ -27,10 +30,11 @@ export class LineTrack {
             return;
         }
 
+        const container = this.container.bind('Telemetry', () => telemetry);
         const worker = new LineWorker(
             editor.document,
             line,
-            {loadingManager: this.loading, kernel: this.kernel, telemetry}
+            container
         );
         this.workers.add(worker);
         await worker.run().catch(() => {});

@@ -7,6 +7,10 @@ export class TextEditorReference {
         this.uri = uri;
     }
 
+    getDocumentUri() {
+        return this.uri;
+    }
+
     getTextEditor(): TextEditor | null {
         const editor = window.visibleTextEditors.find(e => e.document.uri.toString() === this.uri);
         return editor ?? null;

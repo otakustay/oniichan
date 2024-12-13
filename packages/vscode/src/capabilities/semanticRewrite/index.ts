@@ -2,8 +2,10 @@ import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeE
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {newUuid} from '@oniichan/shared/id';
+import {DependencyContainer} from '@oniichan/shared/container';
 import {getSemanticRewriteConfiguration} from '../../utils/config';
-import {Kernel} from '../../kernel';
+import {KernelClient} from '../../kernel';
+import {LoadingManager} from '../../ui/loading';
 import {LineTrack} from './track';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
@@ -11,18 +13,22 @@ function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     return /^\s*\n\s*$/.test(changedText);
 }
 
+interface Dependency {
+    [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
+}
+
 export class SemanticRewriteCommand extends Disposable {
     private readonly disopsable: Disposable;
 
     private readonly tracks = new Map<string, LineTrack>();
 
-    private readonly kernel: Kernel;
+    private readonly container: DependencyContainer<Dependency>;
 
-    constructor(kernel: Kernel) {
+    constructor(container: DependencyContainer<Dependency>) {
         super(() => void this.disopsable.dispose());
 
-        this.kernel = kernel;
-
+        this.container = container;
         this.disopsable = Disposable.from(
             commands.registerCommand(
                 'oniichan.semanticRewrite',
@@ -101,7 +107,7 @@ export class SemanticRewriteCommand extends Disposable {
         const telemetry = new FunctionUsageTelemetry(newUuid(), 'semanticRewrite', {trigger});
         telemetry.setTelemetryData('trigger', trigger);
         const uri = editor.document.uri.toString();
-        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri, this.kernel);
+        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri, this.container);
         this.tracks.set(uri, lineTrack);
         await lineTrack.push(editor.selection.active.line, telemetry);
     }

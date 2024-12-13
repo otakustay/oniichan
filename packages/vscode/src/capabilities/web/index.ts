@@ -13,6 +13,7 @@ import {
 } from 'vscode';
 import {ExecutionMessage, Port} from '@otakustay/ipc';
 import {WebAppServer, IpcServer} from '@oniichan/server';
+import {DependencyContainer} from '@oniichan/shared/container';
 
 function isExecutionMesssage(message: any): message is ExecutionMessage {
     return 'taskId' in message;
@@ -50,8 +51,12 @@ class WebviewPort implements Port, Disposable {
 
 const OPEN_WEB_APP_COMMAND = 'oniichan.openWebAppInExternalBrowser';
 
+interface Dependency {
+    ExtensionContext: ExtensionContext;
+}
+
 export class WebApp implements Disposable {
-    private readonly context: ExtensionContext;
+    private readonly container: DependencyContainer<Dependency>;
 
     // File is `dist/extension.ts`, reference to `dist/web`
     private readonly webAppServer = new WebAppServer({staticDirectory: path.join(__dirname, 'web')});
@@ -60,21 +65,20 @@ export class WebApp implements Disposable {
 
     private readonly disposables: Disposable[] = [];
 
-    constructor(context: ExtensionContext) {
-        this.context = context;
+    constructor(container: DependencyContainer<Dependency>) {
+        this.container = container;
         this.initializeStatusBar();
         this.initializeWebAppServer();
         this.initializeOpenWebAppCommand();
-        this.initializeOpenWebviewCommand(context);
+        this.initializeOpenWebviewCommand();
     }
 
     dispose() {
-        for (const disposable of this.disposables) {
-            disposable.dispose();
-        }
+        Disposable.from(...this.disposables).dispose();
     }
 
-    private initializeOpenWebviewCommand(context: ExtensionContext) {
+    private initializeOpenWebviewCommand() {
+        const context = this.container.get('ExtensionContext');
         const openWebviewCommand = commands.registerCommand(
             'oniichan.openWebview',
             async () => {

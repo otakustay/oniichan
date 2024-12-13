@@ -2,10 +2,11 @@ import {Range, TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {LineLoadingManager} from '../../ui/lineLoading';
-import {TextEditorReference} from '../../utils/editor';
-import {Kernel} from '../../kernel';
 import {SemanticRewriteRequest} from '@oniichan/kernel';
+import {DependencyContainer} from '@oniichan/shared/container';
+import {TextEditorReference} from '../../utils/editor';
+import {KernelClient} from '../../kernel';
+import {LoadingManager} from '../../ui/loading';
 
 interface TextPosition {
     line: number;
@@ -17,10 +18,10 @@ interface TextRange {
     end: TextPosition;
 }
 
-export interface LineWorkerHelper {
-    loadingManager: LineLoadingManager;
-    telemetry: FunctionUsageTelemetry;
-    kernel: Kernel;
+interface Dependency {
+    [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
+    Telemetry: FunctionUsageTelemetry;
 }
 
 export class LineWorker {
@@ -30,31 +31,27 @@ export class LineWorker {
 
     private readonly pin: LinePin;
 
-    private readonly telemetry: FunctionUsageTelemetry;
-
     private readonly editorReference: TextEditorReference;
 
-    private readonly loadingManager: LineLoadingManager;
+    private readonly container: DependencyContainer<Dependency>;
 
-    private readonly kernel: Kernel;
-
-    constructor(document: TextDocument, line: number, helper: LineWorkerHelper) {
+    constructor(document: TextDocument, line: number, container: DependencyContainer<Dependency>) {
         this.line = line;
         this.editorReference = new TextEditorReference(document.uri.toString());
         this.hint = document.lineAt(line).text;
         this.pin = new LinePin(line, this.hint.length);
-        this.loadingManager = helper.loadingManager;
-        this.kernel = helper.kernel;
-        this.telemetry = helper.telemetry;
-        this.telemetry.setTelemetryData('inputHint', this.hint);
+        this.container = container;
     }
 
     async run() {
-        await this.telemetry.spyRun(() => this.runRewrite());
+        const telemetry = this.container.get('Telemetry');
+        await telemetry.spyRun(() => this.runRewrite());
     }
 
     private async runRewrite(): Promise<FunctionUsageResult> {
+        const telemetry = this.container.get('Telemetry');
         const hint = this.hint.trim();
+        telemetry.setTelemetryData('inputHint', hint);
         const editor = this.editorReference.getTextEditor();
 
         if (!editor) {
@@ -68,13 +65,14 @@ export class LineWorker {
                 file: document.fileName,
                 line: this.line,
             };
-            for await (const entry of this.kernel.callStreaming(this.telemetry.getUuid(), 'semanticRewrite', request)) {
+            const kernel = this.container.get(KernelClient);
+            for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
                 switch (entry.type) {
                     case 'loading':
                         this.showLoading();
                         break;
                     case 'telemetryData':
-                        this.telemetry.setTelemetryData(entry.key, entry.value);
+                        telemetry.setTelemetryData(entry.key, entry.value);
                         break;
                     case 'abort':
                         return {type: 'abort', reason: entry.reason};
@@ -117,24 +115,27 @@ export class LineWorker {
 
     applyUserEdit(range: TextRange, text: string) {
         const currentLineNumber = this.pin.getPinLineNumber();
+        const loadingManager = this.container.get(LoadingManager);
         this.pin.edit(range, text);
 
         if (this.pin.isBroken()) {
             this.hideLoading();
-            this.loadingManager.remove(this.line);
+            loadingManager.remove(this.editorReference.getDocumentUri(), this.line);
         }
         else {
             const toLineNumber = this.pin.getPinLineNumber();
-            this.loadingManager.move(currentLineNumber, toLineNumber);
+            loadingManager.move(this.editorReference.getDocumentUri(), currentLineNumber, toLineNumber);
             this.line = toLineNumber;
         }
     }
 
     showLoading() {
-        this.loadingManager.add(this.line);
+        const loadingManager = this.container.get(LoadingManager);
+        loadingManager.add(this.editorReference.getDocumentUri(), this.line);
     }
 
     hideLoading() {
-        this.loadingManager.remove(this.line);
+        const loadingManager = this.container.get(LoadingManager);
+        loadingManager.remove(this.editorReference.getDocumentUri(), this.line);
     }
 }
