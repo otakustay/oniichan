@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.6.0
-        version: 19.6.0(@types/node@22.10.1)(typescript@5.7.2)
+        version: 19.6.0(@types/node@22.10.2)(typescript@5.7.2)
       '@commitlint/config-conventional':
         specifier: ^19.6.0
         version: 19.6.0
@@ -39,8 +39,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@otakustay/ipc':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
     devDependencies:
       '@types/vscode':
         specifier: ^1.95.0
@@ -58,8 +58,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
     devDependencies:
       '@types/node':
         specifier: 20.x
@@ -89,8 +89,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
       detect-port:
         specifier: ^2.1.0
         version: 2.1.0
@@ -114,8 +114,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       openai:
-        specifier: ^4.76.1
-        version: 4.76.1(encoding@0.1.13)
+        specifier: ^4.76.2
+        version: 4.76.2(encoding@0.1.13)
     devDependencies:
       '@types/mustache':
         specifier: ^4.2.5
@@ -134,8 +134,8 @@ importers:
   packages/vscode:
     dependencies:
       '@otakustay/ipc':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -189,8 +189,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
       '@rspack/cli':
         specifier: ^1.1.6
         version: 1.1.6(@rspack/core@1.1.6)(@types/express@4.17.21)
@@ -1128,8 +1128,8 @@ packages:
     resolution: {integrity: sha512-IIynBsoBXvZmT6sFM5atIXRnM+I2pIghx1Xh/mqWc+yWUbBQmxyDyWGqS28/RSuDYUR6cvnWGp2pCjnyOzEDCw==}
     engines: {node: '>= 18'}
 
-  '@otakustay/ipc@2.1.1':
-    resolution: {integrity: sha512-6Mv1lkwKS4qGZyeZHk7D496/g3gb/kxfay/HIq7/8LcwhE47WEA2sZDGPYNZ1MGJGVY5oqnABTUNLltwSSCEGg==}
+  '@otakustay/ipc@2.2.0':
+    resolution: {integrity: sha512-V4Ieh74z6g1V2QrVAFRQ6VWwphV6HeL5mZhA10gf6Va2JrbJUz76t7kYj3GNgl6fRcOP2+lGYC04ne31OGQfnQ==}
     engines: {node: '>= 18'}
 
   '@otakustay/text-pin@1.0.0':
@@ -1336,11 +1336,14 @@ packages:
   '@types/node@18.19.67':
     resolution: {integrity: sha512-wI8uHusga+0ZugNp0Ol/3BqQfEcCCNfojtO6Oou9iVNGPTL6QNSdnUdqq85fRgIorLhLMuPIKpsN98QE9Nh+KQ==}
 
+  '@types/node@18.19.68':
+    resolution: {integrity: sha512-QGtpFH1vB99ZmTa63K4/FU8twThj4fuVSBkGddTp7uIL/cuoLWIUSL2RcOaigBhfR+hg5pgGkBnkoOxrTVBMKw==}
+
   '@types/node@20.17.9':
     resolution: {integrity: sha512-0JOXkRyLanfGPE2QRCwgxhzlBAvaRdCNMcvbd7jFfpmD4eEXll7LRwy5ymJmyeZqk7Nh7eD2LeUyQ68BbndmXw==}
 
-  '@types/node@22.10.1':
-    resolution: {integrity: sha512-qKgsUwfHZV2WCWLAnVP1JqnpE6Im6h3Y0+fYgMTasNQ7V++CBX5OT1as0g0f+OyubbFqhf6XVNIsmN4IIhEgGQ==}
+  '@types/node@22.10.2':
+    resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -3652,8 +3655,8 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
-  openai@4.76.1:
-    resolution: {integrity: sha512-ci63/WFEMd6QjjEVeH0pV7hnFS6CCqhgJydSti4Aak/8uo2SpgzKjteUDaY+OkwziVj11mi6j+0mRUIiGKUzWw==}
+  openai@4.76.2:
+    resolution: {integrity: sha512-T9ZyxAFwLNZz3onC+SFvSR0POF18egIsY8lLze9e2YBe1wzQNf8IHcIgFPWizGPpoCGv/9i3IdTAx3EnLmTL4A==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -4978,11 +4981,11 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@commitlint/cli@19.6.0(@types/node@22.10.1)(typescript@5.7.2)':
+  '@commitlint/cli@19.6.0(@types/node@22.10.2)(typescript@5.7.2)':
     dependencies:
       '@commitlint/format': 19.5.0
       '@commitlint/lint': 19.6.0
-      '@commitlint/load': 19.5.0(@types/node@22.10.1)(typescript@5.7.2)
+      '@commitlint/load': 19.5.0(@types/node@22.10.2)(typescript@5.7.2)
       '@commitlint/read': 19.5.0
       '@commitlint/types': 19.5.0
       tinyexec: 0.3.1
@@ -5029,7 +5032,7 @@ snapshots:
       '@commitlint/rules': 19.6.0
       '@commitlint/types': 19.5.0
 
-  '@commitlint/load@19.5.0(@types/node@22.10.1)(typescript@5.7.2)':
+  '@commitlint/load@19.5.0(@types/node@22.10.2)(typescript@5.7.2)':
     dependencies:
       '@commitlint/config-validator': 19.5.0
       '@commitlint/execute-rule': 19.5.0
@@ -5037,7 +5040,7 @@ snapshots:
       '@commitlint/types': 19.5.0
       chalk: 5.3.0
       cosmiconfig: 9.0.0(typescript@5.7.2)
-      cosmiconfig-typescript-loader: 5.1.0(@types/node@22.10.1)(cosmiconfig@9.0.0(typescript@5.7.2))(typescript@5.7.2)
+      cosmiconfig-typescript-loader: 5.1.0(@types/node@22.10.2)(cosmiconfig@9.0.0(typescript@5.7.2))(typescript@5.7.2)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -5980,12 +5983,12 @@ snapshots:
 
   '@otakustay/async-iterator@1.1.1':
     dependencies:
-      '@types/node': 22.10.1
+      '@types/node': 22.10.2
 
-  '@otakustay/ipc@2.1.1':
+  '@otakustay/ipc@2.2.0':
     dependencies:
       '@otakustay/async-iterator': 1.1.1
-      '@types/node': 22.10.1
+      '@types/node': 22.10.2
       nanoid: 5.0.9
 
   '@otakustay/text-pin@1.0.0': {}
@@ -6233,11 +6236,15 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@18.19.68':
+    dependencies:
+      undici-types: 5.26.5
+
   '@types/node@20.17.9':
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.10.1':
+  '@types/node@22.10.2':
     dependencies:
       undici-types: 6.20.0
 
@@ -6881,9 +6888,9 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig-typescript-loader@5.1.0(@types/node@22.10.1)(cosmiconfig@9.0.0(typescript@5.7.2))(typescript@5.7.2):
+  cosmiconfig-typescript-loader@5.1.0(@types/node@22.10.2)(cosmiconfig@9.0.0(typescript@5.7.2))(typescript@5.7.2):
     dependencies:
-      '@types/node': 22.10.1
+      '@types/node': 22.10.2
       cosmiconfig: 9.0.0(typescript@5.7.2)
       jiti: 1.21.6
       typescript: 5.7.2
@@ -8939,9 +8946,9 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@4.76.1(encoding@0.1.13):
+  openai@4.76.2(encoding@0.1.13):
     dependencies:
-      '@types/node': 18.19.67
+      '@types/node': 18.19.68
       '@types/node-fetch': 2.6.12
       abort-controller: 3.0.0
       agentkeepalive: 4.5.0

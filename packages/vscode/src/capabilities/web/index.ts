@@ -11,13 +11,9 @@ import {
     Webview,
     window,
 } from 'vscode';
-import {ExecutionMessage, Port} from '@otakustay/ipc';
+import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {WebAppServer, IpcServer} from '@oniichan/server';
 import {DependencyContainer} from '@oniichan/shared/container';
-
-function isExecutionMesssage(message: any): message is ExecutionMessage {
-    return 'taskId' in message;
-}
 
 class WebviewPort implements Port, Disposable {
     private readonly webview: Webview;
@@ -34,7 +30,7 @@ class WebviewPort implements Port, Disposable {
 
     listen(callback: (message: ExecutionMessage) => void): void {
         const listener = (message: any) => {
-            if (isExecutionMesssage(message)) {
+            if (isExecutionMessage(message)) {
                 callback(message);
             }
         };

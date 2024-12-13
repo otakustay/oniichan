@@ -1,8 +1,4 @@
-import {ExecutionMessage, Port} from '@otakustay/ipc';
-
-function isExecutionMesssage(message: any): message is ExecutionMessage {
-    return 'taskId' in message;
-}
+import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 
 export class WebSocketPort implements Port {
     private readonly socket: WebSocket;
@@ -21,7 +17,7 @@ export class WebSocketPort implements Port {
             (event: MessageEvent<string>) => {
                 try {
                     const data = JSON.parse(event.data);
-                    if (isExecutionMesssage(data)) {
+                    if (isExecutionMessage(data)) {
                         callback(data);
                     }
                 }
@@ -45,7 +41,7 @@ export class VscodeMessagePort implements Port {
             'message',
             (event: MessageEvent) => {
                 try {
-                    if (isExecutionMesssage(event.data)) {
+                    if (isExecutionMessage(event.data)) {
                         callback(event.data);
                     }
                 }

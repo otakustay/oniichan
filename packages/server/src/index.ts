@@ -4,15 +4,11 @@ import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
-import {ExecutionMessage, Port} from '@otakustay/ipc';
+import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
 import {IpcServer} from './server';
 
 export {IpcServer};
-
-function isExecutionMesssage(message: any): message is ExecutionMessage {
-    return 'taskId' in message;
-}
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;
@@ -31,7 +27,7 @@ class WebSocketPort implements Port {
             (message: Buffer) => {
                 try {
                     const data = JSON.parse(message.toString());
-                    if (isExecutionMesssage(data)) {
+                    if (isExecutionMessage(data)) {
                         callback(data);
                     }
                 }
