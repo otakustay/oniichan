@@ -1,11 +1,12 @@
 import {ProtocolOf, Server} from '@otakustay/ipc';
+import {EchoHandler} from './handlers/echo';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {Context} from './handlers/handler';
 import {EditorHost} from './host';
 
 export {EditorHost};
 
-export type Protocol = ProtocolOf<typeof SemanticRewriteHandler>;
+export type Protocol = ProtocolOf<typeof EchoHandler | typeof SemanticRewriteHandler>;
 
 export class KernelServer extends Server<Protocol, Context> {
     private readonly editorHost: EditorHost;
@@ -19,6 +20,7 @@ export class KernelServer extends Server<Protocol, Context> {
     }
 
     protected initializeHandlers(): void {
+        this.registerHandler(EchoHandler);
         this.registerHandler(SemanticRewriteHandler);
     }
 }

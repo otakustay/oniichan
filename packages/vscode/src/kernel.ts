@@ -1,33 +1,93 @@
-import {EditorHost, KernelServer, Protocol as KernelProtocol} from '@oniichan/kernel';
-import {HostServer, Protocol as HostProtocol} from '@oniichan/host';
-import {Client, DirectPort} from '@otakustay/ipc';
+import {Worker} from 'node:worker_threads';
+import {Protocol as KernelProtocol} from '@oniichan/kernel';
+import {HostServer} from '@oniichan/host';
+import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
+import path from 'node:path';
 
-// 1. `HostServer` must run in VSCode extension runtime
-// 2. `KernelServer` connects to `HostServer` via `hostToKernelPort`
-// 3. `Kernel` is a client that VSCode extension uses to access `KernelServer`
-// 4. Once we want to run `KernelServer` in a separate process, do this:
-//   1. Change `hostToKernelPort` to a process port
-//   2. Change `kernelPort` to a child process port
-// 5. To go further, when kernel requires LSP, we can also easily implement a `LspPort` to handle this
+class WorkerPort implements Port {
+    private readonly worker: Worker;
 
-async function createEditorHost() {
-    const hostToKernelPort = new DirectPort();
-    const hostServer = new HostServer();
-    await hostServer.connect(hostToKernelPort);
-    const hostClient = new Client<HostProtocol>(hostToKernelPort);
-    const editorHost = new EditorHost(hostClient);
-    return editorHost;
+    constructor(worker: Worker) {
+        this.worker = worker;
+    }
+
+    send(message: ExecutionMessage): void {
+        this.worker.postMessage(message);
+    }
+
+    listen(callback: (message: ExecutionMessage) => void): void {
+        this.worker.on(
+            'message',
+            (data: any) => {
+                try {
+                    if (isExecutionMessage(data)) {
+                        callback(data);
+                    }
+                }
+                catch {
+                    // Discard incorrect JSON messages
+                }
+            }
+        );
+    }
 }
 
 export class KernelClient extends Client<KernelProtocol> {
     static readonly containerKey = 'KernelClient';
 }
 
+// By now we run kernel in a worker thread in the same process as VSCode extension,
+// to run it in a separate process, use a `ChildProcessPort` and modify `kernelEntry.ts` to use a `ProcessPort`.
+//
+// Also maybe we need to implement a `LspPort` to allow kernel be aware to LSP, this is a breif code:
+//
+// ```ts
+// import {Readable, Writable} from 'node:stream';
+// import {Port, ExecutionMessage} from '@otakustay/ipc';
+// import {
+//     createConnection,
+//     Connection,
+//     StreamMessageReader,
+//     StreamMessageWriter,
+// } from 'vscode-languageserver/node';
+//
+// const LANGUAGE_SERVER_GENERIC_METHOD = 'genericExec';
+//
+// export class LanguageServerPort implements Port {
+//     private readonly connection: Connection;
+//
+//     private readonly listeners = new Set<(message: any) => void>();
+//
+//     constructor(readable: Readable, writable: Writable) {
+//         this.connection = createConnection(
+//             new StreamMessageReader(readable),
+//             new StreamMessageWriter(writable)
+//         );
+//         this.connection.onRequest(
+//             LANGUAGE_SERVER_GENERIC_METHOD,
+//             (message: ExecutionMessage) => {
+//                 for (const listener of this.listeners) {
+//                     listener(message);
+//                 }
+//             }
+//         );
+//         this.connection.listen();
+//     }
+//
+//     send(message: ExecutionMessage) {
+//         this.connection.sendRequest(LANGUAGE_SERVER_GENERIC_METHOD, message).catch(() => {});
+//     }
+//
+//     listen(callback: (message: ExecutionMessage) => void): void {
+//         this.listeners.add(callback);
+//     }
+// }
+// ```
 export async function createKernelClient(): Promise<KernelClient> {
-    const editorHost = await createEditorHost();
-    const server = new KernelServer(editorHost);
-    const kernelPort = new DirectPort();
-    await server.connect(kernelPort);
-    const kernelClient = new KernelClient(kernelPort);
+    const worker = new Worker(path.join(__dirname, 'kernelEntry.js'), {stdout: true, stderr: true});
+    const port = new WorkerPort(worker);
+    const hostServer = new HostServer();
+    await hostServer.connect(port);
+    const kernelClient = new KernelClient(port);
     return kernelClient;
 }

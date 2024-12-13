@@ -31,6 +31,7 @@ try {
     const buidlContext = {
         entryPoints: [
             'src/extension.ts',
+            'src/kernelEntry.ts',
         ],
         bundle: true,
         format: 'cjs',
@@ -38,7 +39,7 @@ try {
         sourcemap: !production,
         sourcesContent: false,
         platform: 'node',
-        outfile: 'dist/extension.js',
+        outdir: 'dist',
         external: ['vscode'],
         logLevel: 'silent',
         banner: {
