@@ -25,3 +25,16 @@ export function sortedInsert<T>(array: T[], item: T, compare: (x: T, y: T) => nu
     const index = array.findIndex(i => compare(item, i) < 0);
     array.splice(index < 0 ? array.length : index, 0, item);
 }
+
+export function uniqueBy<T>(array: T[], getKey: (item: T) => unknown): T[] {
+    const seen = new Set<unknown>();
+    const results: T[] = [];
+    for (const item of array) {
+        const key = getKey(item);
+        if (!seen.has(key)) {
+            results.push(item);
+            seen.add(key);
+        }
+    }
+    return results;
+}

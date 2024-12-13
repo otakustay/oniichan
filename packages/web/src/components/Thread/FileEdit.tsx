@@ -44,12 +44,15 @@ interface Props {
     edit: FileEditData | null;
 }
 
+// Component to display and manage file edits with diff view capabilities
 export default function FileEdit({file, patch, edit}: Props) {
     const viewMode = useViewModeValue();
     const ipc = useIpc();
     const isEditInteractive = useIsEditInteractive();
     const extension = file.split('.').pop();
     const codeEdit = (!edit || edit.type === 'error') ? null : edit;
+
+    // Opens a diff view for the current edit
     const openDiffView = async () => {
         if (!codeEdit) {
             showToast('error', 'This patch is errored', {timeout: 3000});
@@ -63,6 +66,8 @@ export default function FileEdit({file, patch, edit}: Props) {
             showToast('error', stringifyError(ex), {timeout: 3000});
         }
     };
+
+    // Renders error messages and patch content in debug mode
     const renderDetail = () => {
         const error = edit?.type === 'error' ? edit.message : '';
         const content = patch.trim();
@@ -78,6 +83,7 @@ export default function FileEdit({file, patch, edit}: Props) {
 
         return null;
     };
+
     const showAction = isEditInteractive && codeEdit;
 
     return (

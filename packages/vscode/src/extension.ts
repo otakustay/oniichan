@@ -12,6 +12,7 @@ import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {WebApp, WebConnection} from './capabilities/web';
 import {WorkspaceTracker} from './capabilities/tracker';
 import {InitializeProjectConfigCommand, OmdCompletion} from './capabilities/config';
+import {SuperComment} from './capabilities/superComment';
 import {startKernel} from './kernel';
 import {migrate} from './migration';
 
@@ -42,7 +43,8 @@ export async function activate(context: ExtensionContext) {
         new ScaffoldCommand(globalContainer),
         new ExportInboxCommand(globalContainer),
         new InitializeProjectConfigCommand(globalContainer),
-        new OmdCompletion(globalContainer)
+        new OmdCompletion(globalContainer),
+        new SuperComment(globalContainer)
     );
     const logger = globalContainer.get(Logger);
     logger.trace('ExtensionActivated');

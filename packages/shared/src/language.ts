@@ -53,6 +53,24 @@ class LanguageConfig {
         const [start, end] = symbol;
         return `${start} ${line.trim()} ${end}`;
     }
+
+    stripLineComment(line: string): string {
+        const stripped = this.commentSymbols.reduce(
+            (output: string, prefix: string | [string, string]) => {
+                if (typeof prefix === 'string') {
+                    return output.startsWith(prefix) ? output.slice(prefix.length) : output;
+                }
+
+                const [start, end] = prefix;
+                if (output.startsWith(start) && output.endsWith(end)) {
+                    return output.slice(start.length, -end.length);
+                }
+                return output;
+            },
+            line.trim()
+        );
+        return stripped.trim();
+    }
 }
 
 const JS_KEYWORDS = [

@@ -6,6 +6,7 @@
 
 - 增加一个“Initialize Project Config`命令快速在项目下初始化Oniichan的配置文件。
 - 现在你可以使用Rules来控制邮件系统的回复效果了，修改`.oniichan/rules/default.omd`即可。
+- 可以直接在代码编辑器里写出来需求，再使用“Send This Line To Inbox”命令直接发送到邮件系统，如果在注释中编写，使用“`”符号还能自动补全文件内的元素。
 
 ### Fixed
 

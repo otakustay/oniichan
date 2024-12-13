@@ -2,14 +2,17 @@ import {builtinTools} from '@oniichan/shared/tool';
 import {InboxPromptReference, InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {stringifyError} from '@oniichan/shared/error';
 import {ModelFeature} from '@oniichan/shared/model';
-import {EditorHost} from '../../core/editor';
+import {uniqueBy} from '@oniichan/shared/array';
 import {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
+import {EditorHost} from '../../core/editor';
 
 export class SystemPromptGenerator {
     private readonly logger: Logger;
 
     private readonly editorHost: EditorHost;
+
+    private readonly references: InboxPromptReference[] = [];
 
     private modelFeature: ModelFeature = {
         supportReasoning: false,
@@ -24,6 +27,10 @@ export class SystemPromptGenerator {
 
     setModelFeature(feature: ModelFeature) {
         this.modelFeature = feature;
+    }
+
+    addReference(reference: InboxPromptReference[]) {
+        this.references.push(...reference);
     }
 
     async renderSystemPrompt(): Promise<string> {
@@ -54,6 +61,8 @@ export class SystemPromptGenerator {
         catch (ex) {
             this.logger.warn('CustomRulesViewFail', {reason: stringifyError(ex)});
         }
+
+        view.references = uniqueBy([...view.references, ...this.references], v => `${v.type}:${v.file}`);
 
         const systemPrompt = await renderInboxSystemPrompt(view);
         return systemPrompt;

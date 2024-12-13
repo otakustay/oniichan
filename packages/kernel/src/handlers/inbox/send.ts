@@ -5,13 +5,14 @@ import {ModelResponse} from '@oniichan/shared/model';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {stringifyError} from '@oniichan/shared/error';
+import {InboxConfig} from '@oniichan/editor-host/protocol';
+import {InboxPromptReference} from '@oniichan/prompt';
 import {newUuid} from '@oniichan/shared/id';
 import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
-import {InboxConfig} from '@oniichan/editor-host/protocol';
 
 interface TextMessageBody {
     type: 'text';
@@ -24,6 +25,7 @@ export interface InboxSendMessageRequest {
     threadUuid: string;
     uuid: string;
     body: MessageBody;
+    references?: InboxPromptReference[];
 }
 
 export interface InboxSendMessageResponse {
@@ -46,6 +48,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private roundtrip: Roundtrip = new Roundtrip();
 
+    private references: InboxPromptReference[] = [];
+
     private systemPrompt = '';
 
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
@@ -58,6 +62,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         this.thread = store.ensureThread(payload.threadUuid);
         this.roundtrip.setRequest(new UserRequestMessage(payload.uuid, this.roundtrip, payload.body.content));
         this.thread.addRoundtrip(this.roundtrip);
+        this.references = payload.references ?? [];
         store.moveThreadToTop(this.thread.uuid);
 
         try {
@@ -194,6 +199,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         logger.trace('PrepareSystemPromptStart');
 
         const modelFeature = await this.modelAccess.getModelFeature();
+        this.systemPromptGenerator.addReference(this.references);
         this.systemPromptGenerator.setModelFeature(modelFeature);
         this.systemPrompt = await this.systemPromptGenerator.renderSystemPrompt();
 

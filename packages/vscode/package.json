@@ -56,6 +56,11 @@
         "category": "Oniichan"
       },
       {
+        "command": "oniichan.sendToInbox",
+        "title": "Send This Line to Inbox",
+        "category": "Oniichan"
+      },
+      {
         "command": "oniichan.ejectInternals",
         "title": "[Debug] Eject Internals",
         "category": "Oniichan"
@@ -76,6 +81,11 @@
         "command": "oniichan.openSidebar",
         "key": "alt+shift+2",
         "mac": "command+shift+2"
+      },
+      {
+        "command": "oniichan.sendToInbox",
+        "key": "alt+shift+3",
+        "mac": "command+shift+3"
       }
     ],
     "viewsContainers": {
