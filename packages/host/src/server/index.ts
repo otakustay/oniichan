@@ -5,9 +5,10 @@ import {
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
 } from './handlers/document';
-import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {LoadingManager} from '../ui/loading';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {Logger} from '@oniichan/shared/logger';
+import {LoadingManager} from '../ui/loading';
+import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {Context} from './interface';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
@@ -22,6 +23,7 @@ export type Protocol = ProtocolOf<
 
 export interface HostServerDependency {
     [LoadingManager.containerKey]: LoadingManager;
+    [Logger.containerKey]: Logger;
     ExtensionContext: ExtensionContext;
 }
 
@@ -43,7 +45,8 @@ export class HostServer extends Server<Protocol, Context> {
 
     protected async createContext() {
         return {
-            loadingManager: this.container.get(LoadingManager.containerKey),
+            loadingManager: this.container.get(LoadingManager),
+            logger: this.container.get(Logger),
             extensionHost: this.container.get('ExtensionContext'),
         };
     }

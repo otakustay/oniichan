@@ -6,11 +6,13 @@ import {SemanticRewriteRequest} from '@oniichan/kernel';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {TextEditorReference} from '@oniichan/host/utils/editor';
 import {LoadingManager} from '@oniichan/host/ui/loading';
+import {Logger} from '@oniichan/shared/logger';
 import {KernelClient} from '../../kernel';
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
+    [Logger.containerKey]: Logger;
     Telemetry: FunctionUsageTelemetry;
 }
 
@@ -38,13 +40,24 @@ export class LineWorker {
     }
 
     private async runRewrite(): Promise<FunctionUsageResult> {
+        const logger = this.container.get(Logger);
         const loadingManager = this.container.get(LoadingManager);
         const editor = this.editorReference.getTextEditor();
         const telemetry = this.container.get('Telemetry');
         const hint = this.hint.trim();
         telemetry.setTelemetryData('inputHint', hint);
 
+        logger.info(
+            'RunSemanticRewrite',
+            {
+                documentUri: this.editorReference.getDocumentUri(),
+                line: this.pin.getPinLineNumber(),
+                hint,
+            }
+        );
+
         if (!editor) {
+            logger.info('SemanticRewriteAbort', {reason: 'Editor not opened'});
             return {type: 'abort', reason: 'Editor not opened'};
         }
 
@@ -70,10 +83,14 @@ export class LineWorker {
                         return await this.applyRewrite(entry.code, hint);
                 }
             }
+
+            logger.error('SemanticRewriteFail', {reason: 'No result form kernel'});
             throw new Error('No result form kernel');
         }
         catch (ex) {
-            throw new Error(`Semantic rewrite failed: ${stringifyError(ex)}`, {cause: ex});
+            const reason = stringifyError(ex);
+            logger.error('SemanticRewriteFail', {reason});
+            throw new Error(`Semantic rewrite failed: ${reason}`, {cause: ex});
         }
         finally {
             loadingManager.remove(this.editorReference.getDocumentUri(), this.pin.getPinLineNumber());
@@ -81,7 +98,9 @@ export class LineWorker {
     }
 
     private async applyRewrite(code: string, hint: string): Promise<FunctionUsageResult> {
+        const logger = this.container.get(Logger);
         if (code.trim() === hint || this.signal?.aborted) {
+            logger.info('SemanticRewriteAbort', {reason: 'Trigger hint has beed overriden'});
             return {type: 'abort', reason: 'Trigger hint has beed overriden'};
         }
 
@@ -89,6 +108,7 @@ export class LineWorker {
         const range = new Range(line, 0, line, Number.MAX_SAFE_INTEGER);
         const codeTrimmed = code.replaceAll(/^\n+|\n+$/g, '');
         await this.editorReference.applyReplacementEdit(range, codeTrimmed);
+        logger.info('ApplySemanticRewrite', {line, code: codeTrimmed});
         return {type: 'success'};
         // Format range doesn't seem to work
         // const editSuccessful = await this.editor.edit(builder => builder.replace(range, codeTrimmed));

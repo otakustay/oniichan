@@ -1,8 +1,9 @@
-import {MessagePort, parentPort, threadId} from 'node:worker_threads';
+import {MessagePort, parentPort} from 'node:worker_threads';
+import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {EditorHost, KernelServer} from '@oniichan/kernel';
 import {Protocol as HostProtocol} from '@oniichan/host/server';
-import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
+import {Logger} from '@oniichan/shared/logger';
 
 class WorkerPort implements Port {
     private readonly port: MessagePort;
@@ -37,19 +38,18 @@ class WorkerPort implements Port {
 }
 
 async function main() {
-    console.log('Starting kernel in worker');
     try {
         const port = new WorkerPort();
         const hostClient = new Client<HostProtocol>(port);
         const editorHost = new EditorHost(hostClient);
-        const server = new KernelServer(editorHost);
+        const logger = new Logger('Kernel');
+        const server = new KernelServer(editorHost, logger);
         await server.connect(port);
     }
     catch (ex) {
         console.error(`Failed to start kernel in worker: ${stringifyError(ex)}`);
         process.exit(500);
     }
-    console.log(`Kernel started in worker ${threadId}`);
 }
 
 void main();
