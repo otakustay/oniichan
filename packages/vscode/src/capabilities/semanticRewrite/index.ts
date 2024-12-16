@@ -3,9 +3,9 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {newUuid} from '@oniichan/shared/id';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {getSemanticRewriteConfiguration} from '../../utils/config';
+import {getSemanticRewriteConfiguration} from '@oniichan/host/utils/config';
 import {KernelClient} from '../../kernel';
-import {LoadingManager} from '../../ui/loading';
+import {LoadingManager} from '@oniichan/host/ui/loading';
 import {LineTrack} from './track';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {

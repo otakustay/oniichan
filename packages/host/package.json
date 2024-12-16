@@ -4,7 +4,9 @@
   "version": "1.4.0",
   "description": "Host and expose VSCode API to consumers via IPC",
   "exports": {
-    ".": "./dist/index.js"
+    "./server": "./dist/server/index.js",
+    "./utils/*": "./dist/utils/*.js",
+    "./ui/*": "./dist/ui/*.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -15,7 +17,8 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/vscode": "^1.95.0"
+    "@types/vscode": "^1.95.0",
+    "@types/node": "20.x"
   },
   "dependencies": {
     "@oniichan/shared": "workspace:*",

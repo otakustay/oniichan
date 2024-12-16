@@ -1,5 +1,5 @@
 import {Client} from '@otakustay/ipc';
-import {Protocol} from '@oniichan/host';
+import {Protocol} from '@oniichan/host/server';
 import {EditorDocumentHost} from './document';
 import {ModelAccessHost} from './model';
 

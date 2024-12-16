@@ -1,6 +1,6 @@
 import {MessagePort, parentPort, threadId} from 'node:worker_threads';
 import {EditorHost, KernelServer} from '@oniichan/kernel';
-import {Protocol as HostProtocol} from '@oniichan/host';
+import {Protocol as HostProtocol} from '@oniichan/host/server';
 import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
 

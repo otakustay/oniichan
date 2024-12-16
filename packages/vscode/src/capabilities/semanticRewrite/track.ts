@@ -1,9 +1,9 @@
 import {TextDocumentContentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {TextEditorReference} from '../../utils/editor';
+import {TextEditorReference} from '@oniichan/host/utils/editor';
+import {LoadingManager} from '@oniichan/host/ui/loading';
 import {KernelClient} from '../../kernel';
-import {LoadingManager} from '../../ui/loading';
 import {LineWorker} from './worker';
 
 interface Dependency {

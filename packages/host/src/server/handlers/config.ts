@@ -1,6 +1,7 @@
 import {commands, InputBoxOptions, QuickPickItem, window, workspace} from 'vscode';
 import {RequestHandler} from '@otakustay/ipc';
 import {ModelConfiguration, ModelApiStyle} from '@oniichan/shared/model';
+import {Context} from '../interface';
 
 const DEFAULT_ANTHROPIC_BASE_URL = 'https://api.anthropic.com';
 
@@ -43,7 +44,7 @@ async function updateModelConfiguration(input: ModelConfiguration) {
     await Promise.all([update('apiStyle'), update('baseUrl'), update('apiKey'), update('modelName')]);
 }
 
-export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration> {
+export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration, Context> {
     static action = 'getModelConfig' as const;
 
     async *handleRequest(): AsyncIterable<ModelConfiguration> {
@@ -52,7 +53,7 @@ export class GetModelConfigHandler extends RequestHandler<string, ModelConfigura
     }
 }
 
-export class RequestModelConfigureHandler extends RequestHandler<void, void> {
+export class RequestModelConfigureHandler extends RequestHandler<void, void, Context> {
     static action = 'requestModelConfigure' as const;
 
     // eslint-disable-next-line require-yield

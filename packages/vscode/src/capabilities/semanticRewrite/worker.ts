@@ -4,9 +4,9 @@ import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {SemanticRewriteRequest} from '@oniichan/kernel';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {TextEditorReference} from '../../utils/editor';
+import {TextEditorReference} from '@oniichan/host/utils/editor';
+import {LoadingManager} from '@oniichan/host/ui/loading';
 import {KernelClient} from '../../kernel';
-import {LoadingManager} from '../../ui/loading';
 
 interface TextPosition {
     line: number;

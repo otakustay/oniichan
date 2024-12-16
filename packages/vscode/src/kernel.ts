@@ -1,8 +1,9 @@
+import path from 'node:path';
 import {Worker} from 'node:worker_threads';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {HostServer} from '@oniichan/host';
+import {HostServer, HostServerDependency} from '@oniichan/host/server';
 import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
-import path from 'node:path';
+import {DependencyContainer} from '@oniichan/shared/container';
 
 class WorkerPort implements Port {
     private readonly worker: Worker;
@@ -83,10 +84,10 @@ export class KernelClient extends Client<KernelProtocol> {
 //     }
 // }
 // ```
-export async function createKernelClient(): Promise<KernelClient> {
+export async function createKernelClient(container: DependencyContainer<HostServerDependency>): Promise<KernelClient> {
     const worker = new Worker(path.join(__dirname, 'kernelEntry.js'), {stdout: true, stderr: true});
     const port = new WorkerPort(worker);
-    const hostServer = new HostServer();
+    const hostServer = new HostServer(container);
     await hostServer.connect(port);
     const kernelClient = new KernelClient(port);
     return kernelClient;

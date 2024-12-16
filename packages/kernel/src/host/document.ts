@@ -1,4 +1,4 @@
-import {Protocol} from '@oniichan/host';
+import {Protocol} from '@oniichan/host/server';
 import {Client} from '@otakustay/ipc';
 import {newUuid} from '@oniichan/shared/id';
 

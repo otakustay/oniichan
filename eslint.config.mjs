@@ -34,6 +34,7 @@ export default ts.config(
                 },
             ],
             '@typescript-eslint/require-await': 'off',
+            '@typescript-eslint/no-unsafe-call': 'off',
         },
     }
 );
