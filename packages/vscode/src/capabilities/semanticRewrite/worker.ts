@@ -8,16 +8,6 @@ import {TextEditorReference} from '@oniichan/host/utils/editor';
 import {LoadingManager} from '@oniichan/host/ui/loading';
 import {KernelClient} from '../../kernel';
 
-interface TextPosition {
-    line: number;
-    character: number;
-}
-
-interface TextRange {
-    start: TextPosition;
-    end: TextPosition;
-}
-
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
@@ -25,8 +15,6 @@ interface Dependency {
 }
 
 export class LineWorker {
-    private line: number;
-
     private readonly hint: string;
 
     private readonly pin: LinePin;
@@ -35,8 +23,9 @@ export class LineWorker {
 
     private readonly container: DependencyContainer<Dependency>;
 
+    private signal: AbortSignal | null = null;
+
     constructor(document: TextDocument, line: number, container: DependencyContainer<Dependency>) {
-        this.line = line;
         this.editorReference = new TextEditorReference(document.uri.toString());
         this.hint = document.lineAt(line).text;
         this.pin = new LinePin(line, this.hint.length);
@@ -49,10 +38,11 @@ export class LineWorker {
     }
 
     private async runRewrite(): Promise<FunctionUsageResult> {
+        const loadingManager = this.container.get(LoadingManager);
+        const editor = this.editorReference.getTextEditor();
         const telemetry = this.container.get('Telemetry');
         const hint = this.hint.trim();
         telemetry.setTelemetryData('inputHint', hint);
-        const editor = this.editorReference.getTextEditor();
 
         if (!editor) {
             return {type: 'abort', reason: 'Editor not opened'};
@@ -63,13 +53,13 @@ export class LineWorker {
             const request: SemanticRewriteRequest = {
                 documentUri: document.uri.toString(),
                 file: document.fileName,
-                line: this.line,
+                line: this.pin.getPinLineNumber(),
             };
             const kernel = this.container.get(KernelClient);
             for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
                 switch (entry.type) {
                     case 'loading':
-                        this.showLoading();
+                        this.signal = loadingManager.add(this.editorReference.getDocumentUri(), this.pin);
                         break;
                     case 'telemetryData':
                         telemetry.setTelemetryData(entry.key, entry.value);
@@ -86,16 +76,17 @@ export class LineWorker {
             throw new Error(`Semantic rewrite failed: ${stringifyError(ex)}`, {cause: ex});
         }
         finally {
-            this.hideLoading();
+            loadingManager.remove(this.editorReference.getDocumentUri(), this.pin.getPinLineNumber());
         }
     }
 
     private async applyRewrite(code: string, hint: string): Promise<FunctionUsageResult> {
-        if (code.trim() === hint || this.pin.isBroken()) {
+        if (code.trim() === hint || this.signal?.aborted) {
             return {type: 'abort', reason: 'Trigger hint has beed overriden'};
         }
 
-        const range = new Range(this.line, 0, this.line, Number.MAX_SAFE_INTEGER);
+        const line = this.pin.getPinLineNumber();
+        const range = new Range(line, 0, line, Number.MAX_SAFE_INTEGER);
         const codeTrimmed = code.replaceAll(/^\n+|\n+$/g, '');
         await this.editorReference.applyReplacementEdit(range, codeTrimmed);
         return {type: 'success'};
@@ -111,31 +102,5 @@ export class LineWorker {
         //         new Range(startLine, 0, endLine, 0)
         //     );
         // }
-    }
-
-    applyUserEdit(range: TextRange, text: string) {
-        const currentLineNumber = this.pin.getPinLineNumber();
-        const loadingManager = this.container.get(LoadingManager);
-        this.pin.edit(range, text);
-
-        if (this.pin.isBroken()) {
-            this.hideLoading();
-            loadingManager.remove(this.editorReference.getDocumentUri(), this.line);
-        }
-        else {
-            const toLineNumber = this.pin.getPinLineNumber();
-            loadingManager.move(this.editorReference.getDocumentUri(), currentLineNumber, toLineNumber);
-            this.line = toLineNumber;
-        }
-    }
-
-    showLoading() {
-        const loadingManager = this.container.get(LoadingManager);
-        loadingManager.add(this.editorReference.getDocumentUri(), this.line);
-    }
-
-    hideLoading() {
-        const loadingManager = this.container.get(LoadingManager);
-        loadingManager.remove(this.editorReference.getDocumentUri(), this.line);
     }
 }

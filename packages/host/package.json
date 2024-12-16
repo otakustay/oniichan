@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.2.0"
+    "@otakustay/ipc": "^2.2.0",
+    "@otakustay/text-pin": "^1.0.0"
   }
 }

@@ -41,6 +41,9 @@ importers:
       '@otakustay/ipc':
         specifier: ^2.2.0
         version: 2.2.0
+      '@otakustay/text-pin':
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/node':
         specifier: 20.x

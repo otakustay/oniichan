@@ -6,7 +6,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {getSemanticRewriteConfiguration} from '@oniichan/host/utils/config';
 import {KernelClient} from '../../kernel';
 import {LoadingManager} from '@oniichan/host/ui/loading';
-import {LineTrack} from './track';
+import {LineWorker} from './worker';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     const changedText = event.contentChanges.at(-1)?.text ?? '';
@@ -21,7 +21,7 @@ interface Dependency {
 export class SemanticRewriteCommand extends Disposable {
     private readonly disopsable: Disposable;
 
-    private readonly tracks = new Map<string, LineTrack>();
+    private readonly tracks = new Map<string, Set<LineWorker>>();
 
     private readonly container: DependencyContainer<Dependency>;
 
@@ -47,9 +47,6 @@ export class SemanticRewriteCommand extends Disposable {
                     if (!event.contentChanges.length) {
                         return;
                     }
-
-                    const track = this.tracks.get(event.document.uri.toString());
-                    track?.updateTrack(event.contentChanges);
 
                     if (getSemanticRewriteConfiguration().triggerType !== 'Automatic') {
                         return;
@@ -103,12 +100,26 @@ export class SemanticRewriteCommand extends Disposable {
         return true;
     }
 
+    private async startWorker(editor: TextEditor, line: number, telemetry: FunctionUsageTelemetry) {
+        const container = this.container.bind('Telemetry', () => telemetry);
+        const worker = new LineWorker(
+            editor.document,
+            line,
+            container
+        );
+
+        const uri = editor.document.uri.toString();
+        const workers = this.tracks.get(uri) ?? new Set();
+        this.tracks.set(uri, workers);
+
+        workers.add(worker);
+        await worker.run().catch(() => {});
+        workers.delete(worker);
+    }
+
     private async executeSemanticRewrite(editor: TextEditor, trigger: string) {
         const telemetry = new FunctionUsageTelemetry(newUuid(), 'semanticRewrite', {trigger});
         telemetry.setTelemetryData('trigger', trigger);
-        const uri = editor.document.uri.toString();
-        const lineTrack = this.tracks.get(uri) ?? new LineTrack(uri, this.container);
-        this.tracks.set(uri, lineTrack);
-        await lineTrack.push(editor.selection.active.line, telemetry);
+        await this.startWorker(editor, editor.selection.active.line, telemetry);
     }
 }

@@ -1,4 +1,15 @@
-import {window, Range, DecorationRenderOptions, Position, OverviewRulerLane, ThemeColor} from 'vscode';
+import {
+    window,
+    Range,
+    DecorationRenderOptions,
+    Position,
+    OverviewRulerLane,
+    ThemeColor,
+    Disposable,
+    workspace,
+    TextDocumentChangeEvent,
+} from 'vscode';
+import {LinePin} from '@otakustay/text-pin';
 import {TextEditorReference} from '../utils/editor';
 
 const decorationOptions: DecorationRenderOptions = {
@@ -10,64 +21,93 @@ const decorationOptions: DecorationRenderOptions = {
 const decorationType = window.createTextEditorDecorationType(decorationOptions);
 
 interface LoadingState {
+    pin: LinePin;
     index: number;
     highlightRange: number;
     lineLength: number;
+    controller: AbortController;
 }
 
-export class LoadingManager {
+export class LoadingManager implements Disposable {
     static readonly containerKey = 'LoadingManager';
 
-    private readonly state = new Map<string, Map<number, LoadingState>>();
+    private readonly state = new Map<string, Set<LoadingState>>();
+
+    private readonly disposables: Disposable[] = [];
 
     private timer: ReturnType<typeof setInterval> | null = null;
 
-    add(documentUri: string, line: number) {
+    constructor() {
+        const change = workspace.onDidChangeTextDocument(event => this.updateLoadingStateOnTextChange(event));
+        this.disposables.push(change);
+    }
+
+    add(documentUri: string, line: number | LinePin): AbortSignal {
         const editorReference = new TextEditorReference(documentUri);
         const editor = editorReference.getTextEditorWhenActive();
 
         if (!editor) {
-            return;
+            return AbortSignal.abort('Editor not open');
         }
 
-        const map = this.getStateMap(editor.document.uri.toString());
-        const lineText = editor.document.lineAt(line).text;
+        const map = this.getStateSet(editor.document.uri.toString());
+        const lineText = editor.document.lineAt(typeof line === 'number' ? line : line.getPinLineNumber()).text;
         const state: LoadingState = {
+            pin: typeof line === 'number' ? new LinePin(line, lineText.length) : line,
             index: 0,
             lineLength: lineText.length,
             highlightRange: Math.floor(lineText.length / 3),
+            controller: new AbortController(),
         };
-        map.set(line, state);
+        map.add(state);
 
         this.startAnimation();
+        return state.controller.signal;
     }
 
     remove(documentUri: string, line: number) {
-        const map = this.getStateMap(documentUri);
-        map.delete(line);
+        const set = this.state.get(documentUri);
 
-        this.update();
-    }
+        if (!set) {
+            return;
+        }
 
-    move(documentUri: string, from: number, to: number) {
-        const map = this.getStateMap(documentUri);
-        const state = map.get(from);
-
-        if (state) {
-            map.delete(from);
-            map.set(to, state);
+        for (const state of set) {
+            if (state.pin.getPinLineNumber() === line) {
+                this.delete(documentUri, state);
+            }
         }
 
         this.update();
     }
 
-    private getStateMap(documentUri: string): Map<number, LoadingState> {
-        let stateMap = this.state.get(documentUri);
-        if (!stateMap) {
-            stateMap = new Map();
-            this.state.set(documentUri, stateMap);
+    dispose() {
+        for (const stateSet of this.state.values()) {
+            for (const state of stateSet) {
+                state.controller.abort('Loading state disposed');
+            }
         }
-        return stateMap;
+        this.state.clear();
+        this.stopAnimation();
+
+        Disposable.from(...this.disposables).dispose();
+    }
+
+    private delete(documentUri: string, state: LoadingState) {
+        const set = this.state.get(documentUri);
+        if (!set) {
+            return;
+        }
+        const deleted = set.delete(state);
+        if (deleted) {
+            state.controller.abort('Line is modified');
+        }
+    }
+
+    private getStateSet(documentUri: string): Set<LoadingState> {
+        const stateSet = this.state.get(documentUri) ?? new Set();
+        this.state.set(documentUri, stateSet);
+        return stateSet;
     }
 
     private isEmpty() {
@@ -82,7 +122,7 @@ export class LoadingManager {
 
     private startAnimation() {
         if (!this.timer) {
-            this.timer = setTimeout(() => this.updateLoadingState(), 40);
+            this.timer = setTimeout(() => this.updateLoadingStateOnAnimation(), 40);
         }
     }
 
@@ -96,25 +136,26 @@ export class LoadingManager {
     private update() {
         if (this.isEmpty()) {
             this.stopAnimation();
-            this.updateLoadingState();
+            this.updateLoadingStateOnAnimation();
         }
         else {
             this.startAnimation();
         }
     }
 
-    private updateLoadingState() {
+    private updateLoadingStateOnAnimation() {
         const ranges: Range[] = [];
 
-        for (const [uri, stateMap] of this.state.entries()) {
+        for (const [uri, stateSet] of this.state.entries()) {
             const editor = new TextEditorReference(uri).getTextEditorWhenActive();
 
             if (!editor) {
                 continue;
             }
 
-            for (const [line, state] of stateMap.entries()) {
+            for (const state of stateSet) {
                 const start = state.index;
+                const line = state.pin.getPinLineNumber();
                 const end = Math.min(state.lineLength, start + state.highlightRange);
                 const range = new Range(new Position(line, start), new Position(line, end));
                 state.index = (state.index + 1) % (state.lineLength - 1);
@@ -125,7 +166,30 @@ export class LoadingManager {
         }
 
         if (this.timer) {
-            this.timer = setTimeout(() => this.updateLoadingState(), 40);
+            this.timer = setTimeout(() => this.updateLoadingStateOnAnimation(), 40);
         }
+    }
+
+    private updateLoadingStateOnTextChange(event: TextDocumentChangeEvent) {
+        const uri = event.document.uri.toString();
+        const stateSet = this.state.get(uri);
+
+        if (!stateSet) {
+            return;
+        }
+
+        const broken: LoadingState[] = [];
+        for (const state of stateSet) {
+            for (const change of event.contentChanges) {
+                state.pin.edit(change.range, change.text);
+                if (state.pin.isBroken()) {
+                    broken.push(state);
+                }
+            }
+        }
+        for (const value of broken) {
+            this.delete(uri, value);
+        }
+        this.update();
     }
 }
