@@ -87,12 +87,12 @@ export class KernelClient extends Client<KernelProtocol> {
 // ```
 export async function createKernelClient(container: DependencyContainer<HostServerDependency>): Promise<KernelClient> {
     const logger = container.get(Logger);
-    logger.trace('StartKernel');
+    logger.trace('ActivateKernelStart');
     const worker = new Worker(path.join(__dirname, 'kernelEntry.js'), {stdout: true, stderr: true});
     const port = new WorkerPort(worker);
     const hostServer = new HostServer(container);
     await hostServer.connect(port);
     const kernelClient = new KernelClient(port);
-    logger.trace('StartKernelFinish', {threadId: worker.threadId});
+    logger.trace('ActivateKernelFinish', {mode: 'thread', threadId: worker.threadId});
     return kernelClient;
 }

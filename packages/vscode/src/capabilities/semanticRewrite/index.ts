@@ -41,11 +41,11 @@ class SemanticRewriteExecutor {
 
     async executeCommand() {
         const logger = this.container.get(Logger);
-        logger.trace('StartSemanticRewrite', {trigger: 'command'});
+        logger.trace('Start', {trigger: 'command'});
         const editor = window.activeTextEditor;
 
         if (!editor) {
-            logger.info('SemanticRewriteAbort', {reason: 'Editor not open'});
+            logger.info('Abort', {reason: 'Editor not open'});
             return;
         }
 
@@ -70,7 +70,7 @@ class SemanticRewriteExecutor {
         }
 
         const logger = this.container.get(Logger);
-        logger.trace('StartSemanticRewrite', {trigger: 'automatic'});
+        logger.trace('Start', {trigger: 'automatic'});
 
         if (!this.isContextSuitableForAutomaticTrigger(window.activeTextEditor)) {
             return;
@@ -83,14 +83,14 @@ class SemanticRewriteExecutor {
         const logger = this.container.get(Logger);
 
         if (editor.document.lineCount > 400) {
-            logger.info('SemanticRewriteAbort', {reason: 'Document has too many lines'});
+            logger.info('Abort', {reason: 'Document has too many lines'});
             return false;
         }
 
         for (let i = 0; i < editor.document.lineCount; i++) {
             const line = editor.document.lineAt(i);
             if (line.range.end.character > 300) {
-                logger.info('SemanticRewriteAbort', {reason: 'One line has too many characters'});
+                logger.info('Abort', {reason: 'One line has too many characters'});
                 return false;
             }
         }
@@ -99,17 +99,17 @@ class SemanticRewriteExecutor {
         const language = getLanguageConfig(editor.document.languageId);
 
         if (language.isComment(hint)) {
-            logger.info('SemanticRewriteAbort', {reason: 'Hint is a comment'});
+            logger.info('Abort', {reason: 'Hint is a comment'});
             return false;
         }
 
         if (!language.endsWithIdentifier(hint)) {
-            logger.info('SemanticRewriteAbort', {reason: 'Hint does not end with an identifier'});
+            logger.info('Abort', {reason: 'Hint does not end with an identifier'});
             return false;
         }
 
         if (language.includesKeywordOnly(hint)) {
-            logger.info('SemanticRewriteAbort', {reason: 'Hint contains only keywords'});
+            logger.info('Abort', {reason: 'Hint contains only keywords'});
             return false;
         }
 

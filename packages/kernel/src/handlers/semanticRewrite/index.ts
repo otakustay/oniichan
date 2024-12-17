@@ -17,7 +17,7 @@ interface SemanticRewriteTelemetryData {
     value: string;
 }
 
-interface SemanticRewriteAbort {
+interface Abort {
     type: 'abort';
     reason: string;
 }
@@ -34,7 +34,7 @@ interface SemanticRewriteResult {
 
 export type SemanticRewriteResponse =
     | SemanticRewriteTelemetryData
-    | SemanticRewriteAbort
+    | Abort
     | SemanticRewriteResult
     | SemanticLoading;
 
@@ -70,7 +70,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         const documentContext = await this.getDocumentContext(request.documentUri);
 
         if (documentContext.type !== 'ok') {
-            logger.info('SemanticRewriteAbort', {reason: 'Editor not open'});
+            logger.info('Abort', {reason: 'Editor not open'});
             yield {type: 'abort', reason: 'Editor not open'};
             return;
         }
@@ -80,7 +80,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         const hint = lines.at(request.line)?.trim();
 
         if (!hint) {
-            logger.info('SemanticRewriteAbort', {reason: 'Current line is empty'});
+            logger.info('Abort', {reason: 'Current line is empty'});
             yield {type: 'abort', reason: 'Current line is empty'};
             return;
         }
@@ -88,7 +88,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         const language = getLanguageConfig(languageId);
 
         if (language.isComment(hint)) {
-            logger.info('SemanticRewriteAbort', {reason: 'Current line is comment'});
+            logger.info('Abort', {reason: 'Current line is comment'});
             yield {type: 'abort', reason: 'Current line is comment'};
             return;
         }
@@ -110,10 +110,10 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
                 hint,
             };
             yield {type: 'telemetryData', key: 'inputHint', value: hint};
-            logger.trace('EnhanceContext', input);
+            logger.trace('EnhanceContextStart', input);
             const snippets = await this.retrieveEnhancedContext(input);
             logger.trace('EnhanceContextFinish', snippets);
-            logger.trace('RequestModel');
+            logger.trace('RequestModelStart');
             const code = await this.api.rewrite(
                 {
                     file: request.file,

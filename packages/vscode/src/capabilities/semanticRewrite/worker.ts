@@ -48,7 +48,7 @@ export class LineWorker {
         telemetry.setTelemetryData('inputHint', hint);
 
         logger.info(
-            'RunSemanticRewrite',
+            'Run',
             {
                 documentUri: this.editorReference.getDocumentUri(),
                 line: this.pin.getPinLineNumber(),
@@ -57,7 +57,7 @@ export class LineWorker {
         );
 
         if (!editor) {
-            logger.info('SemanticRewriteAbort', {reason: 'Editor not opened'});
+            logger.info('Abort', {reason: 'Editor not opened'});
             return {type: 'abort', reason: 'Editor not opened'};
         }
 
@@ -84,12 +84,12 @@ export class LineWorker {
                 }
             }
 
-            logger.error('SemanticRewriteFail', {reason: 'No result form kernel'});
+            logger.error('Fail', {reason: 'No result form kernel'});
             throw new Error('No result form kernel');
         }
         catch (ex) {
             const reason = stringifyError(ex);
-            logger.error('SemanticRewriteFail', {reason});
+            logger.error('Fail', {reason});
             throw new Error(`Semantic rewrite failed: ${reason}`, {cause: ex});
         }
         finally {
@@ -100,7 +100,7 @@ export class LineWorker {
     private async applyRewrite(code: string, hint: string): Promise<FunctionUsageResult> {
         const logger = this.container.get(Logger);
         if (code.trim() === hint || this.signal?.aborted) {
-            logger.info('SemanticRewriteAbort', {reason: 'Trigger hint has beed overriden'});
+            logger.info('Abort', {reason: 'Trigger hint has beed overriden'});
             return {type: 'abort', reason: 'Trigger hint has beed overriden'};
         }
 
@@ -108,7 +108,7 @@ export class LineWorker {
         const range = new Range(line, 0, line, Number.MAX_SAFE_INTEGER);
         const codeTrimmed = code.replaceAll(/^\n+|\n+$/g, '');
         await this.editorReference.applyReplacementEdit(range, codeTrimmed);
-        logger.info('ApplySemanticRewrite', {line, code: codeTrimmed});
+        logger.info('Apply', {line, code: codeTrimmed});
         return {type: 'success'};
         // Format range doesn't seem to work
         // const editSuccessful = await this.editor.edit(builder => builder.replace(range, codeTrimmed));
