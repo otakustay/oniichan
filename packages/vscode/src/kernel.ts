@@ -2,7 +2,7 @@ import path from 'node:path';
 import {Worker} from 'node:worker_threads';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
 import {HostServer, HostServerDependency} from '@oniichan/host/server';
-import {Client, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
+import {Client, ClientInit, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
 
@@ -37,20 +37,17 @@ class WorkerPort implements Port {
 export class KernelClient extends Client<KernelProtocol> {
     static readonly containerKey = 'KernelClient';
 
+    private readonly logger: Logger;
+
+    constructor(port: Port, container: DependencyContainer<HostServerDependency>, init?: ClientInit) {
+        super(port, init);
+        this.logger = container.get(Logger);
+    }
+
     protected handleNotice(notice: ExecutionNotice): void {
         if (notice.action === 'log') {
             const entry = notice.payload as LogEntry;
-            switch (entry.level) {
-                case 'error':
-                    console.log(entry);
-                    break;
-                case 'warn':
-                    console.warn(entry);
-                    break;
-                default:
-                    console.log(entry);
-                    break;
-            }
+            this.logger.print(entry);
         }
     }
 }
@@ -110,7 +107,7 @@ export async function createKernelClient(container: DependencyContainer<HostServ
     const port = new WorkerPort(worker);
     const hostServer = new HostServer(container);
     await hostServer.connect(port);
-    const kernelClient = new KernelClient(port);
+    const kernelClient = new KernelClient(port, container);
     logger.trace('ActivateKernelFinish', {mode: 'thread', threadId: worker.threadId});
     return kernelClient;
 }

@@ -18,7 +18,7 @@
     "@oniichan/host": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
-    "@otakustay/ipc": "^2.3.0"
+    "@otakustay/ipc": "^2.3.1"
   },
   "devDependencies": {
     "@types/node": "20.x",

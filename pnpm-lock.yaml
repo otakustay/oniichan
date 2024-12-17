@@ -39,8 +39,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@otakustay/ipc':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       '@otakustay/text-pin':
         specifier: ^1.0.0
         version: 1.0.0
@@ -64,8 +64,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
     devDependencies:
       '@types/node':
         specifier: 20.x
@@ -95,8 +95,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       detect-port:
         specifier: ^2.1.0
         version: 2.1.0
@@ -140,8 +140,8 @@ importers:
   packages/vscode:
     dependencies:
       '@otakustay/ipc':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -195,8 +195,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@otakustay/ipc':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       '@rspack/cli':
         specifier: ^1.1.6
         version: 1.1.6(@rspack/core@1.1.6)(@types/express@4.17.21)
@@ -1134,8 +1134,8 @@ packages:
     resolution: {integrity: sha512-IIynBsoBXvZmT6sFM5atIXRnM+I2pIghx1Xh/mqWc+yWUbBQmxyDyWGqS28/RSuDYUR6cvnWGp2pCjnyOzEDCw==}
     engines: {node: '>= 18'}
 
-  '@otakustay/ipc@2.3.0':
-    resolution: {integrity: sha512-vKVcWvKEWprV3pzgpYdvTDelvYOuRQ7p9IIJsGiMFqj5G+rrd6NNuVILtyrsqeCEu92OBR5ChuhFEilbTjqi2g==}
+  '@otakustay/ipc@2.3.1':
+    resolution: {integrity: sha512-FRCx5r3tVSmavaV5V5Qjm8mEzyj5omxJJ+wQg1yZZX9N5CHCIcPjmZjN700I5wvkxrJKXiixSw7y5IuWyhi8CQ==}
     engines: {node: '>= 18'}
 
   '@otakustay/text-pin@1.0.0':
@@ -5988,7 +5988,7 @@ snapshots:
     dependencies:
       '@types/node': 22.10.2
 
-  '@otakustay/ipc@2.3.0':
+  '@otakustay/ipc@2.3.1':
     dependencies:
       '@otakustay/async-iterator': 1.1.1
       '@types/node': 22.10.2
