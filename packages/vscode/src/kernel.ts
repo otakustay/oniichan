@@ -102,6 +102,7 @@ export class KernelClient extends Client<KernelProtocol> {
 //     }
 // }
 // ```
+
 export async function createKernelClient(container: DependencyContainer<HostServerDependency>): Promise<KernelClient> {
     const logger = container.get(Logger);
     logger.trace('ActivateKernelStart');

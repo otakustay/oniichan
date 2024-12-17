@@ -30,13 +30,27 @@ export abstract class Logger {
         this.functionName = functionName;
     }
 
-    abstract trace(action: string, detail?: Record<string, any>): void;
+    trace(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('trace', action, detail);
+        this.print(entry);
+    }
 
-    abstract info(action: string, detail?: Record<string, any>): void;
+    info(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('info', action, detail);
+        this.print(entry);
+    }
 
-    abstract warn(action: string, detail?: Record<string, any>): void;
+    warn(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('warn', action, detail);
+        this.print(entry);
+    }
 
-    abstract error(action: string, detail?: Record<string, any>): void;
+    error(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('error', action, detail);
+        this.print(entry);
+    }
+
+    abstract print(entry: LogEntry): void;
 
     abstract with(override: LoggerScope): Logger;
 
@@ -83,31 +97,17 @@ export class ConsoleLogger extends Logger {
         );
     }
 
-    toScope(): LoggerScope {
-        return {
-            source: this.source,
-            taskId: this.taskId,
-            functionName: this.functionName,
-        };
-    }
-
-    trace(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('trace', action, detail);
-        console.log(entry);
-    }
-
-    info(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('info', action, detail);
-        console.info(entry);
-    }
-
-    warn(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('warn', action, detail);
-        console.warn(entry);
-    }
-
-    error(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('error', action, detail);
-        console.error(entry);
+    print(entry: LogEntry): void {
+        switch (entry.level) {
+            case 'error':
+                console.log(entry);
+                break;
+            case 'warn':
+                console.warn(entry);
+                break;
+            default:
+                console.log(entry);
+                break;
+        }
     }
 }

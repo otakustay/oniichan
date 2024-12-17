@@ -12,24 +12,8 @@ class HandlerLogger extends Logger {
         this.sendNotice = sendNotice;
     }
 
-    trace(action: string, detail?: Record<string, any>): void {
-        const entry = this.createEntry('trace', action, detail);
-        this.send(entry);
-    }
-
-    info(action: string, detail?: Record<string, any>): void {
-        const entry = this.createEntry('info', action, detail);
-        this.send(entry);
-    }
-
-    warn(action: string, detail?: Record<string, any>): void {
-        const entry = this.createEntry('warn', action, detail);
-        this.send(entry);
-    }
-
-    error(action: string, detail?: Record<string, any>): void {
-        const entry = this.createEntry('error', action, detail);
-        this.send(entry);
+    print(entry: LogEntry): void {
+        this.sendNotice('log', entry);
     }
 
     with(override: LoggerScope): Logger {
@@ -39,10 +23,6 @@ class HandlerLogger extends Logger {
             override.taskId ?? this.taskId,
             override.functionName ?? this.functionName
         );
-    }
-
-    private send(entry: LogEntry) {
-        this.sendNotice('log', entry);
     }
 }
 

@@ -1,15 +1,18 @@
 import {ExtensionContext} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {ConsoleLogger, Logger} from '@oniichan/shared/logger';
+import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/host/ui/loading';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {OpenDataFolderCommand} from './capabilities/debug';
 import {WebApp} from './capabilities/web';
 import {createKernelClient, KernelClient} from './kernel';
+import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 
 export async function activate(context: ExtensionContext) {
-    const serverHostContainer = new DependencyContainer()
-        .bind(Logger, () => new ConsoleLogger('Extension'), {singleton: true})
+    const outputContainer = new DependencyContainer()
+        .bind(OutputChannelProvider, () => new OutputChannelProvider(), {singleton: true});
+    const serverHostContainer = outputContainer
+        .bind(Logger, () => new OutputLogger(outputContainer, 'Extension'), {singleton: true})
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
     const kernel = await createKernelClient(serverHostContainer);
