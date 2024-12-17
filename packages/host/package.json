@@ -17,12 +17,12 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/vscode": "^1.95.0",
-    "@types/node": "20.x"
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0"
   },
   "dependencies": {
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.2.0",
+    "@otakustay/ipc": "^2.3.0",
     "@otakustay/text-pin": "^1.0.0"
   }
 }

@@ -3,7 +3,7 @@ import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc
 import {EditorHost, KernelServer} from '@oniichan/kernel';
 import {Protocol as HostProtocol} from '@oniichan/host/server';
 import {stringifyError} from '@oniichan/shared/string';
-import {Logger} from '@oniichan/shared/logger';
+import {ConsoleLogger} from '@oniichan/shared/logger';
 
 class WorkerPort implements Port {
     private readonly port: MessagePort;
@@ -42,7 +42,7 @@ async function main() {
         const port = new WorkerPort();
         const hostClient = new Client<HostProtocol>(port);
         const editorHost = new EditorHost(hostClient);
-        const logger = new Logger('Kernel');
+        const logger = new ConsoleLogger('Kernel');
         const server = new KernelServer(editorHost, logger);
         await server.connect(port);
     }

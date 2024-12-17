@@ -2,9 +2,9 @@ import path from 'node:path';
 import {Worker} from 'node:worker_threads';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
 import {HostServer, HostServerDependency} from '@oniichan/host/server';
-import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
+import {Client, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {Logger} from '@oniichan/shared/logger';
+import {LogEntry, Logger} from '@oniichan/shared/logger';
 
 class WorkerPort implements Port {
     private readonly worker: Worker;
@@ -36,6 +36,23 @@ class WorkerPort implements Port {
 
 export class KernelClient extends Client<KernelProtocol> {
     static readonly containerKey = 'KernelClient';
+
+    protected handleNotice(notice: ExecutionNotice): void {
+        if (notice.action === 'log') {
+            const entry = notice.payload as LogEntry;
+            switch (entry.level) {
+                case 'error':
+                    console.log(entry);
+                    break;
+                case 'warn':
+                    console.warn(entry);
+                    break;
+                default:
+                    console.log(entry);
+                    break;
+            }
+        }
+    }
 }
 
 // By now we run kernel in a worker thread in the same process as VSCode extension,

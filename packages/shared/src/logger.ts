@@ -9,20 +9,20 @@ export interface LogEntry {
     detail?: Record<string, any>;
 }
 
-export interface LoggerOverride {
+export interface LoggerScope {
     source?: string;
     taskId?: string;
     functionName?: string;
 }
 
-export class Logger {
+export abstract class Logger {
     static containerKey = 'Logger' as const;
 
-    private readonly source: string;
+    protected readonly source: string;
 
-    private readonly taskId?: string;
+    protected readonly taskId?: string;
 
-    private readonly functionName?: string;
+    protected readonly functionName?: string;
 
     constructor(source?: string, taskId?: string, functionName?: string) {
         this.source = source || 'Unknown';
@@ -30,35 +30,25 @@ export class Logger {
         this.functionName = functionName;
     }
 
-    with(override: LoggerOverride): Logger {
-        return new Logger(
-            override.source ?? this.source,
-            override.taskId ?? this.taskId,
-            override.functionName ?? this.functionName
-        );
+    abstract trace(action: string, detail?: Record<string, any>): void;
+
+    abstract info(action: string, detail?: Record<string, any>): void;
+
+    abstract warn(action: string, detail?: Record<string, any>): void;
+
+    abstract error(action: string, detail?: Record<string, any>): void;
+
+    abstract with(override: LoggerScope): Logger;
+
+    toScope(): LoggerScope {
+        return {
+            source: this.source,
+            taskId: this.taskId,
+            functionName: this.functionName,
+        };
     }
 
-    trace(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('trace', action, detail);
-        console.log(entry);
-    }
-
-    info(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('info', action, detail);
-        console.info(entry);
-    }
-
-    warn(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('warn', action, detail);
-        console.warn(entry);
-    }
-
-    error(action: string, detail?: Record<string, any>) {
-        const entry = this.createEntry('error', action, detail);
-        console.error(entry);
-    }
-
-    private createEntry(level: LogLevel, action: string, detail?: Record<string, any>): LogEntry {
+    protected createEntry(level: LogLevel, action: string, detail?: Record<string, any>): LogEntry {
         const source = this.source;
         const entry: LogEntry = {
             level,
@@ -81,5 +71,43 @@ export class Logger {
         }
 
         return entry;
+    }
+}
+
+export class ConsoleLogger extends Logger {
+    with(override: LoggerScope): Logger {
+        return new ConsoleLogger(
+            override.source ?? this.source,
+            override.taskId ?? this.taskId,
+            override.functionName ?? this.functionName
+        );
+    }
+
+    toScope(): LoggerScope {
+        return {
+            source: this.source,
+            taskId: this.taskId,
+            functionName: this.functionName,
+        };
+    }
+
+    trace(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('trace', action, detail);
+        console.log(entry);
+    }
+
+    info(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('info', action, detail);
+        console.info(entry);
+    }
+
+    warn(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('warn', action, detail);
+        console.warn(entry);
+    }
+
+    error(action: string, detail?: Record<string, any>) {
+        const entry = this.createEntry('error', action, detail);
+        console.error(entry);
     }
 }

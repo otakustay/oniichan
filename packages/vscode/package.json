@@ -124,7 +124,7 @@
     "esbuild": "^0.24.0"
   },
   "dependencies": {
-    "@otakustay/ipc": "^2.2.0",
+    "@otakustay/ipc": "^2.3.0",
     "open": "^10.1.0"
   }
 }
