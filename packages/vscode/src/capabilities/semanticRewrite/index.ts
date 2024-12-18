@@ -8,6 +8,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/host/ui/loading';
 import {KernelClient} from '../../kernel';
 import {LineWorker} from './worker';
+import {TaskManager} from '@oniichan/host/utils/task';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     const changedText = event.contentChanges.at(-1)?.text ?? '';
@@ -18,6 +19,7 @@ interface Dependency {
     [Logger.containerKey]: Logger;
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
+    [TaskManager.containerKey]: TaskManager;
 }
 
 class SemanticRewriteExecutor {
@@ -117,24 +119,31 @@ class SemanticRewriteExecutor {
     }
 
     private async startWorker(editor: TextEditor, line: number, telemetry: FunctionUsageTelemetry) {
-        const container = this.container.bind('Telemetry', () => telemetry);
-        const worker = new LineWorker(
-            editor.document,
-            line,
-            container
+        const taskManager = this.container.get(TaskManager);
+        await taskManager.runTask(
+            telemetry.getUuid(),
+            this.container,
+            async taskContainer => {
+                const container = taskContainer.bind('Telemetry', () => telemetry);
+                const worker = new LineWorker(
+                    editor.document,
+                    line,
+                    container
+                );
+
+                const uri = editor.document.uri.toString();
+                const workers = this.tracks.get(uri) ?? new Set();
+                this.tracks.set(uri, workers);
+
+                workers.add(worker);
+                await worker.run().catch(() => {});
+                workers.delete(worker);
+            }
         );
-
-        const uri = editor.document.uri.toString();
-        const workers = this.tracks.get(uri) ?? new Set();
-        this.tracks.set(uri, workers);
-
-        workers.add(worker);
-        await worker.run().catch(() => {});
-        workers.delete(worker);
     }
 
     private async executeSemanticRewrite(editor: TextEditor, trigger: string) {
-        const telemetry = new FunctionUsageTelemetry(this.taskId, 'semanticRewrite', {trigger});
+        const telemetry = new FunctionUsageTelemetry(this.taskId, 'SemanticRewrite', {trigger});
         telemetry.setTelemetryData('trigger', trigger);
         await this.startWorker(editor, editor.selection.active.line, telemetry);
     }

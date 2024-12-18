@@ -7,12 +7,14 @@ import {OpenDataFolderCommand} from './capabilities/debug';
 import {WebApp} from './capabilities/web';
 import {createKernelClient, KernelClient} from './kernel';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
+import {TaskManager} from '@oniichan/host/utils/task';
 
 export async function activate(context: ExtensionContext) {
-    const outputContainer = new DependencyContainer()
-        .bind(OutputChannelProvider, () => new OutputChannelProvider(), {singleton: true});
-    const serverHostContainer = outputContainer
-        .bind(Logger, () => new OutputLogger(outputContainer, 'Extension'), {singleton: true})
+    const baseContainer = new DependencyContainer()
+        .bind(OutputChannelProvider, () => new OutputChannelProvider(), {singleton: true})
+        .bind(TaskManager, () => new TaskManager(), {singleton: true});
+    const serverHostContainer = baseContainer
+        .bind(Logger, () => new OutputLogger(baseContainer, 'Extension'), {singleton: true})
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
     const kernel = await createKernelClient(serverHostContainer);

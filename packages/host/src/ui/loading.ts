@@ -11,6 +11,7 @@ import {
 } from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import {TextEditorReference} from '../utils/editor';
+import {DisposableAbortSignal} from '../utils/task';
 
 const decorationOptions: DecorationRenderOptions = {
     overviewRulerColor: new ThemeColor('editorOverviewRuler.infoForeground'),
@@ -42,12 +43,12 @@ export class LoadingManager implements Disposable {
         this.disposables.push(change);
     }
 
-    add(documentUri: string, line: number | LinePin): AbortSignal {
+    add(documentUri: string, line: number | LinePin): DisposableAbortSignal {
         const editorReference = new TextEditorReference(documentUri);
         const editor = editorReference.getTextEditorWhenActive();
 
         if (!editor) {
-            return AbortSignal.abort('Editor not open');
+            return new DisposableAbortSignal(AbortSignal.abort('Editor not open'), () => {});
         }
 
         const map = this.getStateSet(editor.document.uri.toString());
@@ -62,7 +63,7 @@ export class LoadingManager implements Disposable {
         map.add(state);
 
         this.startAnimation();
-        return state.controller.signal;
+        return new DisposableAbortSignal(state.controller.signal, () => this.delete(documentUri, state));
     }
 
     remove(documentUri: string, line: number) {

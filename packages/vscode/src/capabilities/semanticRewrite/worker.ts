@@ -7,12 +7,14 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {TextEditorReference} from '@oniichan/host/utils/editor';
 import {LoadingManager} from '@oniichan/host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';
+import {TaskContext} from '@oniichan/host/utils/task';
 import {KernelClient} from '../../kernel';
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
+    [TaskContext.containerKey]: TaskContext;
     Telemetry: FunctionUsageTelemetry;
 }
 
@@ -71,9 +73,13 @@ export class LineWorker {
             const kernel = this.container.get(KernelClient);
             for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
                 switch (entry.type) {
-                    case 'loading':
-                        this.signal = loadingManager.add(this.editorReference.getDocumentUri(), this.pin);
+                    case 'loading': {
+                        const disposable = loadingManager.add(this.editorReference.getDocumentUri(), this.pin);
+                        this.signal = disposable.signal;
+                        const taskContext = this.container.get(TaskContext);
+                        taskContext.addDisposable(disposable);
                         break;
+                    }
                     case 'telemetryData':
                         telemetry.setTelemetryData(entry.key, entry.value);
                         break;
@@ -91,9 +97,6 @@ export class LineWorker {
             const reason = stringifyError(ex);
             logger.error('Fail', {reason});
             throw new Error(`Semantic rewrite failed: ${reason}`, {cause: ex});
-        }
-        finally {
-            loadingManager.remove(this.editorReference.getDocumentUri(), this.pin.getPinLineNumber());
         }
     }
 

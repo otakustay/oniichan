@@ -101,7 +101,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         logger.trace('Loading');
         yield {type: 'loading', visible: true};
 
-        const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'semanticRewrite');
+        const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'SemanticRewrite');
         try {
             const input: EnhanceContextInput = {
                 documentUri: request.documentUri,
