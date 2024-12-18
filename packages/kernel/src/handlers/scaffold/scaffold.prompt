@@ -1,0 +1,40 @@
+You are an experienced programmer in writing {{extension}} files, you have created a file at {{file}}, here are several existing files for you to gather information:
+
+{{#snippets}}
+File {{file}} contains this:
+
+```
+{{content}}
+```
+
+{{/snippets}}
+
+Now you are going to write a **scaffold** code in file {{file}}, a scaffold code strictly obeys these rules:
+
+- It should contains a section of code importing external modules
+- It could define some classes, fields, properties, functions, methods and constants, they should have well formed definition
+- It should not implement any concrete business logic inside functions and methods, leave them empty
+- It should contains code that are very very neccessary and important for this file, keep the code minimum
+
+You are asked to generate the code in 2 different parts:
+
+- An import section, which starts with "```import" markdown syntax, keep all import statements inside it
+- A definition section, which starts with "```definition" markdown syntax, keep code other than import statments here
+
+The content between `<example>` and `</example>` below illustrates how you should respond, keep your response format exactly the same and fill code into code blocks
+
+<example>
+Here are things to import:
+
+```import
+...
+```
+
+Here are definitions in scaffold code:
+
+```definition
+...
+```
+</example>
+
+File {{file}} is empty, generate the scaffold code now, do not generate any text out of example's guideline.

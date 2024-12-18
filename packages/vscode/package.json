@@ -25,6 +25,12 @@
         "enablement": "!editorHasMultipleSelections && !editorReadonly && !isInDiffEditor"
       },
       {
+        "command": "oniichan.scaffold",
+        "title": "Generate Scaffold Code",
+        "category": "Oniichan",
+        "enablement": "!editorReadonly && !isInDiffEditor"
+      },
+      {
         "command": "oniichan.openDataFolder",
         "title": "Open Oniichan Data Folder",
         "category": "Oniichan"

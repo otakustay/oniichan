@@ -66,7 +66,7 @@ export class TaskContext implements Disposable {
     }
 }
 
-type TaskContainer<D> = DependencyContainer<D & Record<typeof TaskContext.containerKey, TaskContext>>;
+export type TaskContainer<D> = DependencyContainer<D & Record<typeof TaskContext.containerKey, TaskContext>>;
 
 type Task<D extends DependencyBase> = (container: TaskContainer<D>) => Promise<void>;
 

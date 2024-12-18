@@ -62,7 +62,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
 
     constructor(port: Port, request: ExecutionRequest, context: Context) {
         super(port, request, context);
-        this.api = new SemanticRewriteApi(context.editorHost);
+        this.api = new SemanticRewriteApi(this.getTaskId(), context.editorHost);
     }
 
     async *handleRequest(request: SemanticRewriteRequest): AsyncIterable<SemanticRewriteResponse> {
@@ -136,7 +136,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
 
     private async getDocumentContext(documentUri: string): Promise<GetContextOk | GetContextFail> {
         try {
-            const document = this.context.editorHost.getDocument(documentUri);
+            const document = this.context.editorHost.getDocument(documentUri, this.getTaskId());
             const [text, languageId] = await Promise.all([document.getText(), document.getLanguageId()]);
 
             return {
@@ -152,7 +152,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
 
     private async retrieveEnhancedContext(input: EnhanceContextInput): Promise<EnhancedContextSnippet[]> {
         try {
-            const document = this.context.editorHost.getDocument(input.documentUri);
+            const document = this.context.editorHost.getDocument(input.documentUri, this.getTaskId());
             const language = getLanguageConfig(input.languageId);
             if (language.endsWithIdentifier(input.hint)) {
                 return [];

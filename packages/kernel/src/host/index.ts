@@ -2,6 +2,7 @@ import {Client} from '@otakustay/ipc';
 import {Protocol} from '@oniichan/host/server';
 import {EditorDocumentHost} from './document';
 import {ModelAccessHost} from './model';
+import {WorkspaceHost} from './workspace';
 
 export class EditorHost {
     private readonly client: Client<Protocol>;
@@ -16,5 +17,9 @@ export class EditorHost {
 
     getModelAccess(taskId?: string) {
         return new ModelAccessHost(taskId, this.client);
+    }
+
+    getWorkspace(taskId?: string) {
+        return new WorkspaceHost(taskId, this.client);
     }
 }

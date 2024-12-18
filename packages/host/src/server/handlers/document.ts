@@ -1,5 +1,5 @@
-import {RequestHandler} from '@otakustay/ipc';
 import {Diagnostic, DiagnosticSeverity, languages, Uri, window} from 'vscode';
+import {RequestHandler} from '@otakustay/ipc';
 import {Context} from '../interface';
 
 export class GetDocumentTextHandler extends RequestHandler<string, string, Context> {

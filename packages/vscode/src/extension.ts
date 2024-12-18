@@ -8,6 +8,7 @@ import {WebApp} from './capabilities/web';
 import {createKernelClient, KernelClient} from './kernel';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {TaskManager} from '@oniichan/host/utils/task';
+import {ScaffoldCommand} from './capabilities/scaffold';
 
 export async function activate(context: ExtensionContext) {
     const baseContainer = new DependencyContainer()
@@ -24,7 +25,8 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         new SemanticRewriteCommand(globalContainer),
         new OpenDataFolderCommand(),
-        new WebApp(globalContainer)
+        new WebApp(globalContainer),
+        new ScaffoldCommand(globalContainer)
     );
     const logger = globalContainer.get(Logger);
     logger.trace('ExtensionActivated');

@@ -1,13 +1,14 @@
 import {ProtocolOf, Server} from '@otakustay/ipc';
 import {Logger} from '@oniichan/shared/logger';
+import {EditorHost} from './host';
 import {EchoHandler} from './handlers/echo';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {Context} from './handlers/handler';
-import {EditorHost} from './host';
+import {ScaffoldHandler} from './handlers/scaffold';
 
 export {EditorHost};
 
-export type Protocol = ProtocolOf<typeof EchoHandler | typeof SemanticRewriteHandler>;
+export type Protocol = ProtocolOf<typeof EchoHandler | typeof SemanticRewriteHandler | typeof ScaffoldHandler>;
 
 export class KernelServer extends Server<Protocol, Context> {
     private readonly editorHost: EditorHost;
@@ -26,7 +27,9 @@ export class KernelServer extends Server<Protocol, Context> {
     protected initializeHandlers(): void {
         this.registerHandler(EchoHandler);
         this.registerHandler(SemanticRewriteHandler);
+        this.registerHandler(ScaffoldHandler);
     }
 }
 
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
+export type {ScaffoldRequest, ScaffoldResponse} from './handlers/scaffold';

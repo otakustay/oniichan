@@ -3,23 +3,24 @@ import {ChatMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../../host';
-import rewriteTemplate from './rewrite.prompt';
+import rewriteTemplate from './scaffold.prompt';
 
-export interface EnhancedContextSnippet {
-    label: string;
-    title: string;
+export interface ScaffoldSnippet {
+    path: string;
     content: string;
 }
 
-export interface SemanticRewritePayload {
+interface ScaffoldPayload {
     file: string;
-    codeBefore: string;
-    codeAfter: string;
-    hint: string;
-    snippets: EnhancedContextSnippet[];
+    snippets: ScaffoldSnippet[];
 }
 
-export class SemanticRewriteApi {
+interface ScaffoldResult {
+    importSection: string;
+    definitionSection: string;
+}
+
+export class ScaffoldApi {
     private readonly taskId: string;
 
     private readonly editorHost: EditorHost;
@@ -29,16 +30,13 @@ export class SemanticRewriteApi {
         this.editorHost = editorHost;
     }
 
-    async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
-        const {file, codeBefore, codeAfter, hint, snippets} = paylod;
+    async generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): Promise<ScaffoldResult> {
+        const {file, snippets} = paylod;
         const model = this.editorHost.getModelAccess(this.taskId);
         const prompt = renderPrompt(
             rewriteTemplate,
             {
                 file,
-                codeBefore,
-                codeAfter,
-                hint,
                 snippets,
                 extension: path.extname(file),
             }
@@ -48,12 +46,20 @@ export class SemanticRewriteApi {
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
         const text = await model.chat(messages, modelTelemetry);
+        return {
+            importSection: this.extractCodeBlock(text, 'import'),
+            definitionSection: this.extractCodeBlock(text, 'definition'),
+        };
+    }
 
-        const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
-        const codeBlocks = text.match(codeBlockRegex);
-        const code = codeBlocks
-            ? codeBlocks.map(block => block.replace(/```(?:\w+\n)?|```/g, '')).join('\n')
-            : text;
-        return code;
+    private extractCodeBlock(text: string, tag: string) {
+        const start = text.indexOf('```' + tag);
+
+        if (start < 0) {
+            return '';
+        }
+
+        const end = text.indexOf('```', start + 3 + tag.length);
+        return text.slice(start + 3 + tag.length, end < 0 ? text.length : end).trim();
     }
 }

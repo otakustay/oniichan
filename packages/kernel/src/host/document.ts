@@ -2,8 +2,6 @@ import {Protocol} from '@oniichan/host/server';
 import {Client} from '@otakustay/ipc';
 import {newUuid} from '@oniichan/shared/id';
 
-// TODO: Maybe it's better to have the same `taskId` for all requests in one business session
-
 export class EditorDocumentHost {
     private readonly taskId: string | undefined;
 
