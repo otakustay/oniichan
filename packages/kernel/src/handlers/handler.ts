@@ -35,14 +35,18 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
     static functionName?: string;
 
     constructor(port: Port, request: ExecutionRequest, context: Context) {
-        const {source, functionName} = context.logger.toScope();
         const sendNotice: SendNotice = (action: string, payload?: any) => this.notify(action, payload);
         super(
             port,
             request,
             {
                 editorHost: context.editorHost,
-                logger: new HandlerLogger(sendNotice, source, request.taskId, functionName),
+                logger: new HandlerLogger(
+                    sendNotice,
+                    new.target.name,
+                    request.taskId,
+                    new.target.functionName ?? new.target.name.replace(/Handler$/, '')
+                ),
             }
         );
     }
