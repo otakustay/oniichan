@@ -19,17 +19,13 @@ interface ScaffoldAbort {
     reason: string;
 }
 
-interface ScaffoldImportSection {
-    type: 'importSection';
+interface ScaffoldCode {
+    type: 'code';
+    section: 'import' | 'definition';
     code: string;
 }
 
-interface ScaffoldDefinitionSection {
-    type: 'definitionSection';
-    code: string;
-}
-
-export type ScaffoldResponse = ScaffoldLoading | ScaffoldAbort | ScaffoldImportSection | ScaffoldDefinitionSection;
+export type ScaffoldResponse = ScaffoldLoading | ScaffoldAbort | ScaffoldCode;
 
 interface ScaffoldSnippet {
     path: string;
@@ -69,16 +65,21 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'Scaffold');
         const api = new ScaffoldApi(this.getTaskId(), this.context.editorHost);
         logger.trace('RequestModelStart');
-        const output = await api.generate({file: relativePath, snippets}, telemetry);
-        logger.trace('RequestModelFinish', output);
-        yield {
-            type: 'importSection',
-            code: output.importSection,
+        const output = {
+            importSection: '',
+            definitionSection: '',
         };
-        yield {
-            type: 'definitionSection',
-            code: output.definitionSection,
-        };
+        for await (const chunk of api.generate({file: relativePath, snippets}, telemetry)) {
+            yield {type: 'code', section: chunk.section, code: chunk.code};
+
+            if (chunk.section === 'import') {
+                output.importSection += chunk.code;
+            }
+            else {
+                output.definitionSection += chunk.code;
+            }
+        }
+        logger.trace('RequestModelFinish');
     }
 
     private getRelativePath(workspaceRoot: string, documentUri: string) {

@@ -4,6 +4,7 @@ import {newUuid} from '@oniichan/shared/id';
 import {ChatMessagePayload, createModelClient, ModelClient} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {ModelConfiguration} from '@oniichan/shared/model';
+import {CodeResult, streamingExtractCode} from './extract';
 
 export function isModelConfigurationValid(config: ModelConfiguration) {
     return !!(config.apiKey && config.baseUrl && config.modelName);
@@ -26,6 +27,39 @@ export class ModelAccessHost {
         telemetry.setResponse(response, meta);
         void telemetry.record();
         return response;
+    }
+
+    async *chatStreaming(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): AsyncIterable<string> {
+        const client = await this.createModelClient();
+        telemetry.setRequest(messages);
+        const chunks = [];
+        for await (const chunk of client.chatStreaming(messages)) {
+            if (typeof chunk === 'string') {
+                chunks.push(chunk);
+                yield chunk;
+            }
+            else {
+                telemetry.setResponse(chunks.join(''), chunk);
+            }
+        }
+    }
+
+    async *codeStreaming(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): AsyncIterable<CodeResult> {
+        const client = await this.createModelClient();
+        const chunks = [];
+        for await (const chunk of streamingExtractCode(client.chatStreaming(messages))) {
+            switch (chunk.type) {
+                case 'code':
+                    yield chunk.value;
+                    break;
+                case 'chunk':
+                    chunks.push(chunk.value);
+                    break;
+                case 'other':
+                    telemetry.setResponse(chunks.join(''), chunk.value);
+                    break;
+            }
+        }
     }
 
     private async createModelClient(triggerUserConfigure = true): Promise<ModelClient> {

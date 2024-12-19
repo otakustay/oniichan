@@ -3,7 +3,7 @@ import {ChatMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../../host';
-import rewriteTemplate from './scaffold.prompt';
+import scaffoldTemplate from './scaffold.prompt';
 
 export interface ScaffoldSnippet {
     path: string;
@@ -16,8 +16,8 @@ interface ScaffoldPayload {
 }
 
 interface ScaffoldResult {
-    importSection: string;
-    definitionSection: string;
+    section: 'import' | 'definition';
+    code: string;
 }
 
 export class ScaffoldApi {
@@ -30,11 +30,11 @@ export class ScaffoldApi {
         this.editorHost = editorHost;
     }
 
-    async generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): Promise<ScaffoldResult> {
+    async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ScaffoldResult> {
         const {file, snippets} = paylod;
         const model = this.editorHost.getModelAccess(this.taskId);
         const prompt = renderPrompt(
-            rewriteTemplate,
+            scaffoldTemplate,
             {
                 file,
                 snippets,
@@ -45,21 +45,19 @@ export class ScaffoldApi {
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        const text = await model.chat(messages, modelTelemetry);
-        return {
-            importSection: this.extractCodeBlock(text, 'import'),
-            definitionSection: this.extractCodeBlock(text, 'definition'),
-        };
-    }
-
-    private extractCodeBlock(text: string, tag: string) {
-        const start = text.indexOf('```' + tag);
-
-        if (start < 0) {
-            return '';
+        for await (const chunk of model.codeStreaming(messages, modelTelemetry)) {
+            if (chunk.tag === 'import') {
+                yield {
+                    section: 'import',
+                    code: chunk.content,
+                };
+            }
+            else if (chunk.tag === 'definition') {
+                yield {
+                    section: 'definition',
+                    code: chunk.content,
+                };
+            }
         }
-
-        const end = text.indexOf('```', start + 3 + tag.length);
-        return text.slice(start + 3 + tag.length, end < 0 ? text.length : end).trim();
     }
 }

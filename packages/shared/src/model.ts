@@ -1,5 +1,3 @@
-// import {AsyncIteratorController} from '@otakustay/async-iterator';
-// import {createParser, EventSourceMessage} from 'eventsource-parser';
 import {Anthropic} from '@anthropic-ai/sdk';
 import OpenAi from 'openai';
 
@@ -7,41 +5,6 @@ export interface ChatMessagePayload {
     role: 'user' | 'assistant';
     content: string;
 }
-
-// async function fireEventSourceRequest<T>(messages: Anthropic.MessageParam[], controller: AsyncIteratorController<T>) {
-//     const params: Anthropic.MessageCreateParams = {
-//         model: 'claude-3-5-sonnet-latest',
-//         max_tokens: 100,
-//         messages,
-//         stream: true,
-//     };
-//     const stream = await client.messages.create(params);
-
-//     const onEvent = (event: EventSourceMessage) => {
-//         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-//         controller.put(JSON.parse(event.data));
-//     };
-//     const parser = createParser({onEvent});
-//     const decoder = new TextDecoder('utf-8');
-//     const reader = stream.toReadableStream().getReader();
-
-//     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-//     while (true) {
-//         const result = await reader.read();
-
-//         if (result.done) {
-//             break;
-//         }
-
-//         parser.feed(decoder.decode(result.value as Uint8Array));
-//     }
-// }
-
-// export function chatStream(messages: ChatMessagePayload[]) {
-//     const controller = new AsyncIteratorController();
-//     fireEventSourceRequest(messages, controller).catch((ex: unknown) => controller.error(ex));
-//     return controller.toIterable();
-// }
 
 export type ModelApiStyle = 'OpenAI' | 'Anthropic';
 
@@ -77,7 +40,16 @@ export interface ModelResponseMeta {
 }
 
 export interface ModelClient {
-    chat: (messages: ChatMessagePayload[]) => Promise<[string, ModelResponseMeta]>;
+    chat(messages: ChatMessagePayload[]): Promise<[string, ModelResponseMeta]>;
+    chatStreaming(messages: ChatMessagePayload[]): AsyncIterable<string | ModelResponseMeta>;
+}
+
+function addUsage(x: number | null, y: number | null | undefined) {
+    if (typeof y !== 'number') {
+        return x;
+    }
+
+    return (x ?? 0) + y;
 }
 
 export function createModelClient(config: ModelConfiguration): ModelClient {
@@ -88,7 +60,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
     if (apiStyle === 'Anthropic') {
         const client = new Anthropic({apiKey, baseURL: baseUrl});
         return {
-            chat: async messages => {
+            async chat(messages) {
                 const params: Anthropic.MessageCreateParams = {
                     messages,
                     model: modelName,
@@ -106,17 +78,46 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                     },
                 ];
             },
+            async *chatStreaming(messages) {
+                const options = {
+                    messages,
+                    model: modelName,
+                    max_tokens: 1000,
+                    stream: true,
+                } as const;
+                const stream = await client.messages.create(options);
+                const meta: ModelResponseMeta = {
+                    model: modelName,
+                    usage: {
+                        inputTokens: 0,
+                        outputTokens: 0,
+                    },
+                };
+                for await (const chunk of stream) {
+                    if (chunk.type === 'message_start') {
+                        meta.usage.inputTokens = chunk.message.usage.input_tokens;
+                        meta.usage.outputTokens = chunk.message.usage.output_tokens;
+                    }
+                    else if (chunk.type === 'message_delta') {
+                        addUsage(meta.usage.outputTokens, chunk.usage.output_tokens);
+                    }
+                    else if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+                        yield chunk.delta.text;
+                    }
+                }
+            },
         };
     }
     else {
         const client = new OpenAi({apiKey, baseURL: baseUrl});
         return {
-            chat: async messages => {
-                const response = await client.chat.completions.create({
+            async chat(messages) {
+                const options = {
                     messages,
                     model: modelName,
                     max_tokens: 1000,
-                });
+                } as const;
+                const response = await client.chat.completions.create(options);
                 return [
                     response.choices[0]?.message?.content ?? '',
                     {
@@ -127,6 +128,33 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                         },
                     },
                 ];
+            },
+            async *chatStreaming(messages) {
+                const options = {
+                    messages,
+                    model: modelName,
+                    max_tokens: 1000,
+                    stream: true,
+                } as const;
+                const stream = await client.chat.completions.create(options);
+                const meta: ModelResponseMeta = {
+                    model: modelName,
+                    usage: {
+                        inputTokens: 0,
+                        outputTokens: 0,
+                    },
+                };
+                for await (const chunk of stream) {
+                    const text = chunk.choices[0]?.delta.content ?? '';
+                    if (text) {
+                        if (meta.usage.inputTokens === null && typeof chunk.usage?.prompt_tokens === 'number') {
+                            meta.usage.inputTokens = chunk.usage.prompt_tokens;
+                        }
+                        meta.usage.outputTokens = addUsage(meta.usage.outputTokens, chunk.usage?.completion_tokens);
+                        yield text;
+                    }
+                }
+                yield meta;
             },
         };
     }

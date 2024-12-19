@@ -19,6 +19,8 @@ export interface Dependency {
 export class ScaffoldExecutor {
     private readonly container: TaskContainer<Dependency>;
 
+    private stage: 'context' | 'loading' | 'import' | 'definition' | 'finish' = 'context';
+
     constructor(container: TaskContainer<Dependency>) {
         const logger = container.get(Logger);
         const context = container.get(TaskContext);
@@ -57,16 +59,15 @@ export class ScaffoldExecutor {
         for await (const entry of kernel.callStreaming(context.getTaskId(), 'scaffold', request)) {
             switch (entry.type) {
                 case 'loading':
+                    this.stage = 'loading';
                     await this.showLoading(editorReference);
                     break;
                 case 'abort':
+                    this.stage = 'finish';
                     window.showInformationMessage(`We aborted scaffold generation due to this: ${entry.reason}`);
                     return;
-                case 'importSection':
-                    await editor.edit(builder => builder.insert(new Position(Infinity, 0), entry.code));
-                    break;
-                case 'definitionSection':
-                    await editor.edit(builder => builder.insert(new Position(Infinity, 0), '\n\n' + entry.code));
+                case 'code':
+                    await this.writeCode(editor, entry.section, entry.code);
                     break;
             }
         }
@@ -96,7 +97,10 @@ export class ScaffoldExecutor {
 
         const language = getLanguageConfig(editor.document.languageId);
         const loadingComment = language.toSingleLineComment(LOADING_TEXT);
-        await editor.edit(builder => builder.insert(new Position(0, 0), loadingComment + '\n'));
+        await editor.edit(
+            builder => builder.insert(new Position(0, 0), loadingComment + '\n'),
+            {undoStopAfter: false, undoStopBefore: true}
+        );
 
         const loadingManager = this.container.get(LoadingManager);
         const disposable = loadingManager.add(editorReference.getDocumentUri(), 0);
@@ -120,7 +124,26 @@ export class ScaffoldExecutor {
         }
 
         if (editor.document.lineAt(0).text.includes(LOADING_TEXT)) {
-            editor.edit(builder => builder.delete(new Range(new Position(0, 0), new Position(1, 0))));
+            editor.edit(
+                builder => builder.delete(new Range(new Position(0, 0), new Position(1, 0))),
+                {undoStopAfter: true, undoStopBefore: false}
+            );
         }
+    }
+
+    private async writeCode(editor: TextEditor, section: 'import' | 'definition', code: string) {
+        const logger = this.container.get(Logger);
+        const changeStage = this.stage !== section;
+        const prefix = changeStage && section === 'definition' ? '\n\n' : '';
+        const undoStop = changeStage && this.stage !== 'loading';
+        logger.trace('WriteCode', {section, prefix, code, undoStop});
+        await editor.edit(
+            builder => builder.insert(new Position(Infinity, Infinity), prefix + code),
+            {
+                undoStopBefore: undoStop,
+                undoStopAfter: false,
+            }
+        );
+        this.stage = section;
     }
 }
