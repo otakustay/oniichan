@@ -10,6 +10,12 @@ export interface ScaffoldRequest {
     workspaceRoot: string;
 }
 
+interface ScaffoldTelemetryData {
+    type: 'telemetryData';
+    key: string;
+    value: unknown;
+}
+
 interface ScaffoldLoading {
     type: 'loading';
 }
@@ -25,7 +31,7 @@ interface ScaffoldCode {
     code: string;
 }
 
-export type ScaffoldResponse = ScaffoldLoading | ScaffoldAbort | ScaffoldCode;
+export type ScaffoldResponse = ScaffoldTelemetryData | ScaffoldLoading | ScaffoldAbort | ScaffoldCode;
 
 interface ScaffoldSnippet {
     path: string;
@@ -51,7 +57,17 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         yield {type: 'loading'};
 
         const relativePath = this.getRelativePath(request.workspaceRoot, request.documentUri);
+        yield {
+            type: 'telemetryData',
+            key: 'document',
+            value: relativePath,
+        };
         const snippets = await this.retrieveContext(request.workspaceRoot, relativePath);
+        yield {
+            type: 'telemetryData',
+            key: 'references',
+            value: snippets.map(v => v.path),
+        };
 
         if (!snippets.length) {
             logger.info('Abort', {reason: 'Not enough context'});
@@ -79,6 +95,16 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
                 output.definitionSection += chunk.code;
             }
         }
+        yield {
+            type: 'telemetryData',
+            key: 'importSection',
+            value: output.importSection,
+        };
+        yield {
+            type: 'telemetryData',
+            key: 'definitionSection',
+            value: output.definitionSection,
+        };
         logger.trace('RequestModelFinish');
     }
 

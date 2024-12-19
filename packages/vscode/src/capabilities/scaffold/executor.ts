@@ -5,19 +5,25 @@ import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {TextEditorReference} from '@oniichan/host/utils/editor';
 import {LoadingManager} from '@oniichan/host/ui/loading';
+import {stringifyError} from '@oniichan/shared/string';
 import {KernelClient} from '../../kernel';
+import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 
 const LOADING_TEXT = 'Oniichan正在为你生成脚手架，请不要操作或关闭文件';
 
-export interface Dependency {
+interface Dependency {
     [Logger.containerKey]: Logger;
     [LoadingManager.containerKey]: LoadingManager;
     [KernelClient.containerKey]: KernelClient;
     [TaskManager.containerKey]: TaskManager;
 }
 
+interface Provide extends Dependency {
+    Telemetry: FunctionUsageTelemetry;
+}
+
 export class ScaffoldExecutor {
-    private readonly container: TaskContainer<Dependency>;
+    private readonly container: TaskContainer<Provide>;
 
     private stage: 'context' | 'loading' | 'import' | 'definition' | 'finish' = 'context';
 
@@ -30,23 +36,41 @@ export class ScaffoldExecutor {
             functionName: 'Scaffold',
         };
         this.container = container
-            .bind(Logger, () => logger.with(loggerOverride), {singleton: true});
+            .bind(Logger, () => logger.with(loggerOverride), {singleton: true})
+            .bind('Telemetry', () => new FunctionUsageTelemetry(context.getTaskId(), 'Scaffold'), {singleton: true});
     }
 
     async executeCommand() {
+        const telemetry = this.container.get('Telemetry');
+        await telemetry.spyRun(() => this.executeScaffold());
+    }
+
+    private async executeScaffold(): Promise<FunctionUsageResult> {
         const logger = this.container.get(Logger);
         logger.trace('Start', {trigger: 'command'});
         const editor = window.activeTextEditor;
 
         if (!editor) {
             logger.info('Abort', {reason: 'Editor not open'});
-            return;
+            return {
+                type: 'abort',
+                reason: 'Editor not open',
+            };
         }
 
-        await this.executeKernel(editor);
+        try {
+            return await this.executeKernel(editor);
+        }
+        catch (ex) {
+            logger.error('Fail', {reason: stringifyError(ex)});
+            return {
+                type: 'fail',
+                reason: stringifyError(ex),
+            };
+        }
     }
 
-    private async executeKernel(editor: TextEditor) {
+    private async executeKernel(editor: TextEditor): Promise<FunctionUsageResult> {
         const relative = this.toRelative(editor.document.uri);
         const request: ScaffoldRequest = {
             documentUri: editor.document.uri.toString(),
@@ -54,10 +78,14 @@ export class ScaffoldExecutor {
         };
         const kernel = this.container.get(KernelClient);
         const context = this.container.get(TaskContext);
+        const telementry = this.container.get('Telemetry');
         const editorReference = new TextEditorReference(editor.document.uri.toString());
 
         for await (const entry of kernel.callStreaming(context.getTaskId(), 'scaffold', request)) {
             switch (entry.type) {
+                case 'telemetryData':
+                    telementry.setTelemetryData(entry.key, entry.value);
+                    break;
                 case 'loading':
                     this.stage = 'loading';
                     await this.showLoading(editorReference);
@@ -65,12 +93,19 @@ export class ScaffoldExecutor {
                 case 'abort':
                     this.stage = 'finish';
                     window.showInformationMessage(`We aborted scaffold generation due to this: ${entry.reason}`);
-                    return;
+                    return {
+                        type: 'abort',
+                        reason: entry.reason,
+                    };
                 case 'code':
                     await this.writeCode(editor, entry.section, entry.code);
                     break;
             }
         }
+
+        return {
+            type: 'success',
+        };
     }
 
     private toRelative(documentUri: Uri) {

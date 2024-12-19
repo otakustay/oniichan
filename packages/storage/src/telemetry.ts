@@ -176,6 +176,7 @@ export class FunctionUsageTelemetry {
         }
         catch (ex) {
             this.fail(stringifyError(ex));
+            throw ex;
         }
         finally {
             void this.record();

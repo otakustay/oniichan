@@ -6,9 +6,10 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {getSemanticRewriteConfiguration} from '@oniichan/host/utils/config';
 import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/host/ui/loading';
+import {TaskManager} from '@oniichan/host/utils/task';
+import {stringifyError} from '@oniichan/shared/string';
 import {KernelClient} from '../../kernel';
 import {LineWorker} from './worker';
-import {TaskManager} from '@oniichan/host/utils/task';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     const changedText = event.contentChanges.at(-1)?.text ?? '';
@@ -136,8 +137,16 @@ class SemanticRewriteExecutor {
                 this.tracks.set(uri, workers);
 
                 workers.add(worker);
-                await worker.run().catch(() => {});
-                workers.delete(worker);
+                try {
+                    await worker.run().catch(() => {});
+                }
+                catch (ex) {
+                    const logger = taskContainer.get(Logger);
+                    logger.error('Fail', {reason: stringifyError(ex)});
+                }
+                finally {
+                    workers.delete(worker);
+                }
             }
         );
     }

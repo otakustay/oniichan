@@ -1,6 +1,5 @@
 import {Range, TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
-import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {SemanticRewriteRequest} from '@oniichan/kernel';
 import {DependencyContainer} from '@oniichan/shared/container';
@@ -63,36 +62,29 @@ export class LineWorker {
         }
 
         const document = editor.document;
-        try {
-            const request: SemanticRewriteRequest = {
-                documentUri: document.uri.toString(),
-                file: document.fileName,
-                line: this.pin.getPinLineNumber(),
-            };
-            const kernel = this.container.get(KernelClient);
-            for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
-                switch (entry.type) {
-                    case 'loading':
-                        this.showLoading();
-                        break;
-                    case 'telemetryData':
-                        telemetry.setTelemetryData(entry.key, entry.value);
-                        break;
-                    case 'abort':
-                        return {type: 'abort', reason: entry.reason};
-                    case 'result':
-                        return await this.applyRewrite(entry.code, hint);
-                }
+        const request: SemanticRewriteRequest = {
+            documentUri: document.uri.toString(),
+            file: document.fileName,
+            line: this.pin.getPinLineNumber(),
+        };
+        const kernel = this.container.get(KernelClient);
+        for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
+            switch (entry.type) {
+                case 'loading':
+                    this.showLoading();
+                    break;
+                case 'telemetryData':
+                    telemetry.setTelemetryData(entry.key, entry.value);
+                    break;
+                case 'abort':
+                    return {type: 'abort', reason: entry.reason};
+                case 'result':
+                    return await this.applyRewrite(entry.code, hint);
             }
+        }
 
-            logger.error('Fail', {reason: 'No result form kernel'});
-            throw new Error('No result form kernel');
-        }
-        catch (ex) {
-            const reason = stringifyError(ex);
-            logger.error('Fail', {reason});
-            throw new Error(`Semantic rewrite failed: ${reason}`, {cause: ex});
-        }
+        logger.error('Fail', {reason: 'No result form kernel'});
+        throw new Error('No result form kernel');
     }
 
     private showLoading() {
