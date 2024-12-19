@@ -1,41 +1,41 @@
-import {Disposable, commands, languages} from 'vscode';
+import {Disposable, commands} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
-import {KernelClient} from '../../kernel';
 import {TaskManager} from '@oniichan/host/utils/task';
-import {ScaffoldLoadingCodeLensProvider} from './loading';
+import {LoadingManager} from '@oniichan/host/ui/loading';
+import {newUuid} from '@oniichan/shared/id';
+import {KernelClient} from '../../kernel';
 import {ScaffoldExecutor} from './executor';
 
 export interface Dependency {
     [Logger.containerKey]: Logger;
+    [LoadingManager.containerKey]: LoadingManager;
     [KernelClient.containerKey]: KernelClient;
     [TaskManager.containerKey]: TaskManager;
-}
-
-interface Provide extends Dependency {
-    [ScaffoldLoadingCodeLensProvider.containerKey]: ScaffoldLoadingCodeLensProvider;
 }
 
 export class ScaffoldCommand implements Disposable {
     private readonly disposables: Disposable[] = [];
 
-    private readonly container: DependencyContainer<Provide>;
+    private readonly container: DependencyContainer<Dependency>;
 
     constructor(container: DependencyContainer<Dependency>) {
-        this.container = container
-            .bind(ScaffoldLoadingCodeLensProvider, () => new ScaffoldLoadingCodeLensProvider(), {singleton: true});
+        this.container = container;
         const command = commands.registerCommand(
             'oniichan.scaffold',
             async () => {
-                const executor = new ScaffoldExecutor(this.container);
-                await executor.executeCommand();
+                const taskManager = this.container.get(TaskManager);
+                await taskManager.runTask(
+                    newUuid(),
+                    this.container,
+                    async container => {
+                        const executor = new ScaffoldExecutor(container);
+                        await executor.executeCommand();
+                    }
+                );
             }
         );
-        const loading = languages.registerCodeLensProvider(
-            {scheme: 'file'},
-            this.container.get(ScaffoldLoadingCodeLensProvider)
-        );
-        this.disposables.push(command, loading);
+        this.disposables.push(command);
     }
 
     dispose() {

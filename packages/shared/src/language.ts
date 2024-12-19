@@ -1,12 +1,12 @@
 interface LanguageConfigSource {
-    comment: string[];
+    comment: Array<string | [string, string]>;
     keywords: string[];
 }
 
 class LanguageConfig {
     readonly language: string;
 
-    private readonly commentSymbols: string[];
+    private readonly commentSymbols: Array<string | [string, string]>;
 
     private readonly keywords: Set<string>;
 
@@ -18,7 +18,16 @@ class LanguageConfig {
 
     isComment(line: string): boolean {
         const trimmedLine = line.trim();
-        return this.commentSymbols.some(v => trimmedLine.startsWith(v));
+        const isCommentBySymbol = (symbol: string | [string, string]) => {
+            if (typeof symbol === 'string') {
+                return trimmedLine.startsWith(symbol);
+            }
+            else {
+                const [start, end] = symbol;
+                return trimmedLine.startsWith(start) && trimmedLine.endsWith(end);
+            }
+        };
+        return this.commentSymbols.some(isCommentBySymbol);
     }
 
     endsWithIdentifier(line: string) {
@@ -28,6 +37,21 @@ class LanguageConfig {
     includesKeywordOnly(line: string) {
         const tokens = line.split(/[^a-zA-Z0-9_]+/g);
         return tokens.every(token => !token || this.keywords.has(token));
+    }
+
+    toSingleLineComment(line: string): string {
+        const symbol = this.commentSymbols.at(0);
+
+        if (!symbol) {
+            return `// ${line}`;
+        }
+
+        if (typeof symbol === 'string') {
+            return `${symbol} ${line}`;
+        }
+
+        const [start, end] = symbol;
+        return `${start} ${line.trim()} ${end}`;
     }
 }
 

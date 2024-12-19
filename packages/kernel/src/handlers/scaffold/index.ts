@@ -89,16 +89,16 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
     private async testDocumentStatus(documentUri: string) {
         const {editorHost} = this.context;
         try {
-            const text = await editorHost.getDocument(this.getTaskId(), documentUri).getText();
+            const text = await editorHost.getDocument(documentUri, this.getTaskId()).getText();
             if (text) {
                 return {
-                    ok: true,
-                    reason: '',
+                    ok: false,
+                    reason: 'Document is not empty',
                 };
             }
             return {
-                ok: false,
-                reason: 'Document is not empty',
+                ok: true,
+                reason: '',
             };
         }
         catch {
