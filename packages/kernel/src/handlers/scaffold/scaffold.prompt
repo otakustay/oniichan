@@ -1,7 +1,7 @@
 You are an experienced programmer in writing {{extension}} files, you have created a file at {{file}}, here are several existing files for you to gather information:
 
 {{#snippets}}
-File {{file}} contains this:
+File {{path}} contains this:
 
 ```
 {{content}}

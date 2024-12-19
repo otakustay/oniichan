@@ -42,11 +42,13 @@ export class ModelAccessHost {
                 telemetry.setResponse(chunks.join(''), chunk);
             }
         }
+        void telemetry.record();
     }
 
     async *codeStreaming(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): AsyncIterable<CodeResult> {
         const client = await this.createModelClient();
         const chunks = [];
+        telemetry.setRequest(messages);
         for await (const chunk of streamingExtractCode(client.chatStreaming(messages))) {
             switch (chunk.type) {
                 case 'code':
@@ -60,6 +62,7 @@ export class ModelAccessHost {
                     break;
             }
         }
+        void telemetry.record();
     }
 
     private async createModelClient(triggerUserConfigure = true): Promise<ModelClient> {

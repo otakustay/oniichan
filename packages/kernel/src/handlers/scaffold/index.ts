@@ -2,6 +2,7 @@ import path from 'node:path';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {RequestHandler} from '../handler';
 import {ScaffoldApi} from './api';
+import {FileEntry} from '@oniichan/host/server';
 
 const MAX_SNIPPET_COUNT = 10;
 
@@ -62,7 +63,9 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
             key: 'document',
             value: relativePath,
         };
+        logger.trace('RetrieveContextStart');
         const snippets = await this.retrieveContext(request.workspaceRoot, relativePath);
+        logger.trace('RetrieveContextFinish');
         yield {
             type: 'telemetryData',
             key: 'references',
@@ -136,30 +139,22 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         }
     }
 
-    private async retrieveContext(workspaceRoot: string, relativePath: string): Promise<ScaffoldSnippet[]> {
-        const {editorHost, logger} = this.context;
-        const workspace = editorHost.getWorkspace(this.getTaskId());
+    private async retrieveSiblingFiles(workspaceRoot: string, relativePath: string, entries: FileEntry[]) {
         const directory = path.dirname(relativePath);
-
-        logger.trace('RetrieveContextStart');
-
-        if (!directory && !workspaceRoot) {
-            logger.trace('RetrieveContextAbort', {reason: 'File is at file system root'});
-            return [];
-        }
-
-        const name = path.basename(relativePath);
         const fsDirectory = path.join(workspaceRoot, directory);
-        logger.trace('ReadDirectoryStart', {directory: fsDirectory});
-        const entries = await workspace.readDirectory(fsDirectory, {depth: 1});
-        const files = entries.filter(v => v.type === 'file').filter(v => v.name !== name);
-        logger.trace('ReadDirectoryFinish', {directory: fsDirectory, entries});
+        const extension = path.extname(relativePath);
+        const name = path.basename(relativePath);
+        const targets = entries
+            .filter(v => v.type === 'file')
+            .filter(v => path.extname(v.name) === extension)
+            .filter(v => v.name !== name)
+            .slice(0, MAX_SNIPPET_COUNT);
+        return this.readSnippets(workspaceRoot, fsDirectory, targets.map(v => v.name));
+    }
 
-        if (files.length >= 1) {
-            const targets = files.slice(0, MAX_SNIPPET_COUNT);
-            return this.readSnippets(workspaceRoot, fsDirectory, targets.map(v => v.name));
-        }
-
+    private async retrieveSiblingDirectories(workspaceRoot: string, relativePath: string, entries: FileEntry[]) {
+        const directory = path.dirname(relativePath);
+        const fsDirectory = path.join(workspaceRoot, directory);
         // We require all files in one directory to group together, for model to know the relationship between them
         const targets: string[] = [];
         for (const directory of entries.filter(v => v.type === 'directory')) {
@@ -172,6 +167,72 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
             targets.push(...childFiles.map(v => path.join(directory.name, v.name)));
         }
         return this.readSnippets(workspaceRoot, fsDirectory, targets);
+    }
+
+    private async retrieveParentEntries(workspaceRoot: string, relativePath: string): Promise<ScaffoldSnippet[]> {
+        const {editorHost, logger} = this.context;
+        const directory = path.dirname(relativePath);
+        const fsDirectory = path.join(workspaceRoot, directory);
+        const workspace = editorHost.getWorkspace(this.getTaskId());
+        const parentDirectory = path.join(fsDirectory, '..');
+        const extension = path.extname(relativePath);
+        logger.trace('ReadParentDirectoryStart', {directory: parentDirectory});
+        const entries = await workspace.readDirectory(parentDirectory, {depth: 2});
+        logger.trace('ReadParentDirectoryFinish', {directory: parentDirectory, entries});
+
+        const files: string[] = [];
+        const directories: string[][] = [];
+        for (const entry of entries) {
+            if (entry.type === 'file' && path.extname(entry.name) === extension) {
+                files.push(entry.name);
+            }
+            else if (entry.type === 'directory') {
+                const files = (entry.children ?? []).filter(v => v.type === 'file');
+                directories.push(files.map(v => path.join(entry.name, v.name)));
+            }
+        }
+
+        const targets: string[] = [];
+        for (const files of directories) {
+            if (files.length + targets.length > MAX_SNIPPET_COUNT) {
+                continue;
+            }
+            targets.push(...files);
+        }
+        targets.push(...files.slice(0, MAX_SNIPPET_COUNT - targets.length));
+
+        return this.readSnippets(workspaceRoot, parentDirectory, targets);
+    }
+
+    private async retrieveContext(workspaceRoot: string, relativePath: string): Promise<ScaffoldSnippet[]> {
+        const {editorHost, logger} = this.context;
+        const workspace = editorHost.getWorkspace(this.getTaskId());
+        const directory = path.dirname(relativePath);
+
+        if (!directory && !workspaceRoot) {
+            logger.trace('RetrieveContextAbort', {reason: 'File is at file system root'});
+            return [];
+        }
+
+        const fsDirectory = path.join(workspaceRoot, directory);
+        logger.trace('ReadDirectoryStart', {directory: fsDirectory});
+        const entries = await workspace.readDirectory(fsDirectory, {depth: 1});
+        logger.trace('ReadDirectoryFinish', {directory: fsDirectory, entries});
+
+        const siblingFileSnippets = await this.retrieveSiblingFiles(workspaceRoot, relativePath, entries);
+
+        if (siblingFileSnippets.length) {
+            return siblingFileSnippets;
+        }
+
+        const siblingDirectorySnippets = await this.retrieveSiblingDirectories(workspaceRoot, relativePath, entries);
+
+        if (siblingDirectorySnippets.length) {
+            return siblingDirectorySnippets;
+        }
+
+        const parentSnippets = await this.retrieveParentEntries(workspaceRoot, relativePath);
+        return parentSnippets;
     }
 
     private async readSnippets(workspaceRoot: string, directory: string, files: string[]): Promise<ScaffoldSnippet[]> {
