@@ -24,7 +24,6 @@ interface Abort {
 
 interface SemanticLoading {
     type: 'loading';
-    visible: boolean;
 }
 
 interface SemanticRewriteResult {
@@ -99,7 +98,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         yield {type: 'telemetryData', key: 'inputCodeBefore', value: codeBefore};
 
         logger.trace('Loading');
-        yield {type: 'loading', visible: true};
+        yield {type: 'loading'};
 
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'SemanticRewrite');
         try {

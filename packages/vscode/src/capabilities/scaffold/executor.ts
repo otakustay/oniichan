@@ -58,8 +58,8 @@ export class ScaffoldExecutor {
     private async executeKernel(container: TaskContainer<Dependency>, editor: TextEditor) {
         const relative = this.toRelative(editor.document.uri);
         const request: ScaffoldRequest = {
+            documentUri: editor.document.uri.toString(),
             workspaceRoot: relative.root,
-            relativePath: relative.path,
         };
         const kernel = container.get(KernelClient);
 

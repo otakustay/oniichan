@@ -37,4 +37,6 @@ Here are definitions in scaffold code:
 ```
 </example>
 
+If you are not confident enough, you can make both import and definition section empty, but you are required to output markdown code block even in this case, just keep the content inside code block empty.
+
 File {{file}} is empty, generate the scaffold code now, do not generate any text out of example's guideline.

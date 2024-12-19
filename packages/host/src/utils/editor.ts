@@ -24,17 +24,26 @@ export class TextEditorReference {
         return null;
     }
 
-    async applyReplacementEdit(range: Range, text: string): Promise<void> {
-        const edit = new WorkspaceEdit();
-        edit.replace(
-            Uri.parse(this.uri),
-            range,
-            text,
-            {
-                needsConfirmation: false,
-                label: 'semantic rewrite from oniichan',
-            }
-        );
-        await workspace.applyEdit(edit);
+    async applyReplacementEdit(range: Range, text: string, force = false): Promise<void> {
+        const editor = this.getTextEditor();
+
+        if (editor) {
+            await editor.edit(builder => builder.replace(range, text));
+            return;
+        }
+
+        if (force) {
+            const edit = new WorkspaceEdit();
+            edit.replace(
+                Uri.parse(this.uri),
+                range,
+                text,
+                {
+                    needsConfirmation: false,
+                    label: 'semantic rewrite from oniichan',
+                }
+            );
+            await workspace.applyEdit(edit);
+        }
     }
 }

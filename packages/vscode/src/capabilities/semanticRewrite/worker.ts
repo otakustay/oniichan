@@ -43,7 +43,6 @@ export class LineWorker {
 
     private async runRewrite(): Promise<FunctionUsageResult> {
         const logger = this.container.get(Logger);
-        const loadingManager = this.container.get(LoadingManager);
         const editor = this.editorReference.getTextEditor();
         const telemetry = this.container.get('Telemetry');
         const hint = this.hint.trim();
@@ -73,13 +72,9 @@ export class LineWorker {
             const kernel = this.container.get(KernelClient);
             for await (const entry of kernel.callStreaming(telemetry.getUuid(), 'semanticRewrite', request)) {
                 switch (entry.type) {
-                    case 'loading': {
-                        const disposable = loadingManager.add(this.editorReference.getDocumentUri(), this.pin);
-                        this.signal = disposable.signal;
-                        const taskContext = this.container.get(TaskContext);
-                        taskContext.addDisposable(disposable);
+                    case 'loading':
+                        this.showLoading();
                         break;
-                    }
                     case 'telemetryData':
                         telemetry.setTelemetryData(entry.key, entry.value);
                         break;
@@ -100,6 +95,14 @@ export class LineWorker {
         }
     }
 
+    private showLoading() {
+        const loadingManager = this.container.get(LoadingManager);
+        const taskContext = this.container.get(TaskContext);
+        const disposable = loadingManager.add(this.editorReference.getDocumentUri(), this.pin);
+        this.signal = disposable.signal;
+        taskContext.addDisposable(disposable);
+    }
+
     private async applyRewrite(code: string, hint: string): Promise<FunctionUsageResult> {
         const logger = this.container.get(Logger);
         if (code.trim() === hint || this.signal?.aborted) {
@@ -110,7 +113,7 @@ export class LineWorker {
         const line = this.pin.getPinLineNumber();
         const range = new Range(line, 0, line, Number.MAX_SAFE_INTEGER);
         const codeTrimmed = code.replaceAll(/^\n+|\n+$/g, '');
-        await this.editorReference.applyReplacementEdit(range, codeTrimmed);
+        await this.editorReference.applyReplacementEdit(range, codeTrimmed, true);
         logger.info('Apply', {line, code: codeTrimmed});
         return {type: 'success'};
         // Format range doesn't seem to work
