@@ -9,7 +9,7 @@ import {stringifyError} from '@oniichan/shared/string';
 import {KernelClient} from '../../kernel';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 
-const LOADING_TEXT = 'Oniichan正在为你生成脚手架，请不要操作或关闭文件';
+const LOADING_TEXT = 'Oniichan正在为你生成脚手架，请不要操作或关闭文件，删除本行可以中止任务';
 
 interface Dependency {
     [Logger.containerKey]: Logger;
@@ -24,6 +24,8 @@ interface Provide extends Dependency {
 
 export class ScaffoldExecutor {
     private readonly container: TaskContainer<Provide>;
+
+    private abortSignal: AbortSignal | null = null;
 
     private stage: 'context' | 'loading' | 'import' | 'definition' | 'finish' = 'context';
 
@@ -139,6 +141,7 @@ export class ScaffoldExecutor {
 
         const loadingManager = this.container.get(LoadingManager);
         const disposable = loadingManager.add(editorReference.getDocumentUri(), 0);
+        this.abortSignal = disposable.signal;
         disposable.signal.addEventListener(
             'abort',
             () => this.removeLoadingText(editorReference)
@@ -168,6 +171,12 @@ export class ScaffoldExecutor {
 
     private async writeCode(editor: TextEditor, section: 'import' | 'definition', code: string) {
         const logger = this.container.get(Logger);
+
+        if (this.abortSignal?.aborted) {
+            logger.trace('AbortWriteCode', {section, code});
+            return;
+        }
+
         const changeStage = this.stage !== section;
         const prefix = changeStage && section === 'definition' ? '\n\n' : '';
         const undoStop = changeStage && this.stage !== 'loading';
