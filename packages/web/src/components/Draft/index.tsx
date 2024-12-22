@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
-import {now} from '@oniichan/shared/string';
 import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@/atoms/draft';
-import {Message, useSendMessageToThread} from '@/atoms/inbox';
+import {useSendMessageToThread} from '@/atoms/inbox';
 import Modal from '@/components/Modal';
 import Avatar from '@/components/Avatar';
 import MessageEditor from './Editor';
@@ -47,13 +46,7 @@ function Content({threadUuid, mode}: EditingValue) {
     const setEditing = useSetEditing();
     const sendMessage = useSendMessageToThread(threadUuid);
     const send = async () => {
-        const message: Message = {
-            uuid: crypto.randomUUID(),
-            sender: 'user',
-            createdAt: now(),
-            content,
-        };
-        await sendMessage(message);
+        await sendMessage(crypto.randomUUID(), content);
     };
 
     return (

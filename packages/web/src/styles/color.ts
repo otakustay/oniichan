@@ -22,6 +22,9 @@ injectGlobal`
         --color-link-foreground: var(--color-interactive-background);
         --color-link-foreground-hover: var(--color-interactive-background-hover);
         --color-link-foreground-active: var(--color-interactive-background-active);
+        --color-information: #1a85ff;
+        --color-warn: #ddb100;
+        --color: error: #b01011;
     }
 
    @media (prefers-color-scheme: dark) {
@@ -45,6 +48,9 @@ injectGlobal`
             --color-link-foreground: var(--color-interactive-background);
             --color-link-foreground-hover: var(--color-interactive-background-hover);
             --color-link-foreground-active: var(--color-interactive-background-active);
+            --color-information: #1a85ff;
+            --color-warn: #ffcc01;
+            --color: error: #f88070;
         }
     }
 `;

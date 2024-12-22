@@ -1,8 +1,11 @@
+import {useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
-import {useMessageThreadValueByUuid} from '@/atoms/inbox';
+import {useInView} from 'react-intersection-observer';
+import {Message, useMarkMessageStatus} from '@/atoms/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import Markdown from '@/components/Markdown';
+import MessageStatusIcon from '@/components/MessageStatusIcon';
 
 const Layout = styled.div`
     display: flex;
@@ -14,21 +17,21 @@ const Layout = styled.div`
 
 const Header = styled.div`
     display: flex;
-    justify-content: space-between;
     padding-bottom: .5em;
     border-bottom: 1px solid var(--color-default-bottom);
     align-items: center;
+    gap: .2em;
 `;
 
 const Time = styled(TimeAgo)`
     color: var(--color-secondary-foreground);
+    margin-left: auto;
 `;
 
 const Sender = styled.span`
     font-size: 1.2em;
     font-weight: bold;
     display: flex;
-    gap: .2em;
     align-items: center;
 `;
 
@@ -39,29 +42,30 @@ const Content = styled(Markdown)`
 
 interface Props {
     threadUuid: string;
-    uuid: string;
+    message: Message;
 }
 
-export default function Message({threadUuid, uuid}: Props) {
-    const thread = useMessageThreadValueByUuid(threadUuid);
-
-    if (!thread) {
-        return null;
-    }
-
-    const message = thread.messages.find(v => v.uuid === uuid);
-
-    if (!message) {
-        return null;
-    }
+export default function Message({threadUuid, message}: Props) {
+    const {ref, inView} = useInView();
+    const markMessageStatus = useMarkMessageStatus(threadUuid, message.uuid);
+    const markAsRead = useRef(() => markMessageStatus('read'));
+    useEffect(
+        () => {
+            if (message.status === 'unread' && inView) {
+                markAsRead.current();
+            }
+        },
+        [message.status, inView]
+    );
 
     return (
-        <Layout>
+        <Layout ref={ref}>
             <Header>
+                {message.sender === 'assistant' ? <Avatar.Assistant /> : <Avatar.User />}
                 <Sender>
-                    {message.sender === 'assistant' ? <Avatar.Assistant /> : <Avatar.User />}
                     {message.sender === 'assistant' ? 'Oniichan' : 'Me'}
                 </Sender>
+                <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
             <Content content={message.content} />

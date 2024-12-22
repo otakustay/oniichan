@@ -18,7 +18,7 @@ async function createClient() {
                 'open',
                 () => {
                     const port = new WebSocketPort(socket);
-                    const client = new Client<Protocol>(port);
+                    const client = new Client<Protocol>(port, {namespace: 'web -> server'});
                     resolve(client);
                 }
             );

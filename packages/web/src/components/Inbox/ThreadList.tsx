@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import {MessageThread, useMessageThreadListValue, useSetActiveMessageThread} from '@/atoms/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
+import MessageStatusIcon from '../MessageStatusIcon';
 
 const ItemLayout = styled.div`
     padding: 1em;
@@ -17,12 +18,13 @@ const ItemHeader = styled.div`
     height: 2em;
     display: flex;
     align-items: center;
-    gap: 1.5em;
+    gap: .5em;
 `;
 
 const ItemTitle = styled.span`
     font-size: 1.2em;
     font-weight: bold;
+    gap: 0.5em;
     flex: 1;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -58,6 +60,7 @@ function ThreadItem({thread}: ThreadItemProps) {
     return (
         <ItemLayout onClick={() => setActive(thread.uuid)}>
             <ItemHeader>
+                <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
                 <ItemTitle>
                     {firstMessage?.content ?? '(No Title)'}
                 </ItemTitle>

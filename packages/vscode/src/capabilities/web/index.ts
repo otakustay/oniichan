@@ -93,7 +93,7 @@ export class WebApp implements Disposable {
                 const html = htmlContent.replace('main.js', panel.webview.asWebviewUri(entryScriptUri).toString());
                 panel.webview.html = html;
                 const port = new WebviewPort(panel.webview);
-                const ipcServer = new IpcServer();
+                const ipcServer = new IpcServer({namespace: 'web -> server'});
                 await ipcServer.connect(port);
                 panel.onDidDispose(() => port.dispose());
             }

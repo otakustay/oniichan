@@ -53,7 +53,7 @@ export default function Thread({uuid}: Props) {
                 }
             />
             <Layout>
-                {thread.messages.map(v => <Message key={v.uuid} threadUuid={uuid} uuid={v.uuid} />)}
+                {thread.messages.map(v => <Message key={v.uuid} threadUuid={thread.uuid} message={v} />)}
             </Layout>
         </>
     );

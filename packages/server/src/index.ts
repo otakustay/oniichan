@@ -69,7 +69,7 @@ export class WebAppServer extends EventEmitter<ServerEventMap> {
             {websocket: true},
             async socket => {
                 const port = new WebSocketPort(socket);
-                const ipcServer = new IpcServer();
+                const ipcServer = new IpcServer({namespace: 'web -> server'});
                 await ipcServer.connect(port);
             }
         );
