@@ -3,12 +3,8 @@ import {Protocol} from '@oniichan/host/server';
 import {newUuid} from '@oniichan/shared/id';
 import {ChatMessagePayload, createModelClient, ModelClient} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
-import {ModelConfiguration} from '@oniichan/shared/model';
+import {isModelConfigValid} from '@oniichan/host/utils/config';
 import {CodeResult, streamingExtractCode} from './extract';
-
-export function isModelConfigurationValid(config: ModelConfiguration) {
-    return !!(config.apiKey && config.baseUrl && config.modelName);
-}
 
 export class ModelAccessHost {
     private readonly taskId: string | undefined;
@@ -68,7 +64,7 @@ export class ModelAccessHost {
     private async createModelClient(triggerUserConfigure = true): Promise<ModelClient> {
         const config = await this.getModelConfiguration();
 
-        if (isModelConfigurationValid(config)) {
+        if (isModelConfigValid(config)) {
             const client = createModelClient(config);
             return client;
         }

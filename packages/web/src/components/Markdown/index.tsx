@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import {ComponentType, ReactNode} from 'react';
+import {ComponentType} from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from './CodeBlock';
 
@@ -14,33 +14,16 @@ const MarkdownContent = styled(ReactMarkdown)`
         }
     }
 
-    pre {
-        margin: 0;
-        border: 1em solid transparent;
-        font-size: 12px;
-        background-color: #000;
-        color: #fff;
-        border-radius: 4px;
-        overflow-x: auto;
-    }
-
     code {
         font-family: monospace;
         padding: 0 .5em;
+        background-color: var(--color-contrast-background);
+        color: var(--color-contrast-foreground);
     }
 `;
 
-interface TransparentProps {
-    children: ReactNode;
-}
-
-function Transparent({children}: TransparentProps) {
-    return <>{children}</>;
-}
-
 const components: Record<string, ComponentType<any>> = {
-    pre: Transparent,
-    code: CodeBlock,
+    pre: CodeBlock,
 };
 
 interface Props {

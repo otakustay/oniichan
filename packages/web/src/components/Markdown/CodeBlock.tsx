@@ -1,10 +1,9 @@
-import {useMemo} from 'react';
+import {ReactElement, Suspense} from 'react';
 import styled from '@emotion/styled';
 import {getIcon} from 'material-file-icons';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import {docco} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import {CopyCode} from './CopyCode';
 import {sampleFileNameFromLanguage} from './language';
+import SourceCode from './SourceCode';
 
 interface LanguageTypeIconProps {
     language: string;
@@ -13,56 +12,63 @@ interface LanguageTypeIconProps {
 function LanguageTypeIcon({language}: LanguageTypeIconProps) {
     const icon = getIcon(sampleFileNameFromLanguage(language));
 
-    // bca-disable-line
     return <i style={{width: 14, height: 14}} dangerouslySetInnerHTML={{__html: icon.svg}} />;
 }
 
 const Header = styled.div`
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 8px;
+    gap: .5em;
     align-items: center;
     justify-content: space-between;
-    height: 32px;
-    padding: 0 12px;
-    background-color: #343540;
+    height: 2.5em;
+    padding: 0 1em;
+    border: 1px solid var(--color-default-border);
+    border-bottom: none;
+    background-color: var(--color-contrast-background);
 `;
 
 const Layout = styled.div`
-    --source-text-color: #f8f8f3;
-    --source-background-color: #000;
-
     margin: 0;
-    font-size: 14px;
-    background-color: var(--source-background-color);
-    color: var(--source-text-color);
-    border-radius: 4px;
+    border-radius: .5em;
     overflow: hidden;
+
+    pre {
+        margin: 0;
+        padding: 0;
+    }
+
+    code {
+        all: unset;
+    }
 `;
 
-const SourceCode = styled(SyntaxHighlighter)`
-    border: 1em solid transparent;
-`;
-
-interface Props {
-    inline: boolean;
+interface CodeInPreProps {
     className?: string;
-    children: string[];
+    children?: string;
 }
 
-export default function CodeBlock({inline, className, children}: Props) {
-    const code = useMemo(
-        () => children.join('\n').trim(),
-        [children]
-    );
-    const language = useMemo(
-        () => /language-(\w+)/.exec(className ?? '')?.[1],
-        [className]
-    );
+interface CodeInPreElement {
+    type: 'code';
+    props: CodeInPreProps;
+}
 
-    if (inline) {
-        return <code className={className}>{children}</code>;
+interface Props {
+    children: ReactElement;
+}
+
+function isCodeElement(element: any): element is CodeInPreElement {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return element?.type === 'code';
+}
+
+export default function CodeBlock({children}: Props) {
+    if (!isCodeElement(children)) {
+        return children;
     }
+
+    const {className, children: code = ''} = children.props;
+    const language = /language-(\w+)/.exec(className ?? '')?.at(1);
 
     return (
         <Layout>
@@ -71,9 +77,9 @@ export default function CodeBlock({inline, className, children}: Props) {
                 {language}
                 <CopyCode text={code + '\n'} />
             </Header>
-            <SourceCode language={language} style={docco}>
-                {code}
-            </SourceCode>
+            <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
+                <SourceCode code={code} language={language} />
+            </Suspense>
         </Layout>
     );
 }

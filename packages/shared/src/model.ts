@@ -64,7 +64,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                 const params: Anthropic.MessageCreateParams = {
                     messages,
                     model: modelName,
-                    max_tokens: 1000,
+                    max_tokens: 8000,
                 };
                 const result = await client.messages.create(params);
                 return [
@@ -82,7 +82,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                 const options = {
                     messages,
                     model: modelName,
-                    max_tokens: 1000,
+                    max_tokens: 8000,
                     stream: true,
                 } as const;
                 const stream = await client.messages.create(options);
@@ -115,7 +115,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                 const options = {
                     messages,
                     model: modelName,
-                    max_tokens: 1000,
+                    max_tokens: 8000,
                 } as const;
                 const response = await client.chat.completions.create(options);
                 return [
@@ -133,7 +133,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                 const options = {
                     messages,
                     model: modelName,
-                    max_tokens: 1000,
+                    max_tokens: 8000,
                     stream: true,
                 } as const;
                 const stream = await client.chat.completions.create(options);

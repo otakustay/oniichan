@@ -19,6 +19,7 @@
     "-": "^0.0.1",
     "@fastify/static": "^8.0.3",
     "@fastify/websocket": "^11.0.1",
+    "@oniichan/host": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/ipc": "^2.3.1",

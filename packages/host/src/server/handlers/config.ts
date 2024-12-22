@@ -1,6 +1,7 @@
 import {commands, InputBoxOptions, QuickPickItem, window, workspace} from 'vscode';
 import {RequestHandler} from '@otakustay/ipc';
 import {ModelConfiguration, ModelApiStyle} from '@oniichan/shared/model';
+import {getModelConfig} from '../../utils/config';
 import {Context} from '../interface';
 
 const DEFAULT_ANTHROPIC_BASE_URL = 'https://api.anthropic.com';
@@ -14,23 +15,6 @@ interface ApiStylePickItem extends QuickPickItem {
 interface NotConfiguredAction {
     title: string;
     action: 'go-to-settings' | 'configure-now';
-}
-
-function getModelConfig(): ModelConfiguration {
-    const config = workspace.getConfiguration('oniichan.model');
-
-    const apiStyle = config.get<ModelApiStyle>('apiStyle', 'Anthropic');
-    const apiKey = config.get<string>('apiKey', '');
-    const modelName = config.get<string>(
-        'modelName',
-        apiStyle === 'Anthropic' ? 'claude-3-5-sonnet-latest' : 'gpt-4o'
-    );
-    const baseUrl = config.get<string>(
-        'baseUrl',
-        apiStyle === 'Anthropic' ? 'https://api.anthropic.com' : 'https://api.openai.com/v1'
-    );
-
-    return {apiStyle, apiKey, modelName, baseUrl};
 }
 
 async function updateModelConfiguration(input: ModelConfiguration) {

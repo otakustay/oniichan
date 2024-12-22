@@ -1,15 +1,15 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {ModelUsageRecord} from '@oniichan/storage/telemetry';
-import {useClient} from '@/components/ClientProvider';
+import {useClient} from '@/components/AppProvider';
 
 const Card = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 20px;
+    gap: 1em;
+    padding: 1.5em;
     background: white;
-    border-radius: 4px;
+    border-radius: .5em;
     max-height: 200px;
     width: 100%;
     border: 1px solid #eaeaea;
@@ -21,39 +21,36 @@ const Section = styled.div`
 `;
 
 const Label = styled.div`
-    font-size: 12px;
     color: #666;
-    margin-bottom: 4px;
+    margin-bottom: .3em;
     font-weight: 500;
 `;
 
 const Value = styled.div`
-    font-size: 14px;
     color: #333;
     word-break: break-all;
 `;
 
 const TokenSection = styled.div`
     display: flex;
-    gap: 24px;
+    gap: 2em;
     flex: 2;
     min-width: 200px;
 `;
 
 const TokenBox = styled.div`
     background: #f5f5f5;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 1em;
+    border-radius: .5em;
     flex: 1;
 `;
 
 const ModelBadge = styled.div`
     background: #e8f0fe;
     color: #1a73e8;
-    padding: 6px 12px;
-    border-radius: 16px;
+    padding: .5em 1em;
+    border-radius: 1em;
     display: inline-block;
-    font-size: 14px;
     font-weight: 500;
 `;
 

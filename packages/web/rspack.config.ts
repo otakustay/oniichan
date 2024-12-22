@@ -7,6 +7,9 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const config: Configuration = {
     entry: './src/index.tsx',
+    experiments: {
+        css: true,
+    },
     output: {
         path: path.resolve(__dirname, '..', 'vscode', 'dist', 'web'),
         filename: 'main.js',
@@ -53,12 +56,19 @@ const config: Configuration = {
                 },
                 type: 'javascript/auto',
             },
+            {
+                test: /\.png$/,
+                type: 'asset/inline',
+            },
         ],
     },
     plugins: [
-        new HtmlRspackPlugin(),
+        new HtmlRspackPlugin({title: 'Oniichan'}),
         isDev && new ReactRefreshPlugin(),
     ],
+    performance: {
+        hints: false,
+    },
 };
 
 export default config;

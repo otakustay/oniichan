@@ -42,5 +42,11 @@ export default ts.config(
                 },
             ],
         },
+    },
+    {
+        files: ['packages/web/**'],
+        rules: {
+            '@typescript-eslint/no-misused-promises': 'off',
+        },
     }
 );

@@ -1,10 +1,23 @@
-import ClientProvider from '@/components/ClientProvider';
-import ModelTelemetry from '../ModelTelemetry';
+import Thread from '@/components/Thread';
+import Inbox from '@/components/Inbox';
+import Draft from '@/components/Draft';
+import {useActiveMessageThreadValue} from '@/atoms/inbox';
+
+function Body() {
+    const activeThread = useActiveMessageThreadValue();
+
+    if (activeThread) {
+        return <Thread uuid={activeThread.uuid} />;
+    }
+
+    return <Inbox />;
+}
 
 export default function App() {
     return (
-        <ClientProvider>
-            <ModelTelemetry />
-        </ClientProvider>
+        <>
+            <Body />
+            <Draft />
+        </>
     );
 }

@@ -7,7 +7,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 const Layout = styled.span`
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: .5em;
     cursor: pointer;
 `;
 

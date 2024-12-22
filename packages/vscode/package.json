@@ -127,7 +127,7 @@
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.24.2"
   },
   "dependencies": {
     "@otakustay/ipc": "^2.3.1",
