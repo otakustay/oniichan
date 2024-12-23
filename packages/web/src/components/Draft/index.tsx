@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import {motion} from 'motion/react';
 import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@/atoms/draft';
 import {useSendMessageToThread} from '@/atoms/inbox';
 import Modal from '@/components/Modal';
@@ -6,7 +7,7 @@ import Avatar from '@/components/Avatar';
 import MessageEditor from './Editor';
 import SendTrigger from './SendTrigger';
 
-const Layout = styled.div`
+const Layout = styled(motion.div)`
     position: fixed;
     left: 0;
     bottom: 0;
@@ -51,7 +52,7 @@ function Content({threadUuid, mode}: EditingValue) {
 
     return (
         <Modal onClose={() => setEditing(null)}>
-            <Layout>
+            <Layout initial={{translateY: '100%'}} animate={{translateY: 0}} transition={{ease: 'easeInOut'}}>
                 <Header>
                     {mode === 'reply' ? 'Reply Message' : 'New Message'}
                     <SendTrigger disabled={!content.trim()} onClick={send} />

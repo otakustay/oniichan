@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
-import {useInView} from 'react-intersection-observer';
+import {useInView} from 'motion/react';
 import {Message, useMarkMessageStatus} from '@/atoms/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
@@ -46,7 +46,8 @@ interface Props {
 }
 
 export default function Message({threadUuid, message}: Props) {
-    const {ref, inView} = useInView();
+    const ref = useRef<HTMLDivElement>(null);
+    const inView = useInView(ref);
     const markMessageStatus = useMarkMessageStatus(threadUuid, message.uuid);
     const markAsRead = useRef(() => markMessageStatus('read'));
     useEffect(

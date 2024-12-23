@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
+import {motion} from 'motion/react';
 import {MessageThread, useMessageThreadListValue, useSetActiveMessageThread} from '@/atoms/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import MessageStatusIcon from '../MessageStatusIcon';
 
-const ItemLayout = styled.div`
+const ItemLayout = styled(motion.div)`
     padding: 1em;
     border-bottom: 1px solid var(--color-default-border);
     background-color: var(--color-default-background);
@@ -58,7 +59,10 @@ function ThreadItem({thread}: ThreadItemProps) {
     const lastMessage = thread.messages.at(0);
 
     return (
-        <ItemLayout onClick={() => setActive(thread.uuid)}>
+        <ItemLayout
+            layout="position"
+            onClick={() => setActive(thread.uuid)}
+        >
             <ItemHeader>
                 <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
                 <ItemTitle>
