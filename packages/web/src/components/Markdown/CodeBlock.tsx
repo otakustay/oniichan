@@ -23,6 +23,7 @@ const Header = styled.div`
     justify-content: space-between;
     height: 2.5em;
     padding: 0 1em;
+    border-radius: .5em .5em 0 0;
     border: 1px solid var(--color-default-border);
     border-bottom: none;
     background-color: var(--color-contrast-background);
@@ -30,7 +31,6 @@ const Header = styled.div`
 
 const Layout = styled.div`
     margin: 0;
-    border-radius: .5em;
     overflow: hidden;
 
     pre {

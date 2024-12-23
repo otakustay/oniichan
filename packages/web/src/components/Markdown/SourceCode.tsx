@@ -1,20 +1,17 @@
-import {use} from 'react';
+import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {codeToHtml} from 'shiki';
-
-function renderCode(code: string, language: string) {
-    return codeToHtml(
-        code,
-        {
-            lang: language,
-            themes: {light: 'github-light-default', dark: 'github-dark-default'},
-        }
-    );
-}
+import {
+    BundledHighlighterOptions,
+    BundledLanguage,
+    BundledTheme,
+    getSingletonHighlighter,
+    HighlighterGeneric,
+} from 'shiki';
 
 const Layout = styled.div`
     border: 1px solid var(--color-default-border);
     padding: .5em;
+    border-radius: 0 0 .5em .5em;
     overflow-x: auto;
 `;
 
@@ -32,11 +29,36 @@ function NoHighlight({code}: Props) {
 }
 
 function SourceCode({code, language}: Props) {
-    if (!language) {
+    const [highlighter, setHighlighter] = useState<HighlighterGeneric<BundledLanguage, BundledTheme> | null>(null);
+    useEffect(
+        () => {
+            if (!language) {
+                return;
+            }
+
+            void (async () => {
+                const options: BundledHighlighterOptions<BundledLanguage, BundledTheme> = {
+                    langs: [language],
+                    themes: ['github-light-default', 'github-dark-default'],
+                };
+                const highlighter = await getSingletonHighlighter(options).catch();
+                setHighlighter(highlighter);
+            })();
+        },
+        [language]
+    );
+
+    if (!language || !highlighter) {
         return <NoHighlight code={code} language={language} />;
     }
 
-    const html = use(renderCode(code, language));
+    const html = highlighter.codeToHtml(
+        code,
+        {
+            lang: language,
+            themes: {light: 'github-light-default', dark: 'github-dark-default'},
+        }
+    );
 
     return <Layout dangerouslySetInnerHTML={{__html: html}} />;
 }
