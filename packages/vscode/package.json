@@ -39,6 +39,11 @@
         "command": "oniichan.openWebview",
         "title": "Open Oniichan Webview",
         "category": "Oniichan"
+      },
+      {
+        "command": "oniichan.openSidebar",
+        "title": "Open Oniichan Sidebar",
+        "category": "Oniichan"
       }
     ],
     "keybindings": [
@@ -46,6 +51,11 @@
         "command": "oniichan.semanticRewrite",
         "key": "alt+shift+r",
         "mac": "command+shift+r"
+      },
+      {
+        "command": "oniichan.openSidebar",
+        "key": "alt+shift+2",
+        "mac": "command+shift+2"
       }
     ],
     "viewsContainers": {

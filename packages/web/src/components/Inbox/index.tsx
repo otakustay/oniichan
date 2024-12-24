@@ -16,12 +16,16 @@ const EditTrigger = styled(Button)`
     border-radius: 50%;
 `;
 
-export default function Inbox() {
+function InboxHeader() {
+    return <HeadNavigation title="Inbox" description="All your messages" />;
+}
+
+function Inbox() {
     const setEditing = useSetEditing();
 
     return (
         <>
-            <HeadNavigation title="Inbox" description="All your messages" />
+            <InboxHeader />
             <ThreadList />
             <EditTrigger onClick={() => setEditing({threadUuid: crypto.randomUUID(), mode: 'new'})}>
                 <HiOutlinePencilAlt />
@@ -29,3 +33,5 @@ export default function Inbox() {
         </>
     );
 }
+
+export default Object.assign(Inbox, {Header: InboxHeader, List: ThreadList});

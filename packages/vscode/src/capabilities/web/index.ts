@@ -102,8 +102,14 @@ export class WebApp implements Disposable, WebviewViewProvider {
     }
 
     private initializeSidebar() {
-        const disposable = window.registerWebviewViewProvider('oniichan-sidebar', this);
-        this.disposables.push(disposable);
+        const view = window.registerWebviewViewProvider('oniichan-sidebar', this);
+        const command = commands.registerCommand(
+            'oniichan.openSidebar',
+            async () => {
+                await commands.executeCommand('oniichan-sidebar.focus');
+            }
+        );
+        this.disposables.push(view, command);
     }
 
     private initializeOpenWebviewCommand() {
