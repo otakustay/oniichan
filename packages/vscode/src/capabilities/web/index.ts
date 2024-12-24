@@ -13,7 +13,7 @@ import {
     window,
     WebviewView,
 } from 'vscode';
-import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {ExecutionMessage, ExecutionRequest, ExecutionType, Port, isExecutionMessage} from '@otakustay/ipc';
 import {WebAppServer, IpcServer} from '@oniichan/server';
 import {DependencyContainer} from '@oniichan/shared/container';
 
@@ -56,7 +56,6 @@ interface Dependency {
 export class WebApp implements Disposable, WebviewViewProvider {
     private readonly container: DependencyContainer<Dependency>;
 
-    // TODO: Add command to open sidebar
     private sidebarView: WebviewView | null = null;
 
     // File is `dist/extension.ts`, reference to `dist/web`
@@ -87,7 +86,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     private async setupWebview(webview: Webview) {
         const port = new WebviewPort(webview);
-        const ipcServer = new IpcServer({namespace: 'web -> server'});
+        const ipcServer = new IpcServer({namespace: 'web -> ide'});
         await ipcServer.connect(port);
         const context = this.container.get('ExtensionContext');
         const htmlUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'index.html');
@@ -103,13 +102,30 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     private initializeSidebar() {
         const view = window.registerWebviewViewProvider('oniichan-sidebar', this);
-        const command = commands.registerCommand(
+        const openCommand = commands.registerCommand(
             'oniichan.openSidebar',
-            async () => {
+            async (request?: ExecutionRequest) => {
                 await commands.executeCommand('oniichan-sidebar.focus');
+                if (request) {
+                    await this.sidebarView?.webview.postMessage(request);
+                }
             }
         );
-        this.disposables.push(view, command);
+        // TODO: We need to make a client to send these messages by creating a server-in-web standalone package
+        const composeCommand = commands.registerCommand(
+            'oniichan.composeNewMessage',
+            async () => {
+                const request: ExecutionRequest = {
+                    namespace: 'ide -> web',
+                    taskId: crypto.randomUUID(),
+                    executionId: crypto.randomUUID(),
+                    executionType: ExecutionType.Request,
+                    action: 'composeNewMessage',
+                };
+                await commands.executeCommand('oniichan.openSidebar', request);
+            }
+        );
+        this.disposables.push(view, openCommand, composeCommand);
     }
 
     private initializeOpenWebviewCommand() {

@@ -7,7 +7,7 @@ export interface EditingValue {
     mode: 'new' | 'reply';
 }
 
-const editingAtom = atom<EditingValue | null>(null);
+export const editingAtom = atom<EditingValue | null>(null);
 
 export function useDraftContentValue() {
     return useAtomValue(draftContentAtom);

@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "husky",
     "lint": "nx affected -t lint",
-    "build": "nx affected -t build",
+    "build": "rm -r packages/*/dist && nx run-many -t build",
     "preversion": "npm run ci",
     "release": "sh scripts/release.sh",
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",

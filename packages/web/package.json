@@ -42,5 +42,12 @@
     "react-refresh": "^0.16.0",
     "react-spinners": "^0.15.0",
     "shiki": "^1.24.4"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": ["{projectRoot}/../vscode/dist/web"]
+      }
+    }
   }
 }

@@ -44,6 +44,11 @@
         "command": "oniichan.openSidebar",
         "title": "Open Oniichan Sidebar",
         "category": "Oniichan"
+      },
+      {
+        "command": "oniichan.composeNewMessage",
+        "title": "Compose New Message",
+        "category": "Oniichan"
       }
     ],
     "keybindings": [

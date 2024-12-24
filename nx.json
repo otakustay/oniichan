@@ -6,13 +6,15 @@
       "dependsOn": ["^build"],
       "outputs": [
         "{projectRoot}/dist"
-      ]
+      ],
+      "cache": true
     },
-    "test": {
-      "dependsOn": ["^build"],
+    "lint": {
+      "dependsOn": ["^lint"],
       "outputs": [
         "{projectRoot}/coverage"
-      ]
+      ],
+      "cache": true
     }
   },
   "namedInputs": {
