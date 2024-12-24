@@ -3,6 +3,7 @@ import {Protocol} from '@oniichan/host/server';
 import {newUuid} from '@oniichan/shared/id';
 import {ChatMessagePayload, createModelClient, ModelClient} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
+// TODO: Move this to shared
 import {isModelConfigValid} from '@oniichan/host/utils/config';
 import {CodeResult, streamingExtractCode} from './extract';
 

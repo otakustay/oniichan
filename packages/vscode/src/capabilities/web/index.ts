@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import {
     commands,
+    WebviewViewProvider,
     Disposable,
     ExtensionContext,
     StatusBarAlignment,
@@ -10,6 +11,7 @@ import {
     ViewColumn,
     Webview,
     window,
+    WebviewView,
 } from 'vscode';
 import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {WebAppServer, IpcServer} from '@oniichan/server';
@@ -51,8 +53,11 @@ interface Dependency {
     ExtensionContext: ExtensionContext;
 }
 
-export class WebApp implements Disposable {
+export class WebApp implements Disposable, WebviewViewProvider {
     private readonly container: DependencyContainer<Dependency>;
+
+    // TODO: Add command to open sidebar
+    private sidebarView: WebviewView | null = null;
 
     // File is `dist/extension.ts`, reference to `dist/web`
     private readonly webAppServer = new WebAppServer({staticDirectory: path.join(__dirname, 'web')});
@@ -64,13 +69,41 @@ export class WebApp implements Disposable {
     constructor(container: DependencyContainer<Dependency>) {
         this.container = container;
         this.initializeStatusBar();
+        this.initializeSidebar();
         this.initializeWebAppServer();
         this.initializeOpenWebAppCommand();
         this.initializeOpenWebviewCommand();
     }
 
+    async resolveWebviewView(view: WebviewView) {
+        this.sidebarView = view;
+        const disposable = await this.setupWebview(view.webview);
+        this.disposables.push(disposable);
+    }
+
     dispose() {
         Disposable.from(...this.disposables).dispose();
+    }
+
+    private async setupWebview(webview: Webview) {
+        const port = new WebviewPort(webview);
+        const ipcServer = new IpcServer({namespace: 'web -> server'});
+        await ipcServer.connect(port);
+        const context = this.container.get('ExtensionContext');
+        const htmlUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'index.html');
+        const entryScriptUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'main.js');
+        const htmlContent = await fs.readFile(htmlUri.fsPath, 'utf-8');
+        const html = htmlContent.replace('main.js', webview.asWebviewUri(entryScriptUri).toString());
+        webview.options = {
+            enableScripts: true,
+        };
+        webview.html = html;
+        return new Disposable(() => port.dispose());
+    }
+
+    private initializeSidebar() {
+        const disposable = window.registerWebviewViewProvider('oniichan-sidebar', this);
+        this.disposables.push(disposable);
     }
 
     private initializeOpenWebviewCommand() {
@@ -87,15 +120,8 @@ export class WebApp implements Disposable {
                         localResourceRoots: [Uri.joinPath(context.extensionUri, 'dist', 'web')],
                     }
                 );
-                const htmlUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'index.html');
-                const entryScriptUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'main.js');
-                const htmlContent = await fs.readFile(htmlUri.fsPath, 'utf-8');
-                const html = htmlContent.replace('main.js', panel.webview.asWebviewUri(entryScriptUri).toString());
-                panel.webview.html = html;
-                const port = new WebviewPort(panel.webview);
-                const ipcServer = new IpcServer({namespace: 'web -> server'});
-                await ipcServer.connect(port);
-                panel.onDidDispose(() => port.dispose());
+                const disposable = await this.setupWebview(panel.webview);
+                panel.onDidDispose(() => void disposable.dispose());
             }
         );
         this.disposables.push(openWebviewCommand);

@@ -48,6 +48,24 @@
         "mac": "command+shift+r"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "oniichan-sidebar-view",
+          "title": "Oniichan",
+          "icon": "assets/sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "oniichan-sidebar-view": [
+        {
+          "type": "webview",
+          "id": "oniichan-sidebar",
+          "name": "Oniichan"
+        }
+      ]
+    },
     "configuration": [
       {
         "title": "Model Configuration",
