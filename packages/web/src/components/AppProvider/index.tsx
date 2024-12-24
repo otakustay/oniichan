@@ -1,5 +1,6 @@
 import {ReactNode} from 'react';
 import ClientProvider, {useClient} from './Client';
+import ColorSchemeProvider from './ColorScheme';
 
 export {useClient};
 
@@ -10,7 +11,9 @@ interface Props {
 export default function AppProvider({children}: Props) {
     return (
         <ClientProvider>
-            {children}
+            <ColorSchemeProvider>
+                {children}
+            </ColorSchemeProvider>
         </ClientProvider>
     );
 }

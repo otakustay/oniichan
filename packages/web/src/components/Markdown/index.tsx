@@ -17,8 +17,12 @@ const MarkdownContent = styled(ReactMarkdown)`
     code {
         font-family: monospace;
         padding: 0 .5em;
-        background-color: var(--color-contrast-background);
+        background-color: transparent;
         color: var(--color-contrast-foreground);
+    }
+
+    pre {
+        background-color: transparent !important;
     }
 `;
 

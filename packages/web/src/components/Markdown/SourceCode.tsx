@@ -7,6 +7,7 @@ import {
     getSingletonHighlighter,
     HighlighterGeneric,
 } from 'shiki';
+import {useColorScheme} from '@/components/AppProvider/ColorScheme';
 
 const Layout = styled.div`
     border: 1px solid var(--color-default-border);
@@ -30,6 +31,7 @@ function NoHighlight({code}: Props) {
 
 function SourceCode({code, language}: Props) {
     const [highlighter, setHighlighter] = useState<HighlighterGeneric<BundledLanguage, BundledTheme> | null>(null);
+    const colorScheme = useColorScheme();
     useEffect(
         () => {
             if (!language) {
@@ -56,7 +58,7 @@ function SourceCode({code, language}: Props) {
         code,
         {
             lang: language,
-            themes: {light: 'github-light-default', dark: 'github-dark-default'},
+            theme: colorScheme === 'light' ? 'github-light-default' : 'github-dark-default',
         }
     );
 
