@@ -284,7 +284,7 @@ export function useSendMessageToThread(threadUuid: string) {
         setMessageThreadList(addNewMessageToThreadListBy(threadUuid, userMessage));
         const replyUuid = crypto.randomUUID();
         const messages: ChatMessagePayload[] = payloadFromThread(thread, userMessage);
-        for await (const chunk of ipc.kernel.callStreaming(uuid, 'modelChat', messages)) {
+        for await (const chunk of ipc.kernel.callStreaming(uuid, 'inboxSendMessage', messages)) {
             setMessageThreadList(appendMessageBy(threadUuid, replyUuid, chunk));
         }
         setMessageThreadList(markAsGeneratedBy(threadUuid, replyUuid));

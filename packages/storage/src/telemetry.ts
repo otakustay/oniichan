@@ -86,7 +86,14 @@ export interface FunctionUsageAbnormalResult {
     reason: string;
 }
 
+export interface FunctionUsageValueResult<T> {
+    type: 'value';
+    value: T;
+}
+
 export type FunctionUsageResult = FunctionUsageSuccessResult | FunctionUsageAbnormalResult;
+
+export type FunctionUsageStreamResult<T> = FunctionUsageValueResult<T> | FunctionUsageAbnormalResult;
 
 export class FunctionUsageTelemetry {
     private readonly uuid: string;
@@ -162,7 +169,7 @@ export class FunctionUsageTelemetry {
         }
     }
 
-    async spyRun(fn: () => Promise<FunctionUsageResult>) {
+    async spyRun(fn: () => Promise<FunctionUsageResult>): Promise<void> {
         this.start();
 
         try {
@@ -173,6 +180,29 @@ export class FunctionUsageTelemetry {
             else {
                 this[result.type](result.reason);
             }
+        }
+        catch (ex) {
+            this.fail(stringifyError(ex));
+            throw ex;
+        }
+        finally {
+            void this.record();
+        }
+    }
+
+    async *spyStreaming<T>(fn: () => AsyncIterable<FunctionUsageStreamResult<T>>): AsyncIterable<T> {
+        this.start();
+
+        try {
+            for await (const result of fn()) {
+                if (result.type === 'value') {
+                    yield result.value;
+                }
+                else {
+                    this[result.type](result.reason);
+                }
+            }
+            this.end();
         }
         catch (ex) {
             this.fail(stringifyError(ex));

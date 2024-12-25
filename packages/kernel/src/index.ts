@@ -7,6 +7,7 @@ import {Context} from './handlers/handler';
 import {ScaffoldHandler} from './handlers/scaffold';
 import {ModelChatHandler} from './handlers/model';
 import {ModelTelemetryHandler} from './handlers/telemetry';
+import {InboxSendMessageHandler} from './handlers/inbox/send';
 
 export {EditorHost};
 
@@ -16,6 +17,7 @@ export type Protocol = ProtocolOf<
     | typeof ScaffoldHandler
     | typeof ModelChatHandler
     | typeof ModelTelemetryHandler
+    | typeof InboxSendMessageHandler
 >;
 
 export class KernelServer extends Server<Protocol, Context> {
@@ -39,6 +41,7 @@ export class KernelServer extends Server<Protocol, Context> {
         this.registerHandler(ScaffoldHandler);
         this.registerHandler(ModelChatHandler);
         this.registerHandler(ModelTelemetryHandler);
+        this.registerHandler(InboxSendMessageHandler);
     }
 }
 
