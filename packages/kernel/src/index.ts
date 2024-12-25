@@ -1,6 +1,6 @@
 import {ProtocolOf, Server} from '@otakustay/ipc';
 import {Logger} from '@oniichan/shared/logger';
-import {EditorHost} from './host';
+import {EditorHost} from './editor';
 import {EchoHandler} from './handlers/echo';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {Context} from './handlers/handler';

@@ -2,7 +2,7 @@ import path from 'node:path';
 import {ChatMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {EditorHost} from '../../host';
+import {EditorHost} from '../../editor';
 import rewriteTemplate from './rewrite.prompt';
 
 export interface EnhancedContextSnippet {

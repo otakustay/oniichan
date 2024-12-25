@@ -1,8 +1,8 @@
 import {Disposable, commands} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
-import {TaskManager} from '@oniichan/host/utils/task';
-import {LoadingManager} from '@oniichan/host/ui/loading';
+import {TaskManager} from '@oniichan/editor-host/utils/task';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
 import {KernelClient} from '../../kernel';
 import {ScaffoldExecutor} from './executor';

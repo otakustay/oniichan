@@ -19,7 +19,7 @@
     "watch:shared": "cd packages/shared && npm run watch",
     "watch:storage": "cd packages/storage && npm run watch",
     "watch:server": "cd packages/server && npm run watch",
-    "watch:host": "cd packages/host && npm run watch",
+    "watch:editor-host": "cd packages/editor-host && npm run watch",
     "watch:kernel": "cd packages/kernel && npm run watch",
     "watch:web": "cd packages/web && npm run watch",
     "watch:web-types": "cd packages/web && npm run watch-types"

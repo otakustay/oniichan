@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {Worker} from 'node:worker_threads';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {HostServer, HostServerDependency} from '@oniichan/host/server';
+import {HostServer, HostServerDependency} from '@oniichan/editor-host/server';
 import {Client, ClientInit, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';

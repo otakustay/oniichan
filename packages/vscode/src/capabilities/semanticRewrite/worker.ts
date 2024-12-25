@@ -3,10 +3,10 @@ import {LinePin} from '@otakustay/text-pin';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {SemanticRewriteRequest} from '@oniichan/kernel';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {TextEditorReference} from '@oniichan/host/utils/editor';
-import {LoadingManager} from '@oniichan/host/ui/loading';
+import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';
-import {TaskContext} from '@oniichan/host/utils/task';
+import {TaskContext} from '@oniichan/editor-host/utils/task';
 import {KernelClient} from '../../kernel';
 
 interface Dependency {

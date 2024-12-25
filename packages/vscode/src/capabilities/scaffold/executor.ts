@@ -1,10 +1,10 @@
 import {window, TextEditor, Position, Uri, workspace, Disposable, Range} from 'vscode';
-import {TaskManager, TaskContainer, TaskContext} from '@oniichan/host/utils/task';
+import {TaskManager, TaskContainer, TaskContext} from '@oniichan/editor-host/utils/task';
 import {ScaffoldRequest} from '@oniichan/kernel';
 import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
-import {TextEditorReference} from '@oniichan/host/utils/editor';
-import {LoadingManager} from '@oniichan/host/ui/loading';
+import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {stringifyError} from '@oniichan/shared/string';
 import {KernelClient} from '../../kernel';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';

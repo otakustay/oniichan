@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@oniichan/host",
+  "name": "@oniichan/editor-host",
   "version": "1.5.0",
   "description": "Host and expose VSCode API to consumers via IPC",
   "exports": {

@@ -2,7 +2,7 @@ import path from 'node:path';
 import {ChatMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {EditorHost} from '../../host';
+import {EditorHost} from '../../editor';
 import scaffoldTemplate from './scaffold.prompt';
 
 export interface ScaffoldSnippet {

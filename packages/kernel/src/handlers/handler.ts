@@ -1,6 +1,6 @@
 import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@otakustay/ipc';
 import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
-import {EditorHost} from '../host';
+import {EditorHost} from '../editor';
 
 type SendNotice = (action: string, payload?: any) => void;
 

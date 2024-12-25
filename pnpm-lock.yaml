@@ -33,7 +33,7 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1(eslint@9.17.0(jiti@2.4.1))(typescript@5.7.2)
 
-  packages/host:
+  packages/editor-host:
     dependencies:
       '@oniichan/shared':
         specifier: workspace:*
@@ -54,9 +54,9 @@ importers:
 
   packages/kernel:
     dependencies:
-      '@oniichan/host':
+      '@oniichan/editor-host':
         specifier: workspace:*
-        version: link:../host
+        version: link:../editor-host
       '@oniichan/shared':
         specifier: workspace:*
         version: link:../shared
@@ -111,9 +111,9 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.1
         version: 11.0.1
-      '@oniichan/host':
+      '@oniichan/editor-host':
         specifier: workspace:*
-        version: link:../host
+        version: link:../editor-host
       '@oniichan/kernel':
         specifier: workspace:*
         version: link:../kernel
@@ -6199,20 +6199,20 @@ snapshots:
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/bonjour@3.5.13':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
       '@types/express-serve-static-core': 5.0.2
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/conventional-commits-parser@5.0.1':
     dependencies:
@@ -6230,14 +6230,14 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.6':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
       '@types/qs': 6.9.17
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
 
   '@types/express-serve-static-core@5.0.2':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
       '@types/qs': 6.9.17
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -6257,7 +6257,7 @@ snapshots:
 
   '@types/http-proxy@1.17.15':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/json-schema@7.0.15': {}
 
@@ -6277,12 +6277,12 @@ snapshots:
 
   '@types/node-fetch@2.6.12':
     dependencies:
-      '@types/node': 18.19.68
+      '@types/node': 20.17.9
       form-data: 4.0.1
 
   '@types/node-forge@1.3.11':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/node@18.19.68':
     dependencies:
@@ -6323,7 +6323,7 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/serve-index@1.9.4':
     dependencies:
@@ -6332,12 +6332,12 @@ snapshots:
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
       '@types/send': 0.17.4
 
   '@types/sockjs@0.3.36':
     dependencies:
-      '@types/node': 22.10.2
+      '@types/node': 20.17.9
 
   '@types/unist@2.0.11': {}
 

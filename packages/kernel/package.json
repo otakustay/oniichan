@@ -15,7 +15,7 @@
     "dist"
   ],
   "dependencies": {
-    "@oniichan/host": "workspace:*",
+    "@oniichan/editor-host": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/ipc": "^2.3.1"
