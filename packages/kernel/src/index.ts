@@ -5,10 +5,18 @@ import {EchoHandler} from './handlers/echo';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {Context} from './handlers/handler';
 import {ScaffoldHandler} from './handlers/scaffold';
+import {ModelChatHandler} from './handlers/model';
+import {ModelTelemetryHandler} from './handlers/telemetry';
 
 export {EditorHost};
 
-export type Protocol = ProtocolOf<typeof EchoHandler | typeof SemanticRewriteHandler | typeof ScaffoldHandler>;
+export type Protocol = ProtocolOf<
+    | typeof EchoHandler
+    | typeof SemanticRewriteHandler
+    | typeof ScaffoldHandler
+    | typeof ModelChatHandler
+    | typeof ModelTelemetryHandler
+>;
 
 export class KernelServer extends Server<Protocol, Context> {
     private readonly editorHost: EditorHost;
@@ -16,10 +24,11 @@ export class KernelServer extends Server<Protocol, Context> {
     private readonly logger: Logger;
 
     constructor(editorHost: EditorHost, logger: Logger) {
-        super();
+        super({namespace: '-> kernel'});
         this.editorHost = editorHost;
         this.logger = logger;
     }
+
     protected async createContext(): Promise<Context> {
         return {editorHost: this.editorHost, logger: this.logger};
     }
@@ -28,6 +37,8 @@ export class KernelServer extends Server<Protocol, Context> {
         this.registerHandler(EchoHandler);
         this.registerHandler(SemanticRewriteHandler);
         this.registerHandler(ScaffoldHandler);
+        this.registerHandler(ModelChatHandler);
+        this.registerHandler(ModelTelemetryHandler);
     }
 }
 

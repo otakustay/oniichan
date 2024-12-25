@@ -4,8 +4,9 @@
   "version": "1.5.0",
   "description": "Web app for Oniichan Coding Assistant",
   "scripts": {
-    "build": "rspack build && tsc --noEmit",
+    "build": "rspack build && tsc",
     "watch": "rspack build --watch",
+    "watch-types": "tsc --watch",
     "lint": "eslint --max-warnings=0 --fix src",
     "start": "rspack serve"
   },
@@ -16,7 +17,7 @@
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@oniichan/server": "workspace:*",
+    "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/ipc": "^2.3.1",

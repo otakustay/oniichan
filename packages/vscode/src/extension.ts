@@ -2,12 +2,12 @@ import {ExtensionContext} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/host/ui/loading';
+import {TaskManager} from '@oniichan/host/utils/task';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {OpenDataFolderCommand} from './capabilities/debug';
 import {WebApp} from './capabilities/web';
-import {createKernelClient, KernelClient} from './kernel';
+import {createKernelClient} from './kernel';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
-import {TaskManager} from '@oniichan/host/utils/task';
 import {ScaffoldCommand} from './capabilities/scaffold';
 
 export async function activate(context: ExtensionContext) {
@@ -20,7 +20,7 @@ export async function activate(context: ExtensionContext) {
         .bind('ExtensionContext', () => context, {singleton: true});
     const kernel = await createKernelClient(serverHostContainer);
     const globalContainer = serverHostContainer
-        .bind(KernelClient, () => kernel, {singleton: true});
+        .bind('KernelClient', () => kernel, {singleton: true});
 
     context.subscriptions.push(
         new SemanticRewriteCommand(globalContainer),

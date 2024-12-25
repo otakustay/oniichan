@@ -35,7 +35,7 @@ export class HostServer extends Server<Protocol, Context> {
     private readonly container: DependencyContainer<HostServerDependency>;
 
     constructor(container: DependencyContainer<HostServerDependency>) {
-        super();
+        super({namespace: '-> host'});
         this.container = container;
     }
 

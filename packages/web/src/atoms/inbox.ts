@@ -1,7 +1,7 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {ChatMessagePayload} from '@oniichan/shared/model';
-import {useClientValue} from './client';
+import {useIpcValue} from './ipc';
 import {useSetEditing} from './draft';
 
 export type MessageStatus = 'generating' | 'unread' | 'read';
@@ -167,7 +167,7 @@ function payloadFromThread(thread: MessageThread | null, newMessage: Message) {
 }
 
 export function useSendMessageToThread(threadUuid: string) {
-    const client = useClientValue();
+    const ipc = useIpcValue();
     const thread = useMessageThreadValueByUuid(threadUuid);
     const setMessageThreadList = useSetMessagelThreadList();
     const setEditing = useSetEditing();
@@ -284,7 +284,7 @@ export function useSendMessageToThread(threadUuid: string) {
         setMessageThreadList(addNewMessageToThreadListBy(threadUuid, userMessage));
         const replyUuid = crypto.randomUUID();
         const messages: ChatMessagePayload[] = payloadFromThread(thread, userMessage);
-        for await (const chunk of client.callStreaming(uuid, 'modelChat', messages)) {
+        for await (const chunk of ipc.kernel.callStreaming(uuid, 'modelChat', messages)) {
             setMessageThreadList(appendMessageBy(threadUuid, replyUuid, chunk));
         }
         setMessageThreadList(markAsGeneratedBy(threadUuid, replyUuid));

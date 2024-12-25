@@ -4,7 +4,11 @@
 
 ### Added
 
-- 一个以电子邮件为交互形态的大模型对话系统。
+- 一个以电子邮件为交互形态的大模型对话系统，可以在侧边栏、独立标签、浏览器中打开，具体参考[邮件系统](https://github.com/otakustay/oniichan/wiki/%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F)。
+
+### Removed
+
+原有的`Open Oniichan Webview`命令将不再显示模型用量的信息，由邮件系统的界面代替。
 
 ## [1.5.0] - 2024-12-19
 

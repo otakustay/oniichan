@@ -26,7 +26,3 @@ export function getModelConfig(): ModelConfiguration {
 
     return {apiStyle, apiKey, modelName, baseUrl};
 }
-
-export function isModelConfigValid(config: ModelConfiguration) {
-    return !!(config.apiKey && config.baseUrl && config.modelName);
-}

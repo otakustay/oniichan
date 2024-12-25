@@ -1,5 +1,5 @@
 import {readModelTelemetry, ModelUsageRecord} from '@oniichan/storage/telemetry';
-import {RequestHandler} from '@otakustay/ipc';
+import {RequestHandler} from '../handler';
 
 async function takeLastReversed<T>(iterable: AsyncIterable<T>, count: number): Promise<T[]> {
     const output: T[] = [];

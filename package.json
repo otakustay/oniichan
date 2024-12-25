@@ -9,17 +9,20 @@
   "scripts": {
     "prepare": "husky",
     "lint": "nx affected -t lint",
-    "build": "rm -r packages/*/dist && nx run-many -t build",
+    "build": "nx run-many -t build",
+    "build-clean": "rm -r packages/*/dist && npm run build",
     "preversion": "npm run ci",
     "release": "sh scripts/release.sh",
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",
     "watch:vscode": "cd packages/vscode && npm run watch",
+    "watch:vscode-types": "cd packages/vscode && npm run watch-types",
     "watch:shared": "cd packages/shared && npm run watch",
     "watch:storage": "cd packages/storage && npm run watch",
     "watch:server": "cd packages/server && npm run watch",
     "watch:host": "cd packages/host && npm run watch",
     "watch:kernel": "cd packages/kernel && npm run watch",
-    "watch:web": "cd packages/web && npm run watch"
+    "watch:web": "cd packages/web && npm run watch",
+    "watch:web-types": "cd packages/web && npm run watch-types"
   },
   "homepage": "https://github.com/otakustay/oniichan",
   "bugs": {

@@ -34,13 +34,17 @@ class WorkerPort implements Port {
     }
 }
 
+interface Dependency {
+    [Logger.containerKey]: Logger;
+}
+
 export class KernelClient extends Client<KernelProtocol> {
     static readonly containerKey = 'KernelClient';
 
     private readonly logger: Logger;
 
-    constructor(port: Port, container: DependencyContainer<HostServerDependency>, init?: ClientInit) {
-        super(port, init);
+    constructor(port: Port, container: DependencyContainer<Dependency>, init?: ClientInit) {
+        super(port, {namespace: '-> kernel', ...init});
         this.logger = container.get(Logger);
     }
 
@@ -103,7 +107,7 @@ export class KernelClient extends Client<KernelProtocol> {
 export async function createKernelClient(container: DependencyContainer<HostServerDependency>): Promise<KernelClient> {
     const logger = container.get(Logger);
     logger.trace('ActivateKernelStart');
-    const worker = new Worker(path.join(__dirname, 'kernelEntry.js'), {stdout: true, stderr: true});
+    const worker = new Worker(path.join(__dirname, 'kernelEntry.js'));
     const port = new WorkerPort(worker);
     const hostServer = new HostServer(container);
     await hostServer.connect(port);

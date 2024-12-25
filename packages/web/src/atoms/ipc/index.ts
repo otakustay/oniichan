@@ -1,30 +1,34 @@
 import {atom, useAtomValue} from 'jotai';
 import {Client} from '@otakustay/ipc';
-import {Protocol as WebToIdeProtocol} from '@oniichan/server/protocol';
 import {WebSocketPort, VscodeMessagePort} from './port';
+import {Protocol as KernelProtocol} from '@oniichan/kernel';
 import {Server} from '@/server';
+
+export interface Ipc {
+    kernel: Client<KernelProtocol>;
+}
 
 async function createIpc() {
     const isVscode = location.protocol === 'vscode-webview:';
 
     if (isVscode) {
         const port = new VscodeMessagePort();
-        const client = new Client<WebToIdeProtocol>(port, {namespace: 'web -> ide'});
-        const server = new Server({namespace: 'ide -> web'});
+        const kernelClient = new Client<KernelProtocol>(port, {namespace: '-> kernel'});
+        const server = new Server({namespace: '-> web'});
         await server.connect(port);
-        return client;
+        return {kernel: kernelClient};
     }
     else {
-        const executor = (resolve: (value: Client<WebToIdeProtocol>) => void) => {
+        const executor = (resolve: (value: Ipc) => void) => {
             const socket = new WebSocket(`ws://${location.host}/gateway`);
             socket.addEventListener(
                 'open',
                 async () => {
                     const port = new WebSocketPort(socket);
-                    const client = new Client<WebToIdeProtocol>(port, {namespace: 'web -> ide'});
-                    const server = new Server({namespace: 'ide -> web'});
+                    const kernelClient = new Client<KernelProtocol>(port, {namespace: '-> kernel'});
+                    const server = new Server({namespace: '-> web'});
                     await server.connect(port);
-                    resolve(client);
+                    resolve({kernel: kernelClient});
                 }
             );
         };
@@ -32,9 +36,9 @@ async function createIpc() {
     }
 }
 
-export const clientAtom = atom(createIpc);
+export const ipcAtom = atom(createIpc);
 
-export function useClientValue() {
-    const client = useAtomValue(clientAtom);
-    return client;
+export function useIpcValue() {
+    const ipc = useAtomValue(ipcAtom);
+    return ipc;
 }

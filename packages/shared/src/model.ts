@@ -159,3 +159,7 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
         };
     }
 }
+
+export function isModelConfigValid(config: ModelConfiguration) {
+    return !!(config.apiKey && config.baseUrl && config.modelName);
+}

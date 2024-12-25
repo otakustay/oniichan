@@ -77,43 +77,6 @@ importers:
         specifier: ^6.2.1
         version: 6.2.1(typescript@5.7.2)
 
-  packages/server:
-    dependencies:
-      '@fastify/static':
-        specifier: ^8.0.3
-        version: 8.0.3
-      '@fastify/websocket':
-        specifier: ^11.0.1
-        version: 11.0.1
-      '@oniichan/host':
-        specifier: workspace:*
-        version: link:../host
-      '@oniichan/shared':
-        specifier: workspace:*
-        version: link:../shared
-      '@oniichan/storage':
-        specifier: workspace:*
-        version: link:../storage
-      '@otakustay/ipc':
-        specifier: ^2.3.1
-        version: 2.3.1
-      detect-port:
-        specifier: ^2.1.0
-        version: 2.1.0
-      fastify:
-        specifier: ^5.2.0
-        version: 5.2.0
-    devDependencies:
-      '@types/node':
-        specifier: 20.x
-        version: 20.17.9
-      '@types/vscode':
-        specifier: ^1.95.0
-        version: 1.95.0
-      '@types/ws':
-        specifier: ^8.5.13
-        version: 8.5.13
-
   packages/shared:
     dependencies:
       '@anthropic-ai/sdk':
@@ -141,23 +104,19 @@ importers:
         version: 20.17.9
 
   packages/vscode:
-    dependencies:
-      '@otakustay/ipc':
-        specifier: ^2.3.1
-        version: 2.3.1
-      open:
-        specifier: ^10.1.0
-        version: 10.1.0
     devDependencies:
+      '@fastify/static':
+        specifier: ^8.0.3
+        version: 8.0.3
+      '@fastify/websocket':
+        specifier: ^11.0.1
+        version: 11.0.1
       '@oniichan/host':
         specifier: workspace:*
         version: link:../host
       '@oniichan/kernel':
         specifier: workspace:*
         version: link:../kernel
-      '@oniichan/server':
-        specifier: workspace:*
-        version: link:../server
       '@oniichan/shared':
         specifier: workspace:*
         version: link:../shared
@@ -167,6 +126,9 @@ importers:
       '@oniichan/web':
         specifier: workspace:*
         version: link:../web
+      '@otakustay/ipc':
+        specifier: ^2.3.1
+        version: 2.3.1
       '@otakustay/text-pin':
         specifier: ^1.0.0
         version: 1.0.0
@@ -176,9 +138,21 @@ importers:
       '@types/vscode':
         specifier: ^1.95.0
         version: 1.95.0
+      '@types/ws':
+        specifier: ^8.5.13
+        version: 8.5.13
+      detect-port:
+        specifier: ^2.1.0
+        version: 2.1.0
       esbuild:
         specifier: ^0.24.2
         version: 0.24.2
+      fastify:
+        specifier: ^5.2.0
+        version: 5.2.0
+      open:
+        specifier: ^10.1.0
+        version: 10.1.0
 
   packages/web:
     devDependencies:
@@ -191,9 +165,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.0.2)(react@19.0.0))(@types/react@19.0.2)(react@19.0.0)
-      '@oniichan/server':
+      '@oniichan/kernel':
         specifier: workspace:*
-        version: link:../server
+        version: link:../kernel
       '@oniichan/shared':
         specifier: workspace:*
         version: link:../shared

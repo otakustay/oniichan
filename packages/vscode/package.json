@@ -137,7 +137,8 @@
     "lint": "eslint --max-warnings=0 --fix src",
     "build": "npm run check-types && node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
-    "check-types": "tsc --noEmit",
+    "watch-types": "tsc --watch",
+    "check-types": "tsc",
     "vscode:prepublish": "npm run package",
     "package": "npm run check-types && npm run lint && node esbuild.mjs --production"
   },
@@ -151,19 +152,21 @@
     "url": "https://github.com/otakustay/oniichan"
   },
   "devDependencies": {
+    "@fastify/static": "^8.0.3",
+    "@fastify/websocket": "^11.0.1",
     "@oniichan/host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
-    "@oniichan/server": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@oniichan/web": "workspace:*",
+    "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
-    "esbuild": "^0.24.2"
-  },
-  "dependencies": {
-    "@otakustay/ipc": "^2.3.1",
+    "@types/ws": "^8.5.13",
+    "detect-port": "^2.1.0",
+    "esbuild": "^0.24.2",
+    "fastify": "^5.2.0",
     "open": "^10.1.0"
   }
 }

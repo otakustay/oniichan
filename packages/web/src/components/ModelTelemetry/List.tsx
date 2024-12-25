@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {ModelUsageRecord} from '@oniichan/storage/telemetry';
-import {useClient} from '@/components/AppProvider';
+import {useIpc} from '@/components/AppProvider';
 
 const Card = styled.div`
     display: flex;
@@ -102,12 +102,12 @@ const Layout = styled.div`
 `;
 
 export default function List() {
-    const client = useClient();
+    const ipc = useIpc();
     const [dataSource, setDataSource] = useState<ModelUsageRecord[]>([]);
     useEffect(
         () => {
             void (async () => {
-                const dataSource = await client.call(crypto.randomUUID(), 'modelTelemetry');
+                const dataSource = await ipc.kernel.call(crypto.randomUUID(), 'modelTelemetry');
                 setDataSource(dataSource);
             })();
         },

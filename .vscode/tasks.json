@@ -7,10 +7,11 @@
         "npm: watch:vscode",
         "npm: watch:shared",
         "npm: watch:storage",
-        "npm: watch:server",
         "npm: watch:web",
         "npm: watch:host",
-        "npm: watch:kernel"
+        "npm: watch:kernel",
+        "npm: watch:vscode-types",
+        "npm: watch:web-types"
       ],
       "presentation": {
         "reveal": "never"
@@ -55,17 +56,6 @@
     },
     {
       "type": "npm",
-      "script": "watch:server",
-      "group": "build",
-      "problemMatcher": "$tsc-watch",
-      "isBackground": true,
-      "label": "npm: watch:server",
-      "presentation": {
-        "reveal": "never"
-      }
-    },
-    {
-      "type": "npm",
       "script": "watch:web",
       "group": "build",
       "problemMatcher": "$ts-webpack-watch",
@@ -93,6 +83,28 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:kernel",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:vscode-types",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:vscode-types",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:web-types",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:web-types",
       "presentation": {
         "reveal": "never"
       }

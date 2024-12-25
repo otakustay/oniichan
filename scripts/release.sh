@@ -9,7 +9,7 @@ if git diff --quiet -- "$CHANGELOG_FILE" && git diff --cached --quiet -- "$CHANG
 fi
 
 # Run a fresh build
-npm run build
+npm run build-clean
 
 # Update version in all package.json
 npm exec lerna version

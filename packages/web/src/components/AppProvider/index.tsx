@@ -1,8 +1,8 @@
 import {ReactNode} from 'react';
-import ClientProvider, {useClient} from './Client';
+import IpcProvider, {useIpc} from './Ipc';
 import ColorSchemeProvider from './ColorScheme';
 
-export {useClient};
+export {useIpc};
 
 interface Props {
     children: ReactNode;
@@ -10,10 +10,10 @@ interface Props {
 
 export default function AppProvider({children}: Props) {
     return (
-        <ClientProvider>
+        <IpcProvider>
             <ColorSchemeProvider>
                 {children}
             </ColorSchemeProvider>
-        </ClientProvider>
+        </IpcProvider>
     );
 }

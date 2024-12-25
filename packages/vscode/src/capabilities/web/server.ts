@@ -4,11 +4,11 @@ import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
-import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {Client, ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
-import {IpcServer} from './server';
-
-export {IpcServer};
+import {Protocol as KernelProtocol} from '@oniichan/kernel';
+import {establishIpc} from './ipc';
+import {DependencyContainer} from '@oniichan/shared/container';
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;
@@ -48,15 +48,22 @@ export interface ServerInit {
     staticDirectory: string;
 }
 
+interface Dependency {
+    KernelClient: Client<KernelProtocol>;
+}
+
 export class WebAppServer extends EventEmitter<ServerEventMap> {
     port: number | null = null;
 
     private readonly app: FastifyInstance;
 
+    private readonly container: DependencyContainer<Dependency>;
+
     private readonly staticDirectory: string;
 
-    constructor(init: ServerInit) {
+    constructor(container: DependencyContainer<Dependency>, init: ServerInit) {
         super();
+        this.container = container;
         this.app = fastify();
         this.staticDirectory = init.staticDirectory;
     }
@@ -68,9 +75,8 @@ export class WebAppServer extends EventEmitter<ServerEventMap> {
             '/gateway',
             {websocket: true},
             async socket => {
-                const port = new WebSocketPort(socket);
-                const ipcServer = new IpcServer({namespace: 'web -> ide'});
-                await ipcServer.connect(port);
+                const container = this.container.bind('Port', () => new WebSocketPort(socket), {singleton: true});
+                await establishIpc(container);
             }
         );
 

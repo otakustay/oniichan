@@ -40,7 +40,7 @@ class WorkerPort implements Port {
 async function main() {
     try {
         const port = new WorkerPort();
-        const hostClient = new Client<HostProtocol>(port);
+        const hostClient = new Client<HostProtocol>(port, {namespace: '-> host'});
         const editorHost = new EditorHost(hostClient);
         const logger = new ConsoleLogger('Kernel');
         const server = new KernelServer(editorHost, logger);

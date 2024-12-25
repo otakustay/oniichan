@@ -13,9 +13,12 @@ import {
     window,
     WebviewView,
 } from 'vscode';
-import {ExecutionMessage, ExecutionRequest, ExecutionType, Port, isExecutionMessage} from '@otakustay/ipc';
-import {WebAppServer, IpcServer} from '@oniichan/server';
+import {Client, ExecutionMessage, ExecutionRequest, ExecutionType, Port, isExecutionMessage} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {Logger} from '@oniichan/shared/logger';
+import {Protocol as KernelProtocol} from '@oniichan/kernel';
+import {WebAppServer} from './server';
+import {establishIpc} from './ipc';
 
 class WebviewPort implements Port, Disposable {
     private readonly webview: Webview;
@@ -50,7 +53,9 @@ class WebviewPort implements Port, Disposable {
 const OPEN_WEB_APP_COMMAND = 'oniichan.openWebAppInExternalBrowser';
 
 interface Dependency {
+    [Logger.containerKey]: Logger;
     ExtensionContext: ExtensionContext;
+    KernelClient: Client<KernelProtocol>;
 }
 
 export class WebApp implements Disposable, WebviewViewProvider {
@@ -59,7 +64,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
     private sidebarView: WebviewView | null = null;
 
     // File is `dist/extension.ts`, reference to `dist/web`
-    private readonly webAppServer = new WebAppServer({staticDirectory: path.join(__dirname, 'web')});
+    private readonly webAppServer;
 
     private readonly statusBarItem: StatusBarItem = window.createStatusBarItem(StatusBarAlignment.Right);
 
@@ -67,6 +72,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     constructor(container: DependencyContainer<Dependency>) {
         this.container = container;
+        this.webAppServer = new WebAppServer(this.container, {staticDirectory: path.join(__dirname, 'web')});
         this.initializeStatusBar();
         this.initializeSidebar();
         this.initializeWebAppServer();
@@ -86,8 +92,9 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     private async setupWebview(webview: Webview) {
         const port = new WebviewPort(webview);
-        const ipcServer = new IpcServer({namespace: 'web -> ide'});
-        await ipcServer.connect(port);
+        const container = this.container.bind('Port', () => port, {singleton: true});
+        await establishIpc(container);
+
         const context = this.container.get('ExtensionContext');
         const htmlUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'index.html');
         const entryScriptUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'main.js');
@@ -97,6 +104,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
             enableScripts: true,
         };
         webview.html = html;
+
         return new Disposable(() => port.dispose());
     }
 
@@ -116,7 +124,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
             'oniichan.composeNewMessage',
             async () => {
                 const request: ExecutionRequest = {
-                    namespace: 'ide -> web',
+                    namespace: '-> web',
                     taskId: crypto.randomUUID(),
                     executionId: crypto.randomUUID(),
                     executionType: ExecutionType.Request,
