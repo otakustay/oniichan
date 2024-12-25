@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "@oniichan/web-host",
+  "version": "1.5.0",
+  "description": "Provides methods to control web app",
+  "exports": {
+    "./atoms/ipc": "./dist/atoms/ipc/index.js",
+    "./atoms/draft": "./dist/atoms/draft.js",
+    "./atoms/inbox": "./dist/atoms/inbox.js",
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 --fix src",
+    "watch": "tsc -p tsconfig.build.json --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@oniichan/kernel": "workspace:*",
+    "@oniichan/shared": "workspace:*",
+    "@otakustay/ipc": "^2.3.1"
+  },
+  "devDependencies": {
+    "jotai": "^2.10.4",
+    "@types/vscode-webview": "^1.57.5"
+  },
+  "peerDependencies": {
+    "jotai": "^2.10.4"
+  }
+}

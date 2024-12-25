@@ -1,7 +1,7 @@
 import {useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
-import {Message, useMarkMessageStatus} from '@/atoms/inbox';
+import {Message, useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import Markdown from '@/components/Markdown';

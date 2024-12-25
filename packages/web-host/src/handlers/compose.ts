@@ -1,6 +1,6 @@
 import {getDefaultStore} from 'jotai';
-import {ipcAtom} from '@/atoms/ipc';
-import {editingAtom} from '@/atoms/draft';
+import {ipcAtom} from '../atoms/ipc';
+import {editingAtom} from '../atoms/draft';
 import {RequestHandler} from '@otakustay/ipc';
 
 export class ComposeNewMessageRequestHandler extends RequestHandler<void, void> {

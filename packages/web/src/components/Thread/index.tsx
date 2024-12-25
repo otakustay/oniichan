@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
-import {useMessageThreadValueByUuid, useSetActiveMessageThread} from '@/atoms/inbox';
+import {useMessageThreadValueByUuid, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
 import {FaAngleLeft, FaReply} from 'react-icons/fa';
 import HeadNavigation from '@/components/HeadNavigation';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import Message from './Message';
-import {useSetEditing} from '@/atoms/draft';
+import {useSetEditing} from '@oniichan/web-host/atoms/draft';
 
 const Back = styled(InteractiveLabel)`
     display: flex;

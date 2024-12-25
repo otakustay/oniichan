@@ -22,7 +22,8 @@
     "watch:editor-host": "cd packages/editor-host && npm run watch",
     "watch:kernel": "cd packages/kernel && npm run watch",
     "watch:web": "cd packages/web && npm run watch",
-    "watch:web-types": "cd packages/web && npm run watch-types"
+    "watch:web-types": "cd packages/web && npm run watch-types",
+    "watch:web-host": "cd packages/web-host && npm run watch"
   },
   "homepage": "https://github.com/otakustay/oniichan",
   "bugs": {

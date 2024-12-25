@@ -1,7 +1,7 @@
 import Thread from '@/components/Thread';
 import Inbox from '@/components/Inbox';
 import Draft from '@/components/Draft';
-import {useActiveMessageThreadValue} from '@/atoms/inbox';
+import {useActiveMessageThreadValue} from '@oniichan/web-host/atoms/inbox';
 
 function Body() {
     const activeThread = useActiveMessageThreadValue();

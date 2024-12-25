@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@/atoms/draft';
-import {useSendMessageToThread} from '@/atoms/inbox';
+import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
+import {useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
 import Modal from '@/components/Modal';
 import Avatar from '@/components/Avatar';
 import MessageEditor from './Editor';

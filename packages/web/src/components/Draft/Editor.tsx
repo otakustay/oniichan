@@ -1,6 +1,6 @@
 import {ChangeEvent, KeyboardEvent} from 'react';
 import styled from '@emotion/styled';
-import {useDraftContentValue, useSetDraftContent} from '@/atoms/draft';
+import {useDraftContentValue, useSetDraftContent} from '@oniichan/web-host/atoms/draft';
 
 const EditArea = styled.textarea`
     width: 100%;

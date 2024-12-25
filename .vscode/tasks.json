@@ -11,7 +11,8 @@
         "npm: watch:editor-host",
         "npm: watch:kernel",
         "npm: watch:vscode-types",
-        "npm: watch:web-types"
+        "npm: watch:web-types",
+        "npm: watch:web-host"
       ],
       "presentation": {
         "reveal": "never"
@@ -105,6 +106,17 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:web-types",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:web-host",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:web-host",
       "presentation": {
         "reveal": "never"
       }

@@ -174,6 +174,9 @@ importers:
       '@oniichan/storage':
         specifier: workspace:*
         version: link:../storage
+      '@oniichan/web-host':
+        specifier: workspace:*
+        version: link:../web-host
       '@otakustay/ipc':
         specifier: ^2.3.1
         version: 2.3.1
@@ -243,6 +246,25 @@ importers:
       shiki:
         specifier: ^1.24.4
         version: 1.24.4
+
+  packages/web-host:
+    dependencies:
+      '@oniichan/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@oniichan/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@otakustay/ipc':
+        specifier: ^2.3.1
+        version: 2.3.1
+    devDependencies:
+      '@types/vscode-webview':
+        specifier: ^1.57.5
+        version: 1.57.5
+      jotai:
+        specifier: ^2.10.4
+        version: 2.10.4(@types/react@19.0.2)(react@19.0.0)
 
 packages:
 

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import {HiOutlinePencilAlt} from 'react-icons/hi';
 import '@/styles';
-import {useSetEditing} from '@/atoms/draft';
+import {useSetEditing} from '@oniichan/web-host/atoms/draft';
 import Button from '@/components/Button';
 import HeadNavigation from '@/components/HeadNavigation';
 import ThreadList from './ThreadList';

@@ -2,7 +2,7 @@ import {atom, useAtomValue} from 'jotai';
 import {Client} from '@otakustay/ipc';
 import {WebSocketPort, VscodeMessagePort} from './port';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {Server} from '@/server';
+import {Server} from '../../server';
 
 export interface Ipc {
     kernel: Client<KernelProtocol>;
