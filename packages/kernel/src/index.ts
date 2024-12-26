@@ -7,9 +7,15 @@ import {Context} from './handlers/handler';
 import {ScaffoldHandler} from './handlers/scaffold';
 import {ModelChatHandler} from './handlers/model';
 import {ModelTelemetryHandler} from './handlers/telemetry';
-import {InboxSendMessageHandler} from './handlers/inbox/send';
+import {
+    InboxMarkMessageStatusHandler,
+    InboxSendMessageHandler,
+    InboxGetThreadListHandler,
+    InboxSendMessageRequest,
+    InboxMarkMessageStatusRequest,
+} from './handlers/inbox';
 
-export {EditorHost};
+export {EditorHost, InboxSendMessageRequest, InboxMarkMessageStatusRequest};
 
 export type Protocol = ProtocolOf<
     | typeof EchoHandler
@@ -18,6 +24,8 @@ export type Protocol = ProtocolOf<
     | typeof ModelChatHandler
     | typeof ModelTelemetryHandler
     | typeof InboxSendMessageHandler
+    | typeof InboxMarkMessageStatusHandler
+    | typeof InboxGetThreadListHandler
 >;
 
 export class KernelServer extends Server<Protocol, Context> {
@@ -42,6 +50,8 @@ export class KernelServer extends Server<Protocol, Context> {
         this.registerHandler(ModelChatHandler);
         this.registerHandler(ModelTelemetryHandler);
         this.registerHandler(InboxSendMessageHandler);
+        this.registerHandler(InboxMarkMessageStatusHandler);
+        this.registerHandler(InboxGetThreadListHandler);
     }
 }
 

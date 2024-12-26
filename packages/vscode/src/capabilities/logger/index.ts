@@ -39,7 +39,7 @@ export class OutputLogger extends Logger {
         const outputChannel = this.container.get(OutputChannelProvider);
         outputChannel.append(entry);
 
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV === 'development') {
             this.console.print(entry);
         }
     }

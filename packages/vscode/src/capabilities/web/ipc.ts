@@ -1,6 +1,6 @@
 import {Client, ExecutionRequest, Port, RequestHandler, Server, ServerInit} from '@otakustay/ipc';
-import {Protocol as KernelProtocol} from '@oniichan/kernel';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {KernelClient} from '../../kernel';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
     private readonly upstream: Client<any>;
@@ -44,7 +44,7 @@ class BridgeServer<P extends Record<keyof P, () => AsyncIterable<any>>> extends 
 }
 
 interface Dependency {
-    KernelClient: Client<KernelProtocol>;
+    [KernelClient.containerKey]: KernelClient;
     Port: Port;
 }
 
@@ -53,4 +53,5 @@ export async function establishIpc(container: DependencyContainer<Dependency>) {
     const kernelClient = container.get('KernelClient');
     const kernelServer = new BridgeServer(kernelClient, {namespace: '-> kernel'});
     await kernelServer.connect(port);
+    kernelClient.addWebPort(port);
 }

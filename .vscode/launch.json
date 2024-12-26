@@ -12,7 +12,10 @@
       "outFiles": [
         "${workspaceFolder}/packages/vscode/dist/**/*.js"
       ],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "${defaultBuildTask}",
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   ]
 }

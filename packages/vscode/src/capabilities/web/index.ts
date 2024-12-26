@@ -13,10 +13,12 @@ import {
     window,
     WebviewView,
 } from 'vscode';
-import {Client, ExecutionMessage, ExecutionRequest, ExecutionType, Port, isExecutionMessage} from '@otakustay/ipc';
+import {Client, ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
-import {Protocol as KernelProtocol} from '@oniichan/kernel';
+import {Protocol as WebProtocol} from '@oniichan/web-host';
+import {newUuid} from '@oniichan/shared/id';
+import {KernelClient} from '../../kernel';
 import {WebAppServer} from './server';
 import {establishIpc} from './ipc';
 
@@ -55,13 +57,15 @@ const OPEN_WEB_APP_COMMAND = 'oniichan.openWebAppInExternalBrowser';
 interface Dependency {
     [Logger.containerKey]: Logger;
     ExtensionContext: ExtensionContext;
-    KernelClient: Client<KernelProtocol>;
+    [KernelClient.containerKey]: KernelClient;
 }
 
 export class WebApp implements Disposable, WebviewViewProvider {
     private readonly container: DependencyContainer<Dependency>;
 
     private sidebarView: WebviewView | null = null;
+
+    private sidebarClient: Client<WebProtocol> | null = null;
 
     // File is `dist/extension.ts`, reference to `dist/web`
     private readonly webAppServer;
@@ -82,8 +86,9 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     async resolveWebviewView(view: WebviewView) {
         this.sidebarView = view;
-        const disposable = await this.setupWebview(view.webview);
-        this.disposables.push(disposable);
+        const port = await this.setupWebview(view.webview);
+        this.sidebarClient = new Client<WebProtocol>(port, {namespace: '-> web'});
+        this.disposables.push(port);
     }
 
     dispose() {
@@ -105,32 +110,22 @@ export class WebApp implements Disposable, WebviewViewProvider {
         };
         webview.html = html;
 
-        return new Disposable(() => port.dispose());
+        return port;
     }
 
     private initializeSidebar() {
         const view = window.registerWebviewViewProvider('oniichan-sidebar', this);
         const openCommand = commands.registerCommand(
             'oniichan.openSidebar',
-            async (request?: ExecutionRequest) => {
+            async () => {
                 await commands.executeCommand('oniichan-sidebar.focus');
-                if (request) {
-                    await this.sidebarView?.webview.postMessage(request);
-                }
             }
         );
-        // TODO: We need to make a client to send these messages by creating a server-in-web standalone package
         const composeCommand = commands.registerCommand(
             'oniichan.composeNewMessage',
             async () => {
-                const request: ExecutionRequest = {
-                    namespace: '-> web',
-                    taskId: crypto.randomUUID(),
-                    executionId: crypto.randomUUID(),
-                    executionType: ExecutionType.Request,
-                    action: 'composeNewMessage',
-                };
-                await commands.executeCommand('oniichan.openSidebar', request);
+                await commands.executeCommand('oniichan-sidebar.focus');
+                await this.sidebarClient?.call(newUuid(), 'composeNewMessage');
             }
         );
         this.disposables.push(view, openCommand, composeCommand);
@@ -150,8 +145,8 @@ export class WebApp implements Disposable, WebviewViewProvider {
                         localResourceRoots: [Uri.joinPath(context.extensionUri, 'dist', 'web')],
                     }
                 );
-                const disposable = await this.setupWebview(panel.webview);
-                panel.onDidDispose(() => void disposable.dispose());
+                const port = await this.setupWebview(panel.webview);
+                panel.onDidDispose(() => port.dispose());
             }
         );
         this.disposables.push(openWebviewCommand);
@@ -177,8 +172,9 @@ export class WebApp implements Disposable, WebviewViewProvider {
     }
 
     private initializeWebAppServer() {
+        const logger = this.container.get(Logger);
         this.webAppServer.on('port', port => this.updateStatusBar(port));
-        this.webAppServer.on('error', reason => console.error(`Server encounted an error: ${reason}`));
+        this.webAppServer.on('error', reason => logger.error('WebServerError', {reason}));
         this.webAppServer.start().catch(() => {});
         this.disposables.push(new Disposable(() => this.webAppServer.close().catch(() => {})));
     }

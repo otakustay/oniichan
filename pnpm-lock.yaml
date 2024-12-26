@@ -126,6 +126,9 @@ importers:
       '@oniichan/web':
         specifier: workspace:*
         version: link:../web
+      '@oniichan/web-host':
+        specifier: workspace:*
+        version: link:../web-host
       '@otakustay/ipc':
         specifier: ^2.3.1
         version: 2.3.1

@@ -4,11 +4,11 @@ import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
-import {Client, ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
-import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {establishIpc} from './ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {KernelClient} from '../../kernel';
+import {establishIpc} from './ipc';
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;
@@ -49,7 +49,7 @@ export interface ServerInit {
 }
 
 interface Dependency {
-    KernelClient: Client<KernelProtocol>;
+    [KernelClient.containerKey]: KernelClient;
 }
 
 export class WebAppServer extends EventEmitter<ServerEventMap> {

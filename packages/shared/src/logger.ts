@@ -74,7 +74,7 @@ export abstract class Logger {
         };
 
         // Prevent VSCode from printing `undefined` in Debug Console
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV === 'development') {
             const output: Record<string, any> = {};
             for (const [key, value] of Object.entries(entry)) {
                 if (value !== undefined) {

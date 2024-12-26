@@ -1,10 +1,13 @@
 import path from 'node:path';
 import {Worker} from 'node:worker_threads';
+import {Client, ClientInit, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {Protocol as KernelProtocol} from '@oniichan/kernel';
 import {HostServer, HostServerDependency} from '@oniichan/editor-host/server';
-import {Client, ClientInit, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
+import {MessageThread} from '@oniichan/shared/inbox';
+import {Protocol as WebProtocol} from '@oniichan/web-host';
+import {stringifyError} from '@oniichan/shared/string';
 
 class WorkerPort implements Port {
     private readonly worker: Worker;
@@ -43,15 +46,42 @@ export class KernelClient extends Client<KernelProtocol> {
 
     private readonly logger: Logger;
 
+    private readonly webClients = new Map<Port, Client<WebProtocol>>();
+
     constructor(port: Port, container: DependencyContainer<Dependency>, init?: ClientInit) {
         super(port, {namespace: '-> kernel', ...init});
         this.logger = container.get(Logger);
+    }
+
+    addWebPort(port: Port) {
+        const client = new Client<WebProtocol>(port, {namespace: '-> web'});
+        this.webClients.set(port, client);
+    }
+
+    removeWebPort(port: Port) {
+        this.webClients.delete(port);
+    }
+
+    private broadcast(fn: (client: Client<WebProtocol>) => Promise<void>) {
+        const clients = [...this.webClients.values()];
+        void (async () => {
+            try {
+                await Promise.all(clients.map(v => fn(v)));
+            }
+            catch (ex) {
+                this.logger.error('BroadcastWebFail', {reason: stringifyError(ex)});
+            }
+        })();
     }
 
     protected handleNotice(notice: ExecutionNotice): void {
         if (notice.action === 'log') {
             const entry = notice.payload as LogEntry;
             this.logger.print(entry);
+        }
+        else if (notice.action === 'updateInboxThreadList') {
+            const list: MessageThread[] = notice.payload;
+            this.broadcast(v => v.call(notice.taskId, 'updateThreadList', list));
         }
     }
 }

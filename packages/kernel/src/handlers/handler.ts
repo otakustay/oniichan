@@ -1,5 +1,6 @@
 import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@otakustay/ipc';
 import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
+import {MessageThread} from '@oniichan/shared/inbox';
 import {EditorHost} from '../editor';
 
 type SendNotice = (action: string, payload?: any) => void;
@@ -49,5 +50,9 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
                 ),
             }
         );
+    }
+
+    updateInboxThreadList(threads: MessageThread[]): void {
+        this.notify('updateInboxThreadList', threads);
     }
 }
