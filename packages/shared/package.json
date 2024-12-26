@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/shared",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Shared elements without any platform dependencies",
   "exports": {
     "./*": "./dist/*.js"

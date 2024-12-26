@@ -7,10 +7,10 @@
 - `shared`：共享用的代码，包括模型访问、工具函数、共享类型等。
 - `vscode`：VSCode扩展的源码。
 - `kernel`：包含了解耦VSCode API后的核心逻辑，它被设计为可以工作在独立的环境（线程、进程、甚至远端）中。
-- `host`：将核心逻辑需要的VSCode的能力暴露给`kernel`模块。
+- `editor-host`：将核心逻辑需要的VSCode的能力暴露给`kernel`模块。
 - `storage`：在本地持久化数据的能力，只要和持久化有关的，必须使用这里面的功能，不得自己写文件、数据库。
 - `web`：一个React应用，打完包以后通过WebSocket和服务端通信，可以通过插件打开Web页面使用。
-- `server`：一个Fastify的服务，最终在VSCode扩展里启动，它会与VSCode、文件系统交互，提供一个WebSocket服务出来，并把`web`模块的产出作为静态文件输出。
+- `web-host`：在Web系统中暴露出来给IDE、`kernel`等调用的能力，即由外部操控页面元素的服务。
 
 > 为什么要做这么复杂的结构？
 
