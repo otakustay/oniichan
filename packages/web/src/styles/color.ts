@@ -13,12 +13,12 @@ injectGlobal`
         --color-contrast-background: var(--vscode-tab-activeBackground, #f8f8f8);
         --color-contrast-foreground: var(--vscode-statusBar-background, #e50000);
         --color-secondary-foreground: var(--vscode-descriptionForeground, #666);
-        --color-interactive-background: var(--vscode-statusBar-background, #015eb8);
-        --color-interactive-background-hover: var(--vscode-statusBarItem-hoverBackground, #2e72c1);
-        --color-interactive-background-active: var(--vscode-statusBarItem-activeBackground, #407bc6);
-        --color-interactive-background-disabled: var(--vscode-statusBarItem-offlineBackground, #f8f8f8);
-        --color-interactive-foreground: var(--color-statusBar-foreground, #fff);
-        --color-interactive-foreground-disabled: var(--vscode-statusBarItem-offlineForeground, #666);
+        --color-interactive-background: var(--vscode-button-background, #015eb8);
+        --color-interactive-background-hover: var(--vscode-button-hoverBackground, #2e72c1);
+        --color-interactive-background-active: var(--vscode-button-hoverBackground, #407bc6);
+        --color-interactive-background-disabled: var(--vscode-button-secondaryBackground, #f8f8f8);
+        --color-interactive-foreground: var(--color-button-foreground, #fff);
+        --color-interactive-foreground-disabled: var(--vscode-button-secondaryForeground, #666);
         --color-link-foreground: var(--vscode-textLink-foreground, var(--color-interactive-background));
         --color-link-foreground-hover: var(--vscode-textLink-activeForeground, var(--color-interactive-background-hover));
         --color-link-foreground-active: var(--vscode-textLink-activeForeground, var(--color-interactive-background-active));

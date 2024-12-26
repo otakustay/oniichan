@@ -8,23 +8,19 @@ interface Props {
     onClick?: () => void;
 }
 
-const Background = styled.button`
+const Layout = styled.button`
     appearance: none;
     border: none;
-    color: var(--color-interactive-foreground);
-    background-color: var(--color-interactive-background);
     padding: 0;
     overflow: hidden;
-`;
-
-const Layout = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
     cursor: pointer;
-    background-color: transparent;
+    color: var(--color-interactive-foreground);
+    background-color: var(--color-interactive-background);
 
     :hover:not(:disabled) {
         background-color: var(--color-interactive-background-hover);
@@ -43,8 +39,8 @@ const Layout = styled.div`
 
 export default function Button({className, disabled, children, onClick}: Props) {
     return (
-        <Background disabled={disabled} onClick={onClick} className={className}>
-            <Layout>{children}</Layout>
-        </Background>
+        <Layout disabled={disabled} onClick={onClick} className={className}>
+            {children}
+        </Layout>
     );
 }
