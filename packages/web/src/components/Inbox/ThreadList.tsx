@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {MessageThread, useMessageThreadListValue, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
+import {useMessageThreadListValue, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
+import {MessageThread} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import MessageStatusIcon from '../MessageStatusIcon';
 

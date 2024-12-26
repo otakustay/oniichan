@@ -1,24 +1,9 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel';
+import {Message, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
 import {useIpcValue} from './ipc';
 import {useSetEditing} from './draft';
-
-export type MessageStatus = 'generating' | 'unread' | 'read';
-
-export interface Message {
-    uuid: string;
-    sender: 'user' | 'assistant';
-    content: string;
-    createdAt: string;
-    status: MessageStatus;
-    error?: string;
-}
-
-export interface MessageThread {
-    uuid: string;
-    messages: Message[];
-}
 
 export const messageThreadListAtom = atom<MessageThread[]>([]);
 

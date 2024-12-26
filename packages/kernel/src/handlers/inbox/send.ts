@@ -1,7 +1,7 @@
 import {ChatMessagePayload} from '@oniichan/shared/model';
 import {Message} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {now} from '@oniichan/shared/string';
+import {now, stringifyError} from '@oniichan/shared/string';
 import {newUuid} from '@oniichan/shared/id';
 import {RequestHandler} from '../handler';
 import {store} from './store';
@@ -69,16 +69,21 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         telemetry.setTelemetryData('replyUuid', replyUuid);
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = telemetry.createModelTelemetry(this.getTaskId());
-        for await (const chunk of model.chatStreaming(messages, modelTelemetry)) {
-            // We update the store but don't broadcast to all views on streaming
-            store.appendMessage(payload.threadUuid, replyUuid, chunk);
-            yield {
-                type: 'value',
-                value: {
-                    uuid: replyUuid,
-                    content: chunk,
-                },
-            } as const;
+        try {
+            for await (const chunk of model.chatStreaming(messages, modelTelemetry)) {
+                // We update the store but don't broadcast to all views on streaming
+                store.appendMessage(payload.threadUuid, replyUuid, chunk);
+                yield {
+                    type: 'value',
+                    value: {
+                        uuid: replyUuid,
+                        content: chunk,
+                    },
+                } as const;
+            }
+        }
+        catch (ex) {
+            store.setMessageError(payload.threadUuid, replyUuid, stringifyError(ex));
         }
 
         // Broadcast update when message is fully generated

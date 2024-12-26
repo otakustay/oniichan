@@ -1,7 +1,9 @@
 import {useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
-import {Message, useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
+import {BiErrorAlt} from 'react-icons/bi';
+import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
+import {Message} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import Markdown from '@/components/Markdown';
@@ -40,6 +42,31 @@ const Content = styled(Markdown)`
     white-space: pre-wrap;
 `;
 
+const ErrorLayout = styled.div`
+    color: var(--color-error);
+    margin-top: 1em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+`;
+
+interface ErrorProps {
+    reason: string | undefined;
+}
+
+function Error({reason}: ErrorProps) {
+    if (!reason) {
+        return null;
+    }
+
+    return (
+        <ErrorLayout>
+            <BiErrorAlt />
+            {reason}
+        </ErrorLayout>
+    );
+}
+
 interface Props {
     threadUuid: string;
     message: Message;
@@ -69,7 +96,8 @@ export default function Message({threadUuid, message}: Props) {
                 <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
-            <Content content={message.content} />
+            <Content content={message.content || '(Empty)'} />
+            <Error reason={message.error} />
         </Layout>
     );
 }

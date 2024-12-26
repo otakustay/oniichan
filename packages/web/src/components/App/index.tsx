@@ -8,11 +8,11 @@ import {useIpc} from '../AppProvider';
 
 const ErrorLabel = styled.div`
     position: fixed;
-    left: 0;
-    right: 0;
     bottom: 0;
+    width: 100%;
     height: 2em;
     display: flex;
+    justify-content: center;
     align-items: center;
     background-color: var(--color-error);
     color: var(--color-interactive-foreground);

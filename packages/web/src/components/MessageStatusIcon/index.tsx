@@ -1,7 +1,7 @@
 import {createElement} from 'react';
 import {FaCircle, FaDownload} from 'react-icons/fa';
 import {css} from '@emotion/css';
-import {Message} from '@oniichan/web-host/atoms/inbox';
+import {Message} from '@oniichan/shared/inbox';
 
 const className = css`
     color: var(--color-information);

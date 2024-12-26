@@ -16,6 +16,11 @@ export interface MessageThread {
     messages: Message[];
 }
 
+interface MessageUpdateHelper {
+    create: () => Message;
+    update: (message: Message) => void;
+}
+
 const debugMessageThreadFixtures: MessageThread[] = [
     {
         uuid: '2f773372-aa66-4b9f-a17c-b8c5f57a1fc5',
@@ -47,6 +52,7 @@ const debugMessageThreadFixtures: MessageThread[] = [
                     'I don\'t have access to real-time information, including the current time. I cannot tell you the exact time right now. To check the current time, you can:\n\n1. Look at your device\'s clock\n2. Check your watch\n3. Use an online time service\n4. Ask your device\'s virtual assistant (Siri, Google Assistant, etc.)',
                 createdAt: '2021-07-30T06:58:49.335Z',
                 status: 'generating',
+                error: 'Connection reset',
             },
             {
                 uuid: '09ebe07d-61dc-4981-b2cb-6eb1f8d6ffb0',
@@ -102,31 +108,45 @@ export class ThreadStore {
     }
 
     appendMessage(threadUuid: string, messageUuid: string, chunk: string) {
-        const threadIndex = this.threads.findIndex(v => v.uuid === threadUuid);
+        this.updateMessage(
+            threadUuid,
+            messageUuid,
+            {
+                create: () => {
+                    return {
+                        uuid: messageUuid,
+                        sender: 'assistant',
+                        content: chunk,
+                        status: 'generating',
+                        createdAt: now(),
+                    };
+                },
+                update: message => {
+                    message.content += chunk;
+                },
+            }
+        );
+    }
 
-        if (threadIndex < 0) {
-            return;
-        }
-
-        const targetThread = this.threads[threadIndex];
-        const message = targetThread.messages.find(v => v.uuid === messageUuid);
-
-        if (message) {
-            message.content += chunk;
-        }
-        else {
-            const newMessage: Message = {
-                uuid: messageUuid,
-                sender: 'assistant',
-                content: chunk,
-                status: 'generating',
-                createdAt: now(),
-            };
-            targetThread.messages.unshift(newMessage);
-        }
-
-        this.threads.splice(threadIndex, 1);
-        this.threads.unshift(targetThread);
+    setMessageError(threadUuid: string, messageUuid: string, error: string) {
+        this.updateMessage(
+            threadUuid,
+            messageUuid,
+            {
+                create: () => {
+                    return {
+                        uuid: messageUuid,
+                        sender: 'assistant',
+                        content: '',
+                        status: 'unread',
+                        createdAt: now(),
+                    };
+                },
+                update: message => {
+                    message.error = error;
+                },
+            }
+        );
     }
 
     markStatus(threadUuid: string, messageUuid: string, status: MessageStatus) {
@@ -145,5 +165,27 @@ export class ThreadStore {
 
     dump() {
         return [...this.threads];
+    }
+
+    private updateMessage(threadUuid: string, messageUuid: string, helper: MessageUpdateHelper) {
+        const threadIndex = this.threads.findIndex(v => v.uuid === threadUuid);
+
+        if (threadIndex < 0) {
+            return;
+        }
+
+        const targetThread = this.threads[threadIndex];
+        const message = targetThread.messages.find(v => v.uuid === messageUuid);
+
+        if (message) {
+            helper.update(message);
+        }
+        else {
+            const newMessage = helper.create();
+            targetThread.messages.unshift(newMessage);
+        }
+
+        this.threads.splice(threadIndex, 1);
+        this.threads.unshift(targetThread);
     }
 }
