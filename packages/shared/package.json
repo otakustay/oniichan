@@ -4,7 +4,15 @@
   "version": "1.6.1",
   "description": "Shared elements without any platform dependencies",
   "exports": {
-    "./*": "./dist/*.js"
+    "./container": "./dist/container.js",
+    "./dir": "./dist/dir.js",
+    "./id": "./dist/id.js",
+    "./inbox": "./dist/inbox.js",
+    "./language": "./dist/language.js",
+    "./logger": "./dist/logger.js",
+    "./model": "./dist/model/index.js",
+    "./prompt": "./dist/prompt.js",
+    "./string": "./dist/string.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
