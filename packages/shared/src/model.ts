@@ -147,12 +147,12 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
                 for await (const chunk of stream) {
                     const text = chunk.choices[0]?.delta.content ?? '';
                     if (text) {
-                        if (meta.usage.inputTokens === null && typeof chunk.usage?.prompt_tokens === 'number') {
-                            meta.usage.inputTokens = chunk.usage.prompt_tokens;
-                        }
-                        meta.usage.outputTokens = addUsage(meta.usage.outputTokens, chunk.usage?.completion_tokens);
                         yield text;
                     }
+                    if (meta.usage.inputTokens === null && typeof chunk.usage?.prompt_tokens === 'number') {
+                        meta.usage.inputTokens = chunk.usage.prompt_tokens;
+                    }
+                    meta.usage.outputTokens = addUsage(meta.usage.outputTokens, chunk.usage?.completion_tokens);
                 }
                 yield meta;
             },
