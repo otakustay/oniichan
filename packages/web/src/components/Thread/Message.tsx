@@ -8,6 +8,7 @@ import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import Markdown from '@/components/Markdown';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
+import Reference from './Reference';
 
 const Layout = styled.div`
     display: flex;
@@ -97,6 +98,7 @@ export default function Message({threadUuid, message}: Props) {
                 <Time time={message.createdAt} />
             </Header>
             <Content content={message.content || '(Empty)'} />
+            <Reference references={message.references} />
             <Error reason={message.error} />
         </Layout>
     );

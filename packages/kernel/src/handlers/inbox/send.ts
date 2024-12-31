@@ -1,5 +1,5 @@
 import {ChatInputPayload, ModelToolResponse} from '@oniichan/shared/model';
-import {Message} from '@oniichan/shared/inbox';
+import {Message, MessageReference} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {now, stringifyError} from '@oniichan/shared/string';
 import {newUuid} from '@oniichan/shared/id';
@@ -20,13 +20,50 @@ export interface InboxSendMessageRequest {
     body: MessageBody;
 }
 
-export interface InboxSendMessageResponse {
+interface InboxSendMessageTextResponse {
     uuid: string;
-    content: string;
+    type: 'text';
+    value: string;
 }
+
+interface InboxSendMessageReferenceResponse {
+    uuid: string;
+    type: 'reference';
+    value: MessageReference;
+}
+
+export type InboxSendMessageResponse = InboxSendMessageTextResponse | InboxSendMessageReferenceResponse;
 
 interface ToolCallState {
     current: ModelToolResponse | null;
+}
+
+interface RequestOptions {
+    messages: ChatInputPayload[];
+    replyUuid: string;
+}
+
+interface PathArguments {
+    path: string;
+}
+
+function toolCallToReference(toolCall: ModelToolResponse): MessageReference {
+    switch (toolCall.name) {
+        case 'readFile':
+            return {
+                id: toolCall.id,
+                type: 'file',
+                path: (toolCall.arguments as PathArguments).path,
+            };
+        case 'readDirectory':
+            return {
+                id: toolCall.id,
+                type: 'directory',
+                path: (toolCall.arguments as PathArguments).path,
+            };
+        default:
+            throw new Error(`Unknown tool call ${toolCall.name}`);
+    }
 }
 
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
@@ -40,26 +77,29 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         yield* this.telemetry.spyStreaming(() => this.chat(payload));
     }
 
-    private async *requestModel(input: ChatInputPayload[], replyUuid: string): AsyncIterable<string> {
+    private async *requestModel(options: RequestOptions): AsyncIterable<InboxSendMessageResponse> {
+        const {messages, replyUuid} = options;
         const {editorHost} = this.context;
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
         const tool: ToolCallState = {
             current: null,
         };
-        for await (const chunk of model.chatStreaming({tools, messages: input, telemetry: modelTelemetry})) {
+        for await (const chunk of model.chatStreaming({tools, messages, telemetry: modelTelemetry})) {
             if (chunk.type === 'tool') {
                 tool.current = chunk;
+                yield {uuid: replyUuid, type: 'reference', value: toolCallToReference(chunk)};
             }
             else {
-                yield chunk.content;
+                yield {uuid: replyUuid, type: 'text', value: chunk.content};
             }
         }
+
         if (tool.current) {
             const implement = new ToolImplement(this.context.editorHost);
             const result = await implement.callTool(tool.current.name, tool.current.arguments);
             const nextMessages: ChatInputPayload[] = [
-                ...input,
+                ...messages,
                 {
                     role: 'assistant',
                     content: '',
@@ -75,7 +115,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                     content: result,
                 },
             ];
-            yield* this.requestModel(nextMessages, replyUuid);
+            yield* this.requestModel({messages: nextMessages, replyUuid});
         }
     }
 
@@ -88,6 +128,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                 sender: 'user',
                 content: payload.body.content,
                 createdAt: now(),
+                references: [],
                 status: 'read',
             }
         );
@@ -110,19 +151,22 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const messages = thread.messages.map(toMessagePayload).reverse();
         const replyUuid = newUuid();
         try {
-            for await (const chunk of this.requestModel(messages, replyUuid)) {
-                // We update the store but don't broadcast to all views on streaming
-                store.appendMessage(payload.threadUuid, replyUuid, chunk);
-                yield {
-                    type: 'value',
-                    value: {
-                        uuid: replyUuid,
-                        content: chunk,
-                    },
-                } as const;
+            for await (const chunk of this.requestModel({messages, replyUuid})) {
+                if (chunk.type === 'text') {
+                    // We update the store but don't broadcast to all views on streaming
+                    store.appendMessage(payload.threadUuid, replyUuid, chunk.value);
+                }
+                else {
+                    // Broadcast tool usage
+                    store.addReference(payload.threadUuid, replyUuid, chunk.value);
+                    this.updateInboxThreadList(store.dump());
+                }
+
+                yield {type: 'value', value: chunk} as const;
             }
         }
         catch (ex) {
+            console.error(ex);
             store.setMessageError(payload.threadUuid, replyUuid, stringifyError(ex));
         }
 

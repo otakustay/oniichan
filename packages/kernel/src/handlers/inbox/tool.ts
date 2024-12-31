@@ -63,7 +63,7 @@ export class ToolImplement {
                 const content = await workspace.readFile(path.join(root, arg.path));
 
                 if (content.length > 30000) {
-                    return '(This file is too large)';
+                    return `Unable to read ${arg.path}: This file is too large`;
                 }
 
                 return content;

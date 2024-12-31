@@ -53,17 +53,25 @@ export abstract class StreamToolCallRecord<T> {
 
     record(chunk: T) {
         const info = this.extractFromChunk(chunk);
-        if (info) {
-            this.active = true;
-            if (info.id) {
-                this.callId = info.id;
-            }
-            if (info.functionName) {
-                this.functionName = info.functionName;
-            }
-            if (info.argumentsDelta) {
-                this.argumentsText += info.argumentsDelta;
-            }
+
+        if (!info) {
+            return;
+        }
+
+        // Some LLM generates multiple tool use chunks in one stream, we only preserve the first one
+        if (this.active && info.id && info.id !== this.callId) {
+            return;
+        }
+
+        this.active = true;
+        if (info.id) {
+            this.callId = info.id;
+        }
+        if (info.functionName) {
+            this.functionName = info.functionName;
+        }
+        if (info.argumentsDelta) {
+            this.argumentsText += info.argumentsDelta;
         }
     }
 
@@ -72,12 +80,18 @@ export abstract class StreamToolCallRecord<T> {
     }
 
     toToolResponse(): ModelToolResponse {
-        return {
-            type: 'tool',
-            id: this.callId,
-            name: this.functionName,
-            arguments: JSON.parse(this.argumentsText),
-        };
+        try {
+            const args = JSON.parse(this.argumentsText);
+            return {
+                type: 'tool',
+                id: this.callId,
+                name: this.functionName,
+                arguments: args,
+            };
+        }
+        catch {
+            throw new Error(`Model yields invalid tool call arguments: ${this.argumentsText || '(empty string)'}`);
+        }
     }
 
     clear() {
