@@ -23,4 +23,8 @@ export class WorkspaceHost {
     async readDirectory(path: string, options?: ReadDirectoryOptions) {
         return this.client.call(newUuid(this.taskId), 'readDirectory', {path, depth: options?.depth});
     }
+
+    async getRoot() {
+        return this.client.call(newUuid(this.taskId), 'getWorkspaceRoot');
+    }
 }

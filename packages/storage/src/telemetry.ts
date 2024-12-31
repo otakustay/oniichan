@@ -1,5 +1,5 @@
 import {stringifyError} from '@oniichan/shared/string';
-import {ChatMessagePayload, ModelResponseMeta} from '@oniichan/shared/model';
+import {ChatInputPayload, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
 import {createJsonlStore} from './jsonl';
 
@@ -9,8 +9,8 @@ export interface ModelUsageRecord {
     startTime: string;
     endTime: string;
     modelName: string;
-    input: ChatMessagePayload[];
-    output: string;
+    input: ChatInputPayload[];
+    output: unknown;
     inputTokens: number | null;
     outputTokens: number | null;
 }
@@ -19,8 +19,8 @@ export class ModelUsageTelemetry {
     private readonly uuid: string;
     private readonly parentUuid: string;
     private modelName = 'unknown';
-    private input: ChatMessagePayload[] = [];
-    private output = '';
+    private input: ChatInputPayload[] = [];
+    private output: unknown = null;
     private inputTokens: number | null = null;
     private outputTokens: number | null = null;
     private startTime = new Date();
@@ -31,17 +31,29 @@ export class ModelUsageTelemetry {
         this.parentUuid = parentUuid;
     }
 
-    setRequest(input: ChatMessagePayload[]) {
+    setRequest(input: ChatInputPayload[]) {
         this.input = input;
         this.startTime = new Date();
     }
 
-    setResponse(output: string, meta: ModelResponseMeta) {
-        this.output = output;
-        this.modelName = meta.model;
-        this.inputTokens = meta.usage.inputTokens ?? null;
-        this.outputTokens = meta.usage.outputTokens ?? null;
-        this.endTime = new Date();
+    setResponseChunk(output: ModelStreamingResponse) {
+        if (output.type === 'text') {
+            if (typeof this.output === 'string') {
+                this.output += output.content;
+            }
+            else {
+                this.output = output.content;
+            }
+        }
+        else if (output.type === 'tool') {
+            this.output = output;
+        }
+        else {
+            this.modelName = output.model;
+            this.inputTokens = output.usage.inputTokens ?? null;
+            this.outputTokens = output.usage.outputTokens ?? null;
+            this.endTime = new Date();
+        }
     }
 
     async record() {

@@ -1,5 +1,5 @@
 import path from 'node:path';
-import {ChatMessagePayload} from '@oniichan/shared/model';
+import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../../editor';
@@ -43,17 +43,20 @@ export class SemanticRewriteApi {
                 extension: path.extname(file),
             }
         );
-        const messages: ChatMessagePayload[] = [
+        const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        const text = await model.chat(messages, modelTelemetry);
+        const response = await model.chat({messages, telemetry: modelTelemetry});
 
-        const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
-        const codeBlocks = text.match(codeBlockRegex);
-        const code = codeBlocks
-            ? codeBlocks.map(block => block.replace(/```(?:\w+\n)?|```/g, '')).join('\n')
-            : text;
-        return code;
+        if (response.type === 'text') {
+            const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
+            const codeBlocks = response.content.match(codeBlockRegex);
+            const code = codeBlocks
+                ? codeBlocks.map(block => block.replace(/```(?:\w+\n)?|```/g, '')).join('\n')
+                : response.content;
+            return code;
+        }
+        return '';
     }
 }

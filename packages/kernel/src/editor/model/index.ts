@@ -1,9 +1,25 @@
 import {Client} from '@otakustay/ipc';
 import {Protocol} from '@oniichan/editor-host/server';
 import {newUuid} from '@oniichan/shared/id';
-import {ChatMessagePayload, createModelClient, ModelClient, isModelConfigValid} from '@oniichan/shared/model';
+import {
+    createModelClient,
+    ModelClient,
+    isModelConfigValid,
+    ModelResponse,
+    ChatToolPayload,
+    ChatInputPayload,
+} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {CodeResult, streamingExtractCode} from './extract';
+
+export interface ModelChatOptionsNoTools {
+    messages: ChatInputPayload[];
+    telemetry: ModelUsageTelemetry;
+}
+
+export interface ModelChatOptions extends ModelChatOptionsNoTools {
+    tools?: ChatToolPayload[];
+}
 
 export class ModelAccessHost {
     private readonly taskId: string | undefined;
@@ -15,45 +31,41 @@ export class ModelAccessHost {
         this.client = client;
     }
 
-    async chat(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): Promise<string> {
+    async chat(options: ModelChatOptions): Promise<ModelResponse> {
+        const {messages, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);
-        const [response, meta] = await client.chat(messages);
-        telemetry.setResponse(response, meta);
+        const [response, meta] = await client.chat({messages});
+        telemetry.setResponseChunk(response);
+        telemetry.setResponseChunk(meta);
         void telemetry.record();
         return response;
     }
 
-    async *chatStreaming(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): AsyncIterable<string> {
+    async *chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse> {
+        const {messages, tools, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);
-        const chunks = [];
-        for await (const chunk of client.chatStreaming(messages)) {
-            if (typeof chunk === 'string') {
-                chunks.push(chunk);
+        for await (const chunk of client.chatStreaming({messages, tools})) {
+            telemetry.setResponseChunk(chunk);
+            if (chunk.type !== 'meta') {
                 yield chunk;
-            }
-            else {
-                telemetry.setResponse(chunks.join(''), chunk);
             }
         }
         void telemetry.record();
     }
 
-    async *codeStreaming(messages: ChatMessagePayload[], telemetry: ModelUsageTelemetry): AsyncIterable<CodeResult> {
+    async *codeStreaming(options: ModelChatOptionsNoTools): AsyncIterable<CodeResult> {
+        const {messages, telemetry} = options;
         const client = await this.createModelClient();
-        const chunks = [];
         telemetry.setRequest(messages);
-        for await (const chunk of streamingExtractCode(client.chatStreaming(messages))) {
+        for await (const chunk of streamingExtractCode(client.chatStreaming({messages}))) {
             switch (chunk.type) {
                 case 'code':
                     yield chunk.value;
                     break;
                 case 'chunk':
-                    chunks.push(chunk.value);
-                    break;
-                case 'other':
-                    telemetry.setResponse(chunks.join(''), chunk.value);
+                    telemetry.setResponseChunk(chunk.value);
                     break;
             }
         }

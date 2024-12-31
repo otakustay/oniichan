@@ -138,6 +138,7 @@ export class ThreadStore {
                         uuid: messageUuid,
                         sender: 'assistant',
                         content: '',
+                        error,
                         status: 'unread',
                         createdAt: now(),
                     };

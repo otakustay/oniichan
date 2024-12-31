@@ -1,3 +1,5 @@
+import {ModelStreamingResponse} from '@oniichan/shared/model';
+
 interface CodeBlock {
     tag: string;
     content: string;
@@ -21,17 +23,12 @@ interface CodeItem {
     value: CodeResult;
 }
 
-interface OtherItem<T> {
-    type: 'other';
-    value: T;
-}
-
 interface ChunkItem {
     type: 'chunk';
-    value: string;
+    value: ModelStreamingResponse;
 }
 
-type Item<T> = CodeItem | OtherItem<T> | ChunkItem;
+type Item = CodeItem | ChunkItem;
 
 function extractCodeBlocks(content: string): CodeBlock[] {
     const codeBlocks: CodeBlock[] = [];
@@ -97,7 +94,7 @@ function* yieldCode(state: ExtractState): Iterable<CodeItem> {
     yield* yieldCode(state);
 }
 
-export async function* streamingExtractCode<T>(input: AsyncIterable<string | T>): AsyncIterable<Item<T>> {
+export async function* streamingExtractCode(input: AsyncIterable<ModelStreamingResponse>): AsyncIterable<Item> {
     const state: ExtractState = {
         codeBlocks: [],
         codeBlockIndex: -1,
@@ -106,14 +103,12 @@ export async function* streamingExtractCode<T>(input: AsyncIterable<string | T>)
     };
 
     for await (const chunk of input) {
-        if (typeof chunk === 'string') {
-            state.content += chunk;
+        yield {type: 'chunk', value: chunk};
+
+        if (chunk.type === 'text') {
             state.codeBlocks = extractCodeBlocks(state.content);
 
             yield* yieldCode(state);
-        }
-        else {
-            yield {type: 'other', value: chunk};
         }
     }
 }

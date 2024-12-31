@@ -1,5 +1,5 @@
 import path from 'node:path';
-import {ChatMessagePayload} from '@oniichan/shared/model';
+import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../../editor';
@@ -41,11 +41,11 @@ export class ScaffoldApi {
                 extension: path.extname(file),
             }
         );
-        const messages: ChatMessagePayload[] = [
+        const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        for await (const chunk of model.codeStreaming(messages, modelTelemetry)) {
+        for await (const chunk of model.codeStreaming({messages, telemetry: modelTelemetry})) {
             if (chunk.tag === 'import') {
                 yield {
                     section: 'import',

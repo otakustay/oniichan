@@ -2,6 +2,25 @@ import {ModelConfiguration, ModelClient} from './interface';
 import {AnthropicModelClient} from './anthropic';
 import {OpenAiModelClient} from './openai';
 
+export {
+    ChatUserMessagePayload,
+    ChatAssistantMessagePayload,
+    ChatToolParameterSchema,
+    ChatToolPayload,
+    ModelChatOptions,
+    ModelClient,
+    ModelApiStyle,
+    ModelConfiguration,
+    ModelMetaResponse,
+    ModelUsage,
+    ModelResponse,
+    ModelTextResponse,
+    ModelToolResponse,
+    ModelStreamingResponse,
+    ChatInputPayload,
+    ChatToolCallPayload,
+} from './interface';
+
 function validateModelConfiguration(config: ModelConfiguration): void {
     if (!config.modelName) {
         throw new Error('Require modelName to create a model client');

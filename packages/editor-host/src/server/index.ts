@@ -10,7 +10,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '../ui/loading';
 import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {Context} from './interface';
-import {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
+import {GetWorkspaceRootHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
@@ -23,6 +23,7 @@ export type Protocol = ProtocolOf<
     | typeof RequestModelConfigureHandler
     | typeof ReadFileHandler
     | typeof ReadDirectoryHandler
+    | typeof GetWorkspaceRootHandler
 >;
 
 export interface HostServerDependency {
@@ -47,6 +48,7 @@ export class HostServer extends Server<Protocol, Context> {
         this.registerHandler(RequestModelConfigureHandler);
         this.registerHandler(ReadFileHandler);
         this.registerHandler(ReadDirectoryHandler);
+        this.registerHandler(GetWorkspaceRootHandler);
     }
 
     protected async createContext() {

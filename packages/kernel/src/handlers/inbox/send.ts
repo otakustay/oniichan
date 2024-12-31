@@ -1,10 +1,11 @@
-import {ChatMessagePayload} from '@oniichan/shared/model';
+import {ChatInputPayload, ModelToolResponse} from '@oniichan/shared/model';
 import {Message} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {now, stringifyError} from '@oniichan/shared/string';
 import {newUuid} from '@oniichan/shared/id';
 import {RequestHandler} from '../handler';
 import {store} from './store';
+import {tools, ToolImplement} from './tool';
 
 interface TextMessageBody {
     type: 'text';
@@ -24,19 +25,61 @@ export interface InboxSendMessageResponse {
     content: string;
 }
 
+interface ToolCallState {
+    current: ModelToolResponse | null;
+}
+
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
     static action = 'inboxSendMessage' as const;
 
+    private telemetry: FunctionUsageTelemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
+
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
         const thread = store.getThreadByUuid(payload.threadUuid);
-        const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
-        telemetry.setTelemetryData('mode', thread ? 'new' : 'reply');
-        yield* telemetry.spyStreaming(() => this.chat(payload, telemetry));
+        this.telemetry.setTelemetryData('mode', thread ? 'new' : 'reply');
+        yield* this.telemetry.spyStreaming(() => this.chat(payload));
     }
 
-    private async *chat(payload: InboxSendMessageRequest, telemetry: FunctionUsageTelemetry) {
+    private async *requestModel(input: ChatInputPayload[], replyUuid: string): AsyncIterable<string> {
         const {editorHost} = this.context;
+        const model = editorHost.getModelAccess(this.getTaskId());
+        const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
+        const tool: ToolCallState = {
+            current: null,
+        };
+        for await (const chunk of model.chatStreaming({tools, messages: input, telemetry: modelTelemetry})) {
+            if (chunk.type === 'tool') {
+                tool.current = chunk;
+            }
+            else {
+                yield chunk.content;
+            }
+        }
+        if (tool.current) {
+            const implement = new ToolImplement(this.context.editorHost);
+            const result = await implement.callTool(tool.current.name, tool.current.arguments);
+            const nextMessages: ChatInputPayload[] = [
+                ...input,
+                {
+                    role: 'assistant',
+                    content: '',
+                    toolCall: {
+                        id: tool.current.id,
+                        functionName: tool.current.name,
+                        arguments: tool.current.arguments,
+                    },
+                },
+                {
+                    role: 'tool',
+                    callId: tool.current.id,
+                    content: result,
+                },
+            ];
+            yield* this.requestModel(nextMessages, replyUuid);
+        }
+    }
 
+    private async *chat(payload: InboxSendMessageRequest) {
         // Add a user message to thread (or create a new thread)
         store.addNewMessageToThreadList(
             payload.threadUuid,
@@ -57,7 +100,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             throw new Error(`Cannot find thread ${payload.threadUuid} after it is created`);
         }
 
-        const toMessagePayload = (message: Message): ChatMessagePayload => {
+        const toMessagePayload = (message: Message): ChatInputPayload => {
             return {
                 role: message.sender,
                 content: message.content,
@@ -66,11 +109,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         // Messages are latest-on-top in thread
         const messages = thread.messages.map(toMessagePayload).reverse();
         const replyUuid = newUuid();
-        telemetry.setTelemetryData('replyUuid', replyUuid);
-        const model = editorHost.getModelAccess(this.getTaskId());
-        const modelTelemetry = telemetry.createModelTelemetry(this.getTaskId());
         try {
-            for await (const chunk of model.chatStreaming(messages, modelTelemetry)) {
+            for await (const chunk of this.requestModel(messages, replyUuid)) {
                 // We update the store but don't broadcast to all views on streaming
                 store.appendMessage(payload.threadUuid, replyUuid, chunk);
                 yield {
