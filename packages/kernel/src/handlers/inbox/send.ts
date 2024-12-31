@@ -72,12 +72,22 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     private telemetry: FunctionUsageTelemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
 
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
+        const {logger} = this.context;
+        logger.info('Start', payload);
         const thread = store.getThreadByUuid(payload.threadUuid);
         this.telemetry.setTelemetryData('mode', thread ? 'new' : 'reply');
-        yield* this.telemetry.spyStreaming(() => this.chat(payload));
+        try {
+            yield* this.telemetry.spyStreaming(() => this.chat(payload));
+            logger.info('Finish');
+        }
+        catch (ex) {
+            logger.error('Fail', {reason: stringifyError(ex)});
+        }
     }
 
     private async *requestModel(options: RequestOptions): AsyncIterable<InboxSendMessageResponse> {
+        const {logger} = this.context;
+        logger.trace('RequestModelStart', options);
         const {messages, replyUuid} = options;
         const {editorHost} = this.context;
         const model = editorHost.getModelAccess(this.getTaskId());
@@ -86,6 +96,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             current: null,
         };
         for await (const chunk of model.chatStreaming({tools, messages, telemetry: modelTelemetry})) {
+            logger.trace('RequestModelChunk', chunk);
             if (chunk.type === 'tool') {
                 tool.current = chunk;
                 yield {uuid: replyUuid, type: 'reference', value: toolCallToReference(chunk)};
@@ -94,10 +105,13 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                 yield {uuid: replyUuid, type: 'text', value: chunk.content};
             }
         }
+        logger.trace('RequestModelFinish');
 
         if (tool.current) {
+            logger.trace('HandleToolCallStart', tool.current);
             const implement = new ToolImplement(this.context.editorHost);
             const result = await implement.callTool(tool.current.name, tool.current.arguments);
+            logger.trace('HandleToolCallFinish', {...tool.current, result});
             const nextMessages: ChatInputPayload[] = [
                 ...messages,
                 {
@@ -120,6 +134,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *chat(payload: InboxSendMessageRequest) {
+        const {logger} = this.context;
+        logger.trace('AddNewMessageToStore', payload);
         // Add a user message to thread (or create a new thread)
         store.addNewMessageToThreadList(
             payload.threadUuid,
@@ -132,6 +148,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                 status: 'read',
             }
         );
+        logger.trace('PushStoreUpdate', payload);
         this.updateInboxThreadList(store.dump());
 
         const thread = store.getThreadByUuid(payload.threadUuid);
@@ -153,10 +170,18 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         try {
             for await (const chunk of this.requestModel({messages, replyUuid})) {
                 if (chunk.type === 'text') {
+                    logger.trace(
+                        'AppendMessage',
+                        {threadUuid: payload.threadUuid, messageUuid: replyUuid, chunk: chunk.value}
+                    );
                     // We update the store but don't broadcast to all views on streaming
                     store.appendMessage(payload.threadUuid, replyUuid, chunk.value);
                 }
                 else {
+                    logger.trace(
+                        'AddReference',
+                        {threadUuid: payload.threadUuid, messageUuid: replyUuid, reference: chunk.value}
+                    );
                     // Broadcast tool usage
                     store.addReference(payload.threadUuid, replyUuid, chunk.value);
                     this.updateInboxThreadList(store.dump());
@@ -166,12 +191,14 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             }
         }
         catch (ex) {
-            console.error(ex);
             store.setMessageError(payload.threadUuid, replyUuid, stringifyError(ex));
+            throw ex;
         }
 
         // Broadcast update when message is fully generated
+        logger.trace('MarkMessageUnread', {threadUuid: payload.threadUuid, messageUuid: replyUuid});
         store.markStatus(payload.threadUuid, replyUuid, 'unread');
+        logger.trace('PushStoreUpdate', payload);
         this.updateInboxThreadList(store.dump());
     }
 }
