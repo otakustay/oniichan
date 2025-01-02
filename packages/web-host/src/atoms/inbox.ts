@@ -3,7 +3,7 @@ import {now} from '@oniichan/shared/string';
 import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel';
 import {Message, MessageReference, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
 import {useIpcValue} from './ipc';
-import {useSetEditing} from './draft';
+import {useSetDraftContent, useSetEditing} from './draft';
 
 export const messageThreadListAtom = atom<MessageThread[]>([]);
 
@@ -47,141 +47,116 @@ export function useSetMessagelThreadList() {
 }
 
 interface MessageUpdateOptions {
-    threadUuid: string;
-    messageUuid: string;
     create: () => Message;
     update: (message: Message) => Message;
 }
 
-function updateThreadList(threads: MessageThread[], options: MessageUpdateOptions) {
-    const {threadUuid, messageUuid, create, update} = options;
-    const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
+function createThreadListUpdate(threadUuid: string, messageUuid: string, options: MessageUpdateOptions) {
+    return (threads: MessageThread[]) => {
+        const {create, update} = options;
+        const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
 
-    if (threadIndex < 0) {
-        return threads;
-    }
+        if (threadIndex < 0) {
+            return threads;
+        }
 
-    const targetThread = threads[threadIndex];
-    const messageIndex = targetThread.messages.findIndex(v => v.uuid === messageUuid);
+        const targetThread = threads[threadIndex];
+        const messageIndex = targetThread.messages.findIndex(v => v.uuid === messageUuid);
 
-    if (messageIndex < 0) {
-        const newMessage = create();
+        if (messageIndex < 0) {
+            const newMessage = create();
+            return [
+                {
+                    ...targetThread,
+                    messages: [
+                        newMessage,
+                        ...targetThread.messages,
+                    ],
+                },
+                ...threads.slice(0, threadIndex),
+                ...threads.slice(threadIndex + 1),
+            ];
+        }
+
+        const targetMessage = targetThread.messages[messageIndex];
         return [
             {
                 ...targetThread,
                 messages: [
-                    newMessage,
-                    ...targetThread.messages,
+                    ...targetThread.messages.slice(0, messageIndex),
+                    update(targetMessage),
+                    ...targetThread.messages.slice(messageIndex + 1),
                 ],
             },
             ...threads.slice(0, threadIndex),
             ...threads.slice(threadIndex + 1),
         ];
-    }
+    };
+}
 
-    const targetMessage = targetThread.messages[messageIndex];
-    return [
+function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string) {
+    return createThreadListUpdate(
+        threadUuid,
+        messageUuid,
         {
-            ...targetThread,
-            messages: [
-                ...targetThread.messages.slice(0, messageIndex),
-                update(targetMessage),
-                ...targetThread.messages.slice(messageIndex + 1),
-            ],
-        },
-        ...threads.slice(0, threadIndex),
-        ...threads.slice(threadIndex + 1),
-    ];
+            create: () => {
+                return {
+                    uuid: messageUuid,
+                    sender: 'assistant',
+                    content: chunk,
+                    status: 'generating',
+                    references: [],
+                    createdAt: now(),
+                };
+            },
+            update: message => {
+                return {
+                    ...message,
+                    content: message.content + chunk,
+                };
+            },
+        }
+    );
+}
+function addReferenceBy(threadUuid: string, messageUuid: string, reference: MessageReference) {
+    return createThreadListUpdate(
+        threadUuid,
+        messageUuid,
+        {
+            create: () => {
+                return {
+                    uuid: messageUuid,
+                    sender: 'assistant',
+                    content: '',
+                    status: 'generating',
+                    references: [reference],
+                    createdAt: now(),
+                };
+            },
+            update: message => {
+                const exists = message.references.find(v => v.id === reference.id);
+
+                if (exists) {
+                    return message;
+                }
+
+                return {
+                    ...message,
+                    references: [...message.references, reference],
+                };
+            },
+        }
+    );
 }
 
 export function useSendMessageToThread(threadUuid: string) {
     const ipc = useIpcValue();
     const setMessageThreadList = useSetMessagelThreadList();
     const setEditing = useSetEditing();
-    //     return (threads: MessageThread[]) => {
-    //         const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
-
-    //         if (threadIndex < 0) {
-    //             const newThread: MessageThread = {
-    //                 uuid: threadUuid,
-    //                 messages: [message],
-    //             };
-    //             return [newThread, ...threads];
-    //         }
-
-    //         const targetThread = threads[threadIndex];
-    //         return [
-    //             {
-    //                 ...targetThread,
-    //                 messages: [message, ...targetThread.messages],
-    //             },
-    //             ...threads.slice(0, threadIndex),
-    //             ...threads.slice(threadIndex + 1),
-    //         ];
-    //     };
-    // };
-    const appendMessageBy = (threadUuid: string, messageUuid: string, chunk: string) => {
-        return (threads: MessageThread[]) => {
-            return updateThreadList(
-                threads,
-                {
-                    threadUuid: threadUuid,
-                    messageUuid: messageUuid,
-                    create: () => {
-                        return {
-                            uuid: messageUuid,
-                            sender: 'assistant',
-                            content: chunk,
-                            status: 'generating',
-                            references: [],
-                            createdAt: now(),
-                        };
-                    },
-                    update: message => {
-                        return {
-                            ...message,
-                            content: message.content + chunk,
-                        };
-                    },
-                }
-            );
-        };
-    };
-    const addReferenceBy = (threadUuid: string, messageUuid: string, reference: MessageReference) => {
-        return (threads: MessageThread[]) => {
-            return updateThreadList(
-                threads,
-                {
-                    threadUuid: threadUuid,
-                    messageUuid: messageUuid,
-                    create: () => {
-                        return {
-                            uuid: messageUuid,
-                            sender: 'assistant',
-                            content: '',
-                            status: 'generating',
-                            references: [reference],
-                            createdAt: now(),
-                        };
-                    },
-                    update: message => {
-                        const exists = message.references.find(v => v.id === reference.id);
-
-                        if (exists) {
-                            return message;
-                        }
-
-                        return {
-                            ...message,
-                            references: [...message.references, reference],
-                        };
-                    },
-                }
-            );
-        };
-    };
+    const setDraftContent = useSetDraftContent();
     return async (uuid: string, content: string) => {
         setEditing(null);
+        setDraftContent('');
         const request: InboxSendMessageRequest = {
             threadUuid: threadUuid,
             uuid: uuid,

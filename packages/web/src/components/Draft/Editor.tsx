@@ -8,7 +8,7 @@ const EditArea = styled.textarea`
     resize: none;
     outline: none;
     border: none;
-    padding: 1em 0;
+    padding: .5em;
 `;
 
 interface Props {
