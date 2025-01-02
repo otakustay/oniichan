@@ -32,10 +32,28 @@ const tools: ChatToolPayload[] = [
             required: ['path'],
         },
     },
+    {
+        name: 'findFiles',
+        description: 'Find files in workspace by glob pattern, some files like node_modules are ignored by default',
+        parameters: {
+            type: 'object',
+            properties: {
+                glob: {
+                    description: 'The glob pattern to match files',
+                    type: 'string',
+                },
+            },
+            required: ['glob'],
+        },
+    },
 ];
 
 interface PathArguments {
     path: string;
+}
+
+interface GlobArguments {
+    glob: string;
 }
 
 export class ToolImplement {
@@ -83,6 +101,21 @@ export class ToolImplement {
             }
             catch (ex) {
                 return `Unsable to read file ${arg.path}: ${stringifyError(ex)}`;
+            }
+        }
+        if (name === 'findFiles') {
+            const arg = args as GlobArguments;
+            const workspace = this.editorHost.getWorkspace();
+            try {
+                const root = await workspace.getRoot();
+                if (root) {
+                    const files = await workspace.findFiles(arg.glob, 200);
+                    return files.map(v => path.relative(root, v));
+                }
+                return [];
+            }
+            catch (ex) {
+                return `Unsable to find files with pattern ${arg.glob}: ${stringifyError(ex)}`;
             }
         }
         throw new Error(`Unknown tool "${name}"`);

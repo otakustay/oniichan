@@ -1,5 +1,6 @@
+import {ComponentType} from 'react';
 import styled from '@emotion/styled';
-import {IoDocumentTextOutline, IoFolderOpenOutline} from 'react-icons/io5';
+import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {MessageReference} from '@oniichan/shared/inbox';
 
 const Layout = styled.div`
@@ -34,18 +35,34 @@ function trimPathString(path: string) {
     return `${before}...${last}`;
 }
 
+function renderLabelContent(reference: MessageReference): [ComponentType, string] {
+    switch (reference.type) {
+        case 'file':
+            return [IoDocumentTextOutline, trimPathString(reference.path)];
+        case 'directory':
+            return [IoFolderOpenOutline, trimPathString(reference.path)];
+        case 'find':
+            return [IoSearchOutline, reference.pattern];
+        default:
+            throw new Error(`Unknown reference type`);
+    }
+}
+
 interface Props {
     references: MessageReference[];
 }
 
 export default function Reference({references}: Props) {
-    const renderLabel = (reference: MessageReference) => (
-        <Label>
-            {reference.type === 'file' && <IoDocumentTextOutline />}
-            {reference.type === 'directory' && <IoFolderOpenOutline />}
-            {trimPathString(reference.path)}
-        </Label>
-    );
+    const renderLabel = (reference: MessageReference) => {
+        const [Icon, content] = renderLabelContent(reference);
+
+        return (
+            <Label>
+                <Icon />
+                {content}
+            </Label>
+        );
+    };
 
     return (
         <Layout>

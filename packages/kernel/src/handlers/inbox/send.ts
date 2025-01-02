@@ -45,6 +45,10 @@ interface PathArguments {
     path: string;
 }
 
+interface GlobArguments {
+    glob: string;
+}
+
 function toolCallToReference(toolCall: ModelToolResponse): MessageReference {
     switch (toolCall.name) {
         case 'readFile':
@@ -58,6 +62,12 @@ function toolCallToReference(toolCall: ModelToolResponse): MessageReference {
                 id: toolCall.id,
                 type: 'directory',
                 path: (toolCall.arguments as PathArguments).path,
+            };
+        case 'findFiles':
+            return {
+                id: toolCall.id,
+                type: 'find',
+                pattern: (toolCall.arguments as GlobArguments).glob,
             };
         default:
             throw new Error(`Unknown tool call ${toolCall.name}`);

@@ -58,11 +58,3 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
         return Promise.all(tuples.map(toEntry));
     }
 }
-
-export class GetWorkspaceRootHandler extends RequestHandler<void, string | null, Context> {
-    static action = 'getWorkspaceRoot' as const;
-
-    async *handleRequest(): AsyncIterable<string | null> {
-        yield workspace.workspaceFolders?.at(0)?.uri.toString() ?? null;
-    }
-}

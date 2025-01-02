@@ -1,5 +1,5 @@
 import {Client} from '@otakustay/ipc';
-import {Protocol} from '@oniichan/editor-host/server';
+import {Protocol as EditorHostProtocol} from '@oniichan/editor-host/server';
 import {newUuid} from '@oniichan/shared/id';
 
 export interface ReadDirectoryOptions {
@@ -9,9 +9,9 @@ export interface ReadDirectoryOptions {
 export class WorkspaceHost {
     private readonly taskId: string | undefined;
 
-    private readonly client: Client<Protocol>;
+    private readonly client: Client<EditorHostProtocol>;
 
-    constructor(taskId: string | undefined, client: Client<Protocol>) {
+    constructor(taskId: string | undefined, client: Client<EditorHostProtocol>) {
         this.taskId = taskId;
         this.client = client;
     }
@@ -26,5 +26,9 @@ export class WorkspaceHost {
 
     async getRoot() {
         return this.client.call(newUuid(this.taskId), 'getWorkspaceRoot');
+    }
+
+    async findFiles(glob: string, limit?: number) {
+        return this.client.call(newUuid(this.taskId), 'findFiles', {glob, limit});
     }
 }

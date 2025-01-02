@@ -14,7 +14,13 @@ export interface MessageDirectoryReference {
     path: string;
 }
 
-export type MessageReference = MessageFileReference | MessageDirectoryReference;
+export interface MessageFindReference {
+    id: string;
+    type: 'find';
+    pattern: string;
+}
+
+export type MessageReference = MessageFileReference | MessageDirectoryReference | MessageFindReference;
 
 export interface Message {
     uuid: string;

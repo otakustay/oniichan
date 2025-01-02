@@ -43,7 +43,7 @@ function SourceCode({code, language}: Props) {
                     langs: [language],
                     themes: ['github-light-default', 'github-dark-default'],
                 };
-                const highlighter = await getSingletonHighlighter(options).catch();
+                const highlighter = await getSingletonHighlighter(options).catch(() => null);
                 setHighlighter(highlighter);
             })();
         },
