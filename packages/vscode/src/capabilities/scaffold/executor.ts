@@ -1,6 +1,6 @@
 import {window, TextEditor, Position, Uri, workspace, Disposable, Range} from 'vscode';
 import {TaskManager, TaskContainer, TaskContext} from '@oniichan/editor-host/utils/task';
-import {ScaffoldRequest} from '@oniichan/kernel';
+import {ScaffoldRequest} from '@oniichan/kernel/client';
 import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {TextEditorReference} from '@oniichan/editor-host/utils/editor';

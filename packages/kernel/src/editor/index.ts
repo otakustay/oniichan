@@ -1,13 +1,12 @@
-import {Client} from '@otakustay/ipc';
-import {Protocol} from '@oniichan/editor-host/server';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {EditorDocumentHost} from './document';
 import {ModelAccessHost} from './model';
 import {WorkspaceHost} from './workspace';
 
 export class EditorHost {
-    private readonly client: Client<Protocol>;
+    private readonly client: EditorHostClient;
 
-    constructor(client: Client<Protocol>) {
+    constructor(client: EditorHostClient) {
         this.client = client;
     }
 

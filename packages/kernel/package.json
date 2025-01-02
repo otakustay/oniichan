@@ -4,7 +4,8 @@
   "version": "1.6.1",
   "description": "Contains core logic for all capabilities with VSCode API decoupled",
   "exports": {
-    ".": "./dist/index.js"
+    "./server": "./dist/server.js",
+    "./client": "./dist/client.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

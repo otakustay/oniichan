@@ -1,5 +1,4 @@
-import {Client} from '@otakustay/ipc';
-import {Protocol} from '@oniichan/editor-host/server';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {newUuid} from '@oniichan/shared/id';
 import {
     createModelClient,
@@ -24,9 +23,9 @@ export interface ModelChatOptions extends ModelChatOptionsNoTools {
 export class ModelAccessHost {
     private readonly taskId: string | undefined;
 
-    private readonly client: Client<Protocol>;
+    private readonly client: EditorHostClient;
 
-    constructor(taskId: string | undefined, client: Client<Protocol>) {
+    constructor(taskId: string | undefined, client: EditorHostClient) {
         this.taskId = taskId;
         this.client = client;
     }

@@ -1,5 +1,4 @@
-import {Client} from '@otakustay/ipc';
-import {Protocol as EditorHostProtocol} from '@oniichan/editor-host/server';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {newUuid} from '@oniichan/shared/id';
 
 export interface ReadDirectoryOptions {
@@ -9,9 +8,9 @@ export interface ReadDirectoryOptions {
 export class WorkspaceHost {
     private readonly taskId: string | undefined;
 
-    private readonly client: Client<EditorHostProtocol>;
+    private readonly client: EditorHostClient;
 
-    constructor(taskId: string | undefined, client: Client<EditorHostProtocol>) {
+    constructor(taskId: string | undefined, client: EditorHostClient) {
         this.taskId = taskId;
         this.client = client;
     }

@@ -1,12 +1,12 @@
 import path from 'node:path';
 import {Worker} from 'node:worker_threads';
-import {Client, ClientInit, ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
-import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {HostServer, HostServerDependency} from '@oniichan/editor-host/server';
+import {ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
+import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
+import {EditorHostServer, EditorHostDependency} from '@oniichan/editor-host/server';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
 import {MessageThread} from '@oniichan/shared/inbox';
-import {Protocol as WebProtocol} from '@oniichan/web-host';
+import {WebHostClient} from '@oniichan/web-host/client';
 import {stringifyError} from '@oniichan/shared/string';
 import {Disposable} from 'vscode';
 
@@ -51,7 +51,7 @@ interface Dependency {
     [Logger.containerKey]: Logger;
 }
 
-export class KernelClient extends Client<KernelProtocol> implements Disposable {
+export class KernelClient extends BaseKernelClient implements Disposable {
     static readonly containerKey = 'KernelClient';
 
     // TODO: We need `Client` to expose `port` property directly
@@ -59,16 +59,16 @@ export class KernelClient extends Client<KernelProtocol> implements Disposable {
 
     private readonly logger: Logger;
 
-    private readonly webClients = new Map<Port, Client<WebProtocol>>();
+    private readonly webClients = new Map<Port, WebHostClient>();
 
-    constructor(port: Port, container: DependencyContainer<Dependency>, init?: ClientInit) {
-        super(port, {namespace: '-> kernel', ...init});
+    constructor(port: Port, container: DependencyContainer<Dependency>) {
+        super(port);
         this.logger = container.get(Logger);
         this.ownPort = port;
     }
 
     addWebPort(port: Port) {
-        const client = new Client<WebProtocol>(port, {namespace: '-> web'});
+        const client = new WebHostClient(port);
         this.webClients.set(port, client);
     }
 
@@ -76,7 +76,7 @@ export class KernelClient extends Client<KernelProtocol> implements Disposable {
         this.webClients.delete(port);
     }
 
-    private broadcast(fn: (client: Client<WebProtocol>) => Promise<void>) {
+    private broadcast(fn: (client: WebHostClient) => Promise<void>) {
         const clients = [...this.webClients.values()];
         void (async () => {
             try {
@@ -154,12 +154,12 @@ export class KernelClient extends Client<KernelProtocol> implements Disposable {
 // }
 // ```
 
-export async function createKernelClient(container: DependencyContainer<HostServerDependency>): Promise<KernelClient> {
+export async function createKernelClient(container: DependencyContainer<EditorHostDependency>): Promise<KernelClient> {
     const logger = container.get(Logger);
     logger.trace('ActivateKernelStart');
     const worker = new Worker(path.join(__dirname, 'kernelEntry.js'));
     const port = new WorkerPort(worker);
-    const hostServer = new HostServer(container);
+    const hostServer = new EditorHostServer(container);
     await hostServer.connect(port);
     const kernelClient = new KernelClient(port, container);
     logger.trace('ActivateKernelFinish', {mode: 'thread', threadId: worker.threadId});

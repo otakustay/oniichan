@@ -1,11 +1,10 @@
 import {atom, useAtomValue} from 'jotai';
-import {Client} from '@otakustay/ipc';
-import {Protocol as KernelProtocol} from '@oniichan/kernel';
-import {Server} from '../../server';
+import {KernelClient} from '@oniichan/kernel/client';
+import {WebHostServer} from '../../server';
 import {WebSocketPort, VscodeMessagePort} from './port';
 
 export interface Ipc {
-    kernel: Client<KernelProtocol>;
+    kernel: KernelClient;
 }
 
 async function createIpc() {
@@ -13,8 +12,8 @@ async function createIpc() {
 
     if (isVscode) {
         const port = new VscodeMessagePort();
-        const kernelClient = new Client<KernelProtocol>(port, {namespace: '-> kernel'});
-        const server = new Server({namespace: '-> web'});
+        const kernelClient = new KernelClient(port);
+        const server = new WebHostServer();
         await server.connect(port);
         return {kernel: kernelClient};
     }
@@ -25,8 +24,8 @@ async function createIpc() {
                 'open',
                 async () => {
                     const port = new WebSocketPort(socket);
-                    const kernelClient = new Client<KernelProtocol>(port, {namespace: '-> kernel'});
-                    const server = new Server({namespace: '-> web'});
+                    const kernelClient = new KernelClient(port);
+                    const server = new WebHostServer();
                     await server.connect(port);
                     resolve({kernel: kernelClient});
                 }

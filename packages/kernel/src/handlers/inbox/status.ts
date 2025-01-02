@@ -14,11 +14,15 @@ export class InboxMarkMessageStatusHandler extends RequestHandler<InboxMarkMessa
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: InboxMarkMessageStatusRequest): AsyncIterable<void> {
+        const {logger} = this.context;
+        logger.info('Start', payload);
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxMarkMessageStatus');
         telemetry.setTelemetryData('threadUuid', payload.threadUuid);
         telemetry.setTelemetryData('uuid', payload.uuid);
         store.markStatus(payload.threadUuid, payload.uuid, payload.status);
+        logger.trace('PushStoreUpdate');
         this.updateInboxThreadList(store.dump());
         telemetry.end();
+        logger.info('Finish');
     }
 }

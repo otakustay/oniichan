@@ -1,7 +1,7 @@
 import {MessagePort, parentPort} from 'node:worker_threads';
-import {Client, ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
-import {EditorHost, KernelServer} from '@oniichan/kernel';
-import {Protocol as HostProtocol} from '@oniichan/editor-host/server';
+import {ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
+import {KernelServer} from '@oniichan/kernel/server';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {stringifyError} from '@oniichan/shared/string';
 import {ConsoleLogger} from '@oniichan/shared/logger';
 
@@ -40,10 +40,9 @@ class WorkerPort implements Port {
 async function main() {
     try {
         const port = new WorkerPort();
-        const hostClient = new Client<HostProtocol>(port, {namespace: '-> host'});
-        const editorHost = new EditorHost(hostClient);
+        const editorHostClient = new EditorHostClient(port);
         const logger = new ConsoleLogger('Kernel');
-        const server = new KernelServer(editorHost, logger);
+        const server = new KernelServer(editorHostClient, logger);
         await server.connect(port);
     }
     catch (ex) {

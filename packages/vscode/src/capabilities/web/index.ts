@@ -13,10 +13,10 @@ import {
     window,
     WebviewView,
 } from 'vscode';
-import {Client, ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
-import {Protocol as WebProtocol} from '@oniichan/web-host';
+import {WebHostClient} from '@oniichan/web-host/client';
 import {newUuid} from '@oniichan/shared/id';
 import {KernelClient} from '../../kernel';
 import {WebAppServer} from './server';
@@ -63,9 +63,7 @@ interface Dependency {
 export class WebApp implements Disposable, WebviewViewProvider {
     private readonly container: DependencyContainer<Dependency>;
 
-    private sidebarView: WebviewView | null = null;
-
-    private sidebarClient: Client<WebProtocol> | null = null;
+    private sidebarClient: WebHostClient | null = null;
 
     // File is `dist/extension.ts`, reference to `dist/web`
     private readonly webAppServer;
@@ -85,9 +83,8 @@ export class WebApp implements Disposable, WebviewViewProvider {
     }
 
     async resolveWebviewView(view: WebviewView) {
-        this.sidebarView = view;
         const port = await this.setupWebview(view.webview);
-        this.sidebarClient = new Client<WebProtocol>(port, {namespace: '-> web'});
+        this.sidebarClient = new WebHostClient(port);
         this.disposables.push(port);
     }
 

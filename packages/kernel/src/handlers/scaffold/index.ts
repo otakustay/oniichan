@@ -1,8 +1,8 @@
 import path from 'node:path';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import {FileEntry} from '@oniichan/editor-host/client';
 import {RequestHandler} from '../handler';
 import {ScaffoldApi} from './api';
-import {FileEntry} from '@oniichan/editor-host/server';
 
 const MAX_SNIPPET_COUNT = 10;
 

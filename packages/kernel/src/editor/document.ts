@@ -1,15 +1,14 @@
-import {Protocol} from '@oniichan/editor-host/server';
-import {Client} from '@otakustay/ipc';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {newUuid} from '@oniichan/shared/id';
 
 export class EditorDocumentHost {
     private readonly taskId: string | undefined;
 
-    private readonly client: Client<Protocol>;
+    private readonly client: EditorHostClient;
 
     private readonly uri: string;
 
-    constructor(taskId: string | undefined, client: Client<Protocol>, uri: string) {
+    constructor(taskId: string | undefined, client: EditorHostClient, uri: string) {
         this.taskId = taskId;
         this.client = client;
         this.uri = uri;

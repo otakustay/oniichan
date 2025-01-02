@@ -1,43 +1,29 @@
 import {ExtensionContext} from 'vscode';
-import {ProtocolOf, Server} from '@otakustay/ipc';
+import {Server} from '@otakustay/ipc';
+import {DependencyContainer} from '@oniichan/shared/container';
+import {Logger} from '@oniichan/shared/logger';
+import {LoadingManager} from '../ui/loading';
+import {Context} from './interface';
 import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
 } from './handlers/document';
-import {DependencyContainer} from '@oniichan/shared/container';
-import {Logger} from '@oniichan/shared/logger';
-import {LoadingManager} from '../ui/loading';
 import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {Context} from './interface';
 import {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
-import {GetWorkspaceRootHandler, FindFilesHandler} from './handlers/workspace';
+import {EditorHostProtocol} from './protocol';
+import {FindFilesHandler, GetWorkspaceRootHandler} from './handlers/workspace';
 
-export type {DocumentLine, LineDiagnostic} from './handlers/document';
-export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
-
-export type Protocol = ProtocolOf<
-    | typeof GetDocumentTextHandler
-    | typeof GetDocumentLanguageIdHandler
-    | typeof GetDocumentDiagnosticAtLineHandler
-    | typeof GetModelConfigHandler
-    | typeof RequestModelConfigureHandler
-    | typeof ReadFileHandler
-    | typeof ReadDirectoryHandler
-    | typeof GetWorkspaceRootHandler
-    | typeof FindFilesHandler
->;
-
-export interface HostServerDependency {
+export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     ExtensionContext: ExtensionContext;
 }
 
-export class HostServer extends Server<Protocol, Context> {
-    private readonly container: DependencyContainer<HostServerDependency>;
+export class EditorHostServer extends Server<EditorHostProtocol, Context> {
+    private readonly container: DependencyContainer<EditorHostDependency>;
 
-    constructor(container: DependencyContainer<HostServerDependency>) {
+    constructor(container: DependencyContainer<EditorHostDependency>) {
         super({namespace: '-> host'});
         this.container = container;
     }

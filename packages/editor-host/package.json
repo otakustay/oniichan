@@ -4,7 +4,8 @@
   "version": "1.6.1",
   "description": "Host and expose VSCode API to consumers via IPC",
   "exports": {
-    "./server": "./dist/server/index.js",
+    "./server": "./dist/server/server.js",
+    "./client": "./dist/server/client.js",
     "./utils/*": "./dist/utils/*.js",
     "./ui/*": "./dist/ui/*.js"
   },
