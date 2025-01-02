@@ -23,6 +23,7 @@ export async function activate(context: ExtensionContext) {
         .bind('KernelClient', () => kernel, {singleton: true});
 
     context.subscriptions.push(
+        kernel,
         new SemanticRewriteCommand(globalContainer),
         new OpenDataFolderCommand(),
         new WebApp(globalContainer),

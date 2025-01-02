@@ -8,8 +8,9 @@ import {LogEntry, Logger} from '@oniichan/shared/logger';
 import {MessageThread} from '@oniichan/shared/inbox';
 import {Protocol as WebProtocol} from '@oniichan/web-host';
 import {stringifyError} from '@oniichan/shared/string';
+import {Disposable} from 'vscode';
 
-class WorkerPort implements Port {
+class WorkerPort implements Port, Disposable {
     private readonly worker: Worker;
 
     constructor(worker: Worker) {
@@ -35,14 +36,26 @@ class WorkerPort implements Port {
             }
         );
     }
+
+    dispose() {
+        this.worker.terminate().catch(() => {});
+    }
+}
+
+function isDisposable(target: any): target is Disposable {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return !!target && typeof target.dispose === 'function';
 }
 
 interface Dependency {
     [Logger.containerKey]: Logger;
 }
 
-export class KernelClient extends Client<KernelProtocol> {
+export class KernelClient extends Client<KernelProtocol> implements Disposable {
     static readonly containerKey = 'KernelClient';
+
+    // TODO: We need `Client` to expose `port` property directly
+    private readonly ownPort: Port;
 
     private readonly logger: Logger;
 
@@ -51,6 +64,7 @@ export class KernelClient extends Client<KernelProtocol> {
     constructor(port: Port, container: DependencyContainer<Dependency>, init?: ClientInit) {
         super(port, {namespace: '-> kernel', ...init});
         this.logger = container.get(Logger);
+        this.ownPort = port;
     }
 
     addWebPort(port: Port) {
@@ -82,6 +96,12 @@ export class KernelClient extends Client<KernelProtocol> {
         else if (notice.action === 'updateInboxThreadList') {
             const list: MessageThread[] = notice.payload;
             this.broadcast(v => v.call(notice.taskId, 'updateThreadList', list));
+        }
+    }
+
+    dispose() {
+        if (isDisposable(this.ownPort)) {
+            this.ownPort.dispose();
         }
     }
 }
