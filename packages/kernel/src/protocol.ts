@@ -6,6 +6,10 @@ import type {ModelChatHandler} from './handlers/model';
 import type {ModelTelemetryHandler} from './handlers/telemetry';
 import type {InboxMarkMessageStatusHandler, InboxSendMessageHandler, InboxGetThreadListHandler} from './handlers/inbox';
 
+export type {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from './handlers/inbox';
+export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
+export type {ScaffoldRequest, ScaffoldResponse} from './handlers/scaffold';
+
 export type KernelProtocol = ProtocolOf<
     | typeof EchoHandler
     | typeof SemanticRewriteHandler

@@ -3,7 +3,7 @@ import {RequestHandler} from '@otakustay/ipc';
 import {Context} from '../interface';
 
 export class GetDocumentTextHandler extends RequestHandler<string, string, Context> {
-    static action = 'getDocumentText' as const;
+    static readonly action = 'getDocumentText';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
         const editor = window.visibleTextEditors.find(v => v.document.uri.toString() === uri);
@@ -17,7 +17,7 @@ export class GetDocumentTextHandler extends RequestHandler<string, string, Conte
 }
 
 export class GetDocumentLanguageIdHandler extends RequestHandler<string, string, Context> {
-    static action = 'getDocumentLanguageId' as const;
+    static readonly action = 'getDocumentLanguageId';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
         const editor = window.visibleTextEditors.find(v => v.document.uri.toString() === uri);
@@ -61,7 +61,7 @@ function toLineDiagnostic(diagnostic: Diagnostic): LineDiagnostic {
 }
 
 export class GetDocumentDiagnosticAtLineHandler extends RequestHandler<DocumentLine, LineDiagnostic[], Context> {
-    static action = 'getDocumentDiagnosticAtLine' as const;
+    static readonly action = 'getDocumentDiagnosticAtLine';
 
     async *handleRequest(payload: DocumentLine): AsyncIterable<LineDiagnostic[]> {
         const editor = window.visibleTextEditors.find(v => v.document.uri.toString() === payload.uri);

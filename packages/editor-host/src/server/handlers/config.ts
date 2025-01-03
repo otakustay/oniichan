@@ -29,7 +29,7 @@ async function updateModelConfiguration(input: ModelConfiguration) {
 }
 
 export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration, Context> {
-    static action = 'getModelConfig' as const;
+    static readonly action = 'getModelConfig';
 
     async *handleRequest(): AsyncIterable<ModelConfiguration> {
         const config = getModelConfig();
@@ -38,7 +38,7 @@ export class GetModelConfigHandler extends RequestHandler<string, ModelConfigura
 }
 
 export class RequestModelConfigureHandler extends RequestHandler<void, void, Context> {
-    static action = 'requestModelConfigure' as const;
+    static readonly action = 'requestModelConfigure';
 
     // eslint-disable-next-line require-yield
     async *handleRequest() {

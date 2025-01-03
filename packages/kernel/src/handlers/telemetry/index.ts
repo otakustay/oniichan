@@ -13,7 +13,7 @@ async function takeLastReversed<T>(iterable: AsyncIterable<T>, count: number): P
 }
 
 export class ModelTelemetryHandler extends RequestHandler<void, ModelUsageRecord[]> {
-    static action = 'modelTelemetry' as const;
+    static readonly action = 'modelTelemetry';
 
     async *handleRequest(): AsyncIterable<ModelUsageRecord[]> {
         const result = await takeLastReversed(readModelTelemetry(), 50);

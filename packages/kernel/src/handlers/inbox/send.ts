@@ -84,7 +84,7 @@ function threadMessageToInputPayload(message: Message): ChatInputPayload {
 }
 
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
-    static action = 'inboxSendMessage' as const;
+    static readonly action = 'inboxSendMessage';
 
     private telemetry: FunctionUsageTelemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
 

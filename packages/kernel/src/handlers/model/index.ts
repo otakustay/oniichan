@@ -4,7 +4,7 @@ import {newUuid} from '@oniichan/shared/id';
 import {RequestHandler} from '../handler';
 
 export class ModelChatHandler extends RequestHandler<ChatInputPayload[], ModelResponse> {
-    static action = 'modelChat' as const;
+    static readonly action = 'modelChat';
 
     async *handleRequest(messages: ChatInputPayload[]): AsyncIterable<ModelResponse> {
         const {editorHost} = this.context;

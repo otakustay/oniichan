@@ -55,7 +55,7 @@ interface EnhanceContextInput {
 }
 
 export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteRequest, SemanticRewriteResponse> {
-    static action = 'semanticRewrite' as const;
+    static readonly action = 'semanticRewrite';
 
     private readonly api: SemanticRewriteApi;
 

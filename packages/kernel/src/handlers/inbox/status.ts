@@ -10,7 +10,7 @@ export interface InboxMarkMessageStatusRequest {
 }
 
 export class InboxMarkMessageStatusHandler extends RequestHandler<InboxMarkMessageStatusRequest, void> {
-    static action = 'inboxMarkMessageStatus' as const;
+    static readonly action = 'inboxMarkMessageStatus';
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: InboxMarkMessageStatusRequest): AsyncIterable<void> {

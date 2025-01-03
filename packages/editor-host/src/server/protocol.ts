@@ -14,6 +14,11 @@ import type {
 } from './handlers/workspace';
 import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
+export type {DocumentLine, LineDiagnostic} from './handlers/document';
+export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
+export type {RenderDiffViewRequest} from './handlers/diff';
+export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
+
 export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler
     | typeof GetDocumentLanguageIdHandler

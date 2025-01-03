@@ -1,6 +1,6 @@
 import path from 'node:path';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {FileEntry} from '@oniichan/editor-host/client';
+import {FileEntry} from '@oniichan/editor-host/protocol';
 import {RequestHandler} from '../handler';
 import {ScaffoldApi} from './api';
 
@@ -40,7 +40,7 @@ interface ScaffoldSnippet {
 }
 
 export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldResponse> {
-    static action = 'scaffold' as const;
+    static readonly action = 'scaffold';
 
     async *handleRequest(request: ScaffoldRequest): AsyncIterable<ScaffoldResponse> {
         const {logger} = this.context;

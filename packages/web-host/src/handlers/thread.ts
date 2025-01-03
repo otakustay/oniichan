@@ -4,7 +4,7 @@ import {MessageThread} from '@oniichan/shared/inbox';
 import {activeTheadUuidAtom, messageThreadListAtom} from '../atoms/inbox';
 
 export class UpdateThreadListHandler extends RequestHandler<MessageThread[], void> {
-    static action = 'updateThreadList' as const;
+    static readonly action = 'updateThreadList';
 
     // eslint-disable-next-line require-yield
     async *handleRequest(list: MessageThread[]): AsyncIterable<void> {

@@ -4,6 +4,7 @@
   "version": "1.7.0",
   "description": "Contains core logic for all capabilities with VSCode API decoupled",
   "exports": {
+    "./protocol": "./dist/protocol.js",
     "./server": "./dist/server.js",
     "./client": "./dist/client.js"
   },

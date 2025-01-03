@@ -53,7 +53,7 @@ interface AcceptEditRequest {
 }
 
 export class AcceptEditHandler extends RequestHandler<AcceptEditRequest, void, Context> {
-    static action = 'acceptEdit' as const;
+    static readonly action = 'acceptEdit';
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: AcceptEditRequest) {

@@ -4,11 +4,12 @@
   "version": "1.7.0",
   "description": "Provides methods to control web app",
   "exports": {
+    "./protocol": "./dist/protocol.js",
+    "./server": "./dist/server.js",
+    "./client": "./dist/client.js",
     "./atoms/ipc": "./dist/atoms/ipc/index.js",
     "./atoms/draft": "./dist/atoms/draft.js",
-    "./atoms/inbox": "./dist/atoms/inbox.js",
-    "./server": "./dist/server.js",
-    "./client": "./dist/client.js"
+    "./atoms/inbox": "./dist/atoms/inbox.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

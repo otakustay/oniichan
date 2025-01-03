@@ -4,13 +4,13 @@ import {RequestHandler} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
 import {Context} from '../interface';
 
-interface FindFilesRequest {
+export interface FindFilesRequest {
     glob: string;
     limit?: number;
 }
 
 export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[], Context> {
-    static action = 'findFiles' as const;
+    static readonly action = 'findFiles';
 
     async *handleRequest({glob, limit}: FindFilesRequest): AsyncIterable<string[]> {
         const files = await workspace.findFiles(glob, null, limit);
@@ -19,7 +19,7 @@ export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[],
 }
 
 export class GetWorkspaceRootHandler extends RequestHandler<void, string | null, Context> {
-    static action = 'getWorkspaceRoot' as const;
+    static readonly action = 'getWorkspaceRoot';
 
     async *handleRequest(): AsyncIterable<string | null> {
         yield workspace.workspaceFolders?.at(0)?.uri.toString() ?? null;
@@ -27,7 +27,7 @@ export class GetWorkspaceRootHandler extends RequestHandler<void, string | null,
 }
 
 export class ReadWorkspaceFileHandler extends RequestHandler<string, string | null, Context> {
-    static action = 'readWorkspaceFile' as const;
+    static readonly action = 'readWorkspaceFile';
 
     async *handleRequest(file: string): AsyncIterable<string | null> {
         for (const folder of workspace.workspaceFolders ?? []) {
@@ -45,13 +45,13 @@ export class ReadWorkspaceFileHandler extends RequestHandler<string, string | nu
     }
 }
 
-interface WriteWorkspaceFileRequest {
+export interface WriteWorkspaceFileRequest {
     file: string;
     content: string;
 }
 
 export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFileRequest, void, Context> {
-    static action = 'writeWorkspaceFile' as const;
+    static readonly action = 'writeWorkspaceFile';
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: WriteWorkspaceFileRequest) {

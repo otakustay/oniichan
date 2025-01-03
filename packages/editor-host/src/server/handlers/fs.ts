@@ -3,7 +3,7 @@ import {RequestHandler} from '@otakustay/ipc';
 import {Context} from '../interface';
 
 export class ReadFileHandler extends RequestHandler<string, string, Context> {
-    static action = 'readFile' as const;
+    static readonly action = 'readFile';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
         const content = await workspace.fs.readFile(Uri.parse(uri));
@@ -38,7 +38,7 @@ function toFileEntryType(input: FileType): FileEntryType {
 }
 
 export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, FileEntry[], Context> {
-    static action = 'readDirectory' as const;
+    static readonly action = 'readDirectory';
 
     async *handleRequest({path, depth}: ReadDirectoryRequest): AsyncIterable<FileEntry[]> {
         const entries = await this.read(Uri.parse(path), depth);

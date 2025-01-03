@@ -4,7 +4,7 @@ import {RequestHandler} from '../handler';
 import {store} from './store';
 
 export class InboxGetThreadListHandler extends RequestHandler<void, MessageThread[]> {
-    static action = 'inboxGetThreadList' as const;
+    static readonly action = 'inboxGetThreadList';
 
     async *handleRequest(): AsyncIterable<MessageThread[]> {
         const {logger} = this.context;

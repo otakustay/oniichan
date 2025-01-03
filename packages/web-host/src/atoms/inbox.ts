@@ -1,6 +1,6 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
-import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel/client';
+import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel/protocol';
 import {Message, MessageReference, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
 import {useIpcValue} from './ipc';
 import {useSetDraftContent, useSetEditing} from './draft';
