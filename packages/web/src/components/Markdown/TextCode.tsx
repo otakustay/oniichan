@@ -42,7 +42,7 @@ export default function TextCode({code, language, closed}: Props) {
     return (
         <Layout>
             <Header>
-                <LanguageIcon language={language ?? ''} />
+                <LanguageIcon mode="language" value={language} />
                 {language}
                 {closed && <CopyCode text={code + '\n'} />}
             </Header>

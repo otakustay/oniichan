@@ -181,6 +181,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.0.2)(react@19.0.0))(@types/react@19.0.2)(react@19.0.0)
+      '@oniichan/editor-host':
+        specifier: workspace:*
+        version: link:../editor-host
       '@oniichan/kernel':
         specifier: workspace:*
         version: link:../kernel

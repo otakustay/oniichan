@@ -52,6 +52,6 @@ export default function CodeBlock({children, node}: Props) {
     const file = matches?.at(3);
 
     return file
-        ? <DiffCode file={file} language={language} code={code} closed={closed} />
+        ? <DiffCode file={file} code={code} closed={closed} action={language} />
         : <TextCode language={language} code={code} closed={closed} />;
 }

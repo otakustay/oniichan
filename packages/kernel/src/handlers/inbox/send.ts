@@ -209,12 +209,12 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
-        logger.trace('RequestModelStart', {threadUuid: this.threadUuid, messages: this.messages});
+        const systemPrompt = renderPrompt(systemPromptTemplate, {});
+        logger.trace('RequestModelStart', {threadUuid: this.threadUuid, messages: this.messages, systemPrompt});
         const {editorHost} = this.context;
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
         const tool: ToolCallState = {current: null};
-        const systemPrompt = renderPrompt(systemPromptTemplate, {});
         const options: ModelChatOptions = {
             tools: this.enableTool ? (this.tool?.getBuiltinTools() ?? []) : [],
             messages: this.messages,

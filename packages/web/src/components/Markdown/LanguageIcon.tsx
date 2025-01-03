@@ -1,12 +1,14 @@
 import {getIcon} from 'material-file-icons';
-import {sampleFileNameFromLanguage} from './language';
+import {sampleFileNameFromExtension, sampleFileNameFromLanguage} from './language';
 
 interface Props {
-    language: string;
+    mode: 'language' | 'extension';
+    value: string | undefined;
 }
 
-export default function LanguageIcon({language}: Props) {
-    const icon = getIcon(sampleFileNameFromLanguage(language));
+export default function LanguageIcon({mode, value}: Props) {
+    const iconName = mode === 'language' ? sampleFileNameFromLanguage(value) : sampleFileNameFromExtension(value);
+    const icon = getIcon(iconName);
 
     return <i style={{width: 14, height: 14}} dangerouslySetInnerHTML={{__html: icon.svg}} />;
 }

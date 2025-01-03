@@ -133,7 +133,11 @@ const LANGUAGE_TO_EXTENSION: Record<string, string | undefined> = {
     yaml: 'yml',
 };
 
-export function sampleFileNameFromLanguage(language: string) {
-    const extension = LANGUAGE_TO_EXTENSION[language];
+export function sampleFileNameFromExtension(extension: string | undefined) {
     return `sample.${extension ?? 'txt'}`;
+}
+
+export function sampleFileNameFromLanguage(language: string | undefined) {
+    const extension = LANGUAGE_TO_EXTENSION[language ?? ''];
+    return sampleFileNameFromExtension(extension);
 }

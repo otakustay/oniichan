@@ -1,13 +1,13 @@
 import {window, TextEditor, Position, Uri, workspace, Disposable, Range} from 'vscode';
 import {TaskManager, TaskContainer, TaskContext} from '@oniichan/editor-host/utils/task';
-import {ScaffoldRequest} from '@oniichan/kernel/client';
+import {ScaffoldRequest} from '@oniichan/kernel/protocol';
 import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {stringifyError} from '@oniichan/shared/string';
-import {KernelClient} from '../../kernel';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import {KernelClient} from '../../kernel';
 
 const LOADING_TEXT = 'Oniichan正在为你生成脚手架，请不要操作或关闭文件，删除本行可以中止任务';
 

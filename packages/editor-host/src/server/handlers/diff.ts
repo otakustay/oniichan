@@ -46,7 +46,7 @@ export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest,
     }
 }
 
-interface AcceptEditRequest {
+export interface AcceptEditRequest {
     file: string;
     content: string;
     action: 'modify' | 'delete';
@@ -67,6 +67,7 @@ export class AcceptEditHandler extends RequestHandler<AcceptEditRequest, void, C
             throw new Error('No open workspace');
         }
 
+        // TODO: We should use text editor to apply diff, not file system API
         const absolute = path.join(root, payload.file);
         const uri = Uri.file(absolute);
         try {

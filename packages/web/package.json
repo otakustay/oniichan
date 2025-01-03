@@ -20,6 +20,7 @@
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@oniichan/editor-host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
