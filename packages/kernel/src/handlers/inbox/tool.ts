@@ -87,17 +87,17 @@ export class ToolImplement {
             const arg = args as PathArguments;
             const workspace = this.editorHost.getWorkspace();
             try {
-                const root = await workspace.getRoot();
-                if (root) {
-                    const content = await workspace.readFile(path.join(root, arg.path));
+                const content = await workspace.readWorkspaceFile(arg.path);
 
-                    if (content.length > 30000) {
-                        return `Unable to read file ${arg.path}: This file is too large`;
-                    }
-
-                    return content;
+                if (content === null) {
+                    return `Unsable to read file ${arg.path}: file not exists}`;
                 }
-                return null;
+
+                if (content.length > 30000) {
+                    return `Unable to read file ${arg.path}: This file is too large`;
+                }
+
+                return content;
             }
             catch (ex) {
                 return `Unsable to read file ${arg.path}: ${stringifyError(ex)}`;

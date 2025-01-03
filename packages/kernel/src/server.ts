@@ -12,12 +12,14 @@ import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
 
 export class KernelServer extends Server<KernelProtocol, Context> {
+    static readonly namespace = '-> kernel';
+
     private readonly editorHost: EditorHost;
 
     private readonly logger: Logger;
 
     constructor(editorHostClient: EditorHostClient, logger: Logger) {
-        super({namespace: '-> kernel'});
+        super({namespace: KernelServer.namespace});
         this.editorHost = new EditorHost(editorHostClient);
         this.logger = logger;
     }

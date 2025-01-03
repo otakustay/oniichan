@@ -6,7 +6,13 @@ import type {
 } from './handlers/document';
 import type {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import type {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
-import type {GetWorkspaceRootHandler, FindFilesHandler} from './handlers/workspace';
+import type {
+    GetWorkspaceRootHandler,
+    FindFilesHandler,
+    ReadWorkspaceFileHandler,
+    WriteWorkspaceFileHandler,
+} from './handlers/workspace';
+import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
 export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler
@@ -18,4 +24,8 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof ReadDirectoryHandler
     | typeof GetWorkspaceRootHandler
     | typeof FindFilesHandler
+    | typeof ReadWorkspaceFileHandler
+    | typeof WriteWorkspaceFileHandler
+    | typeof RenderDiffViewHandler
+    | typeof AcceptEditHandler
 >;

@@ -5,7 +5,9 @@ export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
 
 export class EditorHostClient extends Client<EditorHostProtocol> {
+    static readonly namespace = '-> host';
+
     constructor(port: Port) {
-        super(port, {namespace: '-> host'});
+        super(port, {namespace: EditorHostClient.namespace});
     }
 }

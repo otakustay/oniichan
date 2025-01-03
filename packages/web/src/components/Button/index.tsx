@@ -1,7 +1,8 @@
-import {ReactNode} from 'react';
+import {CSSProperties, ReactNode} from 'react';
 import styled from '@emotion/styled';
 
 interface Props {
+    style?: CSSProperties;
     className?: string;
     disabled?: boolean;
     children: ReactNode;
@@ -11,13 +12,11 @@ interface Props {
 const Layout = styled.button`
     appearance: none;
     border: none;
-    padding: 0;
+    padding: 0 1em;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
     cursor: pointer;
     color: var(--color-interactive-foreground);
     background-color: var(--color-interactive-background);
@@ -37,9 +36,9 @@ const Layout = styled.button`
     }
 `;
 
-export default function Button({className, disabled, children, onClick}: Props) {
+export default function Button({style, className, disabled, children, onClick}: Props) {
     return (
-        <Layout disabled={disabled} onClick={onClick} className={className}>
+        <Layout disabled={disabled} onClick={onClick} style={style} className={className}>
             {children}
         </Layout>
     );

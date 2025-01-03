@@ -1,21 +1,24 @@
 import {atom, useAtomValue} from 'jotai';
 import {KernelClient} from '@oniichan/kernel/client';
+import {EditorHostClient} from '@oniichan/editor-host/client';
 import {WebHostServer} from '../../server';
 import {WebSocketPort, VscodeMessagePort} from './port';
 
 export interface Ipc {
     kernel: KernelClient;
+    editor: EditorHostClient;
 }
 
-async function createIpc() {
+async function createIpc(): Promise<Ipc> {
     const isVscode = location.protocol === 'vscode-webview:';
 
     if (isVscode) {
         const port = new VscodeMessagePort();
         const kernelClient = new KernelClient(port);
+        const editorHostClient = new EditorHostClient(port);
         const server = new WebHostServer();
         await server.connect(port);
-        return {kernel: kernelClient};
+        return {kernel: kernelClient, editor: editorHostClient};
     }
     else {
         const executor = (resolve: (value: Ipc) => void) => {
@@ -25,9 +28,10 @@ async function createIpc() {
                 async () => {
                     const port = new WebSocketPort(socket);
                     const kernelClient = new KernelClient(port);
+                    const editorHostClient = new EditorHostClient(port);
                     const server = new WebHostServer();
                     await server.connect(port);
-                    resolve({kernel: kernelClient});
+                    resolve({kernel: kernelClient, editor: editorHostClient});
                 }
             );
         };

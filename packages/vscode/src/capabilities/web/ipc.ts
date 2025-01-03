@@ -1,6 +1,10 @@
 import {Client, ExecutionRequest, Port, RequestHandler, Server, ServerInit} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {KernelClient} from '../../kernel';
+import {EditorHostServer} from '@oniichan/editor-host/server';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import {Logger} from '@oniichan/shared/logger';
+import {ExtensionContext} from 'vscode';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
     private readonly upstream: Client<any>;
@@ -14,6 +18,7 @@ class BridgeHandler extends RequestHandler<any, any, any> {
     }
 
     async *handleRequest(payload: any): AsyncIterable<any> {
+        console.log('bridge', this.action);
         yield* this.upstream.callStreaming(this.getTaskId(), this.action, payload);
     }
 }
@@ -45,13 +50,22 @@ class BridgeServer<P extends Record<keyof P, () => AsyncIterable<any>>> extends 
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
+    [Logger.containerKey]: Logger;
+    ExtensionContext: ExtensionContext;
     Port: Port;
 }
 
 export async function establishIpc(container: DependencyContainer<Dependency>) {
     const port = container.get('Port');
+
     const kernelClient = container.get('KernelClient');
-    const kernelServer = new BridgeServer(kernelClient, {namespace: '-> kernel'});
+    const kernelServer = new BridgeServer(kernelClient, {namespace: KernelClient.namespace});
     await kernelServer.connect(port);
     kernelClient.addWebPort(port);
+
+    const editorHostServer = new EditorHostServer(container);
+    await editorHostServer.connect(port);
+    // const editorHostClient = new EditorHostClient(port);
+    // const editorHostServer = new BridgeServer(editorHostClient, {namespace: EditorHostClient.namespace});
 }

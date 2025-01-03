@@ -28,6 +28,7 @@
     "@rspack/cli": "^1.1.8",
     "@rspack/core": "^1.1.8",
     "@rspack/plugin-react-refresh": "^1.0.1",
+    "@types/diff": "^6.0.0",
     "@types/mustache": "^4.2.5",
     "@types/react": "^19.0.2",
     "@types/react-copy-to-clipboard": "^5.0.7",
@@ -56,5 +57,8 @@
         ]
       }
     }
+  },
+  "dependencies": {
+    "diff": "^7.0.0"
   }
 }

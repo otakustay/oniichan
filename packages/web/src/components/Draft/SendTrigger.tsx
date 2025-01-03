@@ -6,6 +6,7 @@ const Layout = styled(Button)`
     border-radius: 50%;
     width: 2em;
     height: 2em;
+    padding: 0;
 `;
 
 interface Props {

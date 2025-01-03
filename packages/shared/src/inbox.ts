@@ -44,6 +44,72 @@ interface MessageUpdateHelper {
 
 const debugMessageThreadFixtures: MessageThread[] = [
     {
+        uuid: 'eea4bdb9-c8c0-4b64-81ef-7d542aa13b1e',
+        messages: [
+            {
+                uuid: '9fae536b-a78f-4d5d-94ab-f423a2fc75a2',
+                sender: 'assistant',
+                content:
+                    'I\'ll look at the source code first to ensure consistency with your codebase.\n\nI\'ll create both a `flatMap` and `compact` operator according to your codebase patterns. Let me check some of the existing operator implementations first.\n\nI\'ll help you create both `flatMap` and `compact` operators based on the existing patterns in your codebase. Let\'s implement them one by one.\n\n1. First, let\'s create the `flatMap` operator:\n\n```typescript:src/helper/operators/flatMap.ts\nimport { Transform } from \'./interface.js\';\n\nexport async function* flatMap<T, R>(iterator: AsyncIterable<T>, fn: Transform<T, R[]>): AsyncIterable<R> {\n    for await (const value of iterator) {\n        const result = await fn(value);\n        for (const item of result) {\n            yield item;\n        }\n    }\n}\n```\n\n2. Now, let\'s create the `compact` operator that removes null and undefined values:\n\n```typescript:src/helper/operators/compact.ts\nexport async function* compact<T>(iterator: AsyncIterable<T>): AsyncIterable<NonNullable<T>> {\n    for await (const ',
+                status: 'read',
+                references: [
+                    {
+                        id: 'tooluse_SALAs7jdQ5OPXLkDy3eEyg',
+                        type: 'find',
+                        pattern: 'src/helper/**/*.ts',
+                    },
+                    {
+                        id: 'toolu_01To4veWVi2ARiHpUovWcUy5',
+                        type: 'file',
+                        path: 'src/helper/operators/interface.ts',
+                    },
+                    {
+                        id: 'tooluse_dB12d0MqRO-z-EBa4wYJrQ',
+                        type: 'file',
+                        path: 'src/helper/operators/map.ts',
+                    },
+                ],
+                createdAt: '2025-01-03T07:11:01.204Z',
+            },
+            {
+                uuid: 'cfb416f4-7e77-4c9b-aafa-2f27b30d134f',
+                sender: 'user',
+                content: 'I still need a `compact` operator',
+                createdAt: '2025-01-03T07:10:57.429Z',
+                references: [],
+                status: 'read',
+            },
+            {
+                uuid: 'bff80455-4496-4f92-990e-009fbbb06048',
+                sender: 'assistant',
+                content:
+                    'I\'ll help you write a `flatMap` operator. Let me first check the source code directory you mentioned.\n\nLet me check the operators directory to see the existing operators and their structure.\n\nI\'ll help you write a `flatMap` operator. Based on the directory structure, we should create this in the `src/helper/operators` directory. Let\'s call it `flatMap.ts`. The `flatMap` operator will transform each value from the source observable using a mapping function that returns an observable, and then flattens the results into a single observable.\n\nHere\'s the implementation:\n\n```typescript:src/helper/operators/flatMap.ts\nimport { Observable } from \'../../types\';\nimport { Operator } from \'./interface\';\n\nexport function flatMap<T, R>(\n  project: (value: T) => Observable<R>\n): Operator<T, R> {\n  return (source: Observable<T>): Observable<R> => {\n    return (subscriber) => {\n      const subscriptions = new Set<() => void>();\n      \n      // Subscribe to the source observable\n      const sourceSubscription = source((value) => {\n        try {\n          // Get the inner observable from the project function\n          const innerObservable = project(value);\n          \n          // Subscribe to the inner observable\n          const innerSubscription = innerObservable((innerValue) => {\n            subscriber(innerValue);\n          });\n          \n          // Keep track of inner subscriptions\n          subscriptions.add(innerSubscription);\n        } catch (error) {\n          // Handle any errors that occur during projection\n          console.error(\'Error in flatMap:\', error);\n        }\n      });\n      \n      // Return cleanup function\n      return () => {\n        // Clean up all inner subscriptions\n        subscriptions.forEach((unsubscribe) => unsubscribe());\n        subscriptions.clear();\n        // Clean up source subscription\n        sourceSubscription();\n      };\n    };\n  };\n}\n```\n\nThis implementation:\n\n1. Takes a `project` function that maps each value to an Observable\n2. Returns an operator function that transforms the source observable\n3. For each value from the source:\n   - Applies the project function to get an inner observable\n   - Subscribes to the inner observable\n   - Emits all values from the inner observable\n4. Manages subscriptions properly to avoid memory leaks\n5. Provides proper cleanup through the unsubscribe function\n\nYou can use this operator like this:\n\n```typescript\nimport { flatMap } from \'./operators/flatMap\';\n\n// Example usage\nconst source$ = /* some observable */;\nconst result$ = source$.pipe(\n  flatMap(value => /* return an observable */)\n);\n```\n\nYou might also want to add a test file. Would you like me to provide a test implementation as well?',
+                status: 'read',
+                references: [
+                    {
+                        id: 'toolu_011hpmqGDvGcNtwxic8o5hy7',
+                        type: 'directory',
+                        path: 'src/helper',
+                    },
+                    {
+                        id: 'tooluse_99WI2jcKRrmRvAcKZKSbcg',
+                        type: 'directory',
+                        path: 'src/helper/operators',
+                    },
+                ],
+                createdAt: '2025-01-03T05:36:33.402Z',
+            },
+            {
+                uuid: '143b1084-121e-4c80-a718-22bd7dcb3ca7',
+                sender: 'user',
+                content: 'Write a `flatMap` operator for me according to source code in `src/helper`',
+                createdAt: '2025-01-03T05:36:30.974Z',
+                references: [],
+                status: 'read',
+            },
+        ],
+    },
+    {
         uuid: '2f773372-aa66-4b9f-a17c-b8c5f57a1fc5',
         messages: [
             {

@@ -54,6 +54,8 @@ interface Dependency {
 export class KernelClient extends BaseKernelClient implements Disposable {
     static readonly containerKey = 'KernelClient';
 
+    static readonly namespace = BaseKernelClient.namespace;
+
     // TODO: We need `Client` to expose `port` property directly
     private readonly ownPort: Port;
 

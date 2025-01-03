@@ -12,6 +12,7 @@ const EditTrigger = styled(Button)`
     right: 1rem;
     width: 2em;
     height: 2em;
+    padding: 0;
     font-size: 1.5rem;
     border-radius: 50%;
 `;

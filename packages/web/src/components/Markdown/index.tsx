@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import {ComponentType} from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from './CodeBlock';
+import ContentProvider from './ContentProvider';
 
 const MarkdownContent = styled(ReactMarkdown)`
     p {
@@ -36,8 +37,10 @@ interface Props {
 
 export default function Markdown({content}: Props) {
     return (
-        <MarkdownContent components={components}>
-            {content}
-        </MarkdownContent>
+        <ContentProvider content={content}>
+            <MarkdownContent components={components}>
+                {content}
+            </MarkdownContent>
+        </ContentProvider>
     );
 }

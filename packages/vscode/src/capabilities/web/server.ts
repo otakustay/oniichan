@@ -1,3 +1,4 @@
+import {ExtensionContext} from 'vscode';
 import EventEmitter from 'node:events';
 import fastify, {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';
@@ -7,6 +8,8 @@ import detectPort from 'detect-port';
 import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/string';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import {Logger} from '@oniichan/shared/logger';
 import {KernelClient} from '../../kernel';
 import {establishIpc} from './ipc';
 
@@ -50,6 +53,9 @@ export interface ServerInit {
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
+    [Logger.containerKey]: Logger;
+    ExtensionContext: ExtensionContext;
 }
 
 export class WebAppServer extends EventEmitter<ServerEventMap> {

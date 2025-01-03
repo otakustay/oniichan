@@ -4,7 +4,7 @@ import {Ipc, useIpcValue} from '@oniichan/web-host/atoms/ipc';
 
 const emptyClient = new Client(new DirectPort());
 
-const Context = createContext<Ipc>({kernel: emptyClient});
+const Context = createContext<Ipc>({kernel: emptyClient, editor: emptyClient});
 Context.displayName = 'IpcContext';
 
 interface Props {

@@ -25,6 +25,8 @@ injectGlobal`
         --color-information: var(--vscode-notificationsInfoIcon, #1a85ff);
         --color-warn: var(--vscode-notificationsWarningIcon, #ddb100);
         --color-error: var(--vscode-notificationsErrorIcon, #b01011);
+        --color-addition: var(--vscode-diffEditorGutter-insertedLineBackground, #2da042);
+        --color-deletion: var(--vscode-diffEditorGutter-removedLineBackground, #e51600);
     }
 
    @media (prefers-color-scheme: dark) {
@@ -51,6 +53,8 @@ injectGlobal`
             --color-information: var(--vscode-notificationsInfoIcon, #1a85ff);
             --color-warn: var(--vscode-notificationsWarningIcon, #ffcc01);
             --color: error: var(--vscode-notificationsErrorIcon, #f88070);
+            --color-addition: var(--vscode-diffEditorGutter-insertedLineBackground, #2da042);
+            --color-deletion: var(--vscode-diffEditorGutter-removedLineBackground, #8f1e1a);
         }
     }
 `;

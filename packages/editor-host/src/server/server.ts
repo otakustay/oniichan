@@ -12,7 +12,13 @@ import {
 import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 import {EditorHostProtocol} from './protocol';
-import {FindFilesHandler, GetWorkspaceRootHandler} from './handlers/workspace';
+import {
+    FindFilesHandler,
+    GetWorkspaceRootHandler,
+    ReadWorkspaceFileHandler,
+    WriteWorkspaceFileHandler,
+} from './handlers/workspace';
+import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
@@ -21,10 +27,12 @@ export interface EditorHostDependency {
 }
 
 export class EditorHostServer extends Server<EditorHostProtocol, Context> {
+    static readonly namespace = '-> host';
+
     private readonly container: DependencyContainer<EditorHostDependency>;
 
     constructor(container: DependencyContainer<EditorHostDependency>) {
-        super({namespace: '-> host'});
+        super({namespace: EditorHostServer.namespace});
         this.container = container;
     }
 
@@ -38,6 +46,10 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(ReadDirectoryHandler);
         this.registerHandler(GetWorkspaceRootHandler);
         this.registerHandler(FindFilesHandler);
+        this.registerHandler(ReadWorkspaceFileHandler);
+        this.registerHandler(WriteWorkspaceFileHandler);
+        this.registerHandler(RenderDiffViewHandler);
+        this.registerHandler(AcceptEditHandler);
     }
 
     protected async createContext() {

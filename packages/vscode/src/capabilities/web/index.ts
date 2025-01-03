@@ -17,6 +17,7 @@ import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {WebHostClient} from '@oniichan/web-host/client';
+import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
 import {KernelClient} from '../../kernel';
 import {WebAppServer} from './server';
@@ -55,9 +56,10 @@ class WebviewPort implements Port, Disposable {
 const OPEN_WEB_APP_COMMAND = 'oniichan.openWebAppInExternalBrowser';
 
 interface Dependency {
+    [KernelClient.containerKey]: KernelClient;
+    [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     ExtensionContext: ExtensionContext;
-    [KernelClient.containerKey]: KernelClient;
 }
 
 export class WebApp implements Disposable, WebviewViewProvider {

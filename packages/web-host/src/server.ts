@@ -4,8 +4,10 @@ import {UpdateThreadListHandler} from './handlers/thread';
 import {WebHostProtocol} from './protocol';
 
 export class WebHostServer extends Server<WebHostProtocol> {
+    static readonly namespace = '-> web';
+
     constructor() {
-        super({namespace: '-> web'});
+        super({namespace: WebHostServer.namespace});
     }
     protected initializeHandlers() {
         this.registerHandler(ComposeNewMessageRequestHandler);

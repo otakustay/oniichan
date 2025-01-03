@@ -19,6 +19,10 @@ export class WorkspaceHost {
         return this.client.call(newUuid(this.taskId), 'readFile', uri);
     }
 
+    async readWorkspaceFile(path: string) {
+        return this.client.call(newUuid(this.taskId), 'readWorkspaceFile', path);
+    }
+
     async readDirectory(path: string, options?: ReadDirectoryOptions) {
         return this.client.call(newUuid(this.taskId), 'readDirectory', {path, depth: options?.depth});
     }
