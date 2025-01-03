@@ -1,5 +1,11 @@
 # Change Log
 
+## [UNRELEASED]
+
+### Added
+
+- Oniichan给邮件系统加了一个内置的系统提示词，至于效果好坏嘛慢慢调整。
+
 ## [1.7.0] - 2024-01-02
 
 ### Added

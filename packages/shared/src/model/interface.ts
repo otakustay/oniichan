@@ -73,6 +73,7 @@ export interface ChatToolPayload {
 
 export interface ModelChatOptions {
     messages: ChatInputPayload[];
+    systemPrompt?: string | undefined;
     tools?: ChatToolPayload[];
 }
 

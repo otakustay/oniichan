@@ -2,6 +2,7 @@ import {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {MessageReference} from '@oniichan/shared/inbox';
+import {trimPathString} from '@oniichan/shared/string';
 
 const Layout = styled.div`
     display: flex;
@@ -23,17 +24,6 @@ const Label = styled.span`
     padding: 0 .5em;
     cursor: default;
 `;
-
-function trimPathString(path: string) {
-    if (path.length <= 20) {
-        return path;
-    }
-
-    const segments = path.split(/([/\\])/);
-    const before = segments.slice(0, 4).join('');
-    const last = segments.slice(-2).join('');
-    return `${before}...${last}`;
-}
 
 function renderLabelContent(reference: MessageReference): [ComponentType, string] {
     switch (reference.type) {

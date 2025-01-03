@@ -68,13 +68,15 @@ export default function CodeBlock({children}: Props) {
     }
 
     const {className, children: code = ''} = children.props;
-    const language = /language-(\w+)/.exec(className ?? '')?.at(1);
+    const matches = /language-(\w+)(:(\S+)+)?/.exec(className ?? '');
+    const language = matches?.at(1);
+    const file = matches?.at(3);
 
     return (
         <Layout>
             <Header>
                 <LanguageTypeIcon language={language ?? ''} />
-                {language}
+                {file ?? language}
                 <CopyCode text={code + '\n'} />
             </Header>
             <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>

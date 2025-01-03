@@ -14,6 +14,7 @@ import {CodeResult, streamingExtractCode} from './extract';
 export interface ModelChatOptionsNoTools {
     messages: ChatInputPayload[];
     telemetry: ModelUsageTelemetry;
+    systemPrompt?: string;
 }
 
 export interface ModelChatOptions extends ModelChatOptionsNoTools {
@@ -31,10 +32,10 @@ export class ModelAccessHost {
     }
 
     async chat(options: ModelChatOptions): Promise<ModelResponse> {
-        const {messages, telemetry} = options;
+        const {messages, systemPrompt, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);
-        const [response, meta] = await client.chat({messages});
+        const [response, meta] = await client.chat({messages, systemPrompt});
         telemetry.setResponseChunk(response);
         telemetry.setResponseChunk(meta);
         void telemetry.record();
@@ -42,10 +43,10 @@ export class ModelAccessHost {
     }
 
     async *chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse> {
-        const {messages, tools, telemetry} = options;
+        const {messages, tools, systemPrompt, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);
-        for await (const chunk of client.chatStreaming({messages, tools})) {
+        for await (const chunk of client.chatStreaming({messages, tools, systemPrompt})) {
             telemetry.setResponseChunk(chunk);
             if (chunk.type !== 'meta') {
                 yield chunk;

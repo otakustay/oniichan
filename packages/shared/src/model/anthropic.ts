@@ -138,6 +138,7 @@ export class AnthropicModelClient implements ModelClient {
             messages: options.messages.map(transformInputPayload),
             model: this.modelName,
             max_tokens: 8000,
+            system: options.systemPrompt,
         };
         if (options.tools?.length) {
             request.tools = options.tools.map(transformToolPayload);

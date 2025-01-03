@@ -4,7 +4,9 @@ import {ChatInputPayload, ModelTextResponse, ModelToolResponse} from '@oniichan/
 import {Message, MessageReference} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {now, stringifyError} from '@oniichan/shared/string';
+import {renderPrompt} from '@oniichan/shared/prompt';
 import {newUuid} from '@oniichan/shared/id';
+import systemPromptTemplate from './system.prompt';
 import {ModelChatOptions} from '../../editor/model';
 import {RequestHandler} from '../handler';
 import {store} from './store';
@@ -109,7 +111,6 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             // Messages are latest-on-top in thread
             this.messages.unshift(...thread.messages.map(threadMessageToInputPayload));
         }
-        this.telemetry.setTelemetryData('mode', thread ? 'new' : 'reply');
 
         try {
             yield* this.telemetry.spyStreaming(() => this.chat(payload));
@@ -213,10 +214,12 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
         const tool: ToolCallState = {current: null};
+        const systemPrompt = renderPrompt(systemPromptTemplate, {});
         const options: ModelChatOptions = {
             tools: this.enableTool ? (this.tool?.getBuiltinTools() ?? []) : [],
             messages: this.messages,
             telemetry: modelTelemetry,
+            systemPrompt,
         };
         for await (const chunk of model.chatStreaming(options)) {
             logger.trace('RequestModelChunk', chunk);

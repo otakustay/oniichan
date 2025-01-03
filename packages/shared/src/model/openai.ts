@@ -130,8 +130,12 @@ export class OpenAiModelClient implements ModelClient {
     }
 
     private getBaseRequest(options: ModelChatOptions) {
+        const messages = options.messages.map(transformInputPayload);
+        if (options.systemPrompt) {
+            messages.unshift({role: 'system', content: options.systemPrompt});
+        }
         const request: OpenAi.ChatCompletionCreateParams = {
-            messages: options.messages.map(transformInputPayload),
+            messages,
             model: this.modelName,
             max_tokens: 8000,
         };
