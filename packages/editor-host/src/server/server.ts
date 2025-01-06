@@ -3,6 +3,7 @@ import {Server} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '../ui/loading';
+import {DiffViewManager} from '../ui/diff';
 import {Context} from './interface';
 import {
     GetDocumentDiagnosticAtLineHandler,
@@ -23,6 +24,7 @@ import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
+    [DiffViewManager.containerKey]: DiffViewManager;
     ExtensionContext: ExtensionContext;
 }
 
@@ -57,6 +59,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
             loadingManager: this.container.get(LoadingManager),
             logger: this.container.get(Logger),
             extensionHost: this.container.get('ExtensionContext'),
+            diffViewManager: this.container.get(DiffViewManager),
         };
     }
 }

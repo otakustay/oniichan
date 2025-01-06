@@ -9,14 +9,17 @@ import {WebApp} from './capabilities/web';
 import {createKernelClient} from './kernel';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
+import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 
 export async function activate(context: ExtensionContext) {
     const baseContainer = new DependencyContainer()
         .bind(OutputChannelProvider, () => new OutputChannelProvider(), {singleton: true})
         .bind(TaskManager, () => new TaskManager(), {singleton: true});
-    const serverHostContainer = baseContainer
-        .bind(Logger, () => new OutputLogger(baseContainer, 'Extension'), {singleton: true})
+    const loggerContainer = baseContainer
+        .bind(Logger, () => new OutputLogger(baseContainer, 'Extension'), {singleton: true});
+    const serverHostContainer = loggerContainer
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
+        .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
     const kernel = await createKernelClient(serverHostContainer);
     const globalContainer = serverHostContainer

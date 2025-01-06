@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
 import {diffLines} from 'diff';
 import {trimPathString} from '@oniichan/shared/string';
-import {RenderDiffViewRequest, RenderDiffViewResponse, AcceptEditRequest} from '@oniichan/editor-host/protocol';
+import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
 import LanguageIcon from './LanguageIcon';
@@ -36,6 +36,12 @@ function CountLabel({type, count}: CountLabelProps) {
     return <span style={{color}}>{type === 'addition' ? '+' : '-'}{count}</span>;
 }
 
+const FileNameLabel = styled.span`
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+`;
+
 const DeletedMark = styled.span`
     display: flex;
     justify-content: center;
@@ -46,6 +52,7 @@ const DeletedMark = styled.span`
 const ActionButton = styled(Button)`
     height: 1.5em;
     border-radius: .5em;
+    min-width: fit-content;
 `;
 
 const Layout = styled.div`
@@ -83,7 +90,6 @@ interface Props {
 
 export default function DiffCode({action, file, code, closed}: Props) {
     const [rawText, setRawText] = useState<string | null>(null);
-    const [diffViewState, setDiffViewState] = useState<RenderDiffViewResponse | null>(null);
     const ipc = useIpc();
     useEffect(
         () => {
@@ -102,16 +108,13 @@ export default function DiffCode({action, file, code, closed}: Props) {
             oldContent: rawText ?? '',
             newContent: code,
         };
-        const state = await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
-        setDiffViewState(state);
+        await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
     };
     const accept = async () => {
         const request: AcceptEditRequest = {
             file,
             action: action === 'delete' ? 'delete' : 'modify',
             content: code,
-            diffViewOldFile: diffViewState?.oldFile,
-            diffViewNewFile: diffViewState?.newFile,
         };
         await ipc.editor.call(crypto.randomUUID(), 'acceptEdit', request);
     };
@@ -119,7 +122,7 @@ export default function DiffCode({action, file, code, closed}: Props) {
     return (
         <Layout>
             {closed ? <LanguageIcon mode="extension" value={extension} /> : <Loading />}
-            {trimPathString(file)}
+            <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
             {showCount && <CountLabel type="addition" count={addition} />}
             {showCount && <CountLabel type="deletion" count={deletion} />}
             {action === 'delete' && <DeletedMark>D</DeletedMark>}

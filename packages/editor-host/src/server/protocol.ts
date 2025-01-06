@@ -16,7 +16,7 @@ import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
-export type {RenderDiffViewRequest, RenderDiffViewResponse, AcceptEditRequest} from './handlers/diff';
+export type {RenderDiffViewRequest, AcceptEditRequest} from './handlers/diff';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
 
 export type EditorHostProtocol = ProtocolOf<

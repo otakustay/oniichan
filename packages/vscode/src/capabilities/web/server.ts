@@ -10,6 +10,7 @@ import {stringifyError} from '@oniichan/shared/string';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';
+import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {KernelClient} from '../../kernel';
 import {establishIpc} from './ipc';
 
@@ -55,6 +56,7 @@ interface Dependency {
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
+    [DiffViewManager.containerKey]: DiffViewManager;
     ExtensionContext: ExtensionContext;
 }
 

@@ -3,6 +3,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {KernelClient} from '../../kernel';
 import {EditorHostServer} from '@oniichan/editor-host/server';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {Logger} from '@oniichan/shared/logger';
 import {ExtensionContext} from 'vscode';
 
@@ -52,6 +53,7 @@ interface Dependency {
     [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
+    [DiffViewManager.containerKey]: DiffViewManager;
     ExtensionContext: ExtensionContext;
     Port: Port;
 }
