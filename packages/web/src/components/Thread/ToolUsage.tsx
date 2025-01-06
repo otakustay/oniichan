@@ -13,6 +13,10 @@ const Layout = styled.div`
     border-radius: .5em;
     padding: .5em 1em;
     cursor: default;
+
+    + & {
+        margin-top: 0;
+    }
 `;
 
 const ActionLabel = styled.span`

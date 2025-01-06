@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
 import {diffLines} from 'diff';
 import {trimPathString} from '@oniichan/shared/string';
-import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
+import {RenderDiffViewRequest, RenderDiffViewResponse, AcceptEditRequest} from '@oniichan/editor-host/protocol';
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
 import LanguageIcon from './LanguageIcon';
@@ -56,6 +56,10 @@ const Layout = styled.div`
     gap: .5em;
     border-radius: .5em;
     background-color: var(--color-contrast-background);
+
+    + & {
+        margin-top: 0;
+    }
 `;
 
 type Action = 'edit' | 'delete' | (string & {}) | undefined;
@@ -79,6 +83,7 @@ interface Props {
 
 export default function DiffCode({action, file, code, closed}: Props) {
     const [rawText, setRawText] = useState<string | null>(null);
+    const [diffViewState, setDiffViewState] = useState<RenderDiffViewResponse | null>(null);
     const ipc = useIpc();
     useEffect(
         () => {
@@ -97,13 +102,16 @@ export default function DiffCode({action, file, code, closed}: Props) {
             oldContent: rawText ?? '',
             newContent: code,
         };
-        await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
+        const state = await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
+        setDiffViewState(state);
     };
     const accept = async () => {
         const request: AcceptEditRequest = {
             file,
             action: action === 'delete' ? 'delete' : 'modify',
             content: code,
+            diffViewOldFile: diffViewState?.oldFile,
+            diffViewNewFile: diffViewState?.newFile,
         };
         await ipc.editor.call(crypto.randomUUID(), 'acceptEdit', request);
     };

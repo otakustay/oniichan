@@ -111,10 +111,17 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string)
             },
             update: message => {
                 if (message.sender === 'assistant') {
-                    return {
-                        ...message,
-                        content: [...message.content, chunk],
-                    };
+                    const lastChunk = message.content.at(-1);
+                    if (typeof lastChunk === 'string') {
+                        return {
+                            ...message,
+                            content: [
+                                ...message.content.slice(0, -1),
+                                lastChunk + chunk,
+                            ],
+                        };
+                    }
+                    return {...message, content: [...message.content, chunk]};
                 }
                 return {
                     ...message,
@@ -143,10 +150,16 @@ function addToolUsageBy(threadUuid: string, messageUuid: string, usage: MessageT
                     throw new Error('Cannot add tool usage to user message');
                 }
 
-                return {
-                    ...message,
-                    content: [...message.content, usage],
-                };
+                // Kernel will push message containing the latest tool usage,
+                // and we also append usage to message here, this may cause duplication of usage items,
+                // we need to test if the usage is already exists
+                const exists = message.content.some(v => typeof v === 'object' && v.id === usage.id);
+                return exists
+                    ? message
+                    : {
+                        ...message,
+                        content: [...message.content, usage],
+                    };
             },
         }
     );

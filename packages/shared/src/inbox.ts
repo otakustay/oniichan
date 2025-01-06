@@ -216,7 +216,13 @@ export class ThreadStore {
                 },
                 update: message => {
                     if (message.sender === 'assistant') {
-                        message.content.push(chunk);
+                        const lastChunk = message.content.at(-1);
+                        if (lastChunk && typeof lastChunk === 'string') {
+                            message.content[message.content.length - 1] = lastChunk + chunk;
+                        }
+                        else {
+                            message.content.push(chunk);
+                        }
                     }
                     else {
                         message.content += chunk;
