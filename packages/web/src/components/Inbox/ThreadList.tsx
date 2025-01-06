@@ -1,9 +1,21 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
 import {useMessageThreadListValue, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
-import {MessageThread} from '@oniichan/shared/inbox';
+import {Message, MessageThread} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import MessageStatusIcon from '../MessageStatusIcon';
+
+function toContentString(message: Message | undefined): string | null {
+    if (!message) {
+        return null;
+    }
+
+    if (message.sender === 'user') {
+        return message.content;
+    }
+
+    return message.content.filter((v: any) => typeof v === 'string').join('');
+}
 
 const ItemLayout = styled(motion.div)`
     padding: 1em;
@@ -67,12 +79,12 @@ function ThreadItem({thread}: ThreadItemProps) {
             <ItemHeader>
                 <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
                 <ItemTitle>
-                    {firstMessage?.content ?? '(No Title)'}
+                    {toContentString(firstMessage) ?? '(No Title)'}
                 </ItemTitle>
                 {lastMessage && <ItemDateTime time={lastMessage.createdAt} />}
             </ItemHeader>
             <ItemContent>
-                {lastMessage?.content ?? '(Empty)'}
+                {toContentString(lastMessage) ?? '(Empty)'}
             </ItemContent>
         </ItemLayout>
     );

@@ -1,7 +1,7 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel/protocol';
-import {Message, MessageReference, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
+import {Message, MessageToolUsage, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
 import {useIpcValue} from './ipc';
 import {useSetDraftContent, useSetEditing} from './draft';
 
@@ -103,13 +103,19 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string)
                 return {
                     uuid: messageUuid,
                     sender: 'assistant',
-                    content: chunk,
+                    content: [chunk],
                     status: 'generating',
                     references: [],
                     createdAt: now(),
                 };
             },
             update: message => {
+                if (message.sender === 'assistant') {
+                    return {
+                        ...message,
+                        content: [...message.content, chunk],
+                    };
+                }
                 return {
                     ...message,
                     content: message.content + chunk,
@@ -118,7 +124,7 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string)
         }
     );
 }
-function addReferenceBy(threadUuid: string, messageUuid: string, reference: MessageReference) {
+function addToolUsageBy(threadUuid: string, messageUuid: string, usage: MessageToolUsage) {
     return createThreadListUpdate(
         threadUuid,
         messageUuid,
@@ -127,22 +133,19 @@ function addReferenceBy(threadUuid: string, messageUuid: string, reference: Mess
                 return {
                     uuid: messageUuid,
                     sender: 'assistant',
-                    content: '',
+                    content: [usage],
                     status: 'generating',
-                    references: [reference],
                     createdAt: now(),
                 };
             },
             update: message => {
-                const exists = message.references.find(v => v.id === reference.id);
-
-                if (exists) {
-                    return message;
+                if (message.sender === 'user') {
+                    throw new Error('Cannot add tool usage to user message');
                 }
 
                 return {
                     ...message,
-                    references: [...message.references, reference],
+                    content: [...message.content, usage],
                 };
             },
         }
@@ -170,7 +173,7 @@ export function useSendMessageToThread(threadUuid: string) {
                 setMessageThreadList(appendMessageBy(threadUuid, chunk.uuid, chunk.value));
             }
             else {
-                setMessageThreadList(addReferenceBy(threadUuid, chunk.uuid, chunk.value));
+                setMessageThreadList(addToolUsageBy(threadUuid, chunk.uuid, chunk.value));
             }
         }
     };

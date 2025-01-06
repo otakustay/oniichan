@@ -6,9 +6,8 @@ import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {Message} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
-import Markdown from '@/components/Markdown';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
-import Reference from './Reference';
+import MessageContent from './MessageContent';
 
 const Layout = styled.div`
     display: flex;
@@ -36,11 +35,6 @@ const Sender = styled.span`
     font-weight: bold;
     display: flex;
     align-items: center;
-`;
-
-const Content = styled(Markdown)`
-    padding-top: .5em;
-    white-space: pre-wrap;
 `;
 
 const ErrorLayout = styled.div`
@@ -97,8 +91,7 @@ export default function Message({threadUuid, message}: Props) {
                 <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
-            <Content content={message.content || '(Empty)'} />
-            <Reference references={message.references} />
+            <MessageContent content={message.content} />
             <Error reason={message.error} />
         </Layout>
     );

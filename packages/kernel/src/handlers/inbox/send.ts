@@ -1,14 +1,14 @@
 import deepEqual from 'fast-deep-equal';
 import {over} from '@otakustay/async-iterator';
 import {ChatInputPayload, ModelTextResponse, ModelToolResponse} from '@oniichan/shared/model';
-import {Message, MessageReference} from '@oniichan/shared/inbox';
+import {Message, MessageToolUsage} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {now, stringifyError} from '@oniichan/shared/string';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {newUuid} from '@oniichan/shared/id';
-import systemPromptTemplate from './system.prompt';
 import {ModelChatOptions} from '../../editor/model';
 import {RequestHandler} from '../handler';
+import systemPromptTemplate from './system.prompt';
 import {store} from './store';
 import {ToolImplement} from './tool';
 
@@ -31,45 +31,27 @@ interface InboxSendMessageTextResponse {
     value: string;
 }
 
-interface InboxSendMessageReferenceResponse {
+interface InboxSendMessageUsageResponse {
     uuid: string;
-    type: 'reference';
-    value: MessageReference;
+    type: 'toolUsage';
+    value: MessageToolUsage;
 }
 
-export type InboxSendMessageResponse = InboxSendMessageTextResponse | InboxSendMessageReferenceResponse;
+export type InboxSendMessageResponse = InboxSendMessageTextResponse | InboxSendMessageUsageResponse;
 
 interface ToolCallState {
     current: ModelToolResponse | null;
 }
 
-interface PathArguments {
-    path: string;
-}
-
-interface GlobArguments {
-    glob: string;
-}
-
-function toolCallToReference(toolCall: ModelToolResponse): MessageReference {
+function toolCallToUsage(toolCall: ModelToolResponse): MessageToolUsage {
     switch (toolCall.name) {
         case 'readFile':
-            return {
-                id: toolCall.id,
-                type: 'file',
-                path: (toolCall.arguments as PathArguments).path,
-            };
         case 'readDirectory':
-            return {
-                id: toolCall.id,
-                type: 'directory',
-                path: (toolCall.arguments as PathArguments).path,
-            };
         case 'findFiles':
             return {
                 id: toolCall.id,
-                type: 'find',
-                pattern: (toolCall.arguments as GlobArguments).glob,
+                type: toolCall.name,
+                args: toolCall.arguments as any,
             };
         default:
             throw new Error(`Unknown tool call ${toolCall.name}`);
@@ -77,9 +59,15 @@ function toolCallToReference(toolCall: ModelToolResponse): MessageReference {
 }
 
 function threadMessageToInputPayload(message: Message): ChatInputPayload {
+    if (message.sender === 'user') {
+        return {role: 'user', content: message.content};
+    }
+
+    // We discard all tool calls on the initial transform of thread message,
+    // I don't know if this is OK but I can't handle the inconsistant between message history and current file content
     return {
-        role: message.sender,
-        content: message.content,
+        role: 'assistant',
+        content: message.content.filter(v => typeof v === 'string').join(''),
     };
 }
 
@@ -123,15 +111,15 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private persistToolChunk(chunk: ModelToolResponse): InboxSendMessageResponse {
         const {logger} = this.context;
-        const reference = toolCallToReference(chunk);
+        const reference = toolCallToUsage(chunk);
         logger.trace(
             'AddReference',
             {threadUuid: this.threadUuid, messageUuid: this.replyUuid, reference: chunk}
         );
         // Broadcast tool usage
-        store.addReference(this.threadUuid, this.replyUuid, reference);
+        store.addToolUsage(this.threadUuid, this.replyUuid, reference);
         this.updateInboxThreadList(store.dump());
-        return {uuid: this.replyUuid, type: 'reference', value: reference};
+        return {uuid: this.replyUuid, type: 'toolUsage', value: reference};
     }
 
     private persistTextChunk(chunk: ModelTextResponse): InboxSendMessageResponse {
@@ -253,7 +241,6 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                 sender: 'user',
                 content: payload.body.content,
                 createdAt: now(),
-                references: [],
                 status: 'read',
             }
         );
