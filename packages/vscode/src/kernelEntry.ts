@@ -2,7 +2,7 @@ import {MessagePort, parentPort} from 'node:worker_threads';
 import {ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';
 import {EditorHostClient} from '@oniichan/editor-host/client';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {ConsoleLogger} from '@oniichan/shared/logger';
 
 class WorkerPort implements Port {

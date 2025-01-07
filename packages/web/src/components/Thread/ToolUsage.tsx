@@ -1,7 +1,7 @@
 import {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
-import {MessageToolUsage} from '@oniichan/shared/inbox';
+import {MessageToolUsage} from '@oniichan/shared/tool';
 import {trimPathString} from '@oniichan/shared/string';
 
 const Layout = styled.div`

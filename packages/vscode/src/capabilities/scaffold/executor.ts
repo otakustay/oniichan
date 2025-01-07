@@ -5,7 +5,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {KernelClient} from '../../kernel';
 

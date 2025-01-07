@@ -1,4 +1,4 @@
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {ChatInputPayload, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
 import {createJsonlStore} from './jsonl';

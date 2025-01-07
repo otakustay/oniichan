@@ -7,7 +7,7 @@ import {getSemanticRewriteConfiguration} from '@oniichan/editor-host/utils/confi
 import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {KernelClient} from '../../kernel';
 import {LineWorker} from './worker';
 

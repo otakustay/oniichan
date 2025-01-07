@@ -7,7 +7,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
 import {MessageThread} from '@oniichan/shared/inbox';
 import {WebHostClient} from '@oniichan/web-host/client';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {Disposable} from 'vscode';
 
 class WorkerPort implements Port, Disposable {

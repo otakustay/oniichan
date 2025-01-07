@@ -1,6 +1,5 @@
 import {ExecutionRequest, Port} from '@otakustay/ipc';
 import {getLanguageConfig} from '@oniichan/shared/language';
-import {stringifyError} from '@oniichan/shared/string';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {Context, RequestHandler} from '../handler';
 import {EnhancedContextSnippet, SemanticRewriteApi} from './api';
@@ -101,36 +100,30 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
         yield {type: 'loading'};
 
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'SemanticRewrite');
-        try {
-            const input: EnhanceContextInput = {
-                documentUri: request.documentUri,
-                line: request.line,
-                languageId,
-                hint,
-            };
-            yield {type: 'telemetryData', key: 'inputHint', value: hint};
-            logger.trace('EnhanceContextStart', input);
-            const snippets = await this.retrieveEnhancedContext(input);
-            logger.trace('EnhanceContextFinish', snippets);
-            logger.trace('RequestModelStart');
-            const code = await this.api.rewrite(
-                {
-                    file: request.file,
-                    codeBefore: codeBefore,
-                    codeAfter: codeAfter,
-                    hint: hint,
-                    snippets,
-                },
-                telemetry
-            );
-            logger.trace('RequestModelFinish', {code});
-            yield {type: 'telemetryData', key: 'outputCode', value: code};
-            yield {type: 'result', code};
-        }
-        catch (ex) {
-            const reason = stringifyError(ex);
-            throw new Error(`Semantic rewrite failed: ${reason}`, {cause: ex});
-        }
+        const input: EnhanceContextInput = {
+            documentUri: request.documentUri,
+            line: request.line,
+            languageId,
+            hint,
+        };
+        yield {type: 'telemetryData', key: 'inputHint', value: hint};
+        logger.trace('EnhanceContextStart', input);
+        const snippets = await this.retrieveEnhancedContext(input);
+        logger.trace('EnhanceContextFinish', snippets);
+        logger.trace('RequestModelStart');
+        const code = await this.api.rewrite(
+            {
+                file: request.file,
+                codeBefore: codeBefore,
+                codeAfter: codeAfter,
+                hint: hint,
+                snippets,
+            },
+            telemetry
+        );
+        logger.trace('RequestModelFinish', {code});
+        yield {type: 'telemetryData', key: 'outputCode', value: code};
+        yield {type: 'result', code};
     }
 
     private async getDocumentContext(documentUri: string): Promise<GetContextOk | GetContextFail> {

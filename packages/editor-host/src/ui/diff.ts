@@ -3,7 +3,7 @@ import {commands, Uri, window, workspace, Disposable} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {Logger} from '@oniichan/shared/logger';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 
 const LABEL_PREFIX = '[Oniichan] Diff to ';
 

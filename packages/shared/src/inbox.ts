@@ -1,34 +1,7 @@
 import {now} from './string';
+import {MessageToolUsage} from './tool';
 
 export type MessageStatus = 'generating' | 'unread' | 'read';
-
-export interface PathArguments {
-    path: string;
-}
-
-export interface GlobArguments {
-    glob: string;
-}
-
-export interface MessageReadFileUsage {
-    id: string;
-    type: 'readFile';
-    args: PathArguments;
-}
-
-export interface MessageReadDirectoryUsage {
-    id: string;
-    type: 'readDirectory';
-    args: PathArguments;
-}
-
-export interface MessageFindFilesUsage {
-    id: string;
-    type: 'findFiles';
-    args: GlobArguments;
-}
-
-export type MessageToolUsage = MessageReadFileUsage | MessageReadDirectoryUsage | MessageFindFilesUsage;
 
 interface MessageBase {
     uuid: string;

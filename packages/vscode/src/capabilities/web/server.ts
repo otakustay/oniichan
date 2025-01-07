@@ -7,7 +7,7 @@ import proxy from '@fastify/http-proxy';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
 import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';

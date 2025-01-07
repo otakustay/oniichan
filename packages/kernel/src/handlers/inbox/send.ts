@@ -1,16 +1,19 @@
 import deepEqual from 'fast-deep-equal';
 import {over} from '@otakustay/async-iterator';
 import {ChatInputPayload, ModelTextResponse, ModelToolResponse} from '@oniichan/shared/model';
-import {Message, MessageToolUsage} from '@oniichan/shared/inbox';
+import {Message} from '@oniichan/shared/inbox';
+import {MessageToolUsage} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {now, stringifyError} from '@oniichan/shared/string';
+import {now} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
+import {isToolName} from '@oniichan/shared/tool';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelChatOptions} from '../../editor/model';
 import {RequestHandler} from '../handler';
 import systemPromptTemplate from './system.prompt';
 import {store} from './store';
-import {ToolImplement} from './tool';
+import {ToolCallInput, ToolImplement} from './tool';
 
 interface TextMessageBody {
     type: 'text';
@@ -44,18 +47,15 @@ interface ToolCallState {
 }
 
 function toolCallToUsage(toolCall: ModelToolResponse): MessageToolUsage {
-    switch (toolCall.name) {
-        case 'readFile':
-        case 'readDirectory':
-        case 'findFiles':
-            return {
-                id: toolCall.id,
-                type: toolCall.name,
-                args: toolCall.arguments as any,
-            };
-        default:
-            throw new Error(`Unknown tool call ${toolCall.name}`);
+    if (isToolName(toolCall.name)) {
+        return {
+            id: toolCall.id,
+            type: toolCall.name,
+            args: toolCall.arguments as any,
+        };
     }
+
+    throw new Error(`Unknown tool call ${toolCall.name}`);
 }
 
 function threadMessageToInputPayload(message: Message): ChatInputPayload {
@@ -192,7 +192,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         logger.trace('HandleToolCallStart', toolCall);
         const implement = new ToolImplement(this.context.editorHost);
-        const result = await implement.callTool(toolCall.name, toolCall.arguments);
+        const result = await implement.callTool(toolCall as ToolCallInput);
         logger.trace('HandleToolCallFinish', {...toolCall, result});
         const roundtrip = this.getCurrentRoundtrip();
         roundtrip.messages.push(

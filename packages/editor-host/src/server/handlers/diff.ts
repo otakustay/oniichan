@@ -2,7 +2,7 @@ import {commands, Uri, workspace, WorkspaceEdit} from 'vscode';
 import path from 'node:path';
 import {RequestHandler} from '@otakustay/ipc';
 import {tmpDirectory} from '@oniichan/shared/dir';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {Context} from '../interface';
 
 export interface RenderDiffViewRequest {
@@ -42,8 +42,6 @@ export interface AcceptEditRequest {
     content: string;
     action: 'modify' | 'delete';
 }
-
-// TODO: Accept a file can cause its content change while LLM retains its old content, we should mark tool call obsolete
 
 export class AcceptEditHandler extends RequestHandler<AcceptEditRequest, void, Context> {
     static readonly action = 'acceptEdit';

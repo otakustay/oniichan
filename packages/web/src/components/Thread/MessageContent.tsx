@@ -1,4 +1,4 @@
-import {MessageToolUsage} from '@oniichan/shared/inbox';
+import {MessageToolUsage} from '@oniichan/shared/tool';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 

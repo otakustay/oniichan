@@ -12,7 +12,9 @@
     "./logger": "./dist/logger.js",
     "./model": "./dist/model/index.js",
     "./prompt": "./dist/prompt.js",
-    "./string": "./dist/string.js"
+    "./string": "./dist/string.js",
+    "./error": "./dist/error.js",
+    "./tool": "./dist/tool.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -24,6 +26,7 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
+    "json-schema-to-ts": "^3.1.1",
     "mustache": "^4.2.0",
     "openai": "^4.77.0"
   },

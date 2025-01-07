@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {Uri, workspace} from 'vscode';
 import {RequestHandler} from '@otakustay/ipc';
-import {stringifyError} from '@oniichan/shared/string';
+import {stringifyError} from '@oniichan/shared/error';
 import {Context} from '../interface';
 
 export interface FindFilesRequest {
