@@ -18,6 +18,10 @@ const Header = styled.div`
     background-color: var(--color-contrast-background);
 `;
 
+const LanguageLabel = styled.span`
+    font-family: monospace;
+`;
+
 const Layout = styled.div`
     margin: 0;
     overflow: hidden;
@@ -43,7 +47,7 @@ export default function TextCode({code, language, closed}: Props) {
         <Layout>
             <Header>
                 <LanguageIcon mode="language" value={language} />
-                {language}
+                <LanguageLabel>{language}</LanguageLabel>
                 {closed && <CopyCode text={code + '\n'} />}
             </Header>
             <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
