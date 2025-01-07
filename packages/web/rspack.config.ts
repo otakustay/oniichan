@@ -10,7 +10,11 @@ const config: Configuration = {
     experiments: {
         css: true,
     },
+    devServer: {
+        port: 8988,
+    },
     output: {
+        clean: true,
         path: path.resolve(__dirname, '..', 'vscode', 'dist', 'web'),
         filename: 'main.js',
     },

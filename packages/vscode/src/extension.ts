@@ -1,15 +1,15 @@
 import {ExtensionContext} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
+import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
-import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {OpenDataFolderCommand} from './capabilities/debug';
-import {WebApp} from './capabilities/web';
-import {createKernelClient} from './kernel';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
-import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
+import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
+import {WebApp} from './capabilities/web';
+import {createKernelClient} from './kernel';
 
 export async function activate(context: ExtensionContext) {
     const baseContainer = new DependencyContainer()

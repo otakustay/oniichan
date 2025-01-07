@@ -3,6 +3,7 @@ import EventEmitter from 'node:events';
 import fastify, {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
+import proxy from '@fastify/http-proxy';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
 import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
@@ -77,7 +78,6 @@ export class WebAppServer extends EventEmitter<ServerEventMap> {
     }
 
     async start() {
-        await this.app.register(serveStatic, {root: this.staticDirectory});
         await this.app.register(webSocket);
         this.app.get(
             '/gateway',
@@ -87,6 +87,12 @@ export class WebAppServer extends EventEmitter<ServerEventMap> {
                 await establishIpc(container);
             }
         );
+        if (process.env.NODE_ENV === 'development') {
+            await this.app.register(proxy, {upstream: 'http://localhost:8988'});
+        }
+        else {
+            await this.app.register(serveStatic, {root: this.staticDirectory});
+        }
 
         try {
             this.port = await detectPort(17748);

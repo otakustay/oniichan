@@ -19,7 +19,6 @@ class BridgeHandler extends RequestHandler<any, any, any> {
     }
 
     async *handleRequest(payload: any): AsyncIterable<any> {
-        console.log('bridge', this.action);
         yield* this.upstream.callStreaming(this.getTaskId(), this.action, payload);
     }
 }

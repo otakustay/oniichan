@@ -12,7 +12,8 @@
         "npm: watch:kernel",
         "npm: watch:vscode-types",
         "npm: watch:web-types",
-        "npm: watch:web-host"
+        "npm: watch:web-host",
+        "npm: watch:web-serve"
       ],
       "presentation": {
         "reveal": "never"
@@ -117,6 +118,17 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:web-host",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:web-serve",
+      "group": "build",
+      "problemMatcher": "$ts-webpack-watch",
+      "isBackground": true,
+      "label": "npm: watch:web-serve",
       "presentation": {
         "reveal": "never"
       }

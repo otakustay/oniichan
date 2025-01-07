@@ -84,7 +84,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private enableTool = true;
 
-    private readonly toolCallLimit = 10;
+    private readonly toolCallLimit = Infinity;
 
     private tool: ToolImplement | null = null;
 

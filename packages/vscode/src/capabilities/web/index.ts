@@ -115,7 +115,15 @@ export class WebApp implements Disposable, WebviewViewProvider {
     }
 
     private initializeSidebar() {
-        const view = window.registerWebviewViewProvider('oniichan-sidebar', this);
+        const view = window.registerWebviewViewProvider(
+            'oniichan-sidebar',
+            this,
+            {
+                webviewOptions: {
+                    retainContextWhenHidden: true,
+                },
+            }
+        );
         const openCommand = commands.registerCommand(
             'oniichan.openSidebar',
             async () => {
