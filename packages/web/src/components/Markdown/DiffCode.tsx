@@ -57,6 +57,7 @@ const ActionButton = styled(Button)`
 
 const Layout = styled.div`
     padding: .5em 1em;
+    margin: 1em 0;
     border: solid 1px var(--color-default-border);
     display: flex;
     align-items: center;

@@ -71,12 +71,24 @@ function threadMessageToInputPayload(message: Message): ChatInputPayload {
     };
 }
 
+/**
+ * Roundtrip is designed to check unexpected LLM behaviors in a single user request.
+ *
+ * Each roundtrip consists of several messages, in different cases:
+ *
+ * 1. All history messages are grouped into one roundtrip
+ * 2. For every new user message, it is grouped with all its following assistant messages and tool calls
+ */
+interface ChatRoundtrip {
+    messages: ChatInputPayload[];
+}
+
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
     static readonly action = 'inboxSendMessage';
 
     private telemetry: FunctionUsageTelemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
 
-    private readonly messages: ChatInputPayload[] = [];
+    private readonly roundtrips: ChatRoundtrip[] = [];
 
     private threadUuid = '';
 
@@ -96,8 +108,11 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         this.threadUuid = payload.threadUuid;
         const thread = store.getThreadByUuid(payload.threadUuid);
         if (thread) {
-            // Messages are latest-on-top in thread
-            this.messages.unshift(...thread.messages.map(threadMessageToInputPayload));
+            const historyRoundtrip: ChatRoundtrip = {
+                // Messages are latest-on-top in thread
+                messages: thread.messages.map(threadMessageToInputPayload).reverse(),
+            };
+            this.roundtrips.push(historyRoundtrip);
         }
 
         try {
@@ -134,6 +149,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private hasSameToolCall(toolCall: ModelToolResponse): boolean {
+        const roundtrip = this.getCurrentRoundtrip();
+
         const isSame = (message: ChatInputPayload) => {
             if (message.role !== 'assistant') {
                 return false;
@@ -145,11 +162,12 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             return message.toolCall.functionName === toolCall.name
                 && deepEqual(message.toolCall.arguments, toolCall.arguments);
         };
-        return this.messages.some(isSame);
+        return roundtrip.messages.some(isSame);
     }
 
     private reachesToolCallLimit(): boolean {
-        const calls = this.messages.filter(message => message.role === 'assistant').filter(v => !!v.toolCall);
+        const roundtrip = this.getCurrentRoundtrip();
+        const calls = roundtrip.messages.filter(message => message.role === 'assistant').filter(v => !!v.toolCall);
 
         return calls.length >= this.toolCallLimit;
     }
@@ -157,7 +175,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     private async *handleToolCall(toolCall: ModelToolResponse): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
 
-        // Stop if the same tool is called with the same arguments, this is possibily a bug behavior of LLM.
+        // Stop if the same tool is called with the same arguments, this is possibily a bug behavior of LLM
         if (this.hasSameToolCall(toolCall)) {
             logger.info('ToolCallDuplicated', toolCall);
             this.enableTool = false;
@@ -176,7 +194,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const implement = new ToolImplement(this.context.editorHost);
         const result = await implement.callTool(toolCall.name, toolCall.arguments);
         logger.trace('HandleToolCallFinish', {...toolCall, result});
-        this.messages.push(
+        const roundtrip = this.getCurrentRoundtrip();
+        roundtrip.messages.push(
             {
                 role: 'assistant',
                 content: '',
@@ -198,14 +217,14 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
         const systemPrompt = renderPrompt(systemPromptTemplate, {});
-        logger.trace('RequestModelStart', {threadUuid: this.threadUuid, messages: this.messages, systemPrompt});
+        logger.trace('RequestModelStart', {threadUuid: this.threadUuid, roundtrips: this.roundtrips, systemPrompt});
         const {editorHost} = this.context;
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
         const tool: ToolCallState = {current: null};
         const options: ModelChatOptions = {
             tools: this.enableTool ? (this.tool?.getBuiltinTools() ?? []) : [],
-            messages: this.messages,
+            messages: this.roundtrips.flatMap(v => v.messages),
             telemetry: modelTelemetry,
             systemPrompt,
         };
@@ -232,7 +251,10 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     private async *chat(payload: InboxSendMessageRequest) {
         const {logger} = this.context;
         logger.trace('AddNewMessageToStore', payload);
-        this.messages.push({role: 'user', content: payload.body.content});
+        const roundtrip: ChatRoundtrip = {
+            messages: [{role: 'user', content: payload.body.content}],
+        };
+        this.roundtrips.push(roundtrip);
         // Add a user message to thread (or create a new thread)
         store.addNewMessageToThreadList(
             this.threadUuid,
@@ -261,5 +283,15 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             logger.trace('PushStoreUpdate');
             this.updateInboxThreadList(store.dump());
         }
+    }
+
+    private getCurrentRoundtrip() {
+        const roundtrip = this.roundtrips.at(-1);
+
+        if (!roundtrip) {
+            throw new Error('Unexpected chat state with no roundtrip');
+        }
+
+        return roundtrip;
     }
 }
