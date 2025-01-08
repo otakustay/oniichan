@@ -1,0 +1,6 @@
+@@ -66,7 +71,6 @@
+         [Symbol.asyncIterator]() {
+             return iterable[Symbol.asyncIterator]();
+         },
+     };
+ }

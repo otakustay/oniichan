@@ -54,3 +54,11 @@ test('deleted unmatch', async () => {
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
 });
+
+test('no diff hunk', async () => {
+    const oldText = await readOldText('no-diff-hunk');
+    const hunks = await readHunks('no-diff-hunk');
+    const expected = await readNewText('no-diff-hunk');
+    const newText = applyHunks(oldText, hunks);
+    expect(newText).toBe(expected);
+});
