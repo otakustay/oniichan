@@ -41,6 +41,8 @@ export interface ModelToolResponse {
     type: 'tool';
     id: string;
     name: string;
+    hasThought: boolean;
+    reason: string;
     arguments: unknown;
 }
 

@@ -1,5 +1,5 @@
 import {Anthropic} from '@anthropic-ai/sdk';
-import {ModelResponseMetaRecord, PartialToolCallInfo, StreamToolCallRecord} from './utils';
+import {ModelResponseMetaRecord, StreamToolCallRecord, ToolRecordChunk} from './utils';
 import {
     ModelClient,
     ModelConfiguration,
@@ -59,20 +59,28 @@ function transformInputPayload(input: ChatInputPayload): Anthropic.MessageParam 
 }
 
 class AnthropicStreamToolCallRecord extends StreamToolCallRecord<Anthropic.RawMessageStreamEvent> {
-    protected extractFromChunk(chunk: Anthropic.RawMessageStreamEvent): PartialToolCallInfo | null {
+    protected extractFromChunk(chunk: Anthropic.RawMessageStreamEvent): ToolRecordChunk {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+            return {type: 'text', content: chunk.delta.text};
+        }
         if (chunk.type === 'content_block_start' && chunk.content_block.type === 'tool_use') {
             const use = chunk.content_block;
             return {
+                type: 'tool',
                 id: use.id,
                 functionName: use.name,
             };
         }
-        else if (chunk.type === 'content_block_delta' && chunk.delta.type === 'input_json_delta' && this.isActive()) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'input_json_delta' && this.isActive()) {
             return {
+                type: 'tool',
                 argumentsDelta: chunk.delta.partial_json,
             };
         }
-        return null;
+        return {
+            type: 'text',
+            content: '',
+        };
     }
 }
 

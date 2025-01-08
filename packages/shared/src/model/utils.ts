@@ -36,14 +36,29 @@ export class ModelResponseMetaRecord {
     }
 }
 
-export interface PartialToolCallInfo {
+interface PartialTextInfo {
+    type: 'text';
+    content: string;
+}
+
+interface PartialToolCallInfo {
+    type: 'tool';
     id?: string | undefined;
     functionName?: string | undefined;
     argumentsDelta?: string | undefined;
 }
 
+export type ToolRecordChunk = PartialTextInfo | PartialToolCallInfo;
+
+function isReasoned(value: any): value is {reason: string} {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return typeof value?.reason === 'string';
+}
+
 export abstract class StreamToolCallRecord<T> {
     private active = false;
+
+    private thought = '';
 
     private callId = '';
 
@@ -54,7 +69,11 @@ export abstract class StreamToolCallRecord<T> {
     record(chunk: T) {
         const info = this.extractFromChunk(chunk);
 
-        if (!info) {
+        if (info.type === 'text') {
+            // Record all text response before a tool call, it is a better reason than the `reason` field in json
+            if (!this.active) {
+                this.thought += info.content;
+            }
             return;
         }
 
@@ -86,6 +105,8 @@ export abstract class StreamToolCallRecord<T> {
                 type: 'tool',
                 id: this.callId,
                 name: this.functionName,
+                hasThought: !!this.thought,
+                reason: isReasoned(args) ? args.reason : '',
                 arguments: args,
             };
         }
@@ -101,5 +122,5 @@ export abstract class StreamToolCallRecord<T> {
         this.argumentsText = '';
     }
 
-    protected abstract extractFromChunk(chunk: T): PartialToolCallInfo | null;
+    protected abstract extractFromChunk(chunk: T): ToolRecordChunk;
 }

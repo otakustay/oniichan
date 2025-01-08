@@ -1,6 +1,10 @@
 import {FromSchema} from 'json-schema-to-ts';
 
-// TODO: Add a `reason` property to all parameters, show this to user instead of LLM's text chunk
+const reasonParameter = {
+    type: 'string',
+    description:
+        'The reason why you want to take this action, in markdown format and in first-person perspective, end with the correct punctuation',
+} as const;
 
 export const toolSchema = {
     readDirectory: {
@@ -10,9 +14,10 @@ export const toolSchema = {
             type: 'object',
             properties: {
                 path: {
-                    description: 'The path to the directory you want to read, must be a relative path',
                     type: 'string',
+                    description: 'The path to the directory you want to read, must be a relative path',
                 },
+                reason: reasonParameter,
             },
             required: ['path'],
         },
@@ -24,9 +29,10 @@ export const toolSchema = {
             type: 'object',
             properties: {
                 path: {
-                    description: 'The path to the file you want to read, must be a relative path',
                     type: 'string',
+                    description: 'The path to the file you want to read, must be a relative path',
                 },
+                reason: reasonParameter,
             },
             required: ['path'],
         },
@@ -38,9 +44,10 @@ export const toolSchema = {
             type: 'object',
             properties: {
                 glob: {
-                    description: 'The glob pattern to match files',
                     type: 'string',
+                    description: 'The glob pattern to match files',
                 },
+                reason: reasonParameter,
             },
             required: ['glob'],
         },

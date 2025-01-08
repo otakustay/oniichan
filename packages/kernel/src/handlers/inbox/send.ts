@@ -131,6 +131,11 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             'AddReference',
             {threadUuid: this.threadUuid, messageUuid: this.replyUuid, reference: chunk}
         );
+
+        if (!chunk.hasThought && chunk.reason) {
+            this.persistTextChunk({type: 'text', content: chunk.reason});
+        }
+
         // Broadcast tool usage
         store.addToolUsage(this.threadUuid, this.replyUuid, reference);
         this.updateInboxThreadList(store.dump());

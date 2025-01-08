@@ -1,5 +1,5 @@
 import OpenAi from 'openai';
-import {ModelResponseMetaRecord, PartialToolCallInfo, StreamToolCallRecord} from './utils';
+import {ModelResponseMetaRecord, StreamToolCallRecord, ToolRecordChunk} from './utils';
 import {
     ChatInputPayload,
     ChatToolPayload,
@@ -56,14 +56,18 @@ function transformInputPayload(input: ChatInputPayload): OpenAi.ChatCompletionMe
 }
 
 class OpenAiStreamToolCallRecord extends StreamToolCallRecord<OpenAi.ChatCompletionChunk> {
-    protected extractFromChunk(chunk: OpenAi.ChatCompletionChunk): PartialToolCallInfo | null {
+    protected extractFromChunk(chunk: OpenAi.ChatCompletionChunk): ToolRecordChunk {
         const call = chunk.choices[0]?.delta.tool_calls?.at(0);
 
         if (!call) {
-            return null;
+            return {
+                type: 'text',
+                content: chunk.choices[0]?.delta.content ?? '',
+            };
         }
 
         return {
+            type: 'tool',
             id: call.id,
             functionName: call.function?.name,
             argumentsDelta: call.function?.arguments ?? '',
