@@ -1,0 +1,34 @@
+@@ ... @@
+ import {map} from './operators/map.js';
+ import {take} from './operators/take.js';
+-import {until} from './operators/until.js';
+
+ export interface OverAsyncIterator<T> extends AsyncIterable<T> {
+     filter(predicate: Predicate<T>): OverAsyncIterator<T>;
+     map<R>(transform: (value: T) => R): OverAsyncIterator<R>;
+     chunk(size: number): OverAsyncIterator<T[]>;
+     debounce(ms: number): OverAsyncIterator<T[]>;
+     take(count: number): OverAsyncIterator<T>;
+-    until(predicate: Predicate<T>): OverAsyncIterator<T>;
+ }
+
+ export function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {
+@@ ... @@
+         take(count: number): OverAsyncIterator<T> {
+             return over(take(iterable, count));
+         },
+-
+-        /**
+-         * Take elements until a predicate match
+-         *
+-         * @param predicate Predicate function to decide if the iterator should stop,
+-         * the element match the predicate will not yield
+-         * @returns A new `OverAsyncIterator` instance including the `until` operator
+-         */
+-        until(predicate: (value: T) => boolean): OverAsyncIterator<T> {
+-            return over(until(iterable, predicate));
+-        },
+
+         [Symbol.asyncIterator]() {
+             return iterable[Symbol.asyncIterator]();
+         },

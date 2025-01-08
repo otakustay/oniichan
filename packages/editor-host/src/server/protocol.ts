@@ -12,7 +12,7 @@ import type {
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
-import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
+import {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
@@ -32,5 +32,5 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof ReadWorkspaceFileHandler
     | typeof WriteWorkspaceFileHandler
     | typeof RenderDiffViewHandler
-    | typeof AcceptEditHandler
+    | typeof AcceptFileEditHandler
 >;

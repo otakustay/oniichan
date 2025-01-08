@@ -34,52 +34,30 @@ interface MessageUpdateHelper {
 
 const debugMessageThreadFixtures: MessageThread[] = [
     {
-        uuid: '91a68728-01b4-4aa8-9e89-a8b5f491086b',
+        uuid: '444b6fb8-3e5b-4769-93f7-9606960861a5',
         messages: [
             {
-                uuid: '2193b2fa-4042-443e-bb5e-fc724137a28c',
+                uuid: 'e3f02cd7-9b30-401c-b60e-a417a170c2f8',
                 sender: 'assistant',
                 content: [
-                    'I\'ll help you remove the `filter` operator from your project. This involves removing it from multiple files:\n\n1. First, let\'s remove the `filter.ts` file:\n\n```delete:src/helper/operators/filter.ts\n```\n\n2. Now, let\'s modify the `src/helper/index.ts` file to remove all filter-related code:\n\n```edit:src/helper/index.ts\nimport {Predicate, Transform} from \'./operators/interface.js\';\nimport {chunk} from \'./operators/chunk.js\';\nimport {debounce} from \'./operators/debounce.js\';\nimport {map} from \'./operators/map.js\';\nimport {take} from \'./operators/take.js\';\nimport {until} from \'./operators/until.js\';\nimport {flatMap} from \'./operators/flatMap.js\';\n\nexport interface OverAsyncIterator<T> extends AsyncIterable<T> {\n    map<R>(transform: (value: T) => R): OverAsyncIterator<R>;\n    flatMap<R>(transform: (value: T) => AsyncIterable<R>): OverAsyncIterator<R>;\n    chunk(size: number): OverAsyncIterator<T[]>;\n    debounce(ms: number): OverAsyncIterator<T[]>;\n    take(count: number): OverAsyncIterator<T>;\n    until(predicate: Predicate<T>): OverAsyncIterator<T>;\n}\n\nexport function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {\n    return {\n        /**\n         * Map elements wiht a transformer\n         *\n         * @param transform Transform function to transform an element into another\n         * @returns A new `OverAsyncIterator` instance including the `map` operator\n         */\n        map<R>(transform: Transform<T, R>): OverAsyncIterator<R> {\n            return over(map(iterable, transform));\n        },\n\n        /**\n         * FlatMap elements with a transformer that returns an AsyncIterable\n         *\n         * @param transform Transform function to transform an element into an AsyncIterable\n         * @returns A new `OverAsyncIterator` instance including the `flatMap` operator\n         */\n        flatMap<R>(transform: (value: T) => AsyncIterable<R>): OverAsyncIterator<R> {\n            return over(flatMap(iterable, transform));\n        },\n\n        /**\n         * Group elements into chunks by a size\n         *\n         * @param size Chunk size\n         * @returns A new `OverAsyncIterator` instance including the `chunk` operator\n         */\n        chunk(size: number): OverAsyncIterator<T[]> {\n            return over(chunk(iterable, size));\n        },\n\n        /**\n         * Debounce the emit of element by a given amount of time,\n         * all elements within debounce timeout will emit once as an array\n         *\n         * @param ms Debounce timeout\n         * @returns',
-                ],
-                status: 'read',
-                createdAt: '2025-01-03T10:31:13.422Z',
-            },
-            {
-                uuid: '97ff6522-7524-47e0-8d5a-ba614c5ec890',
-                sender: 'user',
-                content:
-                    'Good, now I want to remove my `filter` operator, please help me to achieve this in my project.',
-                createdAt: '2025-01-03T10:31:10.360Z',
-                status: 'read',
-            },
-            {
-                uuid: '817d6c86-1abc-42fe-9db9-ffc47466b657',
-                sender: 'assistant',
-                content: [
-                    'I\'ll help you add a `flatMap` function to the `over` function in the helper module. Let me first check the existing code structure.\n\n',
+                    'I\'ll help you remove the "until" operator. First, let me check the content of the file.',
                     {
-                        id: 'toolu_01JvBNn6gCXHHvfmd6zeWSsJ',
-                        type: 'findFiles',
-                        args: {glob: 'src/helper/*.ts'},
-                    },
-                    'Let me check the existing operators to implement the `flatMap` function in a consistent way.\n\n',
-                    {
-                        id: 'tooluse_N0EZdn1TQWum4OhzZA536Q',
+                        id: 'toolu_01YFSXkueuUWjq4nBdp6CMc4',
                         type: 'readFile',
-                        args: {path: 'src/helper/operators/map.ts'},
+                        args: {
+                            path: 'src/helper/index.ts',
+                        },
                     },
-                    'Let me help you add the `flatMap` function. First, let\'s create a new file for the `flatMap` operator:\n\n```typescript:src/helper/operators/flatMap.ts\nimport {Transform} from \'./interface.js\';\n\nexport async function* flatMap<T, R>(iterator: AsyncIterable<T>, fn: Transform<T, AsyncIterable<R>>): AsyncIterable<R> {\n    for await (const value of iterator) {\n        const result = await fn(value);\n        for await (const item of result) {\n            yield item;\n        }\n    }\n}\n```\n\nNow, let\'s modify the `src/helper/index.ts` file to include the `flatMap` operator:\n\n```edit:src/helper/index.ts\nimport {Predicate, Transform} from \'./operators/interface.js\';\nimport {filter} from \'./operators/filter.js\';\nimport {chunk} from \'./operators/chunk.js\';\nimport {debounce} from \'./operators/debounce.js\';\nimport {map} from \'./operators/map.js\';\nimport {take} from \'./operators/take.js\';\nimport {until} from \'./operators/until.js\';\nimport {flatMap} from \'./operators/flatMap.js\';\n\nexport interface OverAsyncIterator<T> extends AsyncIterable<T> {\n    filter(predicate: Predicate<T>): OverAsyncIterator<T>;\n    map<R>(transform: (value: T) => R): OverAsyncIterator<R>;\n    flatMap<R>(transform: (value: T) => AsyncIterable<R>): OverAsyncIterator<R>;\n    chunk(size: number): OverAsyncIterator<T[]>;\n    debounce(ms: number): OverAsyncIterator<T[]>;\n    take(count: number): OverAsyncIterator<T>;\n    until(predicate: Predicate<T>): OverAsyncIterator<T>;\n}\n\nexport function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {\n    return {\n        /**\n         * Filter elements wiht a predicate\n         *\n         * @param predicate Predicate function to decide if an element should be yielded or not\n         * @returns A new `OverAsyncIterator` instance including the `filter` operator\n         */\n        filter(predicate: Predicate<T>): OverAsyncIterator<T> {\n            return over(filter(iterable, predicate));\n        },\n\n        /**\n         * Map elements wiht a transformer\n         *\n         * @param transform Transform function to transform an element into another\n         * @returns A new `OverAsyncIterator` instance including the `map` operator\n         */\n        map<R>(transform: Transform<T, R>): OverAsyncIterator<R> {\n            return over(map(iterable, transform));\n        },\n\n        /**\n         * FlatMap elements with a transformer that returns an AsyncIterable\n         *\n         * @param transform Transform function to transform an element into an AsyncIterable\n         * @returns A new `OverAsyncIterator` instance including the `flatMap` operator\n         */\n        flatMap<R>(transform: (value: T) => AsyncIterable<R>): OverAsyncIterator<R> {\n            return over(flatMap(iterable, transform));\n        },\n\n        /**\n         * Group elements into chunks by a size\n         *\n         * @param size Chunk size\n         * @returns A new `OverAsyncIterator` instance including the `chunk` operator\n         */\n        chunk(size: number): OverAsyncIterator<T[]> {\n            return over(chunk(iterable, size));\n        },\n\n        /**\n         * Debounce the emit of element by a given amount of time,\n         * all elements within debounce timeout will emit once as an array\n         *\n         * @param ms Debounce timeout\n         * @returns A new `OverAsyncIterator` instance including the `debounce` operator\n         */\n        debounce(ms: number): OverAsyncIterator<T[]> {\n            return over(debounce(iterable, ms));\n        },\n\n        /**\n         * Take the first n elements\n         *\n         * @param count element count to be token\n         * @returns A new `OverAsyncIterator` instance including the `take` operator\n         */\n        take(count: number): OverAsyncIterator<T> {\n            return over(take(iterable, count));\n        },\n\n        /**\n         * Take elements until a predicate match\n         *\n         * @param predicate Predicate function to decide if the iterator should stop,\n         * the element match the predicate will not yield\n         * @returns A new `OverAsyncIterator` instance including the `until` operator\n         */\n        until(predicate: (value: T) => boolean): OverAsyncIterator<T> {\n            return over(until(iterable, predicate));\n        },\n\n        [Symbol.asyncIterator]() {\n            return iterable[Symbol.asyncIterator]();\n        },\n    };\n}\n```\n\nI\'ve added the following changes:\n\n1. Created a new file `flatMap.ts` in the operators directory that implements the `flatMap` functionality.\n2. Added the `flatMap` import to the main index.ts file.\n3. Added the `flatMap` method to the `OverAsyncIterator` interface.\n4. Implemented the `flatMap` method in the `over` function.\n\nThe `flatMap` operator works similarly to `map`, but it expects the transform function to return an `AsyncIterable<R>` instead of just `R`. It will then flatten the result by yielding each item from the returned iterables one by one.\n\nYou can use it like this:\n\n```typescript\n// Example usage\nconst source = over(asyncIterable);\nconst result = source.flatMap(async value => {\n    // Return an AsyncIterable that will be flattened\n    return someAsyncGenerator(value);\n});\n\nfor await (const item of result) {\n    console.log(item);\n}\n```\n\nThis implementation follows the same patterns as the other operators in the codebase, maintaining consistency in the API design and implementation style.',
+                    '\n\nI\'ll help you remove the "until" operator from the file. We need to:\n1. Remove the import statement for "until"\n2. Remove the "until" method from the interface\n3. Remove the "until" method implementation\n\nHere\'s the change:\n\n```diff:src/helper/index.ts\n@@ ... @@\n import {map} from \'./operators/map.js\';\n import {take} from \'./operators/take.js\';\n-import {until} from \'./operators/until.js\';\n\n export interface OverAsyncIterator<T> extends AsyncIterable<T> {\n     filter(predicate: Predicate<T>): OverAsyncIterator<T>;\n     map<R>(transform: (value: T) => R): OverAsyncIterator<R>;\n     chunk(size: number): OverAsyncIterator<T[]>;\n     debounce(ms: number): OverAsyncIterator<T[]>;\n     take(count: number): OverAsyncIterator<T>;\n-    until(predicate: Predicate<T>): OverAsyncIterator<T>;\n }\n\n export function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {\n@@ ... @@\n         take(count: number): OverAsyncIterator<T> {\n             return over(take(iterable, count));\n         },\n-\n-        /**\n-         * Take elements until a predicate match\n-         *\n-         * @param predicate Predicate function to decide if the iterator should stop,\n-         * the element match the predicate will not yield\n-         * @returns A new `OverAsyncIterator` instance including the `until` operator\n-         */\n-        until(predicate: (value: T) => boolean): OverAsyncIterator<T> {\n-            return over(until(iterable, predicate));\n-        },\n\n         [Symbol.asyncIterator]() {\n             return iterable[Symbol.asyncIterator]();\n         },\n```\n\nThe changes:\n1. Removed the import of `until` from \'./operators/until.js\'\n2. Removed the `until` method from the `OverAsyncIterator` interface\n3. Removed the implementation of the `until` method from the `over` function\n\nYou might also want to remove the `until.js` file from the operators directory if it\'s no longer needed. Let me know if you want me to help with that.',
                 ],
                 status: 'read',
-                createdAt: '2025-01-03T10:29:37.197Z',
+                createdAt: '2025-01-07T08:48:04.956Z',
             },
             {
-                uuid: '04792c28-0729-4b47-affd-9206cf2e4f0d',
+                uuid: '265dbc2e-0788-411d-9c20-ac3e16a0b96e',
                 sender: 'user',
-                content:
-                    'I want a `flatMap` function in `over` function inside `src/helper/index.ts`, please reference to the code of other operators, create or modify correct files',
-                createdAt: '2025-01-03T10:29:34.184Z',
+                content: 'Remove "until" operator in `src/helper/index.ts`',
+                createdAt: '2025-01-07T08:48:02.245Z',
                 status: 'read',
             },
         ],
@@ -183,7 +161,6 @@ export class ThreadStore {
                         sender: 'assistant',
                         content: [chunk],
                         status: 'generating',
-                        references: [],
                         createdAt: now(),
                     };
                 },
@@ -287,6 +264,7 @@ export class ThreadStore {
             targetThread.messages.unshift(newMessage);
         }
         else {
+            // TODO: We have race condition issues here, send 2 messages at the same time can cuase this throw
             throw new Error(`Unable to update non-existing message ${messageUuid}`);
         }
 

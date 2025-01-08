@@ -1,5 +1,7 @@
 import {FromSchema} from 'json-schema-to-ts';
 
+// TODO: Add a `reason` property to all parameters, show this to user instead of LLM's text chunk
+
 export const toolSchema = {
     readDirectory: {
         name: 'readDirectory',

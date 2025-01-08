@@ -1,0 +1,51 @@
+[
+  {
+    "changes": [
+      { "type": "normal", "content": "import {map} from './operators/map.js';" },
+      { "type": "normal", "content": "import {take} from './operators/take.js';" },
+      { "type": "delete", "content": "import {until} from './operators/until.js';" },
+      { "type": "normal", "content": "" },
+      { "type": "normal", "content": "export interface OverAsyncIterator<T> extends AsyncIterable<T> {" },
+      { "type": "normal", "content": "    filter(predicate: Predicate<T>): OverAsyncIterator<T>;" },
+      { "type": "normal", "content": "    map<R>(transform: (value: T) => R): OverAsyncIterator<R>;" },
+      { "type": "normal", "content": "    chunk(size: number): OverAsyncIterator<T[]>;" },
+      { "type": "normal", "content": "    debounce(ms: number): OverAsyncIterator<T[]>;" },
+      { "type": "normal", "content": "    take(count: number): OverAsyncIterator<T>;" },
+      { "type": "delete", "content": "    until(predicate: Predicate<T>): OverAsyncIterator<T>;" },
+      { "type": "normal", "content": "}" },
+      { "type": "normal", "content": "" },
+      {
+        "type": "normal",
+        "content": "export function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {"
+      }
+    ]
+  },
+  {
+    "changes": [
+      { "type": "normal", "content": "        take(count: number): OverAsyncIterator<T> {" },
+      { "type": "normal", "content": "            return over(take(iterable, count));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "delete", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Take elements until a predicate match" },
+      { "type": "delete", "content": "         *" },
+      {
+        "type": "delete",
+        "content": "         * @param predicate Predicate function to decide if the iterator should stop,"
+      },
+      { "type": "delete", "content": "         * the element match the predicate will not yield" },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `until` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "delete", "content": "        until(predicate: (value: T) => boolean): OverAsyncIterator<T> {" },
+      { "type": "delete", "content": "            return over(until(iterable, predicate));" },
+      { "type": "delete", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "normal", "content": "        [Symbol.asyncIterator]() {" },
+      { "type": "normal", "content": "            return iterable[Symbol.asyncIterator]();" },
+      { "type": "normal", "content": "        }," }
+    ]
+  }
+]

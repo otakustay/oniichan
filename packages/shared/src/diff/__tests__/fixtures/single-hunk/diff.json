@@ -1,0 +1,99 @@
+[
+  {
+    "changes": [
+      {
+        "type": "normal",
+        "content": "export function over<T>(iterable: AsyncIterable<T>): OverAsyncIterator<T> {"
+      },
+      { "type": "normal", "content": "    return {" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Filter elements wiht a predicate" },
+      { "type": "delete", "content": "         *" },
+      {
+        "type": "delete",
+        "content": "         * @param predicate Predicate function to decide if an element should be yielded or not"
+      },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `filter` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        filter(predicate: Predicate<T>): OverAsyncIterator<T> {" },
+      { "type": "normal", "content": "            return over(filter(iterable, predicate));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Map elements wiht a transformer" },
+      { "type": "delete", "content": "         *" },
+      {
+        "type": "delete",
+        "content": "         * @param transform Transform function to transform an element into another"
+      },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `map` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        map<R>(transform: Transform<T, R>): OverAsyncIterator<R> {" },
+      { "type": "normal", "content": "            return over(map(iterable, transform));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Group elements into chunks by a size" },
+      { "type": "delete", "content": "         *" },
+      { "type": "delete", "content": "         * @param size Chunk size" },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `chunk` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        chunk(size: number): OverAsyncIterator<T[]> {" },
+      { "type": "normal", "content": "            return over(chunk(iterable, size));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Debounce the emit of element by a given amount of time," },
+      { "type": "delete", "content": "         * all elements within debounce timeout will emit once as an array" },
+      { "type": "delete", "content": "         *" },
+      { "type": "delete", "content": "         * @param ms Debounce timeout" },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `debounce` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        debounce(ms: number): OverAsyncIterator<T[]> {" },
+      { "type": "normal", "content": "            return over(debounce(iterable, ms));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Take the first n elements" },
+      { "type": "delete", "content": "         *" },
+      { "type": "delete", "content": "         * @param count element count to be token" },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `take` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        take(count: number): OverAsyncIterator<T> {" },
+      { "type": "normal", "content": "            return over(take(iterable, count));" },
+      { "type": "normal", "content": "        }," },
+      { "type": "normal", "content": "" },
+      { "type": "delete", "content": "        /**" },
+      { "type": "delete", "content": "         * Take elements until a predicate match" },
+      { "type": "delete", "content": "         *" },
+      {
+        "type": "delete",
+        "content": "         * @param predicate Predicate function to decide if the iterator should stop,"
+      },
+      { "type": "delete", "content": "         * the element match the predicate will not yield" },
+      {
+        "type": "delete",
+        "content": "         * @returns A new `OverAsyncIterator` instance including the `until` operator"
+      },
+      { "type": "delete", "content": "         */" },
+      { "type": "normal", "content": "        until(predicate: (value: T) => boolean): OverAsyncIterator<T> {" },
+      { "type": "normal", "content": "            return over(until(iterable, predicate));" },
+      { "type": "normal", "content": "        }," }
+    ]
+  }
+]

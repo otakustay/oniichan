@@ -1,4 +1,5 @@
 import {ReactElement} from 'react';
+import {DiffAction} from '@oniichan/shared/diff';
 import DiffCode from './DiffCode';
 import TextCode from './TextCode';
 import {useMarkdownContent} from './ContentProvider';
@@ -39,6 +40,10 @@ function isCodeElement(element: any): element is CodeInPreElement {
     return element?.type === 'code';
 }
 
+function isDiffAction(action: string | undefined): action is DiffAction {
+    return action === 'create' || action === 'diff' || action === 'delete';
+}
+
 export default function CodeBlock({children, node}: Props) {
     if (!isCodeElement(children)) {
         return children;
@@ -46,12 +51,12 @@ export default function CodeBlock({children, node}: Props) {
 
     const markdownText = useMarkdownContent();
     const closed = markdownText.slice(node.position.end.offset - 3, node.position.end.offset) === '```';
-    const {className, children: code = ''} = children.props;
+    const {className, children: content = ''} = children.props;
     const matches = /language-(\w+)(:(\S+)+)?/.exec(className ?? '');
     const language = matches?.at(1);
     const file = matches?.at(3);
 
-    return file
-        ? <DiffCode file={file} code={code} closed={closed} action={language} />
-        : <TextCode language={language} code={code} closed={closed} />;
+    return file && isDiffAction(language)
+        ? <DiffCode file={file} content={content} closed={closed} action={language} />
+        : <TextCode language={language} code={content} closed={closed} />;
 }

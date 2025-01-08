@@ -19,7 +19,7 @@ import {
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
-import {AcceptEditHandler, RenderDiffViewHandler} from './handlers/diff';
+import {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
 
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
@@ -51,7 +51,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(ReadWorkspaceFileHandler);
         this.registerHandler(WriteWorkspaceFileHandler);
         this.registerHandler(RenderDiffViewHandler);
-        this.registerHandler(AcceptEditHandler);
+        this.registerHandler(AcceptFileEditHandler);
     }
 
     protected async createContext() {

@@ -1,14 +1,16 @@
-import {commands, Uri, workspace, WorkspaceEdit} from 'vscode';
+import {commands, Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
 import path from 'node:path';
 import {RequestHandler} from '@otakustay/ipc';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
+import {applyDiff, DiffAction} from '@oniichan/shared/diff';
 import {Context} from '../interface';
 
 export interface RenderDiffViewRequest {
+    action: DiffAction;
     file: string;
     oldContent: string;
-    newContent: string;
+    inputContent: string;
 }
 
 export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest, void, Context> {
@@ -28,7 +30,8 @@ export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest,
 
         try {
             logger.trace('OpenDiffView');
-            await diffViewManager.open(payload);
+            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
+            await diffViewManager.open({file: payload.file, oldContent: payload.oldContent, newContent});
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});
@@ -38,13 +41,14 @@ export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest,
 }
 
 export interface AcceptEditRequest {
+    action: DiffAction;
     file: string;
-    content: string;
-    action: 'modify' | 'delete';
+    oldContent: string;
+    inputContent: string;
 }
 
-export class AcceptEditHandler extends RequestHandler<AcceptEditRequest, void, Context> {
-    static readonly action = 'acceptEdit';
+export class AcceptFileEditHandler extends RequestHandler<AcceptEditRequest, void, Context> {
+    static readonly action = 'acceptFileEdit';
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: AcceptEditRequest) {
@@ -80,18 +84,32 @@ export class AcceptEditHandler extends RequestHandler<AcceptEditRequest, void, C
     }
 
     private async applyEdit(payload: AcceptEditRequest, edit: WorkspaceEdit, uri: Uri) {
-        if (payload.action === 'modify') {
+        const document = await workspace.openTextDocument(uri);
+
+        if (payload.action === 'delete') {
+            edit.deleteFile(uri);
+        }
+        else if (payload.action === 'create') {
+            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
             edit.createFile(
                 uri,
                 {
                     overwrite: true,
-                    contents: Buffer.from(payload.content, 'utf-8'),
+                    contents: Buffer.from(newContent, 'utf-8'),
                 }
             );
         }
         else {
-            edit.deleteFile(uri);
+            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
+            edit.replace(
+                uri,
+                new Range(new Position(0, 0), new Position(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)),
+                newContent
+            );
         }
+
         await workspace.applyEdit(edit);
+        await document.save();
+        await window.showTextDocument(document);
     }
 }

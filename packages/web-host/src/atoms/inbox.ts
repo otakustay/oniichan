@@ -106,7 +106,6 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string)
                     sender: 'assistant',
                     content: [chunk],
                     status: 'generating',
-                    references: [],
                     createdAt: now(),
                 };
             },

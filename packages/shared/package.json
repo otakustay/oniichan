@@ -14,7 +14,8 @@
     "./prompt": "./dist/prompt.js",
     "./string": "./dist/string.js",
     "./error": "./dist/error.js",
-    "./tool": "./dist/tool.js"
+    "./tool": "./dist/tool.js",
+    "./diff": "./dist/diff/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -26,11 +27,15 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
+    "diff": "^7.0.0",
     "json-schema-to-ts": "^3.1.1",
     "mustache": "^4.2.0",
     "openai": "^4.77.0"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.5"
+    "@types/diff": "^6.0.0",
+    "@types/mustache": "^4.2.5",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
   }
 }

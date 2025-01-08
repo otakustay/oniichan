@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
-import {diffLines} from 'diff';
+import {DiffAction, summarizeDiff} from '@oniichan/shared/diff';
 import {trimPathString} from '@oniichan/shared/string';
 import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
 import {useIpc} from '@/components/AppProvider';
@@ -70,26 +70,26 @@ const Layout = styled.div`
     }
 `;
 
-type Action = 'edit' | 'delete' | (string & {}) | undefined;
-
-function countDiff(action: Action, oldText: string, newText: string) {
+function countDiff(action: DiffAction, input: string) {
+    if (action === 'create') {
+        return {showCount: true, addition: input.split('\n').length, deletion: 0};
+    }
     if (action === 'delete') {
         return {showCount: false, addition: 0, deletion: 0};
     }
-    const changes = diffLines(oldText, newText);
-    const addition = changes.reduce((s, v) => s + (v.added ? v.count ?? 1 : 0), 0);
-    const deletion = changes.reduce((s, v) => s + (v.removed ? v.count ?? 1 : 0), 0);
-    return {showCount: true, addition, deletion};
+
+    const {insertedCount, deletedCount} = summarizeDiff(input);
+    return {showCount: true, addition: insertedCount, deletion: deletedCount};
 }
 
 interface Props {
-    action: Action;
+    action: DiffAction;
     file: string;
-    code: string;
+    content: string;
     closed: boolean;
 }
 
-export default function DiffCode({action, file, code, closed}: Props) {
+export default function DiffCode({action, file, content, closed}: Props) {
     const [rawText, setRawText] = useState<string | null>(null);
     const ipc = useIpc();
     useEffect(
@@ -102,22 +102,24 @@ export default function DiffCode({action, file, code, closed}: Props) {
         [ipc, file]
     );
     const extension = file.split('.').pop();
-    const {showCount, addition, deletion} = countDiff(action, rawText || '', code);
+    const {showCount, addition, deletion} = countDiff(action, content);
     const openDiffView = async () => {
         const request: RenderDiffViewRequest = {
+            action,
             file,
             oldContent: rawText ?? '',
-            newContent: code,
+            inputContent: content,
         };
         await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
     };
     const accept = async () => {
         const request: AcceptEditRequest = {
+            action,
             file,
-            action: action === 'delete' ? 'delete' : 'modify',
-            content: code,
+            oldContent: rawText ?? '',
+            inputContent: content,
         };
-        await ipc.editor.call(crypto.randomUUID(), 'acceptEdit', request);
+        await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', request);
     };
 
     return (
