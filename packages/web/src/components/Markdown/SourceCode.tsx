@@ -10,9 +10,6 @@ import {
 import {useColorScheme} from '@/components/AppProvider/ColorScheme';
 
 const Layout = styled.div`
-    border: 1px solid var(--color-default-border);
-    padding: .5em;
-    border-radius: 0 0 .5em .5em;
     overflow-x: auto;
 `;
 

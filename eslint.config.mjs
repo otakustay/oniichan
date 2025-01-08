@@ -41,6 +41,7 @@ export default ts.config(
                     ignorePrimitives: true,
                 },
             ],
+            '@typescript-eslint/no-unnecessary-condition': 'off',
         },
     },
     {

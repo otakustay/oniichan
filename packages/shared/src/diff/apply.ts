@@ -1,19 +1,25 @@
 import {applyPatch, ParsedDiff} from 'diff';
-import {Change, Hunk, organizeHunk} from './utils';
-import {looseLocateLines} from './locate';
+import {Change, Hunk, OrganizedHunk, organizeHunk} from './utils';
+import {looseLocateLines} from './utils';
 
 function changeToLine(change: Change) {
     const prefix = change.type === 'delete' ? '-' : change.type === 'insert' ? '+' : ' ';
     return prefix + change.content;
 }
 
-function applySingleHunk(source: string, hunk: Hunk): string {
-    const {head, tail, body, oldBody, newBody} = organizeHunk(hunk);
+function applySingleHunk(source: string, organized: OrganizedHunk): string {
+    const {head, tail, body, oldBody, newBody} = organized;
     const sourceLines = source.split('\n');
-    const oldLines = [...head, ...body, ...tail].map(v => v.content);
-    const startLine = looseLocateLines(sourceLines, oldLines, 0);
+    const oldLines = [...head, ...oldBody, ...tail].map(v => v.content);
+    const startLine = looseLocateLines(sourceLines, oldLines);
 
     if (startLine < 0) {
+        if (head.length) {
+            return applySingleHunk(source, {...organized, head: []});
+        }
+        if (tail.length) {
+            return applySingleHunk(source, {...organized, tail: []});
+        }
         throw new Error('Unable to locate hunk in source');
     }
 
@@ -38,5 +44,5 @@ function applySingleHunk(source: string, hunk: Hunk): string {
 }
 
 export function applyHunks(source: string, hunks: Hunk[]): string {
-    return hunks.reduce((result, hunk) => applySingleHunk(result, hunk), source);
+    return hunks.reduce((result, hunk) => applySingleHunk(result, organizeHunk(hunk)), source);
 }

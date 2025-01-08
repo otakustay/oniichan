@@ -1,12 +1,14 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
-import {DiffAction, summarizeDiff} from '@oniichan/shared/diff';
+import {DiffAction, applyDiff} from '@oniichan/shared/diff';
 import {trimPathString} from '@oniichan/shared/string';
 import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
+import Toggle from '@/components/Toggle';
 import LanguageIcon from './LanguageIcon';
+import SourceCode from './SourceCode';
 
 const Loading = styled(AiOutlineLoading3Quarters)`
     animation: spin 1s linear infinite;
@@ -49,19 +51,34 @@ const DeletedMark = styled.span`
     color: var(--color-deletion);
 `;
 
+const ActionSection = styled.div`
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .5em;
+`;
+
 const ActionButton = styled(Button)`
     height: 1.5em;
     border-radius: .5em;
     min-width: fit-content;
 `;
 
+const ErrorLabel = styled.span`
+    margin-left: auto;
+    color: var(--color-error);
+`;
+
+const Bar = styled.div`
+    display: flex;
+    align-items: center;
+    gap: .5em;
+`;
+
 const Layout = styled.div`
     padding: .5em 1em;
     margin: 1em 0;
     border: solid 1px var(--color-default-border);
-    display: flex;
-    align-items: center;
-    gap: .5em;
     border-radius: .5em;
     background-color: var(--color-contrast-background);
 
@@ -69,18 +86,6 @@ const Layout = styled.div`
         margin-top: 0;
     }
 `;
-
-function countDiff(action: DiffAction, input: string) {
-    if (action === 'create') {
-        return {showCount: true, addition: input.split('\n').length, deletion: 0};
-    }
-    if (action === 'delete') {
-        return {showCount: false, addition: 0, deletion: 0};
-    }
-
-    const {insertedCount, deletedCount} = summarizeDiff(input);
-    return {showCount: true, addition: insertedCount, deletion: deletedCount};
-}
 
 interface Props {
     action: DiffAction;
@@ -91,6 +96,7 @@ interface Props {
 
 export default function DiffCode({action, file, content, closed}: Props) {
     const [rawText, setRawText] = useState<string | null>(null);
+    const [showSource, setShowSource] = useState(false);
     const ipc = useIpc();
     useEffect(
         () => {
@@ -102,13 +108,13 @@ export default function DiffCode({action, file, content, closed}: Props) {
         [ipc, file]
     );
     const extension = file.split('.').pop();
-    const {showCount, addition, deletion} = countDiff(action, content);
+    const applied = applyDiff(action, rawText ?? '', content);
     const openDiffView = async () => {
         const request: RenderDiffViewRequest = {
             action,
             file,
             oldContent: rawText ?? '',
-            inputContent: content,
+            newContent: applied.newContent,
         };
         await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
     };
@@ -116,21 +122,29 @@ export default function DiffCode({action, file, content, closed}: Props) {
         const request: AcceptEditRequest = {
             action,
             file,
-            oldContent: rawText ?? '',
-            inputContent: content,
+            newContent: applied.newContent,
         };
         await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', request);
     };
+    const showAction = closed && applied.success;
+    const showError = closed && !applied.success;
 
     return (
         <Layout>
-            {closed ? <LanguageIcon mode="extension" value={extension} /> : <Loading />}
-            <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
-            {showCount && <CountLabel type="addition" count={addition} />}
-            {showCount && <CountLabel type="deletion" count={deletion} />}
-            {action === 'delete' && <DeletedMark>D</DeletedMark>}
-            {closed && <ActionButton style={{marginLeft: 'auto'}} onClick={openDiffView}>Open Diff</ActionButton>}
-            {closed && <ActionButton onClick={accept}>Accept</ActionButton>}
+            <Bar>
+                {closed ? <LanguageIcon mode="extension" value={extension} /> : <Loading />}
+                <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
+                <CountLabel type="addition" count={applied.addition} />
+                <CountLabel type="deletion" count={applied.deletion} />
+                {action === 'delete' && <DeletedMark>D</DeletedMark>}
+                <ActionSection>
+                    {showAction && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
+                    {showAction && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {showError && <ErrorLabel>Not Appliable</ErrorLabel>}
+                    {showError && <Toggle collapsed={showSource} onChange={setShowSource} />}
+                </ActionSection>
+            </Bar>
+            {showSource && <SourceCode code={content.trim()} language="diff" />}
         </Layout>
     );
 }

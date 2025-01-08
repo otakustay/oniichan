@@ -1,8 +1,10 @@
 import {Change, Hunk} from './utils';
 
-// TODO: We know diff may be in format like `@@ ... @@ [next line]`, we should handle this case
+// Some diff may be in format like `@@ ... @@ [next line]`,
+// we are not going to handle this case because there will be enough context lines inside a hunk,
+// it's not a big problem losing one line of context (which is placed after `@@`)
 function isHunkStart(line: string) {
-    return /@@[\s.]+@@/.test(line.trim());
+    return /^\s*@@[\s.]+@@/.test(line.trim());
 }
 
 export function parseDiffText(diff: string): Hunk[] {

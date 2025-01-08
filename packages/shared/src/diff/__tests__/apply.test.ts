@@ -32,3 +32,17 @@ test('multiple hunks', async () => {
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
 });
+
+test.only('context wrong', async () => {
+    const oldText = await readOldText('context-wrong');
+    const hunks = await readExpectedDiff('context-wrong');
+    const expected = await readNewText('context-wrong');
+    const newText = applyHunks(oldText, hunks);
+    expect(newText).toBe(expected);
+});
+
+test('not locatable', async () => {
+    const oldText = await readOldText('not-locatable');
+    const hunks = await readExpectedDiff('not-locatable');
+    expect(() => applyHunks(oldText, hunks)).toThrow();
+});

@@ -1,0 +1,33 @@
+@@ ... @@
+ import {chunk} from './operators/chunk.js';
+ import {debounce} from './operators/debounce.js';
+ import {filter} from './operators/filter.js';
++import {flatMap} from './operators/flatMap.js';
+ import {map} from './operators/map.js';
+ import {take} from './operators/take.js';
+
+ export interface OverAsyncIterator<T> extends AsyncIterable<T> {
+     filter(predicate: Predicate<T>): OverAsyncIterator<T>;
+     map<R>(transform: (value: T) => R): OverAsyncIterator<R>;
++    flatMap<R>(transform: (value: T) => AsyncIterable<R> | Iterable<R> | Promise<AsyncIterable<R> | Iterable<R>>): OverAsyncIterator<R>;
+     chunk(size: number): OverAsyncIterator<T[]>;
+     debounce(ms: number): OverAsyncIterator<T[]>;
+     take(count: number): OverAsyncIterator<T>;
+@@ ... @@
+         map<R>(transform: (value: T) => R): OverAsyncIterator<R> {
+             return over(map(iterable, transform));
+         },
++
++        /**
++         * Transform each element to an iterable and flatten the result
++         *
++         * @param transform Function to transform each element to an iterable
++         * @returns A new `OverAsyncIterator` instance including the `flatMap` operator
++         */
++        flatMap<R>(transform: (value: T) => AsyncIterable<R> | Iterable<R> | Promise<AsyncIterable<R> | Iterable<R>>): OverAsyncIterator<R> {
++            return over(flatMap(iterable, transform));
++        },
+
+         chunk(size: number): OverAsyncIterator<T[]> {
+             return over(chunk(iterable, size));
+         },

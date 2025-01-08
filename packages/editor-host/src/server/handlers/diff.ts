@@ -3,14 +3,14 @@ import path from 'node:path';
 import {RequestHandler} from '@otakustay/ipc';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {applyDiff, DiffAction} from '@oniichan/shared/diff';
+import {DiffAction} from '@oniichan/shared/diff';
 import {Context} from '../interface';
 
 export interface RenderDiffViewRequest {
     action: DiffAction;
     file: string;
     oldContent: string;
-    inputContent: string;
+    newContent: string;
 }
 
 export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest, void, Context> {
@@ -30,8 +30,7 @@ export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest,
 
         try {
             logger.trace('OpenDiffView');
-            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
-            await diffViewManager.open({file: payload.file, oldContent: payload.oldContent, newContent});
+            await diffViewManager.open(payload);
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});
@@ -43,8 +42,7 @@ export class RenderDiffViewHandler extends RequestHandler<RenderDiffViewRequest,
 export interface AcceptEditRequest {
     action: DiffAction;
     file: string;
-    oldContent: string;
-    inputContent: string;
+    newContent: string;
 }
 
 export class AcceptFileEditHandler extends RequestHandler<AcceptEditRequest, void, Context> {
@@ -84,31 +82,38 @@ export class AcceptFileEditHandler extends RequestHandler<AcceptEditRequest, voi
     }
 
     private async applyEdit(payload: AcceptEditRequest, edit: WorkspaceEdit, uri: Uri) {
-        const document = await workspace.openTextDocument(uri);
+        const {logger} = this.context;
 
         if (payload.action === 'delete') {
+            logger.trace('DeleteFile');
             edit.deleteFile(uri);
         }
         else if (payload.action === 'create') {
-            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
+            logger.trace('CreateFile');
             edit.createFile(
                 uri,
                 {
                     overwrite: true,
-                    contents: Buffer.from(newContent, 'utf-8'),
+                    contents: Buffer.from(payload.newContent, 'utf-8'),
                 }
             );
         }
         else {
-            const newContent = applyDiff(payload.oldContent, payload.action, payload.inputContent);
+            logger.trace('ReplaceFile');
             edit.replace(
                 uri,
                 new Range(new Position(0, 0), new Position(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)),
-                newContent
+                payload.newContent
             );
         }
 
         await workspace.applyEdit(edit);
+
+        if (payload.action === 'delete') {
+            return;
+        }
+
+        const document = await workspace.openTextDocument(uri);
         await document.save();
         await window.showTextDocument(document);
     }

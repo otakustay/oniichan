@@ -22,6 +22,12 @@ const LanguageLabel = styled.span`
     font-family: monospace;
 `;
 
+const SourceCodeLayout = styled.div`
+    border: 1px solid var(--color-default-border);
+    padding: .5em;
+    border-radius: 0 0 .5em .5em;
+`;
+
 const Layout = styled.div`
     margin: 0;
     overflow: hidden;
@@ -50,9 +56,11 @@ export default function TextCode({code, language, closed}: Props) {
                 <LanguageLabel>{language}</LanguageLabel>
                 {closed && <CopyCode text={code + '\n'} />}
             </Header>
-            <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
-                <SourceCode code={code} language={language} />
-            </Suspense>
+            <SourceCodeLayout>
+                <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
+                    <SourceCode code={code} language={language} />
+                </Suspense>
+            </SourceCodeLayout>
         </Layout>
     );
 }

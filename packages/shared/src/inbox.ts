@@ -37,6 +37,22 @@ const debugMessageThreadFixtures: MessageThread[] = [
         uuid: '444b6fb8-3e5b-4769-93f7-9606960861a5',
         messages: [
             {
+                uuid: '6cab1952-1a02-484d-8026-46072c77710f',
+                sender: 'assistant',
+                content: [
+                    'I\'ll help you add a `flatMap` function to the `over` function. First, let\'s create the `flatMap` operator file and then modify the main file to include it.\n\nFirst, let\'s create the flatMap operator:\n\n```create:src/helper/operators/flatMap.ts\n/**\n * Transform each element to an iterable and flatten the result\n *\n * @param source The source async iterable\n * @param transform Function to transform each element to an iterable\n * @returns A new async iterable with transformed and flattened elements\n */\nexport async function* flatMap<T, R>(\n    source: AsyncIterable<T>,\n    transform: (value: T) => AsyncIterable<R> | Iterable<R> | Promise<AsyncIterable<R> | Iterable<R>>\n): AsyncIterable<R> {\n    for await (const value of source) {\n        const result = await transform(value);\n        yield* result;\n    }\n}\n```\n\nNow, let\'s modify the main file to include the flatMap operator:\n\n```diff:src/helper/index.ts\n@@ ... @@\n import {chunk} from \'./operators/chunk.js\';\n import {debounce} from \'./operators/debounce.js\';\n import {filter} from \'./operators/filter.js\';\n+import {flatMap} from \'./operators/flatMap.js\';\n import {map} from \'./operators/map.js\';\n import {take} from \'./operators/take.js\';\n\n export interface OverAsyncIterator<T> extends AsyncIterable<T> {\n     filter(predicate: Predicate<T>): OverAsyncIterator<T>;\n     map<R>(transform: (value: T) => R): OverAsyncIterator<R>;\n+    flatMap<R>(transform: (value: T) => AsyncIterable<R> | Iterable<R> | Promise<AsyncIterable<R> | Iterable<R>>): OverAsyncIterator<R>;\n     chunk(size: number): OverAsyncIterator<T[]>;\n     debounce(ms: number): OverAsyncIterator<T[]>;\n     take(count: number): OverAsyncIterator<T>;\n@@ ... @@\n         map<R>(transform: (value: T) => R): OverAsyncIterator<R> {\n             return over(map(iterable, transform));\n         },\n+\n+        /**\n+         * Transform each element to an iterable and flatten the result\n+         *\n+         * @param transform Function to transform each element to an iterable\n+         * @returns A new `OverAsyncIterator` instance including the `flatMap` operator\n+         */\n+        flatMap<R>(transform: (value: T) => AsyncIterable<R> | Iterable<R> | Promise<AsyncIterable<R> | Iterable<R>>): OverAsyncIterator<R> {\n+            return over(flatMap(iterable, transform));\n+        },\n\n         chunk(size: number): OverAsyncIterator<T[]> {\n             return over(chunk(iterable, size));\n         },\n```\n\nThese changes:\n1. Created a new `flatMap.ts` operator file that implements the flatMap functionality\n2. Added the import for the `flatMap` operator in `index.ts`\n3. Added the `flatMap` method to the `OverAsyncIterator` interface\n4. Added the implementation of `flatMap` in the `over` function\n\nThe `flatMap` operator will:\n- Take each element from the source iterable\n- Transform it using the provided transform function into another iterable\n- Flatten the result by yielding each element from the transformed iterable\n\nThis allows you to use it like this:\n```typescript\nconst result = over(source).flatMap(async x => [x, x * 2]);\n// If source is [1, 2, 3], result will be [1, 2, 2, 4, 3, 6]\n```\n\nLet me know if you need any clarification or have questions!',
+                ],
+                status: 'read',
+                createdAt: '2025-01-08T03:41:47.075Z',
+            },
+            {
+                uuid: '470167aa-e362-40f7-99f2-104040149834',
+                sender: 'user',
+                content: 'Thanks, now I want a `flatMap` function in `over` function',
+                createdAt: '2025-01-08T03:41:43.489Z',
+                status: 'read',
+            },
+            {
                 uuid: 'e3f02cd7-9b30-401c-b60e-a417a170c2f8',
                 sender: 'assistant',
                 content: [
@@ -264,7 +280,6 @@ export class ThreadStore {
             targetThread.messages.unshift(newMessage);
         }
         else {
-            // TODO: We have race condition issues here, send 2 messages at the same time can cuase this throw
             throw new Error(`Unable to update non-existing message ${messageUuid}`);
         }
 
