@@ -1,46 +1,51 @@
-import {applyPatch, ParsedDiff} from 'diff';
-import {Change, Hunk, OrganizedHunk, organizeHunk} from './utils';
-import {looseLocateLines} from './utils';
+import {Hunk, isContentRich, looseLocateLines, OrganizedHunk, organizeHunk} from './utils';
 
-function changeToLine(change: Change) {
-    const prefix = change.type === 'delete' ? '-' : change.type === 'insert' ? '+' : ' ';
-    return prefix + change.content;
+function replace(source: string[], locateStart: number, organized: OrganizedHunk): string {
+    const {head, oldBody, newBody} = organized;
+    const resultLines = [
+        ...source.slice(0, locateStart + head.length),
+        ...newBody.map(v => v.content),
+        ...source.slice(locateStart + head.length + oldBody.length),
+    ];
+    return resultLines.join('\n');
 }
 
 function applySingleHunk(source: string, organized: OrganizedHunk): string {
-    const {head, tail, body, oldBody, newBody} = organized;
+    const {head, tail, body, oldBody} = organized;
     const sourceLines = source.split('\n');
-    const oldLines = [...head, ...oldBody, ...tail].map(v => v.content);
-    const startLine = looseLocateLines(sourceLines, oldLines);
+    const headLines = head.map(v => v.content);
+    const bodyLines = oldBody.map(v => v.content);
+    const tailLines = tail.map(v => v.content);
+    const startLine = looseLocateLines(sourceLines, [...headLines, ...bodyLines, ...tailLines], 0);
 
-    if (startLine < 0) {
-        if (head.length) {
-            return applySingleHunk(source, {...organized, head: []});
-        }
-        if (tail.length) {
-            return applySingleHunk(source, {...organized, tail: []});
-        }
-        throw new Error('Unable to locate hunk in source');
+    if (startLine >= 0) {
+        return replace(sourceLines, startLine, organized);
     }
 
-    const parsed: ParsedDiff = {
-        hunks: [
-            {
-                oldStart: startLine + head.length + 1,
-                oldLines: oldBody.length,
-                newStart: startLine + head.length + 1,
-                newLines: newBody.length,
-                lines: body.map(changeToLine),
-            },
-        ],
-    };
-    const result = applyPatch(source, parsed);
-
-    if (result === false) {
-        throw new Error('Unable to apply patch');
+    // Less accurate match, if head and tail context are matched, and lines count between them is as expected, we pass
+    if (isContentRich(head) && isContentRich(tail)) {
+        const headStartLine = looseLocateLines(sourceLines, headLines, 0);
+        const containsHead = headStartLine >= 0;
+        const tailStartLine = containsHead
+            ? looseLocateLines(sourceLines, tailLines, headStartLine + headLines.length)
+            : -1;
+        const containsTail = tailStartLine >= 0;
+        const bodyLinesCountInSource = tailStartLine - headStartLine - headLines.length;
+        if (containsHead && containsTail && bodyLinesCountInSource === body.length) {
+            return replace(sourceLines, headStartLine, organized);
+        }
     }
 
-    return result;
+    // Fallback to match without head or tail
+    if (tail.length) {
+        return applySingleHunk(source, {...organized, tail: []});
+    }
+    if (head.length) {
+        return applySingleHunk(source, {...organized, head: []});
+    }
+
+    // T_T
+    throw new Error('Unable to locate patch in source');
 }
 
 export function applyHunks(source: string, hunks: Hunk[]): string {

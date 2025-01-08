@@ -51,7 +51,7 @@ export function organizeHunk(hunk: Hunk): OrganizedHunk {
                 break;
             case 'insert':
                 result.insertedCount++;
-                result.newBody.unshift(change);
+                result.newBody.push(change);
                 break;
             default:
                 result.oldBody.push(change);
@@ -67,16 +67,21 @@ function looseLineEqual(left: string, right: string) {
     return left === right || left.trim() === right.trim();
 }
 
-export function looseLocateLines(source: string[], target: string[]) {
+export function looseLocateLines(source: string[], target: string[], start: number) {
     const startingLine = target.at(0);
 
     if (typeof startingLine !== 'string') {
         return -1;
     }
 
+    if (!isContentRich(target)) {
+        return -1;
+    }
+
     const followingLinesCount = target.length - 1;
     const followingLinesInTarget = target.slice(1);
-    for (const [i, line] of source.slice(0, -followingLinesCount).entries()) {
+    for (let i = start; i < source.length - followingLinesCount; i++) {
+        const line = source[i];
         if (looseLineEqual(line, startingLine)) {
             const followingLinesInSource = source.slice(i + 1, i + 1 + followingLinesCount);
             if (followingLinesInSource.every((v, i) => looseLineEqual(v, followingLinesInTarget[i]))) {
@@ -86,4 +91,15 @@ export function looseLocateLines(source: string[], target: string[]) {
     }
 
     return -1;
+}
+
+export function isContentRich(changes: string[] | Change[]) {
+    if (changes.length < 2) {
+        return false;
+    }
+
+    // A line is rich if it contains any identifier
+    const matched = changes.filter(v => /[a-zA-Z0-9]/.test(typeof v === 'string' ? v : v.content));
+    // We need at least 2 lines with rich content to match source code
+    return matched.length >= 2;
 }

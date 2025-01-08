@@ -12,14 +12,14 @@ async function readNewText(name: string) {
     return fs.readFile(path.join(__dirname, 'fixtures', name, 'new.txt'), 'utf-8');
 }
 
-async function readExpectedDiff(name: string): Promise<Hunk[]> {
+async function readHunks(name: string): Promise<Hunk[]> {
     const content = await fs.readFile(path.join(__dirname, 'fixtures', name, 'diff.json'), 'utf-8');
     return JSON.parse(content) as Hunk[];
 }
 
 test('single hunk', async () => {
     const oldText = await readOldText('single-hunk');
-    const hunks = await readExpectedDiff('single-hunk');
+    const hunks = await readHunks('single-hunk');
     const expected = await readNewText('single-hunk');
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
@@ -27,15 +27,15 @@ test('single hunk', async () => {
 
 test('multiple hunks', async () => {
     const oldText = await readOldText('multiple-hunks');
-    const hunks = await readExpectedDiff('multiple-hunks');
+    const hunks = await readHunks('multiple-hunks');
     const expected = await readNewText('multiple-hunks');
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
 });
 
-test.only('context wrong', async () => {
+test('context wrong', async () => {
     const oldText = await readOldText('context-wrong');
-    const hunks = await readExpectedDiff('context-wrong');
+    const hunks = await readHunks('context-wrong');
     const expected = await readNewText('context-wrong');
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
@@ -43,6 +43,14 @@ test.only('context wrong', async () => {
 
 test('not locatable', async () => {
     const oldText = await readOldText('not-locatable');
-    const hunks = await readExpectedDiff('not-locatable');
+    const hunks = await readHunks('not-locatable');
     expect(() => applyHunks(oldText, hunks)).toThrow();
+});
+
+test('deleted unmatch', async () => {
+    const oldText = await readOldText('deleted-unmatch');
+    const hunks = await readHunks('deleted-unmatch');
+    const expected = await readNewText('deleted-unmatch');
+    const newText = applyHunks(oldText, hunks);
+    expect(newText).toBe(expected);
 });

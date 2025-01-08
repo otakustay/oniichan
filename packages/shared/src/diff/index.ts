@@ -8,6 +8,27 @@ export interface DiffSummary {
     insertedCount: number;
 }
 
+export function summarizeDiff(action: DiffAction, source: string, input: string): DiffSummary {
+    if (action === 'create') {
+        return {
+            deletedCount: input.split('\n').length,
+            insertedCount: 0,
+        };
+    }
+    if (action === 'delete') {
+        return {
+            deletedCount: source.split('\n').length,
+            insertedCount: 0,
+        };
+    }
+    if (action === 'diff') {
+        const hunks = parseDiffText(input);
+        return summarize(hunks);
+    }
+
+    assertNever<string>(action, v => `Unknown diff action ${v}`);
+}
+
 function summarize(hunks: Hunk[]): DiffSummary {
     const result: DiffSummary = {
         deletedCount: 0,
@@ -23,11 +44,9 @@ function summarize(hunks: Hunk[]): DiffSummary {
 
 export type DiffAction = 'create' | 'diff' | 'delete';
 
-export interface DiffResult {
+export interface DiffResult extends DiffSummary {
     success: boolean;
     newContent: string;
-    addition: number;
-    deletion: number;
 }
 
 export function applyDiff(action: DiffAction, source: string, input: string): DiffResult {
@@ -35,16 +54,16 @@ export function applyDiff(action: DiffAction, source: string, input: string): Di
         return {
             success: true,
             newContent: input,
-            addition: input.split('\n').length,
-            deletion: 0,
+            insertedCount: input.split('\n').length,
+            deletedCount: 0,
         };
     }
     if (action === 'delete') {
         return {
             success: true,
             newContent: '',
-            addition: 0,
-            deletion: source.split('\n').length,
+            insertedCount: 0,
+            deletedCount: source.split('\n').length,
         };
     }
     if (action === 'diff') {
@@ -55,16 +74,16 @@ export function applyDiff(action: DiffAction, source: string, input: string): Di
             return {
                 success: true,
                 newContent,
-                addition: insertedCount,
-                deletion: deletedCount,
+                insertedCount: insertedCount,
+                deletedCount: deletedCount,
             };
         }
         catch {
             return {
                 success: false,
                 newContent: '',
-                addition: insertedCount,
-                deletion: deletedCount,
+                insertedCount: insertedCount,
+                deletedCount: deletedCount,
             };
         }
     }
