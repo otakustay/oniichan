@@ -29,10 +29,9 @@
     "@anthropic-ai/sdk": "^0.33.1",
     "json-schema-to-ts": "^3.1.1",
     "mustache": "^4.2.0",
-    "openai": "^4.77.0"
+    "openai": "^4.77.3"
   },
   "devDependencies": {
-    "@types/diff": "^6.0.0",
     "@types/mustache": "^4.2.5",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
