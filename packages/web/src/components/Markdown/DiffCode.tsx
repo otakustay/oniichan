@@ -207,8 +207,8 @@ export default function DiffCode({action, file, content, closed}: Props) {
                 <ActionSection>
                     {showAction && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
                     {showAction && <ActionButton onClick={accept}>Accept</ActionButton>}
-                    {error && <ErrorLabel>Not Appliable</ErrorLabel>}
-                    {error && <Toggle collapsed={showSource} onChange={setShowSource} />}
+                    {error && <ErrorLabel>{error}</ErrorLabel>}
+                    {error && content && <Toggle collapsed={showSource} onChange={setShowSource} />}
                 </ActionSection>
             </Bar>
             {showSource && <SourceCode code={content.trim()} language="diff" />}
