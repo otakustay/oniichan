@@ -7,7 +7,7 @@ import {
     getSingletonHighlighter,
     HighlighterGeneric,
 } from 'shiki';
-import {useColorScheme} from '@/components/AppProvider/ColorScheme';
+import {useColorScheme} from '@/components/AppProvider';
 
 const Layout = styled.div`
     overflow-x: auto;

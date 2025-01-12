@@ -19,7 +19,7 @@ function getColorScheme(): ColorSchemeResult {
 }
 
 const Context = createContext<ColorSchemeResult>(getColorScheme());
-Context.displayName = 'ColorschemeResult';
+Context.displayName = 'ColorSchemeContext';
 
 interface Props {
     children: ReactNode;

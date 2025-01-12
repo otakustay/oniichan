@@ -1,9 +1,17 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {useMessageThreadListValue, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
+import {
+    useMessageThreadListValue,
+    useSetActiveMessageThread,
+    useSetMessagelThreadList,
+} from '@oniichan/web-host/atoms/inbox';
 import {Message, MessageThread} from '@oniichan/shared/inbox';
+import {mediaWideScreen} from '@/styles';
 import {TimeAgo} from '@/components/TimeAgo';
+import {useIpc} from '@/components/AppProvider';
+import {useSetEditing} from '@oniichan/web-host/atoms/draft';
 import MessageStatusIcon from '../MessageStatusIcon';
+import {useState, useEffect} from 'react';
 
 function toContentString(message: Message | undefined): string | null {
     if (!message) {
@@ -20,7 +28,6 @@ function toContentString(message: Message | undefined): string | null {
 const ItemLayout = styled(motion.div)`
     padding: 1em;
     border-bottom: 1px solid var(--color-default-border);
-    background-color: var(--color-default-background);
 
     &:hover {
         background-color: var(--color-default-background-hover);
@@ -57,6 +64,18 @@ const ItemContent = styled.div`
     -webkit-line-clamp: 2;
 `;
 
+const ErrorLabel = styled.div`
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-error);
+    color: var(--color-interactive-foreground);
+`;
+
 interface ThreadItemProps {
     thread: MessageThread;
 }
@@ -64,18 +83,24 @@ interface ThreadItemProps {
 const Layout = styled.div`
     display: flex;
     flex-direction: column;
+
+    @media (${mediaWideScreen}) {
+        background-color: var(--color-default-background);
+    }
 `;
 
 function ThreadItem({thread}: ThreadItemProps) {
     const setActive = useSetActiveMessageThread();
+    const setEditing = useSetEditing();
     const firstMessage = thread.messages.at(-1);
     const lastMessage = thread.messages.at(0);
+    const select = () => {
+        setActive(thread.uuid);
+        setEditing(null);
+    };
 
     return (
-        <ItemLayout
-            layout="position"
-            onClick={() => setActive(thread.uuid)}
-        >
+        <ItemLayout layout="position" onClick={select}>
             <ItemHeader>
                 <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
                 <ItemTitle>
@@ -91,13 +116,29 @@ function ThreadItem({thread}: ThreadItemProps) {
 }
 
 export default function ThreadList() {
+    const [error, setError] = useState('');
     const dataSource = useMessageThreadListValue();
+    const setThreadList = useSetMessagelThreadList();
+    const ipc = useIpc();
+    useEffect(
+        () => {
+            void (async () => {
+                try {
+                    const threads = await ipc.kernel.call(crypto.randomUUID(), 'inboxGetThreadList');
+                    setThreadList(threads);
+                }
+                catch {
+                    setError('Failed to fetch inbox threads');
+                }
+            })();
+        },
+        [ipc, setThreadList]
+    );
 
     return (
-        <>
-            <Layout>
-                {dataSource.map(v => <ThreadItem key={v.uuid} thread={v} />)}
-            </Layout>
-        </>
+        <Layout>
+            {dataSource.map(v => <ThreadItem key={v.uuid} thread={v} />)}
+            {error && <ErrorLabel>{error}</ErrorLabel>}
+        </Layout>
     );
 }

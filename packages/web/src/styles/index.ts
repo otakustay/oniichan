@@ -17,3 +17,5 @@ injectGlobal`
         font-size: 14px;
     }
 `;
+
+export const mediaWideScreen = 'min-width: 800px';

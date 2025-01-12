@@ -1,8 +1,9 @@
 import {ReactNode} from 'react';
 import IpcProvider, {useIpc} from './Ipc';
-import ColorSchemeProvider from './ColorScheme';
+import ColorSchemeProvider, {useColorScheme} from './ColorScheme';
+import WideScreenProvider, {useIsWideScreen} from './WideScreen';
 
-export {useIpc};
+export {useIpc, useColorScheme, useIsWideScreen};
 
 interface Props {
     children: ReactNode;
@@ -11,9 +12,11 @@ interface Props {
 export default function AppProvider({children}: Props) {
     return (
         <IpcProvider>
-            <ColorSchemeProvider>
-                {children}
-            </ColorSchemeProvider>
+            <WideScreenProvider>
+                <ColorSchemeProvider>
+                    {children}
+                </ColorSchemeProvider>
+            </WideScreenProvider>
         </IpcProvider>
     );
 }

@@ -13,7 +13,7 @@ const Layout = styled.div`
     display: flex;
     flex-direction: column;
     padding: 1em;
-    border-radius: 1em;
+    border-radius: var(--item-border-radius, 0);
     background-color: var(--color-default-background);
 `;
 

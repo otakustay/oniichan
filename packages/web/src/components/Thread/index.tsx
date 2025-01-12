@@ -1,26 +1,19 @@
 import styled from '@emotion/styled';
-import {useMessageThreadValueByUuid, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
-import {FaAngleLeft, FaReply} from 'react-icons/fa';
-import HeadNavigation from '@/components/HeadNavigation';
-import InteractiveLabel from '@/components/InteractiveLabel';
+import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
+import {mediaWideScreen} from '@/styles';
 import Message from './Message';
-import {useSetEditing} from '@oniichan/web-host/atoms/draft';
-
-const Back = styled(InteractiveLabel)`
-    display: flex;
-    align-items: center;
-`;
-
-const Reply = styled(InteractiveLabel)`
-    display: flex;
-    align-items: center;
-    gap: .5em;
-`;
+import {useEditingValue} from '@oniichan/web-host/atoms/draft';
+import Draft from '../Draft';
 
 const Layout = styled.div`
     display: flex;
     flex-direction: column;
     gap: .5em;
+    --item-border-radius: 1rem;
+
+    @media (${mediaWideScreen}) {
+        padding: 0 1em;
+    }
 `;
 
 interface Props {
@@ -28,33 +21,17 @@ interface Props {
 }
 
 export default function Thread({uuid}: Props) {
-    const setEditing = useSetEditing();
-    const setActive = useSetActiveMessageThread();
     const thread = useMessageThreadValueByUuid(uuid);
+    const editing = useEditingValue();
 
     if (!thread) {
         return <div>Not Found</div>;
     }
 
     return (
-        <>
-            <HeadNavigation
-                title={
-                    <Back onClick={() => setActive(null)}>
-                        <FaAngleLeft />
-                        Inbox
-                    </Back>
-                }
-                description={
-                    <Reply onClick={() => setEditing({threadUuid: uuid, mode: 'reply'})}>
-                        <FaReply />
-                        Reply
-                    </Reply>
-                }
-            />
-            <Layout>
-                {thread.messages.map(v => <Message key={v.uuid} threadUuid={thread.uuid} message={v} />)}
-            </Layout>
-        </>
+        <Layout>
+            {editing?.mode === 'reply' && <Draft />}
+            {thread.messages.map(v => <Message key={v.uuid} threadUuid={thread.uuid} message={v} />)}
+        </Layout>
     );
 }
