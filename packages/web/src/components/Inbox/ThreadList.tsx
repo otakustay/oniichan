@@ -1,3 +1,4 @@
+import {useState, useEffect} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
 import {
@@ -11,7 +12,6 @@ import {TimeAgo} from '@/components/TimeAgo';
 import {useIpc} from '@/components/AppProvider';
 import {useSetEditing} from '@oniichan/web-host/atoms/draft';
 import MessageStatusIcon from '../MessageStatusIcon';
-import {useState, useEffect} from 'react';
 
 function toContentString(message: Message | undefined): string | null {
     if (!message) {
