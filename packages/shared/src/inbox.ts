@@ -367,6 +367,15 @@ export class ThreadStore {
         );
     }
 
+    moveThreadToTop(threadUuid: string) {
+        const targetThreadIndex = this.threads.findIndex(v => v.uuid === threadUuid);
+        if (targetThreadIndex >= 0) {
+            const targetThread = this.threads[targetThreadIndex];
+            this.threads.splice(targetThreadIndex, 1);
+            this.threads.unshift(targetThread);
+        }
+    }
+
     dump() {
         return [...this.threads];
     }

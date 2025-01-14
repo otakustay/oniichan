@@ -67,6 +67,7 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
         if (messageIndex < 0) {
             const newMessage = create();
             return [
+                ...threads.slice(0, threadIndex),
                 {
                     ...targetThread,
                     messages: [
@@ -74,13 +75,13 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                         ...targetThread.messages,
                     ],
                 },
-                ...threads.slice(0, threadIndex),
                 ...threads.slice(threadIndex + 1),
             ];
         }
 
         const targetMessage = targetThread.messages[messageIndex];
         return [
+            ...threads.slice(0, threadIndex),
             {
                 ...targetThread,
                 messages: [
@@ -89,7 +90,6 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                     ...targetThread.messages.slice(messageIndex + 1),
                 ],
             },
-            ...threads.slice(0, threadIndex),
             ...threads.slice(threadIndex + 1),
         ];
     };
@@ -131,6 +131,7 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string)
         }
     );
 }
+
 function addToolUsageBy(threadUuid: string, messageUuid: string, usage: MessageToolUsage) {
     return createThreadListUpdate(
         threadUuid,

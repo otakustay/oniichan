@@ -138,6 +138,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         // Broadcast tool usage
         store.addToolUsage(this.threadUuid, this.replyUuid, reference);
+        store.moveThreadToTop(this.threadUuid);
         this.updateInboxThreadList(store.dump());
         return {uuid: this.replyUuid, type: 'toolUsage', value: reference};
     }
@@ -272,6 +273,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             }
         );
         logger.trace('PushStoreUpdate');
+        store.moveThreadToTop(this.threadUuid);
         this.updateInboxThreadList(store.dump());
 
         try {
@@ -286,6 +288,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             logger.trace('MarkMessageUnread', {threadUuid: this.threadUuid, messageUuid: this.replyUuid});
             store.markStatus(this.threadUuid, this.replyUuid, 'unread');
             logger.trace('PushStoreUpdate');
+            store.moveThreadToTop(this.threadUuid);
             this.updateInboxThreadList(store.dump());
         }
     }
