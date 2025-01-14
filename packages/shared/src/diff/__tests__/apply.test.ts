@@ -62,3 +62,11 @@ test('no diff hunk', async () => {
     const newText = applyHunks(oldText, hunks);
     expect(newText).toBe(expected);
 });
+
+test.only('full-replace', async () => {
+    const oldText = await readOldText('full-replace');
+    const hunks = await readHunks('full-replace');
+    const expected = await readNewText('full-replace');
+    const newText = applyHunks(oldText, hunks);
+    expect(newText).toBe(expected);
+});

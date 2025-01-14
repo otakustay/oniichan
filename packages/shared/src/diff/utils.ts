@@ -42,7 +42,8 @@ export function organizeHunk(hunk: Hunk): OrganizedHunk {
         result.tail.unshift(change);
     }
 
-    for (const change of hunk.changes.slice(result.head.length, -result.tail.length)) {
+    // `result.tail.length` can be `0`, don't slice `hunk.changes` to empty array
+    for (const change of hunk.changes.slice(result.head.length, -result.tail.length || undefined)) {
         result.body.push(change);
         switch (change.type) {
             case 'delete':
