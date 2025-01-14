@@ -1,5 +1,6 @@
+import {createContext, ReactNode, use} from 'react';
 import {mediaWideScreen} from '@/styles';
-import {createContext, ReactNode, use, useEffect, useState} from 'react';
+import {useMedia} from 'huse';
 
 const Context = createContext(false);
 Context.displayName = 'WideScreenContext';
@@ -8,22 +9,8 @@ interface Props {
     children: ReactNode;
 }
 
-const match = matchMedia(`(${mediaWideScreen})`);
-
 export default function WideScreenProvider({children}: Props) {
-    const [isWideScreen, setWideScreen] = useState(match.matches);
-    useEffect(
-        () => {
-            const callback = (event: MediaQueryListEvent) => {
-                setWideScreen(event.matches);
-            };
-            match.addEventListener('change', callback);
-            return () => {
-                match.removeEventListener('change', callback);
-            };
-        },
-        []
-    );
+    const isWideScreen = useMedia(`(${mediaWideScreen})`);
 
     return (
         <Context value={isWideScreen}>

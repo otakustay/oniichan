@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
+import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
 import {mediaWideScreen} from '@/styles';
+import {useKeyboardShortcut} from '@/hooks/keyboard';
 import Message from './Message';
-import {useEditingValue} from '@oniichan/web-host/atoms/draft';
 import Draft from '../Draft';
 
 const Layout = styled.div`
@@ -23,6 +24,15 @@ interface Props {
 export default function Thread({uuid}: Props) {
     const thread = useMessageThreadValueByUuid(uuid);
     const editing = useEditingValue();
+    const setEditing = useSetEditing();
+    useKeyboardShortcut(
+        {key: 'r', shift: true},
+        () => {
+            if (thread) {
+                setEditing({mode: 'reply', threadUuid: thread.uuid});
+            }
+        }
+    );
 
     if (!thread) {
         return <div>Not Found</div>;
