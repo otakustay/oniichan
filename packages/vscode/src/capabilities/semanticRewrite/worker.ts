@@ -97,7 +97,13 @@ export class LineWorker {
 
     private async applyRewrite(code: string, hint: string): Promise<FunctionUsageResult> {
         const logger = this.container.get(Logger);
-        if (code.trim() === hint || this.signal?.aborted) {
+
+        if (code.trim() === hint) {
+            logger.info('Abort', {reason: 'Suggestion exactly matches trigger hint'});
+            return {type: 'abort', reason: 'Suggestion exactly matches trigger hint'};
+        }
+
+        if (this.signal?.aborted) {
             logger.info('Abort', {reason: 'Trigger hint has beed overriden'});
             return {type: 'abort', reason: 'Trigger hint has beed overriden'};
         }

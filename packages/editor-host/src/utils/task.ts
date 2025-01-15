@@ -1,6 +1,7 @@
-import {DependencyContainer} from '@oniichan/shared/container';
-import {Logger} from '@oniichan/shared/logger';
 import {Disposable} from 'vscode';
+import {DependencyContainer} from '@oniichan/shared/container';
+import {stringifyError} from '@oniichan/shared/error';
+import {Logger} from '@oniichan/shared/logger';
 
 export class DisposableAbortSignal extends Disposable {
     readonly signal: AbortSignal;
@@ -66,7 +67,9 @@ export class TaskContext implements Disposable {
     }
 }
 
-export type TaskContainer<D> = DependencyContainer<D & Record<typeof TaskContext.containerKey, TaskContext>>;
+type TaskContextDependency = Record<typeof TaskContext.containerKey, TaskContext>;
+
+export type TaskContainer<D extends DependencyBase> = DependencyContainer<D & TaskContextDependency>;
 
 type Task<D extends DependencyBase> = (container: TaskContainer<D>) => Promise<void>;
 
@@ -80,8 +83,19 @@ export class TaskManager {
         this.tasks.set(taskId, context);
 
         const taskContainer = container.bind(TaskContext, () => context, {singleton: true});
-        const promise = task(taskContainer);
-        context.addPending(promise);
-        return promise;
+        try {
+            const promise = task(taskContainer).catch((ex: unknown) => this.handleError(ex, container));
+            context.addPending(promise);
+            return promise;
+        }
+        catch (ex) {
+            this.handleError(ex, container);
+        }
+    }
+
+    // In line this method into `runTask` will cause a type error
+    private handleError(ex: unknown, container: DependencyContainer<DependencyBase>) {
+        const logger = container.get(Logger);
+        logger.error('Fail', {reason: stringifyError(ex)});
     }
 }

@@ -6,8 +6,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {getSemanticRewriteConfiguration} from '@oniichan/editor-host/utils/config';
 import {Logger} from '@oniichan/shared/logger';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
-import {TaskManager} from '@oniichan/editor-host/utils/task';
-import {stringifyError} from '@oniichan/shared/error';
+import {TaskContext, TaskManager} from '@oniichan/editor-host/utils/task';
 import {KernelClient} from '../../kernel';
 import {LineWorker} from './worker';
 
@@ -137,16 +136,10 @@ class SemanticRewriteExecutor {
                 this.tracks.set(uri, workers);
 
                 workers.add(worker);
-                try {
-                    await worker.run().catch(() => {});
-                }
-                catch (ex) {
-                    const logger = taskContainer.get(Logger);
-                    logger.error('Fail', {reason: stringifyError(ex)});
-                }
-                finally {
-                    workers.delete(worker);
-                }
+                const context = taskContainer.get(TaskContext);
+                context.addDisposable(new Disposable(() => workers.delete(worker)));
+
+                await worker.run();
             }
         );
     }

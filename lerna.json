@@ -11,5 +11,8 @@
       "gitTagVersion": false,
       "message": "chore: release %v"
     }
+  },
+  "changelogPreset": {
+    "name": "conventionalcommits"
   }
 }

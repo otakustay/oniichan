@@ -1,5 +1,11 @@
 # Change Log
 
+## [UNRELEASED]
+
+### Removed
+
+- 放过小的吧，实在写不动了，把模型提供方限制到只支持OpenRouter一家了。
+
 ## [1.9.0] - 2024-01-14
 
 ### Added

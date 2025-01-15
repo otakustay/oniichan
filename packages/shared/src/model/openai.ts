@@ -11,6 +11,8 @@ import {
     ModelStreamingResponse,
 } from './interface';
 
+const OPEN_ROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+
 function transformToolPayload(input: ChatToolPayload): OpenAi.ChatCompletionTool {
     return {
         type: 'function',
@@ -81,14 +83,22 @@ export class OpenAiModelClient implements ModelClient {
     private readonly modelName: string;
 
     constructor(config: ModelConfiguration) {
-        this.client = new OpenAi({apiKey: config.apiKey, baseURL: config.baseUrl});
+        const options = {
+            apiKey: config.apiKey,
+            baseURL: OPEN_ROUTER_BASE_URL,
+            defaultHeaders: {
+                'HTTP-Referer': 'https://github.com/otakustay/oniichan',
+                'X-Title': 'Oniichan',
+            },
+        };
+        this.client = new OpenAi(options);
         this.modelName = config.modelName;
     }
 
     async chat(options: ModelChatOptions): Promise<[ModelResponse, ModelMetaResponse]> {
-        const rqeuest = this.getBaseRequest(options);
+        const request = this.getBaseRequest(options);
         const record = new ModelResponseMetaRecord(this.modelName);
-        const response = await this.client.chat.completions.create(rqeuest);
+        const response = await this.client.chat.completions.create(request);
         record.setInputTokens(response.usage?.prompt_tokens);
         record.addOutputTokens(response.usage?.completion_tokens);
         return [

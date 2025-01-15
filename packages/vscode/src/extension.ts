@@ -10,8 +10,11 @@ import {ScaffoldCommand} from './capabilities/scaffold';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {WebApp} from './capabilities/web';
 import {createKernelClient} from './kernel';
+import {migrate} from './migration';
 
 export async function activate(context: ExtensionContext) {
+    void migrate();
+
     const baseContainer = new DependencyContainer()
         .bind(OutputChannelProvider, () => new OutputChannelProvider(), {singleton: true})
         .bind(TaskManager, () => new TaskManager(), {singleton: true});

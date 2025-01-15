@@ -23,12 +23,8 @@ export interface ChatToolCallPayload {
 
 export type ChatInputPayload = ChatUserMessagePayload | ChatAssistantMessagePayload | ChatToolCallPayload;
 
-export type ModelApiStyle = 'OpenAI' | 'Anthropic';
-
 export interface ModelConfiguration {
-    apiStyle: ModelApiStyle;
     modelName: string;
-    baseUrl: string;
     apiKey: string;
 }
 

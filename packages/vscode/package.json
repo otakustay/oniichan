@@ -85,31 +85,13 @@
       {
         "title": "Model Configuration",
         "properties": {
-          "oniichan.model.apiStyle": {
+          "oniichan.model.apiKey": {
             "type": "string",
-            "enum": [
-              "OpenAI",
-              "Anthropic"
-            ],
-            "markdownEnumDescriptions": [
-              "OpenAI style API (ChatGPT, OpenRouter, etc...)",
-              "Anthropic style API (Claude)"
-            ],
-            "default": "Anthropic",
-            "description": "Oniichan supports two different model API style"
+            "description": "You must provide an OpenRouter API key to access configured model"
           },
           "oniichan.model.modelName": {
             "type": "string",
-            "description": "Model name such as `gpt-4o`, `claude-3-5-sonnet-latest`, etc..."
-          },
-          "oniichan.model.apiKey": {
-            "type": "string",
-            "description": "You must provide an API key to access configured model"
-          },
-          "oniichan.model.baseUrl": {
-            "type": "string",
-            "default": "https://api.anthropic.com",
-            "description": "Override default model API base URL, such as using API2D or OpenRouter."
+            "description": "Model name on OpenRouter, such as `deepseek/deepseek-chat`, `anthropic/claude-3.5-sonnet`, etc..."
           }
         }
       },
