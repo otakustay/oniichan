@@ -14,11 +14,9 @@ Oniichan (おにいちゃん，欧尼酱)是我个人完全按照自己的喜好
 
 ## 配置
 
-Oniichan使用大模型进行代码生成，支持OpenAI（ChatGPT、OpenRouter等服务）与Anthropic（Claude等服务）两种形式，你需要有自己的API Key。
+Oniichan使用大模型进行代码生成，使用[OpenRouter](https://openrouter.ai)服务。
 
-在配置项中，你可以搜索`oniichan.model`并填入相关的配置，包括API形式、入口URL、API Key、模型名称等。
-
-如果你使用一些代理服务，可以通过修改`oniichan.model.baseUrl`来指定请求的路径，例如我个人使用[API2D](https://api2d.com/)服务，并调用Claude的模型，则对应的配置值为`https://oa.api2d.net/claude/v1`。
+在配置项中，你可以搜索`oniichan.model`并填入相关的配置，包括API Key和模型名称。
 
 更多细节请参考[安装配置文档](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE)。
 
