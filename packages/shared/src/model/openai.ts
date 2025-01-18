@@ -1,8 +1,7 @@
 import OpenAi from 'openai';
-import {ModelResponseMetaRecord, StreamToolCallRecord, ToolRecordChunk} from './utils';
+import {ModelResponseMetaRecord} from './utils';
 import {
     ChatInputPayload,
-    ChatToolPayload,
     ModelChatOptions,
     ModelClient,
     ModelConfiguration,
@@ -13,68 +12,9 @@ import {
 
 const OPEN_ROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-function transformToolPayload(input: ChatToolPayload): OpenAi.ChatCompletionTool {
-    return {
-        type: 'function',
-        function: {
-            name: input.name,
-            description: input.description,
-            parameters: input.parameters,
-        },
-    };
-}
-
 function transformInputPayload(input: ChatInputPayload): OpenAi.ChatCompletionMessageParam {
-    if (input.role === 'tool') {
-        const result: OpenAi.ChatCompletionToolMessageParam = {
-            role: 'tool',
-            tool_call_id: input.callId,
-            content: JSON.stringify(input.content),
-        };
-        return result;
-    }
-    else if (input.role === 'user') {
-        return input;
-    }
-    else {
-        const message: OpenAi.ChatCompletionMessageParam = {
-            role: 'assistant',
-            content: input.content || null,
-        };
-        if (input.toolCall) {
-            message.tool_calls = [
-                {
-                    id: input.toolCall.id,
-                    type: 'function',
-                    function: {
-                        name: input.toolCall.functionName,
-                        arguments: JSON.stringify(input.toolCall.arguments),
-                    },
-                },
-            ];
-        }
-        return message;
-    }
-}
-
-class OpenAiStreamToolCallRecord extends StreamToolCallRecord<OpenAi.ChatCompletionChunk> {
-    protected extractFromChunk(chunk: OpenAi.ChatCompletionChunk): ToolRecordChunk {
-        const call = chunk.choices[0]?.delta.tool_calls?.at(0);
-
-        if (!call) {
-            return {
-                type: 'text',
-                content: chunk.choices[0]?.delta.content ?? '',
-            };
-        }
-
-        return {
-            type: 'tool',
-            id: call.id,
-            functionName: call.function?.name,
-            argumentsDelta: call.function?.arguments ?? '',
-        };
-    }
+    // TODO: Maybe we can delete this function
+    return input;
 }
 
 export class OpenAiModelClient implements ModelClient {
@@ -114,30 +54,14 @@ export class OpenAiModelClient implements ModelClient {
         } as const;
         const stream = await this.client.chat.completions.create(request);
         const metaRecord = new ModelResponseMetaRecord(this.modelName);
-        const toolRecord = new OpenAiStreamToolCallRecord();
         for await (const chunk of stream) {
-            toolRecord.record(chunk);
-
             const delta = chunk.choices.at(0)?.delta;
-
-            if (!delta?.tool_calls) {
-                const text = delta?.content ?? '';
-                if (text) {
-                    yield {type: 'text', content: text} as const;
-                }
+            const text = delta?.content ?? '';
+            if (text) {
+                yield {type: 'text', content: text} as const;
             }
-
             metaRecord.setInputTokens(chunk.usage?.prompt_tokens);
             metaRecord.addOutputTokens(chunk.usage?.completion_tokens);
-        }
-
-        if (toolRecord.isActive()) {
-            try {
-                yield toolRecord.toToolResponse();
-            }
-            finally {
-                toolRecord.clear();
-            }
         }
 
         yield metaRecord.toResponseMeta();
@@ -153,9 +77,6 @@ export class OpenAiModelClient implements ModelClient {
             model: this.modelName,
             max_tokens: 8000,
         };
-        if (options.tools?.length) {
-            request.tools = options.tools.map(transformToolPayload);
-        }
         return request;
     }
 }

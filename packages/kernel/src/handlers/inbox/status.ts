@@ -19,7 +19,9 @@ export class InboxMarkMessageStatusHandler extends RequestHandler<InboxMarkMessa
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxMarkMessageStatus');
         telemetry.setTelemetryData('threadUuid', payload.threadUuid);
         telemetry.setTelemetryData('uuid', payload.uuid);
-        store.markStatus(payload.threadUuid, payload.uuid, payload.status);
+        const thread = store.findThreadByUuidStrict(payload.threadUuid);
+        const message = thread.findMessageByUuidStrict(payload.uuid);
+        message.markStatus(payload.status);
         logger.trace('PushStoreUpdate');
         this.updateInboxThreadList(store.dump());
         telemetry.end();

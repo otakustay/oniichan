@@ -5,8 +5,8 @@ import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
 import {EditorHostServer, EditorHostDependency} from '@oniichan/editor-host/server';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
-import {MessageThread} from '@oniichan/shared/inbox';
 import {WebHostClient} from '@oniichan/web-host/client';
+import {MessageThreadData} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {Disposable} from 'vscode';
 
@@ -96,7 +96,7 @@ export class KernelClient extends BaseKernelClient implements Disposable {
             this.logger.print(entry);
         }
         else if (notice.action === 'updateInboxThreadList') {
-            const list: MessageThread[] = notice.payload;
+            const list: MessageThreadData[] = notice.payload;
             this.broadcast(v => v.call(notice.taskId, 'updateThreadList', list));
         }
     }

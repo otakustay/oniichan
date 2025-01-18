@@ -1,12 +1,18 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel/protocol';
-import {Message, MessageStatus, MessageThread} from '@oniichan/shared/inbox';
-import {MessageToolUsage} from '@oniichan/shared/tool';
+import {
+    MessageData,
+    MessageStatus,
+    MessageThreadData,
+    AssistantTextMessageData,
+    ToolCallMessageData,
+} from '@oniichan/shared/inbox';
 import {useIpcValue} from './ipc';
 import {useSetDraftContent, useSetEditing} from './draft';
+import {ToolParsedChunk} from '@oniichan/shared/tool';
 
-export const messageThreadListAtom = atom<MessageThread[]>([]);
+export const messageThreadListAtom = atom<MessageThreadData[]>([]);
 
 export const activeTheadUuidAtom = atom<string | null>(null);
 
@@ -48,12 +54,12 @@ export function useSetMessagelThreadList() {
 }
 
 interface MessageUpdateOptions {
-    create: () => Message;
-    update: (message: Message) => Message;
+    create: () => MessageData;
+    update: (message: MessageData) => MessageData;
 }
 
 function createThreadListUpdate(threadUuid: string, messageUuid: string, options: MessageUpdateOptions) {
-    return (threads: MessageThread[]) => {
+    return (threads: MessageThreadData[]) => {
         const {create, update} = options;
         const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
 
@@ -71,8 +77,8 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                 {
                     ...targetThread,
                     messages: [
-                        newMessage,
                         ...targetThread.messages,
+                        newMessage,
                     ],
                 },
                 ...threads.slice(threadIndex + 1),
@@ -95,72 +101,100 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
     };
 }
 
-function appendMessageBy(threadUuid: string, messageUuid: string, chunk: string) {
-    return createThreadListUpdate(
-        threadUuid,
-        messageUuid,
-        {
-            create: () => {
-                return {
-                    uuid: messageUuid,
-                    sender: 'assistant',
-                    content: [chunk],
-                    status: 'generating',
-                    createdAt: now(),
-                };
-            },
-            update: message => {
-                if (message.sender === 'assistant') {
-                    const lastChunk = message.content.at(-1);
-                    if (typeof lastChunk === 'string') {
-                        return {
-                            ...message,
-                            content: [
-                                ...message.content.slice(0, -1),
-                                lastChunk + chunk,
-                            ],
-                        };
-                    }
-                    return {...message, content: [...message.content, chunk]};
-                }
-                return {
-                    ...message,
-                    content: message.content + chunk,
-                };
-            },
+type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
+
+function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: ToolParsedChunk): MessageData {
+    if (chunk.type === 'text') {
+        const lastChunk = message.chunks.at(-1);
+
+        if (typeof lastChunk === 'string') {
+            return {
+                ...message,
+                chunks: [...message.chunks.slice(0, -1), lastChunk + chunk.content],
+            };
         }
-    );
+
+        return {
+            ...message,
+            chunks: [...message.chunks, chunk.content],
+        };
+    }
+
+    if (chunk.type === 'textInTool') {
+        return message;
+    }
+
+    if (chunk.type === 'toolStart') {
+        return {
+            ...message,
+            chunks: [...message.chunks, {toolName: chunk.toolName, arguments: {}, status: 'generating'}],
+        };
+    }
+
+    const lastToolCall = message.chunks.at(-1);
+
+    if (typeof lastToolCall !== 'object') {
+        throw new Error('Unexpected tool call chunk coming without a start chunk');
+    }
+
+    if (chunk.type === 'toolDelta') {
+        const args = {...lastToolCall.arguments};
+        for (const [key, value] of Object.entries(chunk.arguments)) {
+            const previousValue = args[key] ?? '';
+            args[key] = previousValue + value;
+        }
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastToolCall,
+                    arguments: args,
+                },
+            ],
+        };
+    }
+
+    return {
+        ...message,
+        chunks: [
+            ...message.chunks.slice(0, -1),
+            {
+                ...lastToolCall,
+                status: 'completed',
+            },
+        ],
+    };
 }
 
-function addToolUsageBy(threadUuid: string, messageUuid: string, usage: MessageToolUsage) {
+function appendMessageBy(threadUuid: string, messageUuid: string, chunk: ToolParsedChunk) {
     return createThreadListUpdate(
         threadUuid,
         messageUuid,
         {
             create: () => {
-                return {
+                const message: AssistantTextMessageData = {
                     uuid: messageUuid,
-                    sender: 'assistant',
-                    content: [usage],
+                    type: 'assistantText',
+                    chunks: [],
                     status: 'generating',
                     createdAt: now(),
                 };
+                return handleChunkToAssistantMessage(message, chunk);
             },
             update: message => {
-                if (message.sender === 'user') {
-                    throw new Error('Cannot add tool usage to user message');
+                if (message.type === 'assistantText' || message.type === 'toolCall') {
+                    return handleChunkToAssistantMessage(message, chunk);
                 }
 
-                // Kernel will push message containing the latest tool usage,
-                // and we also append usage to message here, this may cause duplication of usage items,
-                // we need to test if the usage is already exists
-                const exists = message.content.some(v => typeof v === 'object' && v.id === usage.id);
-                return exists
-                    ? message
-                    : {
-                        ...message,
-                        content: [...message.content, usage],
-                    };
+                if (chunk.type !== 'text') {
+                    throw new Error('User message should only receive text chunk');
+                }
+
+                return {
+                    ...message,
+                    content: message.content + chunk.content,
+                };
             },
         }
     );
@@ -175,20 +209,15 @@ export function useSendMessageToThread(threadUuid: string) {
         setEditing(null);
         setDraftContent('');
         const request: InboxSendMessageRequest = {
-            threadUuid: threadUuid,
-            uuid: uuid,
+            threadUuid,
+            uuid,
             body: {
                 type: 'text',
                 content: content,
             },
         };
         for await (const chunk of ipc.kernel.callStreaming(uuid, 'inboxSendMessage', request)) {
-            if (chunk.type === 'text') {
-                setMessageThreadList(appendMessageBy(threadUuid, chunk.uuid, chunk.value));
-            }
-            else {
-                setMessageThreadList(addToolUsageBy(threadUuid, chunk.uuid, chunk.value));
-            }
+            setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));
         }
     };
 }

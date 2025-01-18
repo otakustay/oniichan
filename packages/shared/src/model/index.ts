@@ -4,19 +4,14 @@ import {OpenAiModelClient} from './openai';
 export {
     ChatUserMessagePayload,
     ChatAssistantMessagePayload,
-    ChatToolParameterSchema,
-    ChatToolPayload,
     ModelChatOptions,
     ModelClient,
     ModelConfiguration,
     ModelMetaResponse,
     ModelUsage,
     ModelResponse,
-    ModelTextResponse,
-    ModelToolResponse,
     ModelStreamingResponse,
     ChatInputPayload,
-    ChatToolCallPayload,
 } from './interface';
 
 function validateModelConfiguration(config: ModelConfiguration): void {

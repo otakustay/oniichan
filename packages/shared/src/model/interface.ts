@@ -3,43 +3,21 @@ export interface ChatUserMessagePayload {
     content: string;
 }
 
-export interface ChatAssistantToolCallPayload {
-    id: string;
-    functionName: string;
-    arguments: unknown;
-}
-
 export interface ChatAssistantMessagePayload {
     role: 'assistant';
     content: string;
-    toolCall?: ChatAssistantToolCallPayload;
 }
 
-export interface ChatToolCallPayload {
-    role: 'tool';
-    callId: string;
-    content: unknown;
-}
-
-export type ChatInputPayload = ChatUserMessagePayload | ChatAssistantMessagePayload | ChatToolCallPayload;
+export type ChatInputPayload = ChatUserMessagePayload | ChatAssistantMessagePayload;
 
 export interface ModelConfiguration {
     modelName: string;
     apiKey: string;
 }
 
-export interface ModelTextResponse {
+export interface ModelResponse {
     type: 'text';
     content: string;
-}
-
-export interface ModelToolResponse {
-    type: 'tool';
-    id: string;
-    name: string;
-    hasThought: boolean;
-    reason: string;
-    arguments: unknown;
 }
 
 export interface ModelMetaResponse {
@@ -48,8 +26,6 @@ export interface ModelMetaResponse {
     usage: ModelUsage;
 }
 
-export type ModelResponse = ModelTextResponse | ModelToolResponse;
-
 export type ModelStreamingResponse = ModelResponse | ModelMetaResponse;
 
 export interface ModelUsage {
@@ -57,22 +33,9 @@ export interface ModelUsage {
     outputTokens: number | null;
 }
 
-export interface ChatToolParameterSchema {
-    type: 'object';
-    properties?: unknown;
-    [k: string]: unknown;
-}
-
-export interface ChatToolPayload {
-    name: string;
-    description: string;
-    parameters: ChatToolParameterSchema;
-}
-
 export interface ModelChatOptions {
     messages: ChatInputPayload[];
     systemPrompt?: string | undefined;
-    tools?: ChatToolPayload[];
 }
 
 export interface ModelClient {

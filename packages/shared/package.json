@@ -7,14 +7,14 @@
     "./container": "./dist/container.js",
     "./dir": "./dist/dir.js",
     "./id": "./dist/id.js",
-    "./inbox": "./dist/inbox.js",
+    "./inbox": "./dist/inbox/index.js",
     "./language": "./dist/language.js",
     "./logger": "./dist/logger.js",
     "./model": "./dist/model/index.js",
     "./prompt": "./dist/prompt.js",
-    "./string": "./dist/string.js",
+    "./string": "./dist/string/index.js",
     "./error": "./dist/error.js",
-    "./tool": "./dist/tool.js",
+    "./tool": "./dist/tool/index.js",
     "./diff": "./dist/diff/index.js"
   },
   "scripts": {
@@ -27,7 +27,8 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "json-schema-to-ts": "^3.1.1",
+    "@types/json-schema": "^7.0.15",
+    "dedent": "^1.5.3",
     "mustache": "^4.2.0",
     "openai": "^4.77.3"
   },

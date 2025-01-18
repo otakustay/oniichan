@@ -9,6 +9,7 @@ import {useIsWideScreen} from '@/components/AppProvider';
 const Layout = styled.div`
     overflow-y: auto;
     height: calc(100vh - 4em);
+    background-color: var(--color-root-background);
 
     @media not (${mediaWideScreen}) {
         position: fixed;

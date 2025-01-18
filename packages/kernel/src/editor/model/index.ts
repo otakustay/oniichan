@@ -5,20 +5,15 @@ import {
     ModelClient,
     isModelConfigValid,
     ModelResponse,
-    ChatToolPayload,
     ChatInputPayload,
 } from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {CodeResult, streamingExtractCode} from './extract';
 
-export interface ModelChatOptionsNoTools {
+export interface ModelChatOptions {
     messages: ChatInputPayload[];
     telemetry: ModelUsageTelemetry;
     systemPrompt?: string;
-}
-
-export interface ModelChatOptions extends ModelChatOptionsNoTools {
-    tools?: ChatToolPayload[];
 }
 
 export class ModelAccessHost {
@@ -43,10 +38,10 @@ export class ModelAccessHost {
     }
 
     async *chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse> {
-        const {messages, tools, systemPrompt, telemetry} = options;
+        const {messages, systemPrompt, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);
-        for await (const chunk of client.chatStreaming({messages, tools, systemPrompt})) {
+        for await (const chunk of client.chatStreaming({messages, systemPrompt})) {
             telemetry.setResponseChunk(chunk);
             if (chunk.type !== 'meta') {
                 yield chunk;
@@ -55,7 +50,7 @@ export class ModelAccessHost {
         void telemetry.record();
     }
 
-    async *codeStreaming(options: ModelChatOptionsNoTools): AsyncIterable<CodeResult> {
+    async *codeStreaming(options: ModelChatOptions): AsyncIterable<CodeResult> {
         const {messages, telemetry} = options;
         const client = await this.createModelClient();
         telemetry.setRequest(messages);

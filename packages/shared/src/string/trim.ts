@@ -1,7 +1,3 @@
-export function now() {
-    return (new Date()).toISOString();
-}
-
 const PATH_TRIM_SEGMENT_HEAD = 4;
 
 const PATH_TRIM_SEGMENT_TAIL = 2;

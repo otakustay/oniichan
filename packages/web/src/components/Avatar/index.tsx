@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import userSrc from './user.png';
 import assistantSrc from './assistant.png';
+import toolSrc from './tool.png';
 
 interface SizeProps {
     size?: string;
@@ -26,4 +27,8 @@ Avatar.User = function UserAvatar({size}: SizeProps) {
 
 Avatar.Assistant = function AssistantAvatar({size}: SizeProps) {
     return <Layout src={assistantSrc} size={size} />;
+};
+
+Avatar.Tool = function ToolAvatar({size}: SizeProps) {
+    return <Layout src={toolSrc} size={size} />;
 };

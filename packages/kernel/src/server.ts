@@ -5,7 +5,12 @@ import {Context} from './handlers/handler';
 import {EditorHost} from './editor';
 import {KernelProtocol} from './protocol';
 import {EchoHandler} from './handlers/echo';
-import {InboxSendMessageHandler, InboxMarkMessageStatusHandler, InboxGetThreadListHandler} from './handlers/inbox';
+import {
+    InboxSendMessageHandler,
+    InboxMarkMessageStatusHandler,
+    InboxGetThreadListHandler,
+    InboxDumpHandler,
+} from './handlers/inbox';
 import {ModelChatHandler} from './handlers/model';
 import {ScaffoldHandler} from './handlers/scaffold';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
@@ -37,5 +42,6 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.registerHandler(InboxSendMessageHandler);
         this.registerHandler(InboxMarkMessageStatusHandler);
         this.registerHandler(InboxGetThreadListHandler);
+        this.registerHandler(InboxDumpHandler);
     }
 }

@@ -1,29 +1,18 @@
 import {useState, useEffect} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
+import {MessageData, MessageThreadData} from '@oniichan/shared/inbox';
 import {
     useMessageThreadListValue,
     useSetActiveMessageThread,
     useSetMessagelThreadList,
 } from '@oniichan/web-host/atoms/inbox';
-import {Message, MessageThread} from '@oniichan/shared/inbox';
 import {mediaWideScreen} from '@/styles';
 import {TimeAgo} from '@/components/TimeAgo';
 import {useIpc} from '@/components/AppProvider';
 import {useSetEditing} from '@oniichan/web-host/atoms/draft';
 import MessageStatusIcon from '../MessageStatusIcon';
-
-function toContentString(message: Message | undefined): string | null {
-    if (!message) {
-        return null;
-    }
-
-    if (message.sender === 'user') {
-        return message.content;
-    }
-
-    return message.content.filter((v: any) => typeof v === 'string').join('');
-}
+import {assertNever} from '@oniichan/shared/error';
 
 const ItemLayout = styled(motion.div)`
     padding: 1em;
@@ -77,7 +66,7 @@ const ErrorLabel = styled.div`
 `;
 
 interface ThreadItemProps {
-    thread: MessageThread;
+    thread: MessageThreadData;
 }
 
 const Layout = styled.div`
@@ -89,11 +78,24 @@ const Layout = styled.div`
     }
 `;
 
+function resolveMessageContent(message: MessageData) {
+    switch (message.type) {
+        case 'userRequest':
+        case 'toolUse':
+            return message.content;
+        case 'assistantText':
+        case 'toolCall':
+            return message.chunks.filter(v => typeof v === 'string').join('\n\n');
+        default:
+            assertNever<{type: string}>(message, v => `Unknown message type "${v.type}"`);
+    }
+}
+
 function ThreadItem({thread}: ThreadItemProps) {
     const setActive = useSetActiveMessageThread();
     const setEditing = useSetEditing();
-    const firstMessage = thread.messages.at(-1);
-    const lastMessage = thread.messages.at(0);
+    const firstMessage = thread.messages.at(0);
+    const lastMessage = thread.messages.at(-1);
     const select = () => {
         setActive(thread.uuid);
         setEditing(null);
@@ -104,12 +106,12 @@ function ThreadItem({thread}: ThreadItemProps) {
             <ItemHeader>
                 <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
                 <ItemTitle>
-                    {toContentString(firstMessage) ?? '(No Title)'}
+                    {firstMessage ? resolveMessageContent(firstMessage) : '(No Title)'}
                 </ItemTitle>
                 {lastMessage && <ItemDateTime time={lastMessage.createdAt} />}
             </ItemHeader>
             <ItemContent>
-                {toContentString(lastMessage) ?? '(Empty)'}
+                {lastMessage ? resolveMessageContent(lastMessage) : '(Empty)'}
             </ItemContent>
         </ItemLayout>
     );

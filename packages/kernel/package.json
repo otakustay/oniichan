@@ -21,8 +21,7 @@
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/async-iterator": "^1.1.1",
-    "@otakustay/ipc": "^2.3.1",
-    "fast-deep-equal": "^3.1.3"
+    "@otakustay/ipc": "^2.3.1"
   },
   "devDependencies": {
     "@types/node": "20.x",

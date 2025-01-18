@@ -3,11 +3,46 @@ import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
 import {BiErrorAlt} from 'react-icons/bi';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
-import {Message} from '@oniichan/shared/inbox';
+import {assertNever} from '@oniichan/shared/error';
+import {MessageData} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
+
+function resolveMessageSender(message: MessageData) {
+    switch (message.type) {
+        case 'userRequest':
+            return 'user';
+        case 'toolUse':
+            return 'tool';
+        default:
+            return 'assistant';
+    }
+}
+
+function renderAvatar(sender: string) {
+    if (sender === 'assistant') {
+        return <Avatar.Assistant size="1.5em" />;
+    }
+    if (sender === 'tool') {
+        return <Avatar.Tool size="1.5em" />;
+    }
+    return <Avatar.User size="1.5em" />;
+}
+
+function resolveMessageContent(message: MessageData) {
+    switch (message.type) {
+        case 'userRequest':
+        case 'toolUse':
+            return message.content;
+        case 'assistantText':
+        case 'toolCall':
+            return message.chunks;
+        default:
+            assertNever<{type: string}>(message, v => `Unknown message type "${v.type}"`);
+    }
+}
 
 const Layout = styled.div`
     display: flex;
@@ -22,7 +57,7 @@ const Header = styled.div`
     padding-bottom: .5em;
     border-bottom: 1px solid var(--color-default-bottom);
     align-items: center;
-    gap: .2em;
+    gap: .4em;
 `;
 
 const Time = styled(TimeAgo)`
@@ -64,7 +99,7 @@ function Error({reason}: ErrorProps) {
 
 interface Props {
     threadUuid: string;
-    message: Message;
+    message: MessageData;
 }
 
 export default function Message({threadUuid, message}: Props) {
@@ -80,18 +115,19 @@ export default function Message({threadUuid, message}: Props) {
         },
         [message.status, inView]
     );
+    const sender = resolveMessageSender(message);
 
     return (
         <Layout ref={ref}>
             <Header>
-                {message.sender === 'assistant' ? <Avatar.Assistant /> : <Avatar.User />}
+                {renderAvatar(sender)}
                 <Sender>
-                    {message.sender === 'assistant' ? 'Oniichan' : 'Me'}
+                    {sender === 'assistant' ? 'Oniichan' : (sender === 'tool' ? 'Super Tool' : 'Me')}
                 </Sender>
                 <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
-            <MessageContent content={message.content} />
+            <MessageContent content={resolveMessageContent(message)} />
             <Error reason={message.error} />
         </Layout>
     );

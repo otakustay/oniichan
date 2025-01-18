@@ -45,9 +45,6 @@ export class ModelUsageTelemetry {
                 this.output = output.content;
             }
         }
-        else if (output.type === 'tool') {
-            this.output = output;
-        }
         else {
             this.modelName = output.model;
             this.inputTokens = output.usage.inputTokens ?? null;

@@ -1,8 +1,8 @@
 import {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
-import {MessageToolUsage} from '@oniichan/shared/tool';
 import {trimPathString} from '@oniichan/shared/string';
+import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 
 const Layout = styled.div`
     display: flex;
@@ -30,25 +30,25 @@ const ContentLabel = styled.span`
     border-radius: .25em;
 `;
 
-function renderLabelContent(usage: MessageToolUsage): [ComponentType, string, string] {
-    switch (usage.type) {
+function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string, string] {
+    switch (input.toolName) {
         case 'readFile':
-            return [IoDocumentTextOutline, 'Read file', trimPathString(usage.args.path)];
+            return [IoDocumentTextOutline, 'Read file', trimPathString(input.arguments.path ?? '')];
         case 'readDirectory':
-            return [IoFolderOpenOutline, 'Read direcotry', trimPathString(usage.args.path)];
+            return [IoFolderOpenOutline, 'Read direcotry', trimPathString(input.arguments.path ?? '')];
         case 'findFiles':
-            return [IoSearchOutline, 'Find files', usage.args.glob];
+            return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
         default:
             throw new Error(`Unknown reference type`);
     }
 }
 
 interface Props {
-    usage: MessageToolUsage;
+    input: ToolCallMessageChunk;
 }
 
-export default function ToolUsage({usage}: Props) {
-    const [Icon, action, content] = renderLabelContent(usage);
+export default function ToolUsage({input}: Props) {
+    const [Icon, action, content] = renderLabelContent(input);
 
     return (
         <Layout>

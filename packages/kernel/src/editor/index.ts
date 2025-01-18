@@ -3,7 +3,13 @@ import {EditorDocumentHost} from './document';
 import {ModelAccessHost} from './model';
 import {WorkspaceHost} from './workspace';
 
+export {ModelAccessHost, ModelChatOptions} from './model';
+export {ReadDirectoryOptions, WorkspaceHost} from './workspace';
+export {EditorDocumentHost} from './document';
+
 export class EditorHost {
+    static readonly containerKey = 'EditorHost';
+
     private readonly client: EditorHostClient;
 
     constructor(client: EditorHostClient) {
