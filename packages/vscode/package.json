@@ -49,6 +49,16 @@
         "command": "oniichan.composeNewMessage",
         "title": "Compose New Message",
         "category": "Oniichan"
+      },
+      {
+        "command": "oniichan.ejectInternals",
+        "title": "[Debug] Eject Internals",
+        "category": "Oniichan"
+      },
+      {
+        "command": "oniichan.exportInbox",
+        "title": "[Debug] Export Inbox Data",
+        "category": "Oniichan"
       }
     ],
     "keybindings": [

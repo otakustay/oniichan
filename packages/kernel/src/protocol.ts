@@ -4,12 +4,8 @@ import type {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import type {ScaffoldHandler} from './handlers/scaffold';
 import type {ModelChatHandler} from './handlers/model';
 import type {ModelTelemetryHandler} from './handlers/telemetry';
-import type {
-    InboxMarkMessageStatusHandler,
-    InboxSendMessageHandler,
-    InboxGetThreadListHandler,
-    InboxDumpHandler,
-} from './handlers/inbox';
+import type {InboxMarkMessageStatusHandler, InboxSendMessageHandler, InboxGetThreadListHandler} from './handlers/inbox';
+import type {ExportInboxHandler, EjectInternalsHandler} from './handlers/debug';
 
 export type {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from './handlers/inbox';
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
@@ -24,5 +20,6 @@ export type KernelProtocol = ProtocolOf<
     | typeof InboxSendMessageHandler
     | typeof InboxMarkMessageStatusHandler
     | typeof InboxGetThreadListHandler
-    | typeof InboxDumpHandler
+    | typeof ExportInboxHandler
+    | typeof EjectInternalsHandler
 >;
