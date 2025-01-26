@@ -9,6 +9,11 @@ function codeBlock(code: string, language = '') {
     return '```' + language + '\n' + code + '\n' + '```';
 }
 
+// TODO: Should use JSON schema to validate the input
+function errorMissingParameter(name: string) {
+    return `Missing value for required parameter "${name}", this may be caused by empty content in <${name}> tag or missing <${name}> tag, please retry with complete response.`;
+}
+
 interface GenericToolCallInput {
     name: string;
 }
@@ -34,6 +39,10 @@ export class ToolImplement {
     }
 
     private async readFile(file: string) {
+        if (!file) {
+            return errorMissingParameter('path');
+        }
+
         const workspace = this.editorHost.getWorkspace();
         try {
             const content = await workspace.readWorkspaceFile(file);
@@ -59,6 +68,10 @@ export class ToolImplement {
     }
 
     private async findFiles(glob: string) {
+        if (!glob) {
+            return errorMissingParameter('path');
+        }
+
         const formatResult = (root: string, files: string[]) => {
             if (!files.length) {
                 return `There is no file matching glob ${glob}`;
@@ -82,6 +95,10 @@ export class ToolImplement {
     }
 
     private async readDirectory(directory: string) {
+        if (!directory) {
+            return errorMissingParameter('path');
+        }
+
         const formatResult = (items: FileEntry[]) => {
             if (!items.length) {
                 return `Directory ${directory} is empty`;
