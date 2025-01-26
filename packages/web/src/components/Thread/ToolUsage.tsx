@@ -32,11 +32,11 @@ const ContentLabel = styled.span`
 
 function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string, string] {
     switch (input.toolName) {
-        case 'readFile':
+        case 'read_file':
             return [IoDocumentTextOutline, 'Read file', trimPathString(input.arguments.path ?? '')];
-        case 'readDirectory':
-            return [IoFolderOpenOutline, 'Read direcotry', trimPathString(input.arguments.path ?? '')];
-        case 'findFiles':
+        case 'read_directory':
+            return [IoFolderOpenOutline, 'Read directory', trimPathString(input.arguments.path ?? '')];
+        case 'find_files_by_glob':
             return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
         default:
             throw new Error(`Unknown reference type`);

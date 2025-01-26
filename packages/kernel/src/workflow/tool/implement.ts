@@ -27,11 +27,11 @@ export class ToolImplement {
 
     async callTool(input: ToolCallInput): Promise<string> {
         switch (input.name) {
-            case 'readDirectory':
+            case 'read_directory':
                 return this.readDirectory(input.arguments.path);
-            case 'readFile':
+            case 'read_file':
                 return this.readFile(input.arguments.path);
-            case 'findFiles':
+            case 'find_files_by_glob':
                 return this.findFiles(input.arguments.glob);
             default:
                 assertNever<GenericToolCallInput>(input, v => `Unknown tool "${v.name}"`);

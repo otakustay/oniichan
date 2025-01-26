@@ -8,7 +8,7 @@ export interface ParameterInfo {
     [k: string]: unknown;
 }
 
-export type ToolName = 'readFile' | 'readDirectory' | 'findFiles';
+export type ToolName = 'read_file' | 'read_directory' | 'find_files_by_glob';
 
 export interface ToolDescription {
     name: ToolName;
@@ -64,33 +64,33 @@ export interface FindFilesParameter {
 
 export const builtinTools: ToolDescription[] = [
     {
-        name: 'readFile',
+        name: 'read_file',
         description: `Read the content of a file, returns null if the file does not exist`,
         parameters: readFileParameters,
         usage: dedent`
-                <readFile>
+                <read_file>
                     <path>src/utils/index.ts</path>
-                </readFile>
+                </read_file>
             `,
     },
     {
-        name: 'readDirectory',
+        name: 'read_directory',
         description: `Read the file and child directories in a directory`,
         parameters: readDirectoryParameters,
         usage: dedent`
-            <readDirectory>
+            <read_directory>
                 <path>src/utils</path>
-            </readDirectory>
+            </read_directory>
         `,
     },
     {
-        name: 'findFiles',
+        name: 'find_files_by_glob',
         description: `Find files matching a glob pattern`,
         parameters: findFilesParameters,
         usage: dedent`
-            <findFiles>
+            <find_files_by_glob>
                 <glob>src/common/**/*.{ts,tsx}</glob>
-            </findFiles>
+            </find_files_by_glob>
         `,
     },
 ];
@@ -105,6 +105,6 @@ interface ToolCallInputOf<N extends ToolName, P> {
 }
 
 export type ToolCallInput =
-    | ToolCallInputOf<'readDirectory', ReadDirectoryParameter>
-    | ToolCallInputOf<'readFile', ReadFileParameter>
-    | ToolCallInputOf<'findFiles', FindFilesParameter>;
+    | ToolCallInputOf<'read_directory', ReadDirectoryParameter>
+    | ToolCallInputOf<'read_file', ReadFileParameter>
+    | ToolCallInputOf<'find_files_by_glob', FindFilesParameter>;
