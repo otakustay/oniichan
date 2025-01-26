@@ -1,4 +1,4 @@
-import {HTMLAttributes} from 'react';
+import {ElementType, HTMLAttributes} from 'react';
 import styled from '@emotion/styled';
 
 const Layout = styled.span`
@@ -14,6 +14,10 @@ const Layout = styled.span`
     }
 `;
 
-export default function InteractiveLabel(props: HTMLAttributes<HTMLSpanElement>) {
-    return <Layout {...props} />;
+interface Props extends HTMLAttributes<HTMLElement> {
+    as?: ElementType;
+}
+
+export default function InteractiveLabel({as, ...props}: Props) {
+    return <Layout as={as} {...props} />;
 }

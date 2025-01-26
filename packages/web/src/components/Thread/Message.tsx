@@ -1,7 +1,8 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
 import {BiErrorAlt} from 'react-icons/bi';
+import {IoCaretUpOutline, IoCaretDownOutline} from 'react-icons/io5';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {MessageData} from '@oniichan/shared/inbox';
@@ -9,6 +10,7 @@ import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
+import InteractiveLabel from '../InteractiveLabel';
 
 function resolveMessageSender(message: MessageData) {
     switch (message.type) {
@@ -50,6 +52,12 @@ const Layout = styled.div`
     padding: 1em;
     border-radius: var(--item-border-radius, 0);
     background-color: var(--color-default-background);
+
+`;
+
+const Content = styled(MessageContent)<{collapsed: boolean}>`
+    max-height: ${props => (props.collapsed ? '200px' : undefined)};
+    overflow-y: hidden;
 `;
 
 const Header = styled.div`
@@ -97,25 +105,49 @@ function Error({reason}: ErrorProps) {
     );
 }
 
+const ToggleLayout = styled(InteractiveLabel)`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .5em 0;
+    gap: .5em;
+`;
+
+interface ToggleProps {
+    collapsed: boolean;
+    onToggle: (value: boolean) => void;
+}
+
+function Toggle({collapsed, onToggle}: ToggleProps) {
+    return (
+        <ToggleLayout as="div" onClick={() => onToggle(!collapsed)}>
+            {collapsed ? <IoCaretDownOutline /> : <IoCaretUpOutline />}
+            {collapsed ? 'Show more' : 'Show less'}
+        </ToggleLayout>
+    );
+}
+
 interface Props {
     threadUuid: string;
     message: MessageData;
 }
 
 export default function Message({threadUuid, message}: Props) {
+    const sender = resolveMessageSender(message);
+    const [collapsed, setCollapsed] = useState(sender === 'tool' ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
     const markMessageStatus = useMarkMessageStatus(threadUuid, message.uuid);
     const markAsRead = useRef(() => markMessageStatus('read'));
     useEffect(
         () => {
+            // TODO: Seems it doesn't get triggered without scroll of web page
             if (message.status === 'unread' && inView) {
                 markAsRead.current();
             }
         },
         [message.status, inView]
     );
-    const sender = resolveMessageSender(message);
 
     return (
         <Layout ref={ref}>
@@ -127,7 +159,8 @@ export default function Message({threadUuid, message}: Props) {
                 <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
-            <MessageContent content={resolveMessageContent(message)} />
+            <Content content={resolveMessageContent(message)} collapsed={collapsed} />
+            {sender === 'tool' && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
             <Error reason={message.error} />
         </Layout>
     );

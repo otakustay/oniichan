@@ -10,15 +10,16 @@ function renderChunk(chunk: string | ToolCallMessageChunk, index: number) {
 }
 
 interface Props {
+    className?: string;
     content: string | Array<string | ToolCallMessageChunk>;
 }
 
-export default function MessageContent({content}: Props) {
+export default function MessageContent({className, content}: Props) {
     const chunks = Array.isArray(content) ? content : [content];
 
     if (!chunks.length) {
         return <>(Empty)</>;
     }
 
-    return <>{chunks.map(renderChunk)}</>;
+    return <div className={className}>{chunks.map(renderChunk)}</div>;
 }
