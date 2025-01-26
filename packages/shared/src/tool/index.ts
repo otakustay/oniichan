@@ -1,7 +1,12 @@
 export {
+    readFileParameters,
+    readDirectoryParameters,
+    findFilesByGlobParameters,
     ParameterInfo,
     ReadFileParameter,
-    ToolCallInput,
+    ReadDirectoryParameter,
+    FindFilesByGlobParameter,
+    ModelToolCallInput,
     ToolDescription,
     ToolName,
     builtinTools,

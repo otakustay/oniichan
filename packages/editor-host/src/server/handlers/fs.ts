@@ -1,6 +1,7 @@
 import {FileType, Uri, workspace} from 'vscode';
 import {RequestHandler} from '@otakustay/ipc';
 import {Context} from '../interface';
+import {isWellKnownExcludingDirectory} from '@oniichan/shared/dir';
 
 export class ReadFileHandler extends RequestHandler<string, string, Context> {
     static readonly action = 'readFile';
@@ -46,8 +47,13 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
     }
 
     private async read(uri: Uri, depth?: number): Promise<FileEntry[]> {
+        // TODO: Should we use `.gitignore` here?
         const tuples = await workspace.fs.readDirectory(uri);
-        const toEntry = async ([name, type]: [string, FileType]): Promise<FileEntry> => {
+        const toEntry = async ([name, type]: [string, FileType]): Promise<FileEntry | FileEntry[]> => {
+            if (isWellKnownExcludingDirectory(name)) {
+                return [];
+            }
+
             const entry: FileEntry = {name, type: toFileEntryType(type)};
             if (depth && type === FileType.Directory) {
                 const childUri = Uri.joinPath(uri, name);
@@ -55,6 +61,7 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
             }
             return entry;
         };
-        return Promise.all(tuples.map(toEntry));
+        const entries = await Promise.all(tuples.map(toEntry));
+        return entries.flat();
     }
 }

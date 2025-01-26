@@ -1,7 +1,7 @@
 import {assertNever} from '../error';
 import {ChatInputPayload} from '../model';
 import {now} from '../string';
-import {ToolCallInput, ToolName, ToolParsedChunk} from '../tool';
+import {ModelToolCallInput, ToolName, ToolParsedChunk} from '../tool';
 
 export type MessageStatus = 'generating' | 'unread' | 'read';
 
@@ -212,7 +212,7 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         };
     }
 
-    getToolCallInput(): ToolCallInput {
+    getToolCallInput(): ModelToolCallInput {
         const toolCall = this.chunks.find(v => typeof v !== 'string');
 
         if (!toolCall) {
@@ -221,11 +221,9 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
 
         return {
             name: toolCall.toolName,
-            arguments: toolCall.arguments as any,
+            arguments: toolCall.arguments,
         };
     }
-
-    // TODO: Validation
 }
 
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {

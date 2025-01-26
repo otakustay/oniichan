@@ -17,7 +17,7 @@ export interface ToolDescription {
     usage: string;
 }
 
-const readFileParameters = {
+export const readFileParameters = {
     type: 'object',
     properties: {
         path: {
@@ -32,12 +32,16 @@ export interface ReadFileParameter {
     path: string;
 }
 
-const readDirectoryParameters = {
+export const readDirectoryParameters = {
     type: 'object',
     properties: {
         path: {
             type: 'string',
             description: 'The path to the directory you want to read, must be a relative path',
+        },
+        recursive: {
+            type: 'boolean',
+            description: 'Whether to recursively read the directory',
         },
     },
     required: ['path'],
@@ -45,9 +49,10 @@ const readDirectoryParameters = {
 
 export interface ReadDirectoryParameter {
     path: string;
+    recursive?: boolean;
 }
 
-const findFilesParameters = {
+export const findFilesByGlobParameters = {
     type: 'object',
     properties: {
         glob: {
@@ -58,7 +63,7 @@ const findFilesParameters = {
     required: ['glob'],
 } as const satisfies ParameterInfo;
 
-export interface FindFilesParameter {
+export interface FindFilesByGlobParameter {
     glob: string;
 }
 
@@ -75,18 +80,19 @@ export const builtinTools: ToolDescription[] = [
     },
     {
         name: 'read_directory',
-        description: `Read the file and child directories in a directory`,
+        description: `Read the file and child directories in a directory, at most 2000 files will be returned`,
         parameters: readDirectoryParameters,
         usage: dedent`
             <read_directory>
                 <path>src/utils</path>
+                <recursive>true</recursive>
             </read_directory>
         `,
     },
     {
         name: 'find_files_by_glob',
         description: `Find files matching a glob pattern`,
-        parameters: findFilesParameters,
+        parameters: findFilesByGlobParameters,
         usage: dedent`
             <find_files_by_glob>
                 <glob>src/common/**/*.{ts,tsx}</glob>
@@ -99,12 +105,7 @@ export function isToolName(name: string): name is ToolName {
     return builtinTools.some(tool => tool.name === name);
 }
 
-interface ToolCallInputOf<N extends ToolName, P> {
-    name: N;
-    arguments: P;
+export interface ModelToolCallInput {
+    name: ToolName;
+    arguments: Record<string, string>;
 }
-
-export type ToolCallInput =
-    | ToolCallInputOf<'read_directory', ReadDirectoryParameter>
-    | ToolCallInputOf<'read_file', ReadFileParameter>
-    | ToolCallInputOf<'find_files_by_glob', FindFilesParameter>;

@@ -40,7 +40,7 @@ function resolveMessageContent(message: MessageData) {
         case 'toolCall':
             return message.chunks;
         default:
-            assertNever<{type: string}>(message, v => `Unknown message type "${v.type}"`);
+            assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }
 }
 

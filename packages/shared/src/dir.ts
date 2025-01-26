@@ -91,3 +91,8 @@ export async function globalConfigDirectory(...children: string[]) {
     );
     return base && ensure(base, ...children);
 }
+
+export function isWellKnownExcludingDirectory(directory: string) {
+    return directory.includes('node_modules')
+        || /^\/?\..+/.test(directory); // `.xxx` or `/.xxx`
+}

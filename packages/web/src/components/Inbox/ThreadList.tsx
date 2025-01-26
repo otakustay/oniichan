@@ -87,7 +87,7 @@ function resolveMessageContent(message: MessageData) {
         case 'toolCall':
             return message.chunks.filter(v => typeof v === 'string').join('\n\n');
         default:
-            assertNever<{type: string}>(message, v => `Unknown message type "${v.type}"`);
+            assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }
 }
 
