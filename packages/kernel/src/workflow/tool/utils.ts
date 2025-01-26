@@ -85,7 +85,7 @@ function errorUnknown(message: string) {
     return `Parameters have unknown error: ${message}, please retry with correct response.`;
 }
 
-export abstract class ToolImplementBase<A = unknown> {
+export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
     protected readonly editorHost: EditorHost;
 
     private readonly schema: Schema;
@@ -100,7 +100,7 @@ export abstract class ToolImplementBase<A = unknown> {
         const validateResult = validateArguments(this.schema, parsed);
 
         if (validateResult.type === 'valid') {
-            return this.execute(parsed as A);
+            return this.execute(parsed);
         }
 
         switch (validateResult.type) {
@@ -113,7 +113,7 @@ export abstract class ToolImplementBase<A = unknown> {
         }
     }
 
-    protected abstract parseArgs(args: Record<string, string>): Record<string, unknown>;
+    protected abstract parseArgs(args: Record<string, string>): A;
 
     protected abstract execute(args: A): Promise<string>;
 }

@@ -10,7 +10,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
         super(editorHost, readDirectoryParameters);
     }
 
-    protected parseArgs(args: Record<string, string>): Record<string, unknown> {
+    protected parseArgs(args: Record<string, string>): ReadDirectoryParameter {
         return {
             path: args.path,
             recursive: args.recursive === 'true',

@@ -18,6 +18,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
     constructor(init: ToolCallWorkflowRunnerInit) {
         super(init);
         this.input = init.input;
+        // TODO: Failures like validation error should be handled with a workflow
         this.implment = new ToolImplement(init.editorHost);
     }
 

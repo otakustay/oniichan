@@ -9,7 +9,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         super(editorHost, findFilesByGlobParameters);
     }
 
-    protected parseArgs(args: Record<string, string>): Record<string, unknown> {
+    protected parseArgs(args: Record<string, string>): FindFilesByGlobParameter {
         return {
             glob: args.glob,
         };
@@ -19,6 +19,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         const workspace = this.editorHost.getWorkspace();
         try {
             const root = await workspace.getRoot();
+
             if (!root) {
                 return 'No open workspace, you cannot read any file or directory now';
             }

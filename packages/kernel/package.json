@@ -22,7 +22,8 @@
     "@oniichan/storage": "workspace:*",
     "@otakustay/async-iterator": "^1.1.1",
     "@otakustay/ipc": "^2.3.1",
-    "ajv": "^8.17.1"
+    "ajv": "^8.17.1",
+    "execa": "^9.5.2"
   },
   "devDependencies": {
     "@types/node": "20.x",

@@ -9,7 +9,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
         super(editorHost, readFileParameters);
     }
 
-    protected parseArgs(args: Record<string, string>): Record<string, unknown> {
+    protected parseArgs(args: Record<string, string>): ReadFileParameter {
         return {
             path: args.path,
         };
@@ -33,7 +33,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
             }
 
             const language = path.extname(args.path).slice(1);
-            return resultMarkdown('Content of file ${args.path}:', content, language);
+            return resultMarkdown(`Content of file ${args.path}:`, content, language);
         }
         catch (ex) {
             return `Unsable to read file ${args.path}: ${stringifyError(ex)}`;

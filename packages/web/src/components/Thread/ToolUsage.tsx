@@ -38,6 +38,8 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
             return [IoFolderOpenOutline, 'Read directory', trimPathString(input.arguments.path ?? '')];
         case 'find_files_by_glob':
             return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
+        case 'find_files_by_regex':
+            return [IoSearchOutline, 'Grep', input.arguments.regex ?? ''];
         default:
             throw new Error(`Unknown reference type`);
     }

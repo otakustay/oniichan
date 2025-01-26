@@ -8,7 +8,7 @@ export interface ParameterInfo {
     [k: string]: unknown;
 }
 
-export type ToolName = 'read_file' | 'read_directory' | 'find_files_by_glob';
+export type ToolName = 'read_file' | 'read_directory' | 'find_files_by_glob' | 'find_files_by_regex';
 
 export interface ToolDescription {
     name: ToolName;
@@ -67,6 +67,33 @@ export interface FindFilesByGlobParameter {
     glob: string;
 }
 
+export const findFilesByRegExpParameters = {
+    type: 'object',
+    properties: {
+        path: {
+            type: 'string',
+            description: 'The path to the directory you want to search for, must be a relative path',
+        },
+        regex: {
+            type: 'string',
+            description: 'A regular expression to match file content',
+        },
+        // TODO: Native `grep` doesn't support glob
+        // glob: {
+        //     type: 'string',
+        //     description: 'Glob pattern to match files, search for all text files when this parameter is not provided',
+        // },
+    },
+    required: ['path', 'regex'],
+} as const satisfies ParameterInfo;
+
+export interface FindFilesByRegExpParameter {
+    path: string;
+    regex: string;
+    // TODO: Native `grep` doesn't support glob
+    // glob?: string;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -97,6 +124,18 @@ export const builtinTools: ToolDescription[] = [
             <find_files_by_glob>
                 <glob>src/common/**/*.{ts,tsx}</glob>
             </find_files_by_glob>
+        `,
+    },
+    {
+        // TODO: Native `grep` doesn't support glob
+        name: 'find_files_by_regex',
+        description: `Find files matching a regular expression`,
+        parameters: findFilesByRegExpParameters,
+        usage: dedent`
+            <find_files_by_regex>
+                <path>src/common</path>
+                <regex>export function [A-Z][a-zA-Z0-9]*\(</regex>
+            </find_files_by_regex>
         `,
     },
 ];
