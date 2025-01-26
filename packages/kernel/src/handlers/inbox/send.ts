@@ -60,7 +60,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
-        const systemPrompt = renderSystemPrompt(builtinTools);
+        const systemPrompt = await renderSystemPrompt(builtinTools);
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 

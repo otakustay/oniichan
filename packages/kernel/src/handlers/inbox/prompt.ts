@@ -1,9 +1,27 @@
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import {ToolDescription} from '@oniichan/shared/tool';
 import systemPromptTemplate from './system.prompt';
 import {renderPrompt} from '@oniichan/shared/prompt';
+import {globalConfigDirectory} from '@oniichan/shared/dir';
+
+async function readUserSystemPrompt() {
+    const configDirectory = await globalConfigDirectory();
+
+    if (!configDirectory) {
+        return null;
+    }
+
+    try {
+        return await fs.readFile(path.join(configDirectory, 'system-prompt.md'), 'utf-8');
+    }
+    catch {
+        return null;
+    }
+}
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-export function renderSystemPrompt(tools: ToolDescription[]) {
+export async function renderSystemPrompt(tools: ToolDescription[]) {
     const view: Record<string, any> = {
         tools: [],
     };
@@ -26,6 +44,7 @@ export function renderSystemPrompt(tools: ToolDescription[]) {
         view.tools.push(toolView);
     }
 
-    return renderPrompt(systemPromptTemplate, view);
+    const userSystemPrompt = await readUserSystemPrompt();
+    return renderPrompt(userSystemPrompt ?? systemPromptTemplate, view);
 }
 /* eslint-enable @typescript-eslint/no-unsafe-member-access */
