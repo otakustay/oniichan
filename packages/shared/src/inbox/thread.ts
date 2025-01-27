@@ -71,9 +71,10 @@ export class MessageThread {
     }
 
     toThreadData(): MessageThreadData {
+        const messages = this.roundtrips.flatMap(v => v.toMessages(true));
         return {
             uuid: this.uuid,
-            messages: this.toMessages().map(v => v.toMessageData()),
+            messages: messages.map(v => v.toMessageData()),
         };
     }
 

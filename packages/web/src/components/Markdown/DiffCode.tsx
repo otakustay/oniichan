@@ -7,8 +7,8 @@ import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/pr
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
 import Toggle from '@/components/Toggle';
+import SourceCode from '@/components/SourceCode';
 import LanguageIcon from './LanguageIcon';
-import SourceCode from './SourceCode';
 
 const Loading = styled(AiOutlineLoading3Quarters)`
     animation: spin 1s linear infinite;

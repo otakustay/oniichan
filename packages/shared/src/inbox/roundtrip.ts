@@ -18,7 +18,15 @@ interface RoundtripWorkflowResponsePersistData {
     workflow: WorkflowPersistData;
 }
 
-type RoundtripResponsePersistData = RoundtripMessageResponsePersistData | RoundtripWorkflowResponsePersistData;
+interface RoundtripDebugResponsePersistData {
+    type: 'debug';
+    message: AssistantTextMessagePersistData;
+}
+
+type RoundtripResponsePersistData =
+    | RoundtripMessageResponsePersistData
+    | RoundtripWorkflowResponsePersistData
+    | RoundtripDebugResponsePersistData;
 
 export interface RoundtripPersistData {
     request: UserRequestMessagePersistData;
@@ -35,7 +43,12 @@ interface RoundtripWorkflowResponse {
     workflow: Workflow;
 }
 
-type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse;
+interface RoundtripDebugResponse {
+    type: 'debug';
+    message: AssistantTextMessage;
+}
+
+type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | RoundtripDebugResponse;
 
 /**
  * A roundtrip is a part of a thread that starts from a user submitted request,
@@ -66,9 +79,22 @@ export class Roundtrip {
         this.request = request;
     }
 
+    getRequestText() {
+        return this.request.content;
+    }
+
     startTextResponse(messageUuid: string) {
         const response: RoundtripMessageResponse = {
             type: 'message',
+            message: new AssistantTextMessage(messageUuid),
+        };
+        this.responses.push(response);
+        return response.message;
+    }
+
+    startDebugMessage(messageUuid: string) {
+        const response: RoundtripDebugResponse = {
+            type: 'debug',
             message: new AssistantTextMessage(messageUuid),
         };
         this.responses.push(response);
@@ -133,10 +159,19 @@ export class Roundtrip {
         return lastResponse.message;
     }
 
-    toMessages() {
+    addWarning(message: string) {
+        this.request.error = message;
+    }
+
+    toMessages(includingDebug = false) {
         const messages: Message[] = [this.request];
         for (const response of this.responses) {
-            if (response.type === 'message') {
+            if (response.type === 'debug') {
+                if (includingDebug) {
+                    messages.push(response.message);
+                }
+            }
+            else if (response.type === 'message') {
                 messages.push(response.message);
             }
             else if (response.type === 'workflow') {
@@ -148,7 +183,7 @@ export class Roundtrip {
 
     toPersistData(): RoundtripPersistData {
         const serializeResponse = (response: RoundtripResponse): RoundtripResponsePersistData => {
-            if (response.type === 'message') {
+            if (response.type === 'debug' || response.type === 'message') {
                 return {
                     type: response.type,
                     message: response.message.toPersistData(),

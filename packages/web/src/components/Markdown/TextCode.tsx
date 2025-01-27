@@ -1,7 +1,7 @@
 import {Suspense} from 'react';
 import styled from '@emotion/styled';
+import SourceCode from '@/components/SourceCode';
 import {CopyCode} from './CopyCode';
-import SourceCode from './SourceCode';
 import LanguageIcon from './LanguageIcon';
 
 const Header = styled.div`

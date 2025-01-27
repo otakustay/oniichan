@@ -27,7 +27,6 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
 
             // TODO: Use `ripgrep`, this is now macOS style `grep`
-            console.log('cwd', url.fileURLToPath(root));
             const grep = await execa(
                 'grep',
                 [

@@ -127,13 +127,16 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
     if (chunk.type === 'toolStart') {
         return {
             ...message,
-            chunks: [...message.chunks, {toolName: chunk.toolName, arguments: {}, status: 'generating'}],
+            chunks: [
+                ...message.chunks,
+                {type: 'toolCall', toolName: chunk.toolName, arguments: {}, status: 'generating'},
+            ],
         };
     }
 
     const lastToolCall = message.chunks.at(-1);
 
-    if (typeof lastToolCall !== 'object') {
+    if (typeof lastToolCall !== 'object' || lastToolCall.type !== 'toolCall') {
         throw new Error('Unexpected tool call chunk coming without a start chunk');
     }
 

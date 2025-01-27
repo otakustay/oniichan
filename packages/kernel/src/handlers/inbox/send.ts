@@ -1,5 +1,5 @@
 import {over} from '@otakustay/async-iterator';
-import {MessageThread, Roundtrip, UserRequestMessage} from '@oniichan/shared/inbox';
+import {EmbeddingSearchResultItem, MessageThread, Roundtrip, UserRequestMessage} from '@oniichan/shared/inbox';
 import {builtinTools, StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {stringifyError} from '@oniichan/shared/error';
@@ -9,6 +9,8 @@ import {detectWorkflow, DetectWorkflowOptions} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
 import {renderSystemPrompt} from './prompt';
+import {CustomConfig, readCustomConfig} from './config';
+import {searchEmbedding} from './embedding';
 
 interface TextMessageBody {
     type: 'text';
@@ -37,9 +39,21 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private roundtrip: Roundtrip = new Roundtrip(new UserRequestMessage(newUuid(), ''));
 
+    private embeddingSearchResults: EmbeddingSearchResultItem[] = [];
+
+    private customConfig: CustomConfig = {
+        embeddingRepoId: '',
+        embeddingOnQuery: false,
+        embeddingAsTool: false,
+        embeddingContextMode: 'chunk',
+        minEmbeddingDistance: 0,
+    };
+
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
         logger.info('Start', payload);
+
+        this.customConfig = await readCustomConfig(this.context.editorHost);
 
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
@@ -60,7 +74,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
-        const systemPrompt = await renderSystemPrompt(builtinTools);
+        const renderOptions = {tools: builtinTools, embeddingSearchResults: this.embeddingSearchResults};
+        const systemPrompt = await renderSystemPrompt(renderOptions, this.customConfig);
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 
@@ -122,7 +137,50 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         }
     }
 
+    private async applyEmbeddingSearch() {
+        const {editorHost} = this.context;
+
+        if (!this.customConfig.embeddingOnQuery) {
+            return false;
+        }
+
+        const debug = this.roundtrip.startDebugMessage(newUuid());
+        debug.markStatus('read');
+
+        if (!this.customConfig.embeddingRepoId) {
+            const warnning = {
+                type: 'text',
+                content:
+                    '⚠️ Embedding search is enabled, but no repo id is provided, please set `embeddingRepoId` in your `.oniichan/config.json` in project root',
+            } as const;
+            debug.addChunk(warnning);
+            this.updateInboxThreadList(store.dump());
+            return false;
+        }
+
+        const query = this.roundtrip.getRequestText();
+        try {
+            const results = await searchEmbedding(query, {config: this.customConfig, editorHost});
+            this.embeddingSearchResults.push(...results);
+            debug.addEmbeddingSearchResult(query, results);
+            this.updateInboxThreadList(store.dump());
+            return true;
+        }
+        catch (ex) {
+            debug.addChunk({type: 'text', content: `Searching embedding for query: ${query}`});
+            debug.setError(stringifyError(ex));
+            this.updateInboxThreadList(store.dump());
+            return false;
+        }
+    }
+
     private async *chat() {
+        const allowContinue = await this.applyEmbeddingSearch();
+
+        if (!allowContinue) {
+            return;
+        }
+
         yield* over(this.requestModel()).map(v => ({type: 'value', value: v} as const));
     }
 }

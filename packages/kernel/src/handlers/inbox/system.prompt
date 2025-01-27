@@ -135,3 +135,47 @@ It is crucial to proceed step-by-step, waiting for the user's message after each
 4. Ensure that each action builds correctly on the previous ones.
 
 By waiting for and carefully considering the user's response after each tool use, you can react accordingly and make informed decisions about how to proceed with the task. This iterative process helps ensure the overall success and accuracy of your work.
+
+# Context
+
+This section provides some already known information for user's request.
+
+{{#embeddingAsChunk.length}}
+## Code Reference
+
+We already have some code related to user's query in this project which you can reference, they are **a part of** an existing code file, you are encouraged to read the entire file content again if you find one piece of code useful but does not contain enough information.
+{{/embeddingAsChunk.length}}
+
+{{#embeddingAsFullContent.length}}
+## Code Reference
+
+We already have some files and their content related to user's query, you can trust these file content, however when you have already edited a file, the content is no longer in sync, you should read it again.
+{{/embeddingAsFullContent.length}}
+
+{{#embeddingAsNameOnly.length}}
+## File Reference
+
+We already have some files related to user's query, their paths are provided below, you are encouraged to read their content if you think one file is useful.
+{{/embeddingAsNameOnly.length}}
+
+{{#embeddingAsChunk}}
+### {{file}} line {{startLine}}-{{endLine}}
+
+```
+{{content}}
+```
+
+{{/embeddingAsChunk}}
+
+{{#embeddingAsFullContent}}
+### {{file}}
+
+```
+{{content}}
+```
+
+{{/embeddingAsFullContent}}
+
+{{#embeddingAsNameOnly}}
+- {{file}}
+{{/embeddingAsNameOnly}}

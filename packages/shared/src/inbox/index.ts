@@ -2,6 +2,9 @@ import {MessageThread, MessageThreadData, MessageThreadPersistData} from './thre
 
 export {
     ToolCallMessageChunk,
+    EmbeddingSearchChunk,
+    EmbeddingSearchResultItem,
+    MessageContentChunk,
     Message,
     MessageStatus,
     ToolUseMessage,

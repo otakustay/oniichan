@@ -32,7 +32,7 @@ export class EjectInternalsHandler extends RequestHandler<void, string> {
 
         const configFile = path.join(directory, 'config.json');
         if (!existsSync(configFile)) {
-            await fs.writeFile(configFile, JSON.stringify({embeddingRepoId: ''}, null, 2));
+            await fs.writeFile(configFile, JSON.stringify({embeddingOnQuery: true, embeddingAsTool: false}, null, 2));
         }
         yield configFile;
         logger.trace('WriteConfig', {file: configFile});

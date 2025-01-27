@@ -6,10 +6,26 @@ import {ModelToolCallInput, ToolName, ToolParsedChunk} from '../tool';
 export type MessageStatus = 'generating' | 'unread' | 'read';
 
 export interface ToolCallMessageChunk {
+    type: 'toolCall';
     toolName: ToolName;
     arguments: Record<string, string>;
     status: 'generating' | 'completed';
 }
+
+export interface EmbeddingSearchResultItem {
+    file: string;
+    startLine: number;
+    endLine: number;
+    content: string;
+}
+
+export interface EmbeddingSearchChunk {
+    type: 'embeddingSearch';
+    query: string;
+    results: EmbeddingSearchResultItem[];
+}
+
+export type MessageContentChunk = string | ToolCallMessageChunk | EmbeddingSearchChunk;
 
 interface MessageDataBase {
     uuid: string;
@@ -33,22 +49,22 @@ export interface UserRequestMessagePersistData extends MessagePersistDataBase {
 
 export interface AssistantTextMessageData extends MessageDataBase {
     type: 'assistantText';
-    chunks: Array<string | ToolCallMessageChunk>;
+    chunks: MessageContentChunk[];
 }
 
 export interface AssistantTextMessagePersistData extends MessagePersistDataBase {
     type: 'assistantText';
-    chunks: Array<string | ToolCallMessageChunk>;
+    chunks: MessageContentChunk[];
 }
 
 export interface ToolCallMessageData extends MessageDataBase {
     type: 'toolCall';
-    chunks: Array<string | ToolCallMessageChunk>;
+    chunks: MessageContentChunk[];
 }
 
 export interface ToolCallMessagePersistData extends MessagePersistDataBase {
     type: 'toolCall';
-    chunks: Array<string | ToolCallMessageChunk>;
+    chunks: MessageContentChunk[];
 }
 
 export interface ToolUseMessageData extends MessageDataBase {
@@ -163,7 +179,7 @@ export class UserRequestMessage extends MessageBase<'userRequest'> {
 abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends MessageBase<T> {
     textContent = '';
 
-    protected readonly chunks: Array<string | ToolCallMessageChunk> = [];
+    protected readonly chunks: MessageContentChunk[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
     constructor(uuid: string, type: T) {
@@ -215,7 +231,7 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
     getToolCallInput(): ModelToolCallInput {
         const toolCall = this.chunks.find(v => typeof v !== 'string');
 
-        if (!toolCall) {
+        if (toolCall?.type !== 'toolCall') {
             throw new Error('Invalid tool call message without tool chunk');
         }
 
@@ -258,13 +274,13 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         this.textContent += chunk.source;
 
         if (chunk.type === 'toolStart') {
-            this.chunks.push({toolName: chunk.toolName, arguments: {}, status: 'generating'});
+            this.chunks.push({type: 'toolCall', toolName: chunk.toolName, arguments: {}, status: 'generating'});
             return;
         }
 
         const lastToolCall = this.chunks.at(-1);
 
-        if (typeof lastToolCall !== 'object') {
+        if (typeof lastToolCall !== 'object' || lastToolCall.type !== 'toolCall') {
             throw new Error('Unexpected tool call chunk coming without a start chunk');
         }
 
@@ -277,6 +293,10 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         }
 
         lastToolCall.status = 'completed';
+    }
+
+    addEmbeddingSearchResult(query: string, results: EmbeddingSearchResultItem[]) {
+        this.chunks.push({type: 'embeddingSearch', query, results});
     }
 
     toPersistData(): AssistantTextMessagePersistData {
