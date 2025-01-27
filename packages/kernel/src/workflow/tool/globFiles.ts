@@ -25,10 +25,15 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
             }
 
             const files = await workspace.findFiles(args.glob, 200);
-            return resultMarkdown(
-                `Files matching glob ${args.glob}:`,
-                files.map(v => path.relative(root, v)).join('\n')
-            );
+
+            if (files.length) {
+                return resultMarkdown(
+                    `Files matching glob ${args.glob}:`,
+                    files.map(v => path.relative(root, v)).join('\n')
+                );
+            }
+
+            return `There are no files matching glob \`${args.glob}\``;
         }
         catch (ex) {
             return `Unsable to find files with pattern ${args.glob}: ${stringifyError(ex)}`;

@@ -26,6 +26,15 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return 'No open workspace, you cannot read any file or directory now';
             }
 
+            const entries = await workspace.readDirectory(
+                path.join(root, args.path),
+                {depth: args.recursive ? Number.MAX_SAFE_INTEGER : 0}
+            );
+
+            if (!entries.length) {
+                return 'There are no files in directory ${args.path}';
+            }
+
             const tree: string[] = [];
             const process = (items: FileEntry[], indent = 0) => {
                 if (!items.length) {
@@ -40,10 +49,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                     }
                 }
             };
-            const entries = await workspace.readDirectory(
-                path.join(root, args.path),
-                {depth: args.recursive ? Number.MAX_SAFE_INTEGER : 0}
-            );
+
             process(entries);
             return resultMarkdown(
                 `Files in directory ${args.path}, directories are followed by \`/\`:`,

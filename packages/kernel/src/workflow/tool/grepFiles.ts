@@ -42,10 +42,14 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 {cwd: url.fileURLToPath(root)}
             );
 
-            return resultMarkdown(
-                `This is stdout of grep command:`,
-                grep.stdout
-            );
+            if (grep.stdout) {
+                return resultMarkdown(
+                    `This is stdout of grep command:`,
+                    grep.stdout
+                );
+            }
+
+            return 'There are no files matching this regex';
         }
         catch (ex) {
             if (ex instanceof ExecaError) {
