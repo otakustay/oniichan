@@ -8,7 +8,12 @@ export interface ParameterInfo {
     [k: string]: unknown;
 }
 
-export type ToolName = 'read_file' | 'read_directory' | 'find_files_by_glob' | 'find_files_by_regex';
+export type ToolName =
+    | 'read_file'
+    | 'read_directory'
+    | 'find_files_by_glob'
+    | 'find_files_by_regex'
+    | 'search_codebase';
 
 export interface ToolDescription {
     name: ToolName;
@@ -94,6 +99,21 @@ export interface FindFilesByRegExpParameter {
     // glob?: string;
 }
 
+export const searchEmbeddingParameters = {
+    type: 'object',
+    properties: {
+        query: {
+            type: 'string',
+            description: 'A natural language query to search in codebase',
+        },
+    },
+    required: ['query'],
+} as const satisfies ParameterInfo;
+
+export interface SearchEmbeddingParameter {
+    query: string;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -129,13 +149,24 @@ export const builtinTools: ToolDescription[] = [
     {
         // TODO: Native `grep` doesn't support glob
         name: 'find_files_by_regex',
-        description: `Find files matching a regular expression`,
+        description: 'Find files matching a regular expression',
         parameters: findFilesByRegExpParameters,
         usage: dedent`
             <find_files_by_regex>
                 <path>src/common</path>
                 <regex>export function [A-Z][a-zA-Z0-9]*\(</regex>
             </find_files_by_regex>
+        `,
+    },
+    {
+        name: 'search_codebase',
+        description:
+            'Search for codebase with a natural language query, returns chunks with filename, line range and code content',
+        parameters: searchEmbeddingParameters,
+        usage: dedent`
+            <search_codebase>
+                <query>function which validate whether a string is a valid email</query>
+            </search_codebase>
         `,
     },
 ];

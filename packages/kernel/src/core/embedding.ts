@@ -1,8 +1,8 @@
 import path from 'node:path';
 import {EmbeddingSearchResultItem} from '@oniichan/shared/inbox';
 import {now} from '@oniichan/shared/string';
+import {EditorHost} from '../editor';
 import {CustomConfig} from './config';
-import {EditorHost} from '../../editor';
 
 interface Position {
     line: number;

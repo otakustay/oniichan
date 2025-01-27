@@ -40,6 +40,8 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
             return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
         case 'find_files_by_regex':
             return [IoSearchOutline, 'Grep', input.arguments.regex ?? ''];
+        case 'search_codebase':
+            return [IoSearchOutline, 'Embedding', input.arguments.query ?? ''];
         default:
             throw new Error(`Unknown reference type`);
     }

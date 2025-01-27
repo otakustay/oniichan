@@ -9,8 +9,8 @@ import {detectWorkflow, DetectWorkflowOptions} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
 import {renderSystemPrompt} from './prompt';
-import {CustomConfig, readCustomConfig} from './config';
-import {searchEmbedding} from './embedding';
+import {CustomConfig, readCustomConfig} from '../../core/config';
+import {searchEmbedding} from '../../core/embedding';
 
 interface TextMessageBody {
     type: 'text';
@@ -141,7 +141,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const {editorHost} = this.context;
 
         if (!this.customConfig.embeddingOnQuery) {
-            return false;
+            return true;
         }
 
         const debug = this.roundtrip.startDebugMessage(newUuid());

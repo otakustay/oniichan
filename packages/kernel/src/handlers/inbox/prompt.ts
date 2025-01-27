@@ -5,7 +5,7 @@ import systemPromptTemplate from './system.prompt';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {globalConfigDirectory} from '@oniichan/shared/dir';
 import {EmbeddingSearchResultItem} from '@oniichan/shared/inbox';
-import {CustomConfig} from './config';
+import {CustomConfig} from '../../core/config';
 
 async function readUserSystemPrompt() {
     const configDirectory = await globalConfigDirectory();
@@ -54,7 +54,14 @@ export async function renderSystemPrompt(options: SystemPromptRenderOptions, con
             : [],
         tools: [],
     };
-    for (const tool of tools) {
+    const isToolEnabled = (tool: ToolDescription) => {
+        if (tool.name === 'search_codebase' && !config.embeddingAsTool) {
+            return false;
+        }
+        return true;
+    };
+    const enabledTools = tools.filter(isToolEnabled);
+    for (const tool of enabledTools) {
         const toolView: any = {
             name: tool.name,
             description: tool.description,

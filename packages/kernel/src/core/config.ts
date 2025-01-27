@@ -2,7 +2,7 @@ import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs/promises';
 import {globalConfigDirectory} from '@oniichan/shared/dir';
-import {EditorHost} from '../../editor';
+import {EditorHost} from '../editor';
 
 export interface CustomConfig {
     embeddingRepoId: string;
