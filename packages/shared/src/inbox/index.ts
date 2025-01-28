@@ -11,11 +11,14 @@ export {
     ToolCallMessage,
     UserRequestMessage,
     AssistantTextMessage,
+    DebugMessage,
     MessageData,
     ToolUseMessageData,
     ToolCallMessageData,
     UserRequestMessageData,
     AssistantTextMessageData,
+    DebugMessageLevel,
+    DebugMessageData,
     MessageType,
 } from './message';
 export {Roundtrip} from './roundtrip';

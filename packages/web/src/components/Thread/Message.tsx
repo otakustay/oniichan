@@ -12,31 +12,47 @@ import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
 import InteractiveLabel from '../InteractiveLabel';
 
-function resolveMessageSender(message: MessageData) {
+function resolveSenderName(message: MessageData) {
     switch (message.type) {
-        case 'userRequest':
-            return 'user';
+        case 'assistantText':
+        case 'toolCall':
+            return 'Oniichan';
         case 'toolUse':
-            return 'tool';
+            return 'Super Tool';
+        case 'userRequest':
+            return 'Me';
+        case 'debug':
+            return message.title;
         default:
-            return 'assistant';
+            assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }
 }
 
-function renderAvatar(sender: string) {
-    if (sender === 'assistant') {
-        return <Avatar.Assistant size="1.5em" />;
+function isCollapsable(message: MessageData) {
+    return message.type === 'debug' || message.type === 'toolUse';
+}
+
+function renderAvatar(message: MessageData) {
+    switch (message.type) {
+        case 'assistantText':
+        case 'toolCall':
+            return <Avatar.Assistant size="1.5em" />;
+        case 'toolUse':
+            return <Avatar.Tool size="1.5em" />;
+        case 'debug':
+            return <Avatar.Debug size="1.5em" />;
+        case 'userRequest':
+            return <Avatar.User size="1.5em" />;
+        default:
+            assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }
-    if (sender === 'tool') {
-        return <Avatar.Tool size="1.5em" />;
-    }
-    return <Avatar.User size="1.5em" />;
 }
 
 function resolveMessageContent(message: MessageData) {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
+        case 'debug':
             return message.content;
         case 'assistantText':
         case 'toolCall':
@@ -133,8 +149,7 @@ interface Props {
 }
 
 export default function Message({threadUuid, message}: Props) {
-    const sender = resolveMessageSender(message);
-    const [collapsed, setCollapsed] = useState(sender === 'tool' ? true : false);
+    const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
     const markMessageStatus = useMarkMessageStatus(threadUuid, message.uuid);
@@ -152,15 +167,13 @@ export default function Message({threadUuid, message}: Props) {
     return (
         <Layout ref={ref}>
             <Header>
-                {renderAvatar(sender)}
-                <Sender>
-                    {sender === 'assistant' ? 'Oniichan' : (sender === 'tool' ? 'Super Tool' : 'Me')}
-                </Sender>
+                {renderAvatar(message)}
+                <Sender>{resolveSenderName(message)}</Sender>
                 <MessageStatusIcon status={message.status} />
                 <Time time={message.createdAt} />
             </Header>
             <Content content={resolveMessageContent(message)} collapsed={collapsed} />
-            {sender === 'tool' && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
+            {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
             <Error reason={message.error} />
         </Layout>
     );

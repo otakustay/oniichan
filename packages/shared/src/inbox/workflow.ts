@@ -98,7 +98,7 @@ export class Workflow {
         return {
             status: this.status,
             origin: this.origin.toPersistData(),
-            reactions: this.reactions.map(v => v.toPersistData()),
+            reactions: this.reactions.map(v => v.toPersistData()).filter(v => !!v),
             exposed: this.exposed,
         };
     }

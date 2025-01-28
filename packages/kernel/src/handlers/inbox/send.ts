@@ -1,16 +1,15 @@
 import {over} from '@otakustay/async-iterator';
-import {EmbeddingSearchResultItem, MessageThread, Roundtrip, UserRequestMessage} from '@oniichan/shared/inbox';
-import {builtinTools, StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
+import {DebugMessageLevel, MessageThread, Roundtrip, UserRequestMessage} from '@oniichan/shared/inbox';
+import {StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {stringifyError} from '@oniichan/shared/error';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelChatOptions} from '../../editor';
 import {detectWorkflow, DetectWorkflowOptions} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
-import {renderSystemPrompt} from './prompt';
+import {SystemPromptGenerator} from './prompt';
 import {CustomConfig, readCustomConfig} from '../../core/config';
-import {searchEmbedding} from '../../core/embedding';
 
 interface TextMessageBody {
     type: 'text';
@@ -39,21 +38,22 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private roundtrip: Roundtrip = new Roundtrip(new UserRequestMessage(newUuid(), ''));
 
-    private embeddingSearchResults: EmbeddingSearchResultItem[] = [];
-
     private customConfig: CustomConfig = {
         embeddingRepoId: '',
         embeddingOnQuery: false,
         embeddingAsTool: false,
         embeddingContextMode: 'chunk',
         minEmbeddingDistance: 0,
+        rootEntriesOnQuery: false,
     };
+
+    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost, this.customConfig);
+
+    private systemPrompt = '';
 
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
         const {logger} = this.context;
         logger.info('Start', payload);
-
-        this.customConfig = await readCustomConfig(this.context.editorHost);
 
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
@@ -73,20 +73,17 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
-        const {logger} = this.context;
-        const renderOptions = {tools: builtinTools, embeddingSearchResults: this.embeddingSearchResults};
-        const systemPrompt = await renderSystemPrompt(renderOptions, this.customConfig);
+        const {logger, editorHost} = this.context;
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 
-        logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages, systemPrompt});
-        const {editorHost} = this.context;
+        logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
         const options: ModelChatOptions = {
-            messages: messages.map(v => v.toChatInputPayload()),
+            messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
             telemetry: modelTelemetry,
-            systemPrompt,
+            systemPrompt: this.systemPrompt,
         };
         const parser = new StreamingToolParser();
         const stream = over(model.chatStreaming(options)).map(v => v.content);
@@ -137,50 +134,38 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         }
     }
 
-    private async applyEmbeddingSearch() {
-        const {editorHost} = this.context;
+    private async prepareSystemPrompt() {
+        const {logger} = this.context;
+        logger.trace('PrepareSystemPromptStart');
 
-        if (!this.customConfig.embeddingOnQuery) {
-            return true;
+        this.systemPromptGenerator.setCustomConfig(this.customConfig);
+        for await (const item of this.systemPromptGenerator.renderSystemPrompt(this.roundtrip.getRequestText())) {
+            switch (item.type) {
+                case 'debug':
+                    this.addDebugMessage(item.level, item.title, item.message);
+                    break;
+                case 'result':
+                    this.systemPrompt = item.prompt;
+                    break;
+                default:
+                    assertNever<{type: string}>(item, v => `Unknown system prompt yield type ${v.type}`);
+            }
         }
 
-        const debug = this.roundtrip.startDebugMessage(newUuid());
-        debug.markStatus('read');
-
-        if (!this.customConfig.embeddingRepoId) {
-            const warnning = {
-                type: 'text',
-                content:
-                    '⚠️ Embedding search is enabled, but no repo id is provided, please set `embeddingRepoId` in your `.oniichan/config.json` in project root',
-            } as const;
-            debug.addChunk(warnning);
-            this.updateInboxThreadList(store.dump());
-            return false;
-        }
-
-        const query = this.roundtrip.getRequestText();
-        try {
-            const results = await searchEmbedding(query, {config: this.customConfig, editorHost});
-            this.embeddingSearchResults.push(...results);
-            debug.addEmbeddingSearchResult(query, results);
-            this.updateInboxThreadList(store.dump());
-            return true;
-        }
-        catch (ex) {
-            debug.addChunk({type: 'text', content: `Searching embedding for query: ${query}`});
-            debug.setError(stringifyError(ex));
-            this.updateInboxThreadList(store.dump());
-            return false;
-        }
+        logger.trace('PrepareSystemPromptFinish', {systemPrompt: this.systemPrompt});
     }
 
     private async *chat() {
-        const allowContinue = await this.applyEmbeddingSearch();
+        this.customConfig = await readCustomConfig(this.context.editorHost);
+        await this.prepareSystemPrompt();
 
-        if (!allowContinue) {
-            return;
-        }
+        this.addDebugMessage('info', 'System Prompt', this.systemPrompt);
 
         yield* over(this.requestModel()).map(v => ({type: 'value', value: v} as const));
+    }
+
+    private addDebugMessage(level: DebugMessageLevel, title: string, message: string) {
+        this.roundtrip.addDebugMessage(newUuid(), level, title, message);
+        this.updateInboxThreadList(store.dump());
     }
 }

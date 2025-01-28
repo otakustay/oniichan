@@ -10,6 +10,7 @@ export interface CustomConfig {
     embeddingAsTool: boolean;
     embeddingContextMode: 'chunk' | 'fullContent' | 'nameOnly';
     minEmbeddingDistance: number;
+    rootEntriesOnQuery: boolean;
 }
 
 async function readConfig(directory: string): Promise<Partial<CustomConfig>> {
@@ -36,5 +37,6 @@ export async function readCustomConfig(editorHost: EditorHost): Promise<CustomCo
         embeddingAsTool: merged.embeddingAsTool ?? false,
         embeddingContextMode: merged.embeddingContextMode ?? 'chunk',
         minEmbeddingDistance: merged.minEmbeddingDistance ?? 0,
+        rootEntriesOnQuery: merged.rootEntriesOnQuery ?? false,
     };
 }

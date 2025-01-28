@@ -82,6 +82,7 @@ function resolveMessageContent(message: MessageData) {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
+        case 'debug':
             return message.content;
         case 'assistantText':
         case 'toolCall':

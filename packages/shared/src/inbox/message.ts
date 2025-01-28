@@ -38,6 +38,15 @@ export interface MessagePersistDataBase extends MessageDataBase {
     textContent: string;
 }
 
+export type DebugMessageLevel = 'error' | 'warning' | 'info';
+
+export interface DebugMessageData extends MessageDataBase {
+    type: 'debug';
+    level: DebugMessageLevel;
+    title: string;
+    content: string;
+}
+
 export interface UserRequestMessageData extends MessageDataBase {
     type: 'userRequest';
     content: string;
@@ -76,7 +85,12 @@ export interface ToolUseMessagePersistData extends MessagePersistDataBase {
     type: 'toolUse';
 }
 
-export type MessageData = UserRequestMessageData | AssistantTextMessageData | ToolCallMessageData | ToolUseMessageData;
+export type MessageData =
+    | DebugMessageData
+    | UserRequestMessageData
+    | AssistantTextMessageData
+    | ToolCallMessageData
+    | ToolUseMessageData;
 
 export type MessagePersistData =
     | UserRequestMessagePersistData
@@ -100,7 +114,7 @@ abstract class MessageBase<T extends MessageType> {
     constructor(uuid: string, type: T) {
         this.uuid = uuid;
         this.type = type;
-        this.status = (type === 'userRequest' || type === 'toolUse') ? 'read' : 'generating';
+        this.status = type === 'assistantText' ? 'generating' : 'read';
     }
 
     markStatus(status: MessageStatus) {
@@ -119,9 +133,9 @@ abstract class MessageBase<T extends MessageType> {
 
     abstract toMessageData(): MessageData;
 
-    abstract toChatInputPayload(): ChatInputPayload;
+    abstract toChatInputPayload(): ChatInputPayload | null;
 
-    abstract toPersistData(): MessagePersistData;
+    abstract toPersistData(): MessagePersistData | null;
 
     protected toMessageDataBase(): MessageDataBase {
         return {
@@ -130,6 +144,39 @@ abstract class MessageBase<T extends MessageType> {
             status: this.status,
             error: this.error,
         };
+    }
+}
+
+export class DebugMessage extends MessageBase<'debug'> {
+    readonly level: DebugMessageLevel;
+
+    readonly title: string;
+
+    readonly content: string;
+
+    constructor(uuid: string, level: DebugMessageLevel, title: string, content: string) {
+        super(uuid, 'debug');
+        this.level = level;
+        this.title = title;
+        this.content = content;
+    }
+
+    toMessageData(): DebugMessageData {
+        return {
+            ...this.toMessageDataBase(),
+            type: this.type,
+            level: this.level,
+            title: this.title,
+            content: this.content,
+        };
+    }
+
+    toChatInputPayload(): ChatInputPayload | null {
+        return null;
+    }
+
+    toPersistData(): UserRequestMessagePersistData | null {
+        return null;
     }
 }
 
@@ -147,7 +194,7 @@ export class UserRequestMessage extends MessageBase<'userRequest'> {
         this.content = content;
     }
 
-    toMessageData(): MessageData {
+    toMessageData(): UserRequestMessageData {
         return {
             ...this.toMessageDataBase(),
             type: this.type,
@@ -360,7 +407,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
     }
 }
 
-export type Message = UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
+export type Message = DebugMessage | UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
 
 export function deserializeMessage(data: MessagePersistData): Message {
     switch (data.type) {

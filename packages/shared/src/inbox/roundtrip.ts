@@ -5,6 +5,8 @@ import {
     Message,
     UserRequestMessagePersistData,
     AssistantTextMessagePersistData,
+    DebugMessage,
+    DebugMessageLevel,
 } from './message';
 import {Workflow, WorkflowOriginMessage, WorkflowPersistData} from './workflow';
 
@@ -45,7 +47,7 @@ interface RoundtripWorkflowResponse {
 
 interface RoundtripDebugResponse {
     type: 'debug';
-    message: AssistantTextMessage;
+    message: DebugMessage;
 }
 
 type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | RoundtripDebugResponse;
@@ -92,13 +94,12 @@ export class Roundtrip {
         return response.message;
     }
 
-    startDebugMessage(messageUuid: string) {
+    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: string) {
         const response: RoundtripDebugResponse = {
             type: 'debug',
-            message: new AssistantTextMessage(messageUuid),
+            message: new DebugMessage(messageUuid, level, title, content),
         };
         this.responses.push(response);
-        return response.message;
     }
 
     startWorkflowResponse(origin: WorkflowOriginMessage) {
@@ -182,8 +183,11 @@ export class Roundtrip {
     }
 
     toPersistData(): RoundtripPersistData {
-        const serializeResponse = (response: RoundtripResponse): RoundtripResponsePersistData => {
-            if (response.type === 'debug' || response.type === 'message') {
+        const serializeResponse = (response: RoundtripResponse) => {
+            if (response.type === 'debug') {
+                return [];
+            }
+            else if (response.type === 'message') {
                 return {
                     type: response.type,
                     message: response.message.toPersistData(),
@@ -201,7 +205,7 @@ export class Roundtrip {
         };
         return {
             request: this.request.toPersistData(),
-            responses: this.responses.map(serializeResponse),
+            responses: this.responses.flatMap(serializeResponse),
         };
     }
 
