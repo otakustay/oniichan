@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
+import Markdown from '@/components//Markdown';
 
 const Layout = styled.div`
     display: flex;
@@ -52,6 +53,21 @@ interface Props {
 }
 
 export default function ToolUsage({input}: Props) {
+    if (input.toolName === 'attempt_completion') {
+        console.log('attempt completion');
+        const {result, command} = input.arguments;
+        const lines = [result];
+        if (command) {
+            lines.push(
+                '',
+                '```shell',
+                command,
+                '```'
+            );
+        }
+        return <Markdown content={lines.join('\n')} />;
+    }
+
     const [Icon, action, content] = renderLabelContent(input);
 
     return (

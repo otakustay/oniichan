@@ -13,7 +13,8 @@ export type ToolName =
     | 'read_directory'
     | 'find_files_by_glob'
     | 'find_files_by_regex'
-    | 'search_codebase';
+    | 'search_codebase'
+    | 'attempt_completion';
 
 export interface ToolDescription {
     name: ToolName;
@@ -114,6 +115,26 @@ export interface SearchEmbeddingParameter {
     query: string;
 }
 
+export const attemptCompletionParameters = {
+    type: 'object',
+    properties: {
+        result: {
+            type: 'string',
+            description: 'Your final result to user\'s request',
+        },
+        command: {
+            type: 'string',
+            description: 'Command to demonstrate result',
+        },
+    },
+    required: ['result'],
+} as const satisfies ParameterInfo;
+
+export interface AttemptCompletionParameter {
+    result: string;
+    command?: string;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -167,6 +188,18 @@ export const builtinTools: ToolDescription[] = [
             <search_codebase>
                 <query>function which validate whether a string is a valid email</query>
             </search_codebase>
+        `,
+    },
+    {
+        name: 'attempt_completion',
+        description:
+            `When you confirm the user request is completed, use this tool to present the result of your work to the user. Optionally you may provide a CLI command to showcase the result of your work.`,
+        parameters: attemptCompletionParameters,
+        usage: dedent`
+            <attempt_completion>
+                <result>The result of your completion</result>
+                <command>The command you used to demonstrate the result</command>
+            </attempt_completion>
         `,
     },
 ];

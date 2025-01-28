@@ -39,6 +39,8 @@ export class ToolImplement {
                 return this.grepFiles.run(input.arguments);
             case 'search_codebase':
                 return this.searchEmbedding.run(input.arguments);
+            case 'attempt_completion':
+                return '';
             default:
                 assertNever<string>(input.name, v => `Unknown tool ${v}`);
         }
