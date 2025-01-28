@@ -60,6 +60,8 @@ export default function ToolUsage({input}: Props) {
         if (command) {
             lines.push(
                 '',
+                'You can run this command to verify this task.',
+                '',
                 '```shell',
                 command,
                 '```'
