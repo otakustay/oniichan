@@ -10,7 +10,8 @@ export interface WorkflowRunnerInit {
 }
 
 export interface WorkflowRunResult {
-    success: boolean;
+    /** Whether we should automatically request LLM again on workflow completion */
+    autoContinue: boolean;
 }
 
 // TODO: Missing solution to allow workflow runner request LLM with logs and streaming response
@@ -38,17 +39,17 @@ export abstract class WorkflowRunner {
 
     async run(): Promise<WorkflowRunResult> {
         try {
-            await this.execute();
+            const result = await this.execute();
             this.workflow.markStatus('completed');
-            return {success: true};
+            return result;
         }
         catch {
             this.workflow.markStatus('failed');
-            return {success: false};
+            return {autoContinue: false};
         }
     }
 
-    protected abstract execute(): Promise<void>;
+    protected abstract execute(): Promise<WorkflowRunResult>;
 
     protected updateThread() {
         this.onUpdateThread();

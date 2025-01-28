@@ -113,8 +113,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
             if (workflowRunner) {
                 logger.trace('RunWorkflow', {originUuid: reply.uuid});
-                const success = await workflowRunner.run();
-                if (success) {
+                const {autoContinue} = await workflowRunner.run();
+                if (autoContinue) {
                     yield* this.requestModel();
                 }
             }

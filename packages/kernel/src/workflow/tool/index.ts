@@ -1,6 +1,6 @@
 import {ModelToolCallInput} from '@oniichan/shared/tool';
 import {EditorHost} from '../../editor';
-import {WorkflowRunner, WorkflowRunnerInit} from '../workflow';
+import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
 import {ToolUseMessage} from '@oniichan/shared/inbox';
 import {newUuid} from '@oniichan/shared/id';
@@ -22,10 +22,11 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.implment = new ToolImplement(init.editorHost);
     }
 
-    async execute() {
+    async execute(): Promise<WorkflowRunResult> {
         const result = await this.implment.callTool(this.input);
         const responseMessage = new ToolUseMessage(newUuid(), result);
         this.workflow.addReaction(responseMessage, true);
         this.updateThread();
+        return {autoContinue: !!result};
     }
 }
