@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {MessageData, MessageThreadData} from '@oniichan/shared/inbox';
+import {MessageContentChunk, MessageData, MessageThreadData} from '@oniichan/shared/inbox';
 import {
     useMessageThreadListValue,
     useSetActiveMessageThread,
@@ -78,12 +78,23 @@ const Layout = styled.div`
     }
 `;
 
+function resolveChunkContent(chunk: MessageContentChunk) {
+    if (typeof chunk === 'string') {
+        return chunk;
+    }
+    if (chunk.type === 'plainText') {
+        return chunk.content;
+    }
+
+    return '';
+}
+
 function resolveMessageContent(message: MessageData) {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
         case 'debug':
-            return message.content;
+            return resolveChunkContent(message.content);
         case 'assistantText':
         case 'toolCall':
             return message.chunks.filter(v => typeof v === 'string').join('\n\n');

@@ -4,6 +4,7 @@ export {
     ToolCallMessageChunk,
     EmbeddingSearchChunk,
     EmbeddingSearchResultItem,
+    PlainTextChunk,
     MessageContentChunk,
     Message,
     MessageStatus,

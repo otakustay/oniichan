@@ -1,5 +1,11 @@
 import {over} from '@otakustay/async-iterator';
-import {DebugMessageLevel, MessageThread, Roundtrip, UserRequestMessage} from '@oniichan/shared/inbox';
+import {
+    DebugMessageLevel,
+    MessageContentChunk,
+    MessageThread,
+    Roundtrip,
+    UserRequestMessage,
+} from '@oniichan/shared/inbox';
 import {StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
@@ -159,13 +165,13 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         this.customConfig = await readCustomConfig(this.context.editorHost);
         await this.prepareSystemPrompt();
 
-        this.addDebugMessage('info', 'System Prompt', this.systemPrompt);
+        this.addDebugMessage('info', 'System Prompt', {type: 'plainText', content: this.systemPrompt});
 
         yield* over(this.requestModel()).map(v => ({type: 'value', value: v} as const));
     }
 
-    private addDebugMessage(level: DebugMessageLevel, title: string, message: string) {
-        this.roundtrip.addDebugMessage(newUuid(), level, title, message);
+    private addDebugMessage(level: DebugMessageLevel, title: string, content: MessageContentChunk) {
+        this.roundtrip.addDebugMessage(newUuid(), level, title, content);
         this.updateInboxThreadList(store.dump());
     }
 }

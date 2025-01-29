@@ -68,7 +68,7 @@ export function EmbeddingSearch({query, results}: Props) {
 
     return (
         <>
-            <Markdown content={`Embedding search for: ${query}`} />
+            <Markdown content={`Embedding search for: \`${query}\``} />
             {results.map(item => <Item key={`${item.file}-${item.startLine}-${item.endLine}`} item={item} />)}
         </>
     );

@@ -10,6 +10,9 @@ function renderChunk(chunk: MessageContentChunk, index: number) {
     else if (chunk.type === 'toolCall') {
         return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;
     }
+    else if (chunk.type === 'plainText') {
+        return <pre key={`plain-text-chunk-${index}`}>{chunk.content}</pre>;
+    }
     else {
         return <EmbeddingSearch key={`embedding-chunk-${index}`} query={chunk.query} results={chunk.results} />;
     }
@@ -17,7 +20,7 @@ function renderChunk(chunk: MessageContentChunk, index: number) {
 
 interface Props {
     className?: string;
-    content: string | MessageContentChunk[];
+    content: MessageContentChunk | MessageContentChunk[];
 }
 
 export default function MessageContent({className, content}: Props) {

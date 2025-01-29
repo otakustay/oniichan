@@ -5,7 +5,7 @@ import {builtinTools, ToolDescription} from '@oniichan/shared/tool';
 import systemPromptTemplate from './system.prompt';
 import {renderPrompt} from '@oniichan/shared/prompt';
 import {globalConfigDirectory} from '@oniichan/shared/dir';
-import {DebugMessageLevel, EmbeddingSearchResultItem} from '@oniichan/shared/inbox';
+import {DebugMessageLevel, EmbeddingSearchResultItem, MessageContentChunk} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {assertNever} from '@oniichan/shared/error';
 import {CustomConfig} from '../../core/config';
@@ -16,7 +16,7 @@ interface DebugResult {
     type: 'debug';
     level: DebugMessageLevel;
     title: string;
-    message: string;
+    message: MessageContentChunk;
 }
 
 interface PromptResult {
@@ -45,6 +45,17 @@ export class SystemPromptGenerator {
 
         try {
             const embeddingView = await this.createEmbeddingView(userRequest);
+            console.log(embeddingView);
+            yield {
+                type: 'debug',
+                level: 'info',
+                title: 'Embedding Search',
+                message: {
+                    type: 'embeddingSearch',
+                    query: userRequest,
+                    results: embeddingView.embeddingDataSource,
+                },
+            };
             Object.assign(view, embeddingView);
         }
         catch (ex) {
@@ -110,12 +121,14 @@ export class SystemPromptGenerator {
 
     private async createEmbeddingView(userRequest: string) {
         const view: Record<string, any> = {
+            embeddingDataSource: [],
             embeddingAsChunk: [],
             embeddingAsFullContent: [],
             embeddingAsNameOnly: [],
         };
 
         const embeddingSearchResults = await this.applyEmbeddingSearch(userRequest);
+        view.embeddingDataSource = embeddingSearchResults;
         switch (this.customConfig.embeddingContextMode) {
             case 'chunk':
                 view.embeddingAsChunk = embeddingSearchResults;

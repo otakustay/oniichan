@@ -7,6 +7,7 @@ import {
     AssistantTextMessagePersistData,
     DebugMessage,
     DebugMessageLevel,
+    MessageContentChunk,
 } from './message';
 import {Workflow, WorkflowOriginMessage, WorkflowPersistData} from './workflow';
 
@@ -94,7 +95,7 @@ export class Roundtrip {
         return response.message;
     }
 
-    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: string) {
+    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: MessageContentChunk) {
         const response: RoundtripDebugResponse = {
             type: 'debug',
             message: new DebugMessage(messageUuid, level, title, content),

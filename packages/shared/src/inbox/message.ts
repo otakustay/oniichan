@@ -19,13 +19,19 @@ export interface EmbeddingSearchResultItem {
     content: string;
 }
 
+/** Text that should be render directly without formatting to markdown */
+export interface PlainTextChunk {
+    type: 'plainText';
+    content: string;
+}
+
 export interface EmbeddingSearchChunk {
     type: 'embeddingSearch';
     query: string;
     results: EmbeddingSearchResultItem[];
 }
 
-export type MessageContentChunk = string | ToolCallMessageChunk | EmbeddingSearchChunk;
+export type MessageContentChunk = string | ToolCallMessageChunk | EmbeddingSearchChunk | PlainTextChunk;
 
 interface MessageDataBase {
     uuid: string;
@@ -44,7 +50,7 @@ export interface DebugMessageData extends MessageDataBase {
     type: 'debug';
     level: DebugMessageLevel;
     title: string;
-    content: string;
+    content: MessageContentChunk;
 }
 
 export interface UserRequestMessageData extends MessageDataBase {
@@ -152,9 +158,9 @@ export class DebugMessage extends MessageBase<'debug'> {
 
     readonly title: string;
 
-    readonly content: string;
+    readonly content: MessageContentChunk;
 
-    constructor(uuid: string, level: DebugMessageLevel, title: string, content: string) {
+    constructor(uuid: string, level: DebugMessageLevel, title: string, content: MessageContentChunk) {
         super(uuid, 'debug');
         this.level = level;
         this.title = title;
