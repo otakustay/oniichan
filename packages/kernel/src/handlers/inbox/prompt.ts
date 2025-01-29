@@ -45,7 +45,6 @@ export class SystemPromptGenerator {
 
         try {
             const embeddingView = await this.createEmbeddingView(userRequest);
-            console.log(embeddingView);
             yield {
                 type: 'debug',
                 level: 'info',

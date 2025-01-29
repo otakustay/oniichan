@@ -54,7 +54,6 @@ interface Props {
 
 export default function ToolUsage({input}: Props) {
     if (input.toolName === 'attempt_completion') {
-        console.log('attempt completion');
         const {result, command} = input.arguments;
         const lines = [result];
         if (command) {

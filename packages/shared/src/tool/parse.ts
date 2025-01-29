@@ -82,6 +82,11 @@ export class StreamingToolParser {
     }
 
     *yieldForTagEnd(chunk: XmlParseTagEndChunk): Iterable<ToolParsedChunk> {
+        if (!this.tagStack.length) {
+            yield {type: 'text', content: chunk.source};
+            return;
+        }
+
         this.tagStack.pop();
         if (!this.tagStack.length) {
             yield {type: 'toolEnd', source: chunk.source};
