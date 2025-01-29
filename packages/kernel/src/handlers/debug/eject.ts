@@ -4,7 +4,6 @@ import {existsSync} from 'node:fs';
 import {globalConfigDirectory} from '@oniichan/shared/dir';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {RequestHandler} from '../handler';
-import defaultInboxPrompt from '../inbox/system.prompt';
 
 export class EjectInternalsHandler extends RequestHandler<void, string> {
     static readonly action = 'debugEjectInternals';
@@ -21,14 +20,6 @@ export class EjectInternalsHandler extends RequestHandler<void, string> {
             telemetry.fail('NoDirectory');
             throw new Error('Unable to create global config directory');
         }
-
-        const systemPromptFile = path.join(directory, 'system-prompt.md');
-        if (!existsSync(systemPromptFile)) {
-            await fs.writeFile(systemPromptFile, defaultInboxPrompt);
-        }
-        yield systemPromptFile;
-        logger.trace('WriteSystemPrompt', {file: systemPromptFile});
-        telemetry.setTelemetryData('systemPromptFile', systemPromptFile);
 
         const configFile = path.join(directory, 'config.json');
         if (!existsSync(configFile)) {

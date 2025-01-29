@@ -24,7 +24,8 @@
     "watch:web": "cd packages/web && npm run watch",
     "watch:web-types": "cd packages/web && npm run watch-types",
     "watch:web-host": "cd packages/web-host && npm run watch",
-    "watch:web-serve": "cd packages/web && npm run serve"
+    "watch:web-serve": "cd packages/web && npm run serve",
+    "watch:prompt": "cd packages/prompt && npm run watch"
   },
   "homepage": "https://github.com/otakustay/oniichan",
   "bugs": {

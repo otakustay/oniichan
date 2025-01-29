@@ -13,7 +13,8 @@
         "npm: watch:vscode-types",
         "npm: watch:web-types",
         "npm: watch:web-host",
-        "npm: watch:web-serve"
+        "npm: watch:web-serve",
+        "npm: watch:prompt"
       ],
       "presentation": {
         "reveal": "never"
@@ -129,6 +130,17 @@
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "label": "npm: watch:web-serve",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:prompt",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:prompt",
       "presentation": {
         "reveal": "never"
       }

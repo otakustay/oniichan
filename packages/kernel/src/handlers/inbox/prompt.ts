@@ -1,10 +1,6 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import url from 'node:url';
 import {builtinTools, ToolDescription} from '@oniichan/shared/tool';
-import systemPromptTemplate from './system.prompt';
-import {renderPrompt} from '@oniichan/shared/prompt';
-import {globalConfigDirectory} from '@oniichan/shared/dir';
+import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {DebugMessageLevel, EmbeddingSearchResultItem, MessageContentChunk} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {assertNever} from '@oniichan/shared/error';
@@ -41,7 +37,13 @@ export class SystemPromptGenerator {
     }
 
     async *renderSystemPrompt(userRequest: string): AsyncIterable<SystemPromptYieldResult> {
-        const view: Record<string, any> = {};
+        const view: InboxPromptView = {
+            tools: [],
+            embeddingAsChunk: [],
+            embeddingAsFullContent: [],
+            embeddingAsNameOnly: [],
+            rootEntries: [],
+        };
 
         try {
             const embeddingView = await this.createEmbeddingView(userRequest);
@@ -72,8 +74,9 @@ export class SystemPromptGenerator {
             yield {type: 'debug', level: 'error', title: 'Read Root Error', message: stringifyError(ex)};
         }
 
-        const userSystemPrompt = await this.readUserSystemPrompt();
-        yield {type: 'result', prompt: renderPrompt(userSystemPrompt ?? systemPromptTemplate, view)};
+        // const userSystemPrompt = await this.readUserSystemPrompt();
+        const systemPrompt = await renderInboxSystemPrompt(view);
+        yield {type: 'result', prompt: systemPrompt};
     }
 
     private removeDuplicateEmbeddingResult(items: EmbeddingSearchResultItem[]): EmbeddingSearchResultItem[] {
@@ -86,21 +89,6 @@ export class SystemPromptGenerator {
             }
         }
         return uniqueItems;
-    }
-
-    private async readUserSystemPrompt() {
-        const configDirectory = await globalConfigDirectory();
-
-        if (!configDirectory) {
-            return null;
-        }
-
-        try {
-            return await fs.readFile(path.join(configDirectory, 'system-prompt.md'), 'utf-8');
-        }
-        catch {
-            return null;
-        }
     }
 
     private async applyEmbeddingSearch(query: string): Promise<EmbeddingSearchResultItem[]> {
@@ -156,27 +144,7 @@ export class SystemPromptGenerator {
             return true;
         };
         const enabledTools = builtinTools.filter(isToolEnabled);
-        const tools: any[] = [];
-        for (const tool of enabledTools) {
-            const toolView: any = {
-                name: tool.name,
-                description: tool.description,
-                parameters: [],
-                usage: tool.usage,
-            };
-            for (const [name, definition] of Object.entries(tool.parameters.properties)) {
-                const parameterView = {
-                    name,
-                    type: definition.type,
-                    description: definition.description ?? '',
-                    required: tool.parameters.required?.includes(name) ?? false,
-                };
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                toolView.parameters.push(parameterView);
-            }
-            tools.push(toolView);
-        }
-        return {tools};
+        return {tools: enabledTools};
     }
 
     private async createRootEntriesView() {

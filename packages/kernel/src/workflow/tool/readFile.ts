@@ -21,7 +21,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
             const content = await workspace.readWorkspaceFile(args.path);
 
             if (content === null) {
-                return `Unsable to read file ${args.path}: file not exists}`;
+                return `Unsable to read file ${args.path}: file not exists`;
             }
 
             if (content === '') {

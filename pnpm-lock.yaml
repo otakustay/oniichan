@@ -60,6 +60,9 @@ importers:
       '@oniichan/editor-host':
         specifier: workspace:*
         version: link:../editor-host
+      '@oniichan/prompt':
+        specifier: workspace:*
+        version: link:../prompt
       '@oniichan/shared':
         specifier: workspace:*
         version: link:../shared
@@ -88,6 +91,19 @@ importers:
       tsc-watch:
         specifier: ^6.2.1
         version: 6.2.1(typescript@5.7.2)
+
+  packages/prompt:
+    dependencies:
+      '@oniichan/shared':
+        specifier: workspace:*
+        version: link:../shared
+      dedent:
+        specifier: ^1.5.3
+        version: 1.5.3(babel-plugin-macros@3.1.0)
+    devDependencies:
+      '@types/node':
+        specifier: 20.x
+        version: 20.17.12
 
   packages/shared:
     dependencies:
@@ -8959,7 +8975,7 @@ snapshots:
   jake@10.9.2:
     dependencies:
       async: 3.2.6
-      chalk: 4.1.0
+      chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
 

@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "name": "@oniichan/prompt",
+  "version": "2.0.0",
+  "description": "Prompts for all capabilities",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 --fix src",
+    "watch": "tsc -p tsconfig.build.json --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@oniichan/shared": "workspace:*",
+    "dedent": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.x"
+  }
+}
