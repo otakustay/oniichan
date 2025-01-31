@@ -5,6 +5,7 @@ export {
     EmbeddingSearchChunk,
     EmbeddingSearchResultItem,
     PlainTextChunk,
+    ThinkingMessageChunk,
     MessageContentChunk,
     Message,
     MessageStatus,

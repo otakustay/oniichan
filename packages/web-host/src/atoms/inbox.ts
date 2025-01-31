@@ -7,10 +7,14 @@ import {
     MessageThreadData,
     AssistantTextMessageData,
     ToolCallMessageData,
+    MessageContentChunk,
+    ToolCallMessageChunk,
+    ThinkingMessageChunk,
 } from '@oniichan/shared/inbox';
+import {ToolParsedChunk} from '@oniichan/shared/tool';
+import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
 import {useSetDraftContent, useSetEditing} from './draft';
-import {ToolParsedChunk} from '@oniichan/shared/tool';
 
 export const messageThreadListAtom = atom<MessageThreadData[]>([]);
 
@@ -103,6 +107,20 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
 
 type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
 
+type MaybeChunk = MessageContentChunk | undefined;
+
+function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
+    if (typeof chunk === 'string' || chunk?.type !== 'thinking') {
+        throw new Error(message);
+    }
+}
+
+function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
+    if (typeof chunk === 'string' || chunk?.type !== 'toolCall') {
+        throw new Error(message);
+    }
+}
+
 function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: ToolParsedChunk): MessageData {
     if (chunk.type === 'text') {
         const lastChunk = message.chunks.at(-1);
@@ -124,6 +142,15 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
         return message;
     }
 
+    if (chunk.type === 'thinkingStart') {
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks,
+                {type: 'thinking', content: '', status: 'generating'},
+            ],
+        };
+    }
     if (chunk.type === 'toolStart') {
         return {
             ...message,
@@ -134,14 +161,37 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
         };
     }
 
-    const lastToolCall = message.chunks.at(-1);
+    const lastChunk = message.chunks.at(-1);
 
-    if (typeof lastToolCall !== 'object' || lastToolCall.type !== 'toolCall') {
-        throw new Error('Unexpected tool call chunk coming without a start chunk');
+    if (chunk.type === 'thinkingDelta') {
+        assertThinkingChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    content: lastChunk.content + chunk.source,
+                },
+            ],
+        };
     }
-
-    if (chunk.type === 'toolDelta') {
-        const args = {...lastToolCall.arguments};
+    else if (chunk.type === 'thinkingEnd') {
+        assertThinkingChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    status: 'completed',
+                },
+            ],
+        };
+    }
+    else if (chunk.type === 'toolDelta') {
+        assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
+        const args = {...lastChunk.arguments};
         for (const [key, value] of Object.entries(chunk.arguments)) {
             const previousValue = args[key] ?? '';
             args[key] = previousValue + value;
@@ -151,23 +201,28 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
             chunks: [
                 ...message.chunks.slice(0, -1),
                 {
-                    ...lastToolCall,
+                    ...lastChunk,
                     arguments: args,
                 },
             ],
         };
     }
-
-    return {
-        ...message,
-        chunks: [
-            ...message.chunks.slice(0, -1),
-            {
-                ...lastToolCall,
-                status: 'completed',
-            },
-        ],
-    };
+    else if (chunk.type === 'toolEnd') {
+        assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    status: 'completed',
+                },
+            ],
+        };
+    }
+    else {
+        assertNever<{type: string}>(chunk, v => `Unknown chunk type: ${v.type}`);
+    }
 }
 
 function appendMessageBy(threadUuid: string, messageUuid: string, chunk: ToolParsedChunk) {
@@ -192,6 +247,10 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: ToolPar
 
                 if (chunk.type !== 'text') {
                     throw new Error('User message should only receive text chunk');
+                }
+
+                if (message.type === 'debug') {
+                    throw new Error('Debug message should not receive any dynamic chunk');
                 }
 
                 return {

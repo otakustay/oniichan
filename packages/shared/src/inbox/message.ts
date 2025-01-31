@@ -31,7 +31,18 @@ export interface EmbeddingSearchChunk {
     results: EmbeddingSearchResultItem[];
 }
 
-export type MessageContentChunk = string | ToolCallMessageChunk | EmbeddingSearchChunk | PlainTextChunk;
+export interface ThinkingMessageChunk {
+    type: 'thinking';
+    content: string;
+    status: 'generating' | 'completed';
+}
+
+export type MessageContentChunk =
+    | string
+    | ToolCallMessageChunk
+    | EmbeddingSearchChunk
+    | PlainTextChunk
+    | ThinkingMessageChunk;
 
 interface MessageDataBase {
     uuid: string;
@@ -287,9 +298,9 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
     }
 
     getToolCallInput(): ModelToolCallInput {
-        const toolCall = this.chunks.find(v => typeof v !== 'string');
+        const toolCall = this.chunks.find(v => typeof v !== 'string' && v.type === 'toolCall');
 
-        if (toolCall?.type !== 'toolCall') {
+        if (!toolCall) {
             throw new Error('Invalid tool call message without tool chunk');
         }
 
@@ -305,6 +316,20 @@ function isReactiveToolCallChunk(chunk: MessageContentChunk) {
         && chunk.type === 'toolCall'
         && chunk.toolName !== 'ask_followup_question'
         && chunk.toolName !== 'attempt_completion';
+}
+
+type MaybeChunk = MessageContentChunk | undefined;
+
+function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
+    if (typeof chunk === 'string' || chunk?.type !== 'thinking') {
+        throw new Error(message);
+    }
+}
+
+function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
+    if (typeof chunk === 'string' || chunk?.type !== 'toolCall') {
+        throw new Error(message);
+    }
 }
 
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
@@ -331,33 +356,38 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
             return;
         }
 
-        if (chunk.type === 'textInTool') {
-            this.textContent += chunk.source;
-            return;
-        }
-
         this.textContent += chunk.source;
+        const lastChunk = this.chunks.at(-1);
 
-        if (chunk.type === 'toolStart') {
+        if (chunk.type === 'thinkingStart') {
+            this.chunks.push({type: 'thinking', content: '', status: 'generating'});
+        }
+        else if (chunk.type === 'toolStart') {
             this.chunks.push({type: 'toolCall', toolName: chunk.toolName, arguments: {}, status: 'generating'});
-            return;
         }
-
-        const lastToolCall = this.chunks.at(-1);
-
-        if (typeof lastToolCall !== 'object' || lastToolCall.type !== 'toolCall') {
-            throw new Error('Unexpected tool call chunk coming without a start chunk');
+        else if (chunk.type === 'thinkingDelta') {
+            assertThinkingChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
+            lastChunk.content += chunk.source;
         }
-
-        if (chunk.type === 'toolDelta') {
+        else if (chunk.type === 'thinkingEnd') {
+            assertThinkingChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
+            lastChunk.status = 'completed';
+        }
+        else if (chunk.type === 'toolDelta') {
+            assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
             for (const [key, value] of Object.entries(chunk.arguments)) {
-                const previousValue = lastToolCall.arguments[key] ?? '';
-                lastToolCall.arguments[key] = previousValue + value;
+                const previousValue = lastChunk.arguments[key] ?? '';
+                lastChunk.arguments[key] = previousValue + value;
             }
+        }
+        else if (chunk.type === 'toolEnd') {
+            assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
+            lastChunk.status = 'completed';
             return;
         }
-
-        lastToolCall.status = 'completed';
+        else if (chunk.type !== 'textInTool') {
+            assertNever<{type: string}>(chunk, v => `Unexpected chunk type: ${v.type}`);
+        }
     }
 
     addEmbeddingSearchResult(query: string, results: EmbeddingSearchResultItem[]) {

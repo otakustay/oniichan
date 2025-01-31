@@ -2,10 +2,14 @@ import {MessageContentChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import {EmbeddingSearch} from './EmbeddingSearch';
+import Thinking from './Thinking';
 
-function renderChunk(chunk: MessageContentChunk, index: number) {
+function renderChunk(chunk: MessageContentChunk, index: number, dataSource: MessageContentChunk[]) {
     if (typeof chunk === 'string') {
         return <Markdown key={`string-chunk-${index}`} content={chunk} />;
+    }
+    else if (chunk.type === 'thinking') {
+        return index === dataSource.length - 1 ? <Thinking key={`thinking-chunk-${index}`} /> : null;
     }
     else if (chunk.type === 'toolCall') {
         return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;

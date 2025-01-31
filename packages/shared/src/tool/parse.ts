@@ -6,6 +6,21 @@ interface TextChunk {
     content: string;
 }
 
+interface ThinkingStartChunk {
+    type: 'thinkingStart';
+    source: string;
+}
+
+interface ThinkingDeltaChunk {
+    type: 'thinkingDelta';
+    source: string;
+}
+
+interface ThinkingEndChunk {
+    type: 'thinkingEnd';
+    source: string;
+}
+
 interface TextInToolChunk {
     type: 'textInTool';
     source: string;
@@ -28,7 +43,15 @@ interface ToolEndChunk {
     source: string;
 }
 
-export type ToolParsedChunk = TextChunk | TextInToolChunk | ToolStartChunk | ToolDeltaChunk | ToolEndChunk;
+export type ToolParsedChunk =
+    | TextChunk
+    | ThinkingStartChunk
+    | ThinkingDeltaChunk
+    | ThinkingEndChunk
+    | TextInToolChunk
+    | ToolStartChunk
+    | ToolDeltaChunk
+    | ToolEndChunk;
 
 export class StreamingToolParser {
     private tagStack: string[] = [];
@@ -52,8 +75,12 @@ export class StreamingToolParser {
 
     *yieldForTextChunk(chunk: XmlParseTextChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
+        // `<thinking>` tag has plain text inside it
+        if (activeTag === 'thinking') {
+            yield {type: 'thinkingDelta', source: chunk.content};
+        }
         // We don't allow text content in top level tag, all tool calls contains only parameters
-        if (activeTag) {
+        else if (activeTag) {
             if (this.tagStack.length > 1) {
                 yield {type: 'toolDelta', arguments: {[activeTag]: chunk.content}, source: chunk.content};
             }
@@ -72,6 +99,10 @@ export class StreamingToolParser {
             // We're already in a tool call, a tag start means a start of parameter, just push a parameter name
             this.tagStack.push(chunk.tagName);
         }
+        else if (chunk.tagName === 'thinking') {
+            this.tagStack.push(chunk.tagName);
+            yield {type: 'thinkingStart', source: chunk.source};
+        }
         else if (isToolName(chunk.tagName)) {
             this.tagStack.push(chunk.tagName);
             yield {type: 'toolStart', toolName: chunk.tagName, source: chunk.source};
@@ -87,8 +118,11 @@ export class StreamingToolParser {
             return;
         }
 
-        this.tagStack.pop();
-        if (!this.tagStack.length) {
+        const tagName = this.tagStack.pop();
+        if (tagName === 'thinking') {
+            yield {type: 'thinkingEnd', source: chunk.source};
+        }
+        else if (!this.tagStack.length) {
             yield {type: 'toolEnd', source: chunk.source};
         }
     }

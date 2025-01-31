@@ -11,29 +11,49 @@ async function* tokenize(content: string): AsyncIterable<string> {
 }
 
 interface ToolCall {
+    type: 'tool';
     toolName: string;
     args: Record<string, string>;
 }
 
+interface Thinking {
+    type: 'thinking';
+    content: string;
+}
+
 async function consume(content: string) {
-    const calls: ToolCall[] = [];
+    const chunks: Array<ToolCall | Thinking> = [];
     const parser = new StreamingToolParser();
     for await (const chunk of parser.parse(tokenize(content))) {
         if (chunk.type === 'text') {
             continue;
         }
         if (chunk.type === 'toolStart') {
-            calls.push({toolName: chunk.toolName, args: {}});
+            chunks.push({type: 'tool', toolName: chunk.toolName, args: {}});
+            continue;
+        }
+        if (chunk.type === 'thinkingStart') {
+            chunks.push({type: 'thinking', content: ''});
             continue;
         }
 
-        if (!calls.length) {
+        if (!chunks.length) {
             throw new Error(`Chunk of type ${chunk.type} occured without start`);
         }
 
+        const lastChunk = chunks.at(-1);
+
+        if (/tool/i.test(chunk.type) && lastChunk?.type !== 'tool') {
+            throw new Error('Unexpected tool chunk');
+        }
+
+        if (/thinking/i.test(chunk.type) && lastChunk?.type !== 'thinking') {
+            throw new Error('Unexpected thinking chunk');
+        }
+
         if (chunk.type === 'toolDelta') {
-            const call = calls.at(-1);
-            if (call) {
+            const call = chunks.at(-1);
+            if (call?.type === 'tool') {
                 for (const [key, value] of Object.entries(chunk.arguments)) {
                     if (call.args[key] === undefined) {
                         call.args[key] = value;
@@ -44,8 +64,14 @@ async function consume(content: string) {
                 }
             }
         }
+        if (chunk.type === 'thinkingDelta') {
+            const call = chunks.at(-1);
+            if (call?.type === 'thinking') {
+                call.content += chunk.source;
+            }
+        }
     }
-    return calls;
+    return chunks;
 }
 
 test('simple tool call', async () => {
@@ -58,7 +84,12 @@ test('simple tool call', async () => {
     `;
     const tools = await consume(message);
     expect(tools.length).toBe(1);
-    expect(tools.at(0)).toEqual({toolName: 'read_file', args: {path: 'src/main.ts'}});
+    const expected = {
+        type: 'tool',
+        toolName: 'read_file',
+        args: {path: 'src/main.ts'},
+    };
+    expect(tools.at(0)).toEqual(expected);
 });
 
 test('multiple parameters', async () => {
@@ -72,7 +103,12 @@ test('multiple parameters', async () => {
     `;
     const tools = await consume(message);
     expect(tools.length).toBe(1);
-    expect(tools.at(0)).toEqual({toolName: 'read_directory', args: {path: 'src/main.ts', recursive: 'true'}});
+    const expected = {
+        type: 'tool',
+        toolName: 'read_directory',
+        args: {path: 'src/main.ts', recursive: 'true'},
+    };
+    expect(tools.at(0)).toEqual(expected);
 });
 
 test('cross line parameters', async () => {
@@ -87,7 +123,12 @@ test('cross line parameters', async () => {
     `;
     const tools = await consume(message);
     expect(tools.length).toBe(1);
-    expect(tools.at(0)).toEqual({toolName: 'read_directory', args: {path: 'src/\nmain.ts', recursive: 'true'}});
+    const expected = {
+        type: 'tool',
+        toolName: 'read_directory',
+        args: {path: 'src/\nmain.ts', recursive: 'true'},
+    };
+    expect(tools.at(0)).toEqual(expected);
 });
 
 test('not a tool', async () => {
@@ -100,5 +141,23 @@ test('not a tool', async () => {
     `;
     const tools = await consume(message);
     expect(tools.length).toBe(0);
-    // expect(tools.at(0)).toEqual({toolName: 'read_directory', args: {path: 'src/\nmain.ts', recursive: 'true'}});
+});
+
+test.only('with thinking', async () => {
+    const thinkingContent = 'I should read the entry of program first, use tool read_file. - path: src/main.ts';
+    const message = dedent`
+        <thinking>${thinkingContent}</thinking>
+        <read_file>
+            <path>src/main.ts</path>
+        </read_file>
+    `;
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(2);
+    const expectedToolCall = {
+        type: 'tool',
+        toolName: 'read_file',
+        args: {path: 'src/main.ts'},
+    };
+    expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
+    expect(chunks.at(1)).toEqual(expectedToolCall);
 });
