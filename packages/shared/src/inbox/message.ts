@@ -295,6 +295,13 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
     }
 }
 
+function isReactiveToolCallChunk(chunk: MessageContentChunk) {
+    return typeof chunk !== 'string'
+        && chunk.type === 'toolCall'
+        && chunk.toolName !== 'ask_followup_question'
+        && chunk.toolName !== 'attempt_completion';
+}
+
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
     static from(data: AssistantTextMessagePersistData) {
         const message = new AssistantTextMessage(data.uuid);
@@ -362,7 +369,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
     }
 
     toToolCallMessage(): ToolCallMessage | null {
-        if (this.chunks.some(v => typeof v !== 'string')) {
+        if (this.chunks.some(isReactiveToolCallChunk)) {
             return new ToolCallMessage(this.toPersistData());
         }
         return null;
