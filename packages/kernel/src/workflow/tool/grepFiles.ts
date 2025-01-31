@@ -35,7 +35,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                     args.regex,
                     '--context=1',
                     '--exclude-dir',
-                    '.git,.nx,.husky,node_modules',
+                    '.git,.nx,.husky,node_modules,.webpack,dist',
                     '-r',
                     args.path,
                 ],

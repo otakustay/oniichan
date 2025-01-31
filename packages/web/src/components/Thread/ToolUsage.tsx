@@ -69,6 +69,10 @@ export default function ToolUsage({input}: Props) {
         return <Markdown content={lines.join('\n')} />;
     }
 
+    if (input.toolName === 'ask_followup_question') {
+        return input.arguments.question ? <Markdown content={input.arguments.question} /> : null;
+    }
+
     const [Icon, action, content] = renderLabelContent(input);
 
     return (

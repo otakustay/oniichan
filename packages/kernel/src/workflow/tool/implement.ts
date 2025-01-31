@@ -40,6 +40,7 @@ export class ToolImplement {
             case 'search_codebase':
                 return this.searchEmbedding.run(input.arguments);
             case 'attempt_completion':
+            case 'ask_followup_question':
                 return '';
             default:
                 assertNever<string>(input.name, v => `Unknown tool ${v}`);

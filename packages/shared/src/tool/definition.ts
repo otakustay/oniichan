@@ -14,7 +14,8 @@ export type ToolName =
     | 'find_files_by_glob'
     | 'find_files_by_regex'
     | 'search_codebase'
-    | 'attempt_completion';
+    | 'attempt_completion'
+    | 'ask_followup_question';
 
 export interface ToolDescription {
     name: ToolName;
@@ -115,6 +116,22 @@ export interface SearchEmbeddingParameter {
     query: string;
 }
 
+export const askFollowupQuestionParameters = {
+    type: 'object',
+    properties: {
+        question: {
+            type: 'string',
+            description:
+                'The question to ask the user. This should be a clear, specific question that addresses the information you need',
+        },
+    },
+    required: ['question'],
+} as const satisfies ParameterInfo;
+
+export interface AskFollowupQuestionParameter {
+    question: string;
+}
+
 export const attemptCompletionParameters = {
     type: 'object',
     properties: {
@@ -200,6 +217,17 @@ export const builtinTools: ToolDescription[] = [
                 <result>The result of your completion</result>
                 <command>The command you used to demonstrate the result</command>
             </attempt_completion>
+        `,
+    },
+    {
+        name: 'ask_followup_question',
+        description:
+            `Ask the user a question to gather additional information needed to complete the task. This tool should be used when you encounter ambiguities, need clarification, or require more details to proceed effectively. It allows for interactive problem-solving by enabling direct communication with the user. Use this tool judiciously to maintain a balance between gathering necessary information and avoiding excessive back-and-forth`,
+        parameters: askFollowupQuestionParameters,
+        usage: dedent`
+            <ask_followup_question>
+                <question>Your question</question>
+            </ask_followup_question>
         `,
     },
 ];
