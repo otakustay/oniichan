@@ -124,7 +124,12 @@ abstract class MessageBase<T extends MessageType> {
     }
 
     markStatus(status: MessageStatus) {
-        this.status = status;
+        // A `generating` message can be marked as both `unread` or `read`,
+        // a `unread` message can only be marked as `read`,
+        // a `read` message cannot be marked as `generating` nor `unread`
+        if (this.status === 'generating' || status === 'read') {
+            this.status = status;
+        }
     }
 
     setError(reason: string) {

@@ -105,25 +105,6 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                     this.updateInboxThreadList(store.dump());
                 }
             }
-
-            logger.trace('RequestModelFinish');
-
-            const workflowOptions: DetectWorkflowOptions = {
-                threadUuid: this.thread.uuid,
-                taskId: this.getTaskId(),
-                roundtrip: this.roundtrip,
-                editorHost: this.context.editorHost,
-                onUpdateThread: () => this.updateInboxThreadList(store.dump()),
-            };
-            const workflowRunner = detectWorkflow(workflowOptions);
-
-            if (workflowRunner) {
-                logger.trace('RunWorkflow', {originUuid: reply.uuid});
-                const {autoContinue} = await workflowRunner.run();
-                if (autoContinue) {
-                    yield* this.requestModel();
-                }
-            }
         }
         catch (ex) {
             reply.setError(stringifyError(ex));
@@ -137,6 +118,36 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             logger.trace('PushStoreUpdate');
             store.moveThreadToTop(this.thread.uuid);
             this.updateInboxThreadList(store.dump());
+        }
+
+        logger.trace('RequestModelFinish');
+
+        const workflowOptions: DetectWorkflowOptions = {
+            threadUuid: this.thread.uuid,
+            taskId: this.getTaskId(),
+            roundtrip: this.roundtrip,
+            editorHost: this.context.editorHost,
+            onUpdateThread: () => this.updateInboxThreadList(store.dump()),
+        };
+        const workflowRunner = detectWorkflow(workflowOptions);
+
+        if (workflowRunner) {
+            try {
+                logger.trace('RunWorkflow', {originUuid: reply.uuid});
+                const {autoContinue} = await workflowRunner.run();
+                if (autoContinue) {
+                    yield* this.requestModel();
+                }
+                logger.trace('RunWorkflowFinish');
+            }
+            catch (ex) {
+                logger.error('RunWorkflowFail', {reason: stringifyError(ex)});
+            }
+            finally {
+                logger.trace('PushStoreUpdate');
+                store.moveThreadToTop(this.thread.uuid);
+                this.updateInboxThreadList(store.dump());
+            }
         }
     }
 

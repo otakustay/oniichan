@@ -104,6 +104,8 @@ export class Roundtrip {
     }
 
     startWorkflowResponse(origin: WorkflowOriginMessage) {
+        // Auto-responded workflow always has its origin message in `read` status
+        origin.markStatus('read');
         // Before converted to a workflow, we already have a message response in roundtrip
         const response = this.findMessageResponseStrict(origin.uuid);
         const responseIndex = this.responses.lastIndexOf(response);
