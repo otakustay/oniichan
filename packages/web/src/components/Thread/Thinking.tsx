@@ -1,6 +1,11 @@
 import styled from '@emotion/styled';
 import {IoChatbubbleEllipsesOutline} from 'react-icons/io5';
 
+const Content = styled.p`
+    white-space: pre-wrap;
+    margin: 0;
+`;
+
 const Layout = styled.div`
     display: flex;
     align-items: center;
@@ -16,7 +21,36 @@ const Layout = styled.div`
     }
 `;
 
-export default function Thinking() {
+const DebugTitle = styled.div`
+    display: flex;
+    gap: .5em;
+    align-items: center;
+`;
+
+const DebugLayout = styled(Layout)`
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: var(--color-contrast-background);
+    font-size: .8em;
+`;
+
+interface Props {
+    content: string;
+}
+
+export default function Thinking({content}: Props) {
+    if (process.env.NODE_ENV === 'development') {
+        return (
+            <DebugLayout>
+                <DebugTitle>
+                    <IoChatbubbleEllipsesOutline />
+                    Thinking...
+                </DebugTitle>
+                <Content>{content.trim()}</Content>
+            </DebugLayout>
+        );
+    }
+
     return (
         <Layout>
             <IoChatbubbleEllipsesOutline />

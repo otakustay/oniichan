@@ -4,12 +4,11 @@
   "version": "2.0.0",
   "description": "Web app for Oniichan Coding Assistant",
   "scripts": {
-    "build": "rspack build && tsc",
-    "watch": "rspack build --watch",
-    "watch-types": "tsc --watch",
-    "serve": "rspack serve",
-    "lint": "eslint --max-warnings=0 --fix src",
-    "start": "rspack serve"
+    "build": "NODE_ENV=production rspack build && tsc",
+    "watch": "NODE_ENV=development rspack build --watch",
+    "watch-types": "NODE_ENV=deveopment tsc --watch",
+    "serve": "NODE_ENV=development rspack serve",
+    "lint": "eslint --max-warnings=0 --fix src"
   },
   "files": [
     "dist"

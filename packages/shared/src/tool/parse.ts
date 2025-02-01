@@ -95,7 +95,10 @@ export class StreamingToolParser {
 
     *yieldForTagStart(chunk: XmlParseTagStartChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
-        if (activeTag) {
+        if (activeTag === 'thinking') {
+            yield {type: 'thinkingDelta', source: chunk.source};
+        }
+        else if (activeTag) {
             // We're already in a tool call, a tag start means a start of parameter, just push a parameter name
             this.tagStack.push(chunk.tagName);
         }
@@ -118,11 +121,20 @@ export class StreamingToolParser {
             return;
         }
 
-        const tagName = this.tagStack.pop();
-        if (tagName === 'thinking') {
-            yield {type: 'thinkingEnd', source: chunk.source};
+        if (this.tagStack.at(-1) === 'thinking') {
+            if (chunk.tagName === 'thinking') {
+                yield {type: 'thinkingEnd', source: chunk.source};
+                this.tagStack.pop();
+            }
+            else {
+                yield {type: 'thinkingDelta', source: chunk.source};
+            }
+            return;
         }
-        else if (!this.tagStack.length) {
+
+        this.tagStack.pop();
+
+        if (!this.tagStack.length) {
             yield {type: 'toolEnd', source: chunk.source};
         }
     }

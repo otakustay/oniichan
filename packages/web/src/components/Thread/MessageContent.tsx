@@ -9,7 +9,9 @@ function renderChunk(chunk: MessageContentChunk, index: number, dataSource: Mess
         return <Markdown key={`string-chunk-${index}`} content={chunk} />;
     }
     else if (chunk.type === 'thinking') {
-        return index === dataSource.length - 1 ? <Thinking key={`thinking-chunk-${index}`} /> : null;
+        return process.env.NODE_ENV === 'development' || index === dataSource.length - 1
+            ? <Thinking key={`thinking-chunk-${index}`} content={chunk.content} />
+            : null;
     }
     else if (chunk.type === 'toolCall') {
         return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;

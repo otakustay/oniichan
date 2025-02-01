@@ -152,6 +152,7 @@ export interface AttemptCompletionParameter {
     command?: string;
 }
 
+// TODO: Move examples here and loop to prompt
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -191,8 +192,8 @@ export const builtinTools: ToolDescription[] = [
         parameters: findFilesByRegExpParameters,
         usage: dedent`
             <find_files_by_regex>
-                <path>src/common</path>
                 <regex>export function [A-Z][a-zA-Z0-9]*\(</regex>
+                <path>src/common</path>
             </find_files_by_regex>
         `,
     },

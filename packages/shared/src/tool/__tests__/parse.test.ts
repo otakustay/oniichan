@@ -143,7 +143,7 @@ test('not a tool', async () => {
     expect(tools.length).toBe(0);
 });
 
-test.only('with thinking', async () => {
+test('with thinking', async () => {
     const thinkingContent = 'I should read the entry of program first, use tool read_file. - path: src/main.ts';
     const message = dedent`
         <thinking>${thinkingContent}</thinking>
@@ -158,6 +158,32 @@ test.only('with thinking', async () => {
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
     };
+    expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
+    expect(chunks.at(1)).toEqual(expectedToolCall);
+});
+
+test.only('xml inside thinking', async () => {
+    const thinkingContent = dedent`
+        I should read the entry of program first, use tool read_file.
+
+        <read_file>
+        <path>src/main.ts</path>
+        </read_file>
+    `;
+    const message = dedent`
+        <thinking>${thinkingContent}</thinking>
+        <read_file>
+            <path>src/main.ts</path>
+        </read_file>
+    `;
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(2);
+    const expectedToolCall = {
+        type: 'tool',
+        toolName: 'read_file',
+        args: {path: 'src/main.ts'},
+    };
+    console.log(chunks.at(0));
     expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
