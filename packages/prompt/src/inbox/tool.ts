@@ -13,7 +13,6 @@ const prefix = dedent`
     <tool_name>
     <parameter1_name>value1</parameter1_name>
     <parameter2_name>value2</parameter2_name>
-    ...
     </tool_name>
 
     Note that the top level will **NEVER** have text content, all parameters are formed inside a child tag.

@@ -7,6 +7,7 @@ import {renderEmbeddingAsChunkSection} from './embeddingAsChunk';
 import {renderEmbeddingAsFullContentSection} from './embeddingAsFullContent';
 import {renderEmbeddingAsNameOnlySection} from './embeddingAsNameOnly';
 import {renderRootEntriesSection} from './rootEntries';
+import {renderObjectiveSection} from './objective';
 
 export interface InboxPromptView {
     tools: ToolDescription[];
@@ -27,6 +28,7 @@ export async function renderInboxSystemPrompt(view: InboxPromptView) {
         view.embeddingAsChunk.length ? renderEmbeddingAsChunkSection(view.embeddingAsChunk) : '',
         view.embeddingAsFullContent.length ? renderEmbeddingAsFullContentSection(view.embeddingAsFullContent) : '',
         view.embeddingAsNameOnly.length ? renderEmbeddingAsNameOnlySection(view.embeddingAsNameOnly) : '',
+        renderObjectiveSection(),
     ];
     return parts.filter(v => !!v).join('\n\n');
 }
