@@ -7,6 +7,8 @@ export {
     PlainTextChunk,
     ThinkingMessageChunk,
     MessageContentChunk,
+    DebugContentChunk,
+    MessageViewChunk,
     Message,
     MessageStatus,
     ToolUseMessage,
@@ -37,7 +39,7 @@ const debugMessageThreadFixtures: MessageThreadPersistData[] = [
                     createdAt: '2025-01-24T05:33:35.622Z',
                     status: 'read',
                     type: 'userRequest',
-                    textContent: 'Hello',
+                    content: 'Hello',
                 },
                 responses: [
                     {
@@ -47,8 +49,6 @@ const debugMessageThreadFixtures: MessageThreadPersistData[] = [
                             createdAt: '2025-01-24T05:33:35.638Z',
                             status: 'read',
                             type: 'assistantText',
-                            textContent:
-                                'Hello! I\'m here to help you with any programming-related questions or tasks. Feel free to ask anything about:\n\n- Writing new code\n- Debugging existing code\n- Code review and optimization\n- Software architecture and design\n- Best practices and patterns\n- Any specific programming language\n- General software development topics\n\nWhat would you like help with?',
                             chunks: [
                                 'Hello! I\'m here to help you with any programming-related questions or tasks. Feel free to ask anything about:\n\n- Writing new code\n- Debugging existing code\n- Code review and optimization\n- Software architecture and design\n- Best practices and patterns\n- Any specific programming language\n- General software development topics\n\nWhat would you like help with?',
                             ],
@@ -62,7 +62,7 @@ const debugMessageThreadFixtures: MessageThreadPersistData[] = [
                     createdAt: '2025-01-24T05:33:48.777Z',
                     status: 'read',
                     type: 'userRequest',
-                    textContent: 'Bubble sort in JS',
+                    content: 'Bubble sort in JS',
                 },
                 responses: [
                     {
@@ -72,8 +72,6 @@ const debugMessageThreadFixtures: MessageThreadPersistData[] = [
                             createdAt: '2025-01-24T05:33:48.782Z',
                             status: 'read',
                             type: 'assistantText',
-                            textContent:
-                                'I\'ll help you create a bubble sort implementation in JavaScript. Bubble sort is a simple sorting algorithm that repeatedly compares adjacent elements and swaps them if they\'re in the wrong order.\n\nHere\'s a clear implementation with comments explaining each step:\n\n```javascript\nfunction bubbleSort(arr) {\n    // Get the length of the array\n    const len = arr.length;\n    \n    // Flag to optimize the algorithm\n    let swapped;\n    \n    // Outer loop to go through the array multiple times\n    do {\n        swapped = false;\n        \n        // Inner loop to compare adjacent elements\n        for (let i = 0; i < len - 1; i++) {\n            // If current element is greater than next element, swap them\n            if (arr[i] > arr[i + 1]) {\n                // Perform swap using destructuring assignment\n                [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];\n                swapped = true;\n            }\n        }\n    } while (swapped); // Continue until no swaps are needed\n    \n    return arr;\n}\n\n// Example usage:\nconst numbers = [64, 34, 25, 12, 22, 11, 90];\nconsole.log(\'Original array:\', numbers);\nconsole.log(\'Sorted array:\', bubbleSort(numbers));\n```\n\nKey points about this implementation:\n\n1. The outer `do...while` loop continues until no more swaps are needed (array is sorted)\n2. The `swapped` flag optimizes the algorithm by breaking out when no swaps are performed\n3. The inner `for` loop compares adjacent elements\n4. Modern JavaScript destructuring is used for clean swap operations\n\nTime Complexity:\n- Worst and Average case: O(n²)\n- Best case: O(n) when array is already sorted\n\nSpace Complexity:\n- O(1) as it sorts in-place\n\nYou can test it with different arrays:\n\n```javascript\n// More test cases\nconsole.log(bubbleSort([5, 3, 8, 4, 2]));        // [2, 3, 4, 5, 8]\nconsole.log(bubbleSort([1]));                     // [1]\nconsole.log(bubbleSort([]));                      // []\nconsole.log(bubbleSort([1, 1, 1, 1]));           // [1, 1, 1, 1]\nconsole.log(bubbleSort([10, 9, 8, 7, 6]));       // [6, 7, 8, 9, 10]\n```\n\nIf you want to sort in descending order instead, simply change the comparison operator from `>` to `<`:\n\n```javascript\nif (arr[i] < arr[i + 1]) {  // Changed from > to <\n    [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];\n    swapped = true;\n}\n```\n\nWould you like me to explain any part of the implementation in more detail?',
                             chunks: [
                                 'I\'ll help you create a bubble sort implementation in JavaScript. Bubble sort is a simple sorting algorithm that repeatedly compares adjacent elements and swaps them if they\'re in the wrong order.\n\nHere\'s a clear implementation with comments explaining each step:\n\n```javascript\nfunction bubbleSort(arr) {\n    // Get the length of the array\n    const len = arr.length;\n    \n    // Flag to optimize the algorithm\n    let swapped;\n    \n    // Outer loop to go through the array multiple times\n    do {\n        swapped = false;\n        \n        // Inner loop to compare adjacent elements\n        for (let i = 0; i < len - 1; i++) {\n            // If current element is greater than next element, swap them\n            if (arr[i] > arr[i + 1]) {\n                // Perform swap using destructuring assignment\n                [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];\n                swapped = true;\n            }\n        }\n    } while (swapped); // Continue until no swaps are needed\n    \n    return arr;\n}\n\n// Example usage:\nconst numbers = [64, 34, 25, 12, 22, 11, 90];\nconsole.log(\'Original array:\', numbers);\nconsole.log(\'Sorted array:\', bubbleSort(numbers));\n```\n\nKey points about this implementation:\n\n1. The outer `do...while` loop continues until no more swaps are needed (array is sorted)\n2. The `swapped` flag optimizes the algorithm by breaking out when no swaps are performed\n3. The inner `for` loop compares adjacent elements\n4. Modern JavaScript destructuring is used for clean swap operations\n\nTime Complexity:\n- Worst and Average case: O(n²)\n- Best case: O(n) when array is already sorted\n\nSpace Complexity:\n- O(1) as it sorts in-place\n\nYou can test it with different arrays:\n\n```javascript\n// More test cases\nconsole.log(bubbleSort([5, 3, 8, 4, 2]));        // [2, 3, 4, 5, 8]\nconsole.log(bubbleSort([1]));                     // [1]\nconsole.log(bubbleSort([]));                      // []\nconsole.log(bubbleSort([1, 1, 1, 1]));           // [1, 1, 1, 1]\nconsole.log(bubbleSort([10, 9, 8, 7, 6]));       // [6, 7, 8, 9, 10]\n```\n\nIf you want to sort in descending order instead, simply change the comparison operator from `>` to `<`:\n\n```javascript\nif (arr[i] < arr[i + 1]) {  // Changed from > to <\n    [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];\n    swapped = true;\n}\n```\n\nWould you like me to explain any part of the implementation in more detail?',
                             ],

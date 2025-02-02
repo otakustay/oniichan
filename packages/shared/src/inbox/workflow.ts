@@ -2,26 +2,26 @@ import {
     AssistantTextMessage,
     deserializeMessage,
     Message,
-    MessagePersistData,
+    MessageData,
     ToolCallMessage,
-    ToolCallMessagePersistData,
+    ToolCallMessageData,
 } from './message';
 
 export type WorkflowStatus = 'running' | 'completed' | 'failed';
 
 export type WorkflowOriginMessage = ToolCallMessage;
 
-export type WorkflowOriginMessagePersistData = ToolCallMessagePersistData;
+export type WorkflowOriginMessageData = ToolCallMessageData;
 
-export interface WorkflowPersistData {
+export interface WorkflowData {
     status: WorkflowStatus;
-    origin: WorkflowOriginMessagePersistData;
-    reactions: MessagePersistData[];
+    origin: WorkflowOriginMessageData;
+    reactions: MessageData[];
     exposed: string[];
 }
 
 export class Workflow {
-    static from(data: WorkflowPersistData): Workflow {
+    static from(data: WorkflowData): Workflow {
         const workflow = new Workflow(ToolCallMessage.from(data.origin));
         workflow.markStatus(data.status);
         for (const reaction of data.reactions) {
@@ -35,6 +35,8 @@ export class Workflow {
 
     private status: WorkflowStatus = 'running';
 
+    private continueRoundtrip = false;
+
     private readonly origin: WorkflowOriginMessage;
 
     private readonly reactions: Message[] = [];
@@ -43,6 +45,14 @@ export class Workflow {
 
     constructor(origin: WorkflowOriginMessage) {
         this.origin = origin;
+    }
+
+    shouldContinueRoundtrip() {
+        return this.continueRoundtrip;
+    }
+
+    setContinueRoundtrip(shouldContinue: boolean) {
+        this.continueRoundtrip = shouldContinue;
     }
 
     startReaction(uuid: string) {
@@ -94,11 +104,11 @@ export class Workflow {
         ];
     }
 
-    toPersistData(): WorkflowPersistData {
+    toWorkflowData(): WorkflowData {
         return {
             status: this.status,
-            origin: this.origin.toPersistData(),
-            reactions: this.reactions.map(v => v.toPersistData()).filter(v => !!v),
+            origin: this.origin.toMessageData(),
+            reactions: this.reactions.map(v => v.toMessageData()),
             exposed: this.exposed,
         };
     }

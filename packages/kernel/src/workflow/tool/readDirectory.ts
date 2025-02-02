@@ -3,7 +3,7 @@ import {readDirectoryParameters, ReadDirectoryParameter} from '@oniichan/shared/
 import {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
     constructor(editorHost: EditorHost) {
@@ -17,13 +17,17 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
         };
     }
 
-    protected async execute(args: ReadDirectoryParameter): Promise<string> {
+    protected async execute(args: ReadDirectoryParameter): Promise<ToolRunResult> {
         const workspace = this.editorHost.getWorkspace();
         try {
             const root = await workspace.getRoot();
 
             if (!root) {
-                return 'No open workspace, you cannot read any file or directory now';
+                return {
+                    type: 'success',
+                    finished: false,
+                    output: 'No open workspace, you cannot read any file or directory now',
+                };
             }
 
             const entries = await workspace.readDirectory(
@@ -32,7 +36,11 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
             );
 
             if (!entries.length) {
-                return 'There are no files in directory ${args.path}';
+                return {
+                    type: 'success',
+                    finished: false,
+                    output: 'There are no files in directory ${args.path}',
+                };
             }
 
             const tree: string[] = [];
@@ -51,13 +59,20 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
             };
 
             process(entries);
-            return resultMarkdown(
-                `Files in directory ${args.path}, directories are followed by \`/\`:`,
-                tree.join('\n')
-            );
+            return {
+                type: 'success',
+                finished: false,
+                output: resultMarkdown(
+                    `Files in directory ${args.path}, directories are followed by \`/\`:`,
+                    tree.join('\n')
+                ),
+            };
         }
         catch (ex) {
-            return `Unable to read directory ${args.path}: ${stringifyError(ex)}`;
+            return {
+                type: 'executeError',
+                output: `Unable to read directory ${args.path}: ${stringifyError(ex)}`,
+            };
         }
     }
 }

@@ -1,7 +1,7 @@
 import url from 'node:url';
 import {builtinTools, ToolDescription} from '@oniichan/shared/tool';
 import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
-import {DebugMessageLevel, EmbeddingSearchResultItem, MessageContentChunk} from '@oniichan/shared/inbox';
+import {DebugContentChunk, DebugMessageLevel, EmbeddingSearchResultItem} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {assertNever} from '@oniichan/shared/error';
 import {CustomConfig} from '../../core/config';
@@ -12,7 +12,7 @@ interface DebugResult {
     type: 'debug';
     level: DebugMessageLevel;
     title: string;
-    message: MessageContentChunk;
+    message: DebugContentChunk;
 }
 
 interface PromptResult {

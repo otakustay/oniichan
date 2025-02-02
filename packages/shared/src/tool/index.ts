@@ -11,6 +11,7 @@ export {
     FindFilesByRegExpParameter,
     SearchEmbeddingParameter,
     ModelToolCallInput,
+    ModelToolCallInputWithSource,
     ToolDescription,
     ToolName,
     builtinTools,

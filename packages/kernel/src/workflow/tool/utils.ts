@@ -73,17 +73,36 @@ function validateArguments(schema: Schema, args: Record<string, unknown>): Valid
     };
 }
 
-function errorMissingParameter(name: string) {
-    return `Missing value for required parameter "${name}", this may be caused by empty content in <${name}> tag or missing <${name}> tag, please retry with complete response.`;
+export interface ParameterMissingError {
+    type: 'parameterMissing';
+    parameter: string;
 }
 
-function errorParameterType(name: string, expectedType: string) {
-    return `Parameter "${name}" is not of type ${expectedType}, please retry with correct response.`;
+export interface ParameterTypeError {
+    type: 'parameterType';
+    parameter: string;
+    expectedType: string;
 }
 
-function errorUnknown(message: string) {
-    return `Parameters have unknown error: ${message}, please retry with correct response.`;
+export interface ValidationError {
+    type: 'validationError';
+    message: string;
 }
+
+export interface ExecuteError {
+    type: 'executeError';
+    output: string;
+}
+
+export interface Success {
+    type: 'success';
+    finished: boolean;
+    output: string;
+}
+
+export type ToolInputError = ParameterMissingError | ParameterTypeError | ValidationError;
+
+export type ToolRunResult = Success | ExecuteError | ToolInputError;
 
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
     protected readonly editorHost: EditorHost;
@@ -95,7 +114,7 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         this.schema = schema;
     }
 
-    async run(generated: Record<string, string>): Promise<string> {
+    async run(generated: Record<string, string>): Promise<ToolRunResult> {
         const parsed = this.parseArgs(generated);
         const validateResult = validateArguments(this.schema, parsed);
 
@@ -105,17 +124,21 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
         switch (validateResult.type) {
             case 'missing':
-                return errorMissingParameter(validateResult.property);
+                return {type: 'parameterMissing', parameter: validateResult.property};
             case 'type':
-                return errorParameterType(validateResult.property, validateResult.expectedType);
+                return {
+                    type: 'parameterType',
+                    parameter: validateResult.property,
+                    expectedType: validateResult.expectedType,
+                };
             default:
-                return errorUnknown(validateResult.message);
+                return {type: 'validationError', message: validateResult.message};
         }
     }
 
     protected abstract parseArgs(args: Record<string, string>): A;
 
-    protected abstract execute(args: A): Promise<string>;
+    protected abstract execute(args: A): Promise<ToolRunResult>;
 }
 
 export function codeBlock(code: string, language = '') {

@@ -1,13 +1,15 @@
+import {Roundtrip} from '@oniichan/shared/inbox';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../editor';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
-import {Roundtrip} from '@oniichan/shared/inbox';
 
 export interface DetectWorkflowOptions {
     threadUuid: string;
     taskId: string;
     roundtrip: Roundtrip;
     editorHost: EditorHost;
+    telemetry: FunctionUsageTelemetry;
     onUpdateThread: () => void;
 }
 
@@ -25,6 +27,7 @@ export function detectWorkflow(options: DetectWorkflowOptions): WorkflowRunner |
         taskId: options.taskId,
         base: messages.filter(v => v !== assistantTextMessage),
         origin: toolCallMessage,
+        telemetry: options.telemetry,
         onUpdateThrad: options.onUpdateThread,
     };
     const workflow = options.roundtrip.startWorkflowResponse(toolCallMessage);
@@ -32,7 +35,7 @@ export function detectWorkflow(options: DetectWorkflowOptions): WorkflowRunner |
         ...baseInit,
         workflow,
         editorHost: options.editorHost,
-        input: toolCallMessage.getToolCallInput(),
+        origin: toolCallMessage,
     };
     return new ToolCallWorkflowRunner(init);
 }

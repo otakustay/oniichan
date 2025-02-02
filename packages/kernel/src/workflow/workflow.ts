@@ -1,4 +1,6 @@
+import {stringifyError} from '@oniichan/shared/error';
 import {Message, Workflow, WorkflowOriginMessage} from '@oniichan/shared/inbox';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 
 export interface WorkflowRunnerInit {
     threadUuid: string;
@@ -6,12 +8,13 @@ export interface WorkflowRunnerInit {
     base: Message[];
     origin: WorkflowOriginMessage;
     workflow: Workflow;
+    telemetry: FunctionUsageTelemetry;
     onUpdateThrad: () => void;
 }
 
 export interface WorkflowRunResult {
     /** Whether we should automatically request LLM again on workflow completion */
-    autoContinue: boolean;
+    finished: boolean;
 }
 
 // TODO: Missing solution to allow workflow runner request LLM with logs and streaming response
@@ -19,6 +22,8 @@ export abstract class WorkflowRunner {
     protected readonly threadUuid: string;
 
     protected readonly base: Message[];
+
+    protected readonly telemetry: FunctionUsageTelemetry;
 
     protected readonly origin: WorkflowOriginMessage;
 
@@ -34,18 +39,24 @@ export abstract class WorkflowRunner {
         this.origin = init.origin;
         this.taskId = init.taskId;
         this.workflow = init.workflow;
+        this.telemetry = init.telemetry;
         this.onUpdateThread = init.onUpdateThrad;
     }
 
-    async run(): Promise<WorkflowRunResult> {
+    getWorkflow() {
+        return this.workflow;
+    }
+
+    async run(): Promise<void> {
         try {
             const result = await this.execute();
             this.workflow.markStatus('completed');
-            return result;
+            this.workflow.setContinueRoundtrip(!result.finished);
         }
-        catch {
+        catch (ex) {
             this.workflow.markStatus('failed');
-            return {autoContinue: false};
+            this.origin.setError(stringifyError(ex));
+            this.workflow.setContinueRoundtrip(false);
         }
     }
 

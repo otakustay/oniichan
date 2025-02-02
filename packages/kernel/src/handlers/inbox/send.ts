@@ -1,7 +1,7 @@
 import {over} from '@otakustay/async-iterator';
 import {
     DebugMessageLevel,
-    MessageContentChunk,
+    DebugContentChunk,
     MessageThread,
     Roundtrip,
     UserRequestMessage,
@@ -127,6 +127,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             taskId: this.getTaskId(),
             roundtrip: this.roundtrip,
             editorHost: this.context.editorHost,
+            telemetry: this.telemetry,
             onUpdateThread: () => this.updateInboxThreadList(store.dump()),
         };
         const workflowRunner = detectWorkflow(workflowOptions);
@@ -134,10 +135,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         if (workflowRunner) {
             try {
                 logger.trace('RunWorkflow', {originUuid: reply.uuid});
-                const {autoContinue} = await workflowRunner.run();
-                if (autoContinue) {
-                    yield* this.requestModel();
-                }
+                await workflowRunner.run();
                 logger.trace('RunWorkflowFinish');
             }
             catch (ex) {
@@ -147,6 +145,10 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
                 logger.trace('PushStoreUpdate');
                 store.moveThreadToTop(this.thread.uuid);
                 this.updateInboxThreadList(store.dump());
+            }
+
+            if (workflowRunner.getWorkflow().shouldContinueRoundtrip()) {
+                yield* this.requestModel();
             }
         }
     }
@@ -181,7 +183,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         yield* over(this.requestModel()).map(v => ({type: 'value', value: v} as const));
     }
 
-    private addDebugMessage(level: DebugMessageLevel, title: string, content: MessageContentChunk) {
+    private addDebugMessage(level: DebugMessageLevel, title: string, content: DebugContentChunk) {
         this.roundtrip.addDebugMessage(newUuid(), level, title, content);
         this.updateInboxThreadList(store.dump());
     }

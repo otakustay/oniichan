@@ -1,7 +1,7 @@
 import {ModelToolCallInput} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
-import {ToolImplementBase} from './utils';
+import {ToolImplementBase, ToolRunResult} from './utils';
 import {ReadFileToolImplement} from './readFile';
 import {ReadDirectoryToolImplement} from './readDirectory';
 import {GlobFilesToolImplement} from './globFiles';
@@ -27,7 +27,7 @@ export class ToolImplement {
         this.searchEmbedding = new SearchEmbeddingToolImplement(editorHost);
     }
 
-    async callTool(input: ModelToolCallInput): Promise<string> {
+    async callTool(input: ModelToolCallInput): Promise<ToolRunResult> {
         switch (input.name) {
             case 'read_directory':
                 return this.readDirectory.run(input.arguments);
@@ -41,7 +41,11 @@ export class ToolImplement {
                 return this.searchEmbedding.run(input.arguments);
             case 'attempt_completion':
             case 'ask_followup_question':
-                return '';
+                return {
+                    type: 'success',
+                    finished: true,
+                    output: '',
+                };
             default:
                 assertNever<string>(input.name, v => `Unknown tool ${v}`);
         }

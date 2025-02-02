@@ -4,7 +4,7 @@ import {EmbeddingSearchResultItem} from '@oniichan/shared/inbox';
 import {EditorHost} from '../../editor';
 import {searchEmbedding} from '../../core/embedding';
 import {CustomConfig, readCustomConfig} from '../../core/config';
-import {ToolImplementBase} from './utils';
+import {ToolImplementBase, ToolRunResult} from './utils';
 
 function formatItem(item: EmbeddingSearchResultItem) {
     const lines = [
@@ -28,13 +28,17 @@ export class SearchEmbeddingToolImplement extends ToolImplementBase<SearchEmbedd
         };
     }
 
-    protected async execute(args: SearchEmbeddingParameter): Promise<string> {
+    protected async execute(args: SearchEmbeddingParameter): Promise<ToolRunResult> {
         const workspace = this.editorHost.getWorkspace();
         try {
             const root = await workspace.getRoot();
 
             if (!root) {
-                return 'No open workspace, you cannot read any file or directory now';
+                return {
+                    type: 'success',
+                    finished: false,
+                    output: 'No open workspace, you cannot read any file or directory now',
+                };
             }
 
             const config: CustomConfig = {
@@ -48,13 +52,24 @@ export class SearchEmbeddingToolImplement extends ToolImplementBase<SearchEmbedd
                     `Search result for query \`${args.query}\`:`,
                     ...results.map(formatItem),
                 ];
-                return parts.join('\n\n');
+                return {
+                    type: 'success',
+                    finished: false,
+                    output: parts.join('\n\n'),
+                };
             }
 
-            return 'There are no search results for this query';
+            return {
+                type: 'success',
+                finished: false,
+                output: 'There are no search results for this query',
+            };
         }
         catch (ex) {
-            return `Unsable to search codebase: ${stringifyError(ex)}`;
+            return {
+                type: 'executeError',
+                output: `Unsable to search codebase: ${stringifyError(ex)}`,
+            };
         }
     }
 }

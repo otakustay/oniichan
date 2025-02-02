@@ -101,6 +101,7 @@ export class StreamingToolParser {
         else if (activeTag) {
             // We're already in a tool call, a tag start means a start of parameter, just push a parameter name
             this.tagStack.push(chunk.tagName);
+            yield {type: 'toolDelta', arguments: {[chunk.tagName]: ''}, source: chunk.source};
         }
         else if (chunk.tagName === 'thinking') {
             this.tagStack.push(chunk.tagName);
@@ -136,6 +137,9 @@ export class StreamingToolParser {
 
         if (!this.tagStack.length) {
             yield {type: 'toolEnd', source: chunk.source};
+        }
+        else {
+            yield {type: 'toolDelta', arguments: {}, source: chunk.source};
         }
     }
 }

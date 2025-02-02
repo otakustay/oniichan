@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {MessageContentChunk, MessageData, MessageThreadData} from '@oniichan/shared/inbox';
+import {MessageData, MessageThreadData, MessageViewChunk} from '@oniichan/shared/inbox';
 import {
     useMessageThreadListValue,
     useSetActiveMessageThread,
@@ -78,7 +78,7 @@ const Layout = styled.div`
     }
 `;
 
-function resolveChunkContent(chunk: MessageContentChunk) {
+function resolveChunkContent(chunk: MessageViewChunk) {
     if (typeof chunk === 'string') {
         return chunk;
     }

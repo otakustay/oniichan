@@ -241,3 +241,7 @@ export interface ModelToolCallInput {
     name: ToolName;
     arguments: Record<string, string>;
 }
+
+export interface ModelToolCallInputWithSource extends ModelToolCallInput {
+    source: string;
+}

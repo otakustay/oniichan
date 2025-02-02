@@ -1,10 +1,10 @@
-import {MessageContentChunk} from '@oniichan/shared/inbox';
+import {MessageViewChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import {EmbeddingSearch} from './EmbeddingSearch';
 import Thinking from './Thinking';
 
-function renderChunk(chunk: MessageContentChunk, index: number, dataSource: MessageContentChunk[]) {
+function renderChunk(chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) {
     if (typeof chunk === 'string') {
         return <Markdown key={`string-chunk-${index}`} content={chunk} />;
     }
@@ -26,7 +26,7 @@ function renderChunk(chunk: MessageContentChunk, index: number, dataSource: Mess
 
 interface Props {
     className?: string;
-    content: MessageContentChunk | MessageContentChunk[];
+    content: MessageViewChunk | MessageViewChunk[];
 }
 
 export default function MessageContent({className, content}: Props) {

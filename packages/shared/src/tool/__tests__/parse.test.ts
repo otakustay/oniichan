@@ -74,6 +74,34 @@ async function consume(content: string) {
     return chunks;
 }
 
+async function recoverSource(content: string) {
+    const values: string[] = [];
+    const parser = new StreamingToolParser();
+    for await (const chunk of parser.parse(tokenize(content))) {
+        switch (chunk.type) {
+            case 'text':
+                values.push(chunk.content);
+                break;
+            default:
+                values.push(chunk.source);
+                break;
+        }
+    }
+    return values.join('');
+}
+
+test('recover source', async () => {
+    const message = dedent`
+        Start tool call.
+
+        <read_file>
+            <path>src/main.ts</path>
+        </read_file>
+    `;
+    const source = await recoverSource(message);
+    expect(source).toBe(message);
+});
+
 test('simple tool call', async () => {
     const message = dedent`
         Start tool call.
@@ -162,7 +190,7 @@ test('with thinking', async () => {
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
 
-test.only('xml inside thinking', async () => {
+test('xml inside thinking', async () => {
     const thinkingContent = dedent`
         I should read the entry of program first, use tool read_file.
 

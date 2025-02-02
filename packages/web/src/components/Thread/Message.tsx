@@ -5,7 +5,7 @@ import {BiErrorAlt} from 'react-icons/bi';
 import {IoCaretUpOutline, IoCaretDownOutline} from 'react-icons/io5';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {MessageData} from '@oniichan/shared/inbox';
+import {MessageViewChunk, MessageData} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
@@ -48,7 +48,7 @@ function renderAvatar(message: MessageData) {
     }
 }
 
-function resolveMessageContent(message: MessageData) {
+function resolveMessageContent(message: MessageData): MessageViewChunk | MessageViewChunk[] {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':

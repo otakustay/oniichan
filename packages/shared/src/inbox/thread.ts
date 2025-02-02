@@ -1,5 +1,5 @@
 import {MessageData, UserRequestMessage} from './message';
-import {Roundtrip, RoundtripPersistData} from './roundtrip';
+import {Roundtrip, RoundtripData} from './roundtrip';
 
 export interface MessageThreadData {
     uuid: string;
@@ -8,7 +8,7 @@ export interface MessageThreadData {
 
 export interface MessageThreadPersistData {
     uuid: string;
-    roundtrips: RoundtripPersistData[];
+    roundtrips: RoundtripData[];
 }
 
 /**
@@ -81,7 +81,7 @@ export class MessageThread {
     toPersistData(): MessageThreadPersistData {
         return {
             uuid: this.uuid,
-            roundtrips: this.roundtrips.map(v => v.toPersistData()),
+            roundtrips: this.roundtrips.map(v => v.toRoundtripData()),
         };
     }
 }

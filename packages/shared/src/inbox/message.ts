@@ -1,7 +1,7 @@
 import {assertNever} from '../error';
 import {ChatInputPayload} from '../model';
 import {now} from '../string';
-import {ModelToolCallInput, ToolName, ToolParsedChunk} from '../tool';
+import {ModelToolCallInput, ModelToolCallInputWithSource, ToolName, ToolParsedChunk} from '../tool';
 
 export type MessageStatus = 'generating' | 'unread' | 'read';
 
@@ -10,6 +10,7 @@ export interface ToolCallMessageChunk {
     toolName: ToolName;
     arguments: Record<string, string>;
     status: 'generating' | 'completed';
+    source: string;
 }
 
 export interface EmbeddingSearchResultItem {
@@ -37,12 +38,26 @@ export interface ThinkingMessageChunk {
     status: 'generating' | 'completed';
 }
 
-export type MessageContentChunk =
-    | string
-    | ToolCallMessageChunk
-    | EmbeddingSearchChunk
-    | PlainTextChunk
-    | ThinkingMessageChunk;
+export type MessageContentChunk = string | ToolCallMessageChunk | ThinkingMessageChunk;
+
+export type DebugContentChunk = string | PlainTextChunk | EmbeddingSearchChunk;
+
+export type MessageViewChunk = MessageContentChunk | DebugContentChunk;
+
+function chunkToString(chunk: MessageContentChunk) {
+    if (typeof chunk === 'string') {
+        return chunk;
+    }
+
+    switch (chunk.type) {
+        case 'thinking':
+            return `<thinking>${chunk.content}</thinking>`;
+        case 'toolCall':
+            return chunk.source;
+        default:
+            assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);
+    }
+}
 
 interface MessageDataBase {
     uuid: string;
@@ -51,17 +66,13 @@ interface MessageDataBase {
     error?: string | undefined;
 }
 
-export interface MessagePersistDataBase extends MessageDataBase {
-    textContent: string;
-}
-
 export type DebugMessageLevel = 'error' | 'warning' | 'info';
 
 export interface DebugMessageData extends MessageDataBase {
     type: 'debug';
     level: DebugMessageLevel;
     title: string;
-    content: MessageContentChunk;
+    content: DebugContentChunk;
 }
 
 export interface UserRequestMessageData extends MessageDataBase {
@@ -69,16 +80,7 @@ export interface UserRequestMessageData extends MessageDataBase {
     content: string;
 }
 
-export interface UserRequestMessagePersistData extends MessagePersistDataBase {
-    type: 'userRequest';
-}
-
 export interface AssistantTextMessageData extends MessageDataBase {
-    type: 'assistantText';
-    chunks: MessageContentChunk[];
-}
-
-export interface AssistantTextMessagePersistData extends MessagePersistDataBase {
     type: 'assistantText';
     chunks: MessageContentChunk[];
 }
@@ -88,18 +90,9 @@ export interface ToolCallMessageData extends MessageDataBase {
     chunks: MessageContentChunk[];
 }
 
-export interface ToolCallMessagePersistData extends MessagePersistDataBase {
-    type: 'toolCall';
-    chunks: MessageContentChunk[];
-}
-
 export interface ToolUseMessageData extends MessageDataBase {
     type: 'toolUse';
     content: string;
-}
-
-export interface ToolUseMessagePersistData extends MessagePersistDataBase {
-    type: 'toolUse';
 }
 
 export type MessageData =
@@ -108,12 +101,6 @@ export type MessageData =
     | AssistantTextMessageData
     | ToolCallMessageData
     | ToolUseMessageData;
-
-export type MessagePersistData =
-    | UserRequestMessagePersistData
-    | AssistantTextMessagePersistData
-    | ToolCallMessagePersistData
-    | ToolUseMessagePersistData;
 
 export type MessageType = MessageData['type'];
 
@@ -147,7 +134,7 @@ abstract class MessageBase<T extends MessageType> {
         this.error = reason;
     }
 
-    protected restore(persistData: MessagePersistData) {
+    protected restore(persistData: MessageData) {
         this.createdAt = persistData.createdAt;
         this.status = persistData.status;
         this.error = persistData.error;
@@ -156,8 +143,6 @@ abstract class MessageBase<T extends MessageType> {
     abstract toMessageData(): MessageData;
 
     abstract toChatInputPayload(): ChatInputPayload | null;
-
-    abstract toPersistData(): MessagePersistData | null;
 
     protected toMessageDataBase(): MessageDataBase {
         return {
@@ -174,9 +159,9 @@ export class DebugMessage extends MessageBase<'debug'> {
 
     readonly title: string;
 
-    readonly content: MessageContentChunk;
+    readonly content: DebugContentChunk;
 
-    constructor(uuid: string, level: DebugMessageLevel, title: string, content: MessageContentChunk) {
+    constructor(uuid: string, level: DebugMessageLevel, title: string, content: DebugContentChunk) {
         super(uuid, 'debug');
         this.level = level;
         this.title = title;
@@ -193,18 +178,15 @@ export class DebugMessage extends MessageBase<'debug'> {
         };
     }
 
+    // Debug message do not participate in chat
     toChatInputPayload(): ChatInputPayload | null {
-        return null;
-    }
-
-    toPersistData(): UserRequestMessagePersistData | null {
         return null;
     }
 }
 
 export class UserRequestMessage extends MessageBase<'userRequest'> {
-    static from(data: UserRequestMessagePersistData) {
-        const message = new UserRequestMessage(data.uuid, data.textContent);
+    static from(data: UserRequestMessageData) {
+        const message = new UserRequestMessage(data.uuid, data.content);
         message.restore(data);
         return message;
     }
@@ -231,23 +213,13 @@ export class UserRequestMessage extends MessageBase<'userRequest'> {
         };
     }
 
-    toPersistData(): UserRequestMessagePersistData {
-        return {
-            ...this.toMessageDataBase(),
-            type: this.type,
-            textContent: this.content,
-        };
-    }
-
-    protected restore(persistData: UserRequestMessagePersistData) {
+    protected restore(persistData: UserRequestMessageData) {
         super.restore(persistData);
-        this.content = persistData.textContent;
+        this.content = persistData.content;
     }
 }
 
 abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends MessageBase<T> {
-    textContent = '';
-
     protected readonly chunks: MessageContentChunk[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -255,7 +227,11 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
         super(uuid, type);
     }
 
-    toMessageData(): MessageData {
+    getTextContent() {
+        return this.chunks.map(chunkToString).join('');
+    }
+
+    toMessageData(): AssistantTextMessageData | ToolCallMessageData {
         return {
             ...this.toMessageDataBase(),
             type: this.type,
@@ -266,56 +242,88 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     toChatInputPayload(): ChatInputPayload {
         return {
             role: 'assistant',
-            content: this.textContent,
+            content: this.getTextContent(),
         };
     }
 
-    protected restore(persistData: AssistantTextMessagePersistData | ToolCallMessagePersistData) {
+    protected restore(persistData: AssistantTextMessageData | ToolCallMessageData) {
         super.restore(persistData);
-        this.textContent = persistData.textContent;
         this.chunks.push(...persistData.chunks);
     }
 }
 
+function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
+    return typeof chunk !== 'string' && chunk.type === 'toolCall';
+}
+
+function isReactiveToolCallChunk(chunk: MessageContentChunk) {
+    return isToolCallChunk(chunk)
+        && chunk.toolName !== 'ask_followup_question'
+        && chunk.toolName !== 'attempt_completion';
+}
+
 export class ToolCallMessage extends AssistantMessage<'toolCall'> {
-    static from(data: ToolCallMessagePersistData) {
+    static from(data: ToolCallMessageData) {
         const message = new ToolCallMessage(data);
         return message;
     }
 
-    constructor(source: AssistantTextMessagePersistData | ToolCallMessagePersistData) {
+    constructor(source: AssistantTextMessageData | ToolCallMessageData) {
         super(source.uuid, 'toolCall');
         this.restore(source);
     }
 
-    toPersistData(): ToolCallMessagePersistData {
-        return {
-            ...this.toMessageDataBase(),
-            type: this.type,
-            textContent: this.textContent,
-            chunks: this.chunks,
-        };
-    }
-
     getToolCallInput(): ModelToolCallInput {
-        const toolCall = this.chunks.find(v => typeof v !== 'string' && v.type === 'toolCall');
-
-        if (!toolCall) {
-            throw new Error('Invalid tool call message without tool chunk');
-        }
+        const toolCall = this.findToolCallChunkStrict();
 
         return {
             name: toolCall.toolName,
             arguments: toolCall.arguments,
         };
     }
-}
 
-function isReactiveToolCallChunk(chunk: MessageContentChunk) {
-    return typeof chunk !== 'string'
-        && chunk.type === 'toolCall'
-        && chunk.toolName !== 'ask_followup_question'
-        && chunk.toolName !== 'attempt_completion';
+    getToolCallInputWithSource(): ModelToolCallInputWithSource {
+        const toolCall = this.findToolCallChunkStrict();
+
+        return {
+            name: toolCall.toolName,
+            arguments: toolCall.arguments,
+            source: toolCall.source,
+        };
+    }
+
+    replaceToolCallInput(input: ModelToolCallInputWithSource) {
+        const index = this.chunks.findIndex(isToolCallChunk);
+
+        if (index < 0) {
+            throw new Error('Invalid tool call message without tool chunk');
+        }
+
+        this.chunks[index] = {
+            type: 'toolCall',
+            toolName: input.name,
+            arguments: input.arguments,
+            status: 'completed',
+            source: input.source,
+        };
+    }
+
+    toMessageData(): ToolCallMessageData {
+        return {
+            ...super.toMessageData(),
+            type: this.type,
+        };
+    }
+
+    private findToolCallChunkStrict() {
+        const chunk = this.chunks.find(isToolCallChunk);
+
+        if (!chunk) {
+            throw new Error('Invalid tool call message without tool chunk');
+        }
+
+        return chunk;
+    }
 }
 
 type MaybeChunk = MessageContentChunk | undefined;
@@ -333,7 +341,7 @@ function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk 
 }
 
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
-    static from(data: AssistantTextMessagePersistData) {
+    static from(data: AssistantTextMessageData) {
         const message = new AssistantTextMessage(data.uuid);
         message.restore(data);
         return message;
@@ -345,7 +353,6 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
 
     addChunk(chunk: ToolParsedChunk) {
         if (chunk.type === 'text') {
-            this.textContent += chunk.content;
             const lastChunk = this.chunks.at(-1);
             if (typeof lastChunk === 'string') {
                 this.chunks[this.chunks.length - 1] = lastChunk + chunk.content;
@@ -356,14 +363,20 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
             return;
         }
 
-        this.textContent += chunk.source;
         const lastChunk = this.chunks.at(-1);
 
         if (chunk.type === 'thinkingStart') {
             this.chunks.push({type: 'thinking', content: '', status: 'generating'});
         }
         else if (chunk.type === 'toolStart') {
-            this.chunks.push({type: 'toolCall', toolName: chunk.toolName, arguments: {}, status: 'generating'});
+            const toolChunk: ToolCallMessageChunk = {
+                type: 'toolCall',
+                toolName: chunk.toolName,
+                arguments: {},
+                status: 'generating',
+                source: chunk.source,
+            };
+            this.chunks.push(toolChunk);
         }
         else if (chunk.type === 'thinkingDelta') {
             assertThinkingChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
@@ -375,6 +388,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         }
         else if (chunk.type === 'toolDelta') {
             assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
+            lastChunk.source += chunk.source;
             for (const [key, value] of Object.entries(chunk.arguments)) {
                 const previousValue = lastChunk.arguments[key] ?? '';
                 lastChunk.arguments[key] = previousValue + value;
@@ -383,37 +397,36 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         else if (chunk.type === 'toolEnd') {
             assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
             lastChunk.status = 'completed';
+            lastChunk.source += chunk.source;
             return;
         }
-        else if (chunk.type !== 'textInTool') {
+        else if (chunk.type === 'textInTool') {
+            assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
+            lastChunk.source += chunk.source;
+        }
+        else {
             assertNever<{type: string}>(chunk, v => `Unexpected chunk type: ${v.type}`);
         }
     }
 
-    addEmbeddingSearchResult(query: string, results: EmbeddingSearchResultItem[]) {
-        this.chunks.push({type: 'embeddingSearch', query, results});
-    }
-
-    toPersistData(): AssistantTextMessagePersistData {
+    toMessageData(): AssistantTextMessageData {
         return {
-            ...this.toMessageDataBase(),
+            ...super.toMessageData(),
             type: this.type,
-            textContent: this.textContent,
-            chunks: this.chunks,
         };
     }
 
     toToolCallMessage(): ToolCallMessage | null {
         if (this.chunks.some(isReactiveToolCallChunk)) {
-            return new ToolCallMessage(this.toPersistData());
+            return new ToolCallMessage(this.toMessageData());
         }
         return null;
     }
 }
 
 export class ToolUseMessage extends MessageBase<'toolUse'> {
-    static from(data: ToolUseMessagePersistData) {
-        const message = new ToolUseMessage(data.uuid, data.textContent);
+    static from(data: ToolUseMessageData) {
+        const message = new ToolUseMessage(data.uuid, data.content);
         message.restore(data);
         return message;
     }
@@ -441,23 +454,15 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
         };
     }
 
-    toPersistData(): MessagePersistData {
-        return {
-            ...this.toMessageDataBase(),
-            type: this.type,
-            textContent: this.content,
-        };
-    }
-
-    protected restore(persistData: ToolUseMessagePersistData) {
+    protected restore(persistData: ToolUseMessageData) {
         super.restore(persistData);
-        this.content = persistData.textContent;
+        this.content = persistData.content;
     }
 }
 
 export type Message = DebugMessage | UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
 
-export function deserializeMessage(data: MessagePersistData): Message {
+export function deserializeMessage(data: MessageData): Message {
     switch (data.type) {
         case 'userRequest':
             return UserRequestMessage.from(data);
@@ -467,6 +472,8 @@ export function deserializeMessage(data: MessagePersistData): Message {
             return ToolCallMessage.from(data);
         case 'toolUse':
             return ToolUseMessage.from(data);
+        case 'debug':
+            throw new Error('Unexpected debug message on deserialization');
         default:
             assertNever<{type: string}>(data, v => `Unknown message type ${v.type}`);
     }

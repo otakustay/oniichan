@@ -3,37 +3,35 @@ import {
     AssistantTextMessage,
     UserRequestMessage,
     Message,
-    UserRequestMessagePersistData,
-    AssistantTextMessagePersistData,
     DebugMessage,
     DebugMessageLevel,
-    MessageContentChunk,
+    DebugContentChunk,
+    AssistantTextMessageData,
+    UserRequestMessageData,
+    DebugMessageData,
 } from './message';
-import {Workflow, WorkflowOriginMessage, WorkflowPersistData} from './workflow';
+import {Workflow, WorkflowOriginMessage, WorkflowData} from './workflow';
 
-interface RoundtripMessageResponsePersistData {
+interface RoundtripMessageResponseData {
     type: 'message';
-    message: AssistantTextMessagePersistData;
+    message: AssistantTextMessageData;
 }
 
-interface RoundtripWorkflowResponsePersistData {
+interface RoundtripWorkflowResponseData {
     type: 'workflow';
-    workflow: WorkflowPersistData;
+    workflow: WorkflowData;
 }
 
-interface RoundtripDebugResponsePersistData {
+interface RoundtripDebugResponseData {
     type: 'debug';
-    message: AssistantTextMessagePersistData;
+    message: DebugMessageData;
 }
 
-type RoundtripResponsePersistData =
-    | RoundtripMessageResponsePersistData
-    | RoundtripWorkflowResponsePersistData
-    | RoundtripDebugResponsePersistData;
+type RoundtripResponseData = RoundtripMessageResponseData | RoundtripWorkflowResponseData | RoundtripDebugResponseData;
 
-export interface RoundtripPersistData {
-    request: UserRequestMessagePersistData;
-    responses: RoundtripResponsePersistData[];
+export interface RoundtripData {
+    request: UserRequestMessageData;
+    responses: RoundtripResponseData[];
 }
 
 interface RoundtripMessageResponse {
@@ -58,7 +56,7 @@ type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | 
  * then a bunch of messages are involed to handle this request, like tool calls and LLM text responses.
  */
 export class Roundtrip {
-    static from(data: RoundtripPersistData): Roundtrip {
+    static from(data: RoundtripData): Roundtrip {
         const request = UserRequestMessage.from(data.request);
         const roundtrip = new Roundtrip(request);
         for (const response of data.responses) {
@@ -95,7 +93,7 @@ export class Roundtrip {
         return response.message;
     }
 
-    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: MessageContentChunk) {
+    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: DebugContentChunk) {
         const response: RoundtripDebugResponse = {
             type: 'debug',
             message: new DebugMessage(messageUuid, level, title, content),
@@ -185,30 +183,31 @@ export class Roundtrip {
         return messages;
     }
 
-    toPersistData(): RoundtripPersistData {
-        const serializeResponse = (response: RoundtripResponse) => {
-            if (response.type === 'debug') {
-                return [];
-            }
-            else if (response.type === 'message') {
-                return {
-                    type: response.type,
-                    message: response.message.toPersistData(),
-                };
-            }
-            else if (response.type === 'workflow') {
-                return {
-                    type: response.type,
-                    workflow: response.workflow.toPersistData(),
-                };
-            }
-            else {
-                assertNever<{type: string}>(response, v => `Unknown roundtrip response type: ${v.type}`);
+    toRoundtripData(): RoundtripData {
+        const serializeResponse = (response: RoundtripResponse): RoundtripResponseData => {
+            switch (response.type) {
+                case 'debug':
+                    return {
+                        type: response.type,
+                        message: response.message.toMessageData(),
+                    };
+                case 'message':
+                    return {
+                        type: response.type,
+                        message: response.message.toMessageData(),
+                    };
+                case 'workflow':
+                    return {
+                        type: response.type,
+                        workflow: response.workflow.toWorkflowData(),
+                    };
+                default:
+                    assertNever<{type: string}>(response, v => `Unknown roundtrip response type: ${v.type}`);
             }
         };
         return {
-            request: this.request.toPersistData(),
-            responses: this.responses.flatMap(serializeResponse),
+            request: this.request.toMessageData(),
+            responses: this.responses.map(serializeResponse),
         };
     }
 
