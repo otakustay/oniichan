@@ -1,9 +1,7 @@
-import path from 'node:path';
 import {ChatUserMessagePayload} from '@oniichan/shared/model';
-import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import {renderScaffoldPrompt} from '@oniichan/prompt';
 import {EditorHost} from '../../editor';
-import scaffoldTemplate from './scaffold.prompt';
 
 export interface ScaffoldSnippet {
     path: string;
@@ -33,14 +31,7 @@ export class ScaffoldApi {
     async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ScaffoldResult> {
         const {file, snippets} = paylod;
         const model = this.editorHost.getModelAccess(this.taskId);
-        const prompt = renderPrompt(
-            scaffoldTemplate,
-            {
-                file,
-                snippets,
-                extension: path.extname(file),
-            }
-        );
+        const prompt = renderScaffoldPrompt({file, snippets});
         const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];

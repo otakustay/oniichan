@@ -11,7 +11,6 @@
     "./language": "./dist/language.js",
     "./logger": "./dist/logger.js",
     "./model": "./dist/model/index.js",
-    "./prompt": "./dist/prompt.js",
     "./string": "./dist/string/index.js",
     "./error": "./dist/error.js",
     "./tool": "./dist/tool/index.js",

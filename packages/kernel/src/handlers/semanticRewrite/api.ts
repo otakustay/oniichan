@@ -1,9 +1,7 @@
-import path from 'node:path';
 import {ChatUserMessagePayload} from '@oniichan/shared/model';
-import {renderPrompt} from '@oniichan/shared/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost} from '../../editor';
-import rewriteTemplate from './rewrite.prompt';
+import {renderSemanticRewritePrompt, SemanticRewriteView} from '@oniichan/prompt';
 
 export interface EnhancedContextSnippet {
     label: string;
@@ -32,17 +30,14 @@ export class SemanticRewriteApi {
     async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
         const {file, codeBefore, codeAfter, hint, snippets} = paylod;
         const model = this.editorHost.getModelAccess(this.taskId);
-        const prompt = renderPrompt(
-            rewriteTemplate,
-            {
-                file,
-                codeBefore,
-                codeAfter,
-                hint,
-                snippets,
-                extension: path.extname(file),
-            }
-        );
+        const view: SemanticRewriteView = {
+            file,
+            codeBefore,
+            codeAfter,
+            hint,
+            snippets,
+        };
+        const prompt = renderSemanticRewritePrompt(view);
         const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];

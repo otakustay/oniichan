@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint --max-warnings=0 --fix src",
-    "watch": "tsc-watch -p tsconfig.build.json --onSuccess 'cpy \"./**/*.prompt\" ../dist --cwd=src'"
+    "watch": "tsc -p tsconfig.build.json --watch"
   },
   "files": [
     "dist"
@@ -28,8 +28,6 @@
     "p-retry": "^6.2.1"
   },
   "devDependencies": {
-    "@types/node": "20.x",
-    "cpy-cli": "^5.0.0",
-    "tsc-watch": "^6.2.1"
+    "@types/node": "20.x"
   }
 }
