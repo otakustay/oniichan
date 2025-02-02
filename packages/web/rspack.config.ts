@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {Configuration} from '@rspack/cli';
 import ReactRefreshPlugin from '@rspack/plugin-react-refresh';
-import {HtmlRspackPlugin, DefinePlugin} from '@rspack/core';
+import {HtmlRspackPlugin, EnvironmentPlugin} from '@rspack/core';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -11,6 +11,7 @@ const htmlOptions = {
 };
 
 const config: Configuration = {
+    mode: isDev ? 'development' : 'production',
     entry: './src/index.tsx',
     experiments: {
         css: true,
@@ -72,7 +73,7 @@ const config: Configuration = {
         ],
     },
     plugins: [
-        new DefinePlugin({'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)}),
+        new EnvironmentPlugin(['NODE_ENV']),
         new HtmlRspackPlugin(htmlOptions),
         isDev && new ReactRefreshPlugin(),
     ],
