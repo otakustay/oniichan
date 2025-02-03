@@ -79,13 +79,9 @@ const Layout = styled.div`
 `;
 
 function resolveChunkContent(chunk: MessageViewChunk) {
-    if (typeof chunk === 'string') {
-        return chunk;
-    }
-    if (chunk.type === 'plainText') {
+    if (chunk.type === 'text' || chunk.type === 'plainText') {
         return chunk.content;
     }
-
     return '';
 }
 
@@ -93,11 +89,12 @@ function resolveMessageContent(message: MessageData) {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
+            return message.content;
         case 'debug':
             return resolveChunkContent(message.content);
         case 'assistantText':
         case 'toolCall':
-            return message.chunks.filter(v => typeof v === 'string').join('\n\n');
+            return message.chunks.map(v => (v.type === 'text' ? v.content : '')).join('\n\n');
         default:
             assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }

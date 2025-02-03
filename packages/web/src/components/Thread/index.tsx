@@ -28,7 +28,7 @@ function buildMessageDataSource(thread: MessageThreadData): MessageData[] {
         messages.push(response);
         for (const reaction of reactions) {
             if (reaction.type === 'assistantText' || reaction.type === 'toolCall') {
-                response.chunks.push(...reaction.chunks.filter(v => typeof v === 'string' || v.type !== 'thinking'));
+                response.chunks.push(...reaction.chunks.filter(v => v.type !== 'thinking'));
                 if (reaction.error) {
                     response.error = reaction.error;
                 }

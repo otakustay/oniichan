@@ -60,7 +60,15 @@ export class SystemPromptGenerator {
             Object.assign(view, embeddingView);
         }
         catch (ex) {
-            yield {type: 'debug', level: 'error', title: 'Embedding Error', message: stringifyError(ex)};
+            yield {
+                type: 'debug',
+                level: 'error',
+                title: 'Embedding Error',
+                message: {
+                    type: 'plainText',
+                    content: stringifyError(ex),
+                },
+            };
         }
 
         const toolsView = this.createToolsView();
@@ -71,7 +79,15 @@ export class SystemPromptGenerator {
             Object.assign(view, rootEntriesView);
         }
         catch (ex) {
-            yield {type: 'debug', level: 'error', title: 'Read Root Error', message: stringifyError(ex)};
+            yield {
+                type: 'debug',
+                level: 'error',
+                title: 'Read Root Error',
+                message: {
+                    type: 'plainText',
+                    content: stringifyError(ex),
+                },
+            };
         }
 
         // const userSystemPrompt = await this.readUserSystemPrompt();

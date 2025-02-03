@@ -5,6 +5,17 @@ import {ModelToolCallInput, ModelToolCallInputWithSource, ToolName, ToolParsedCh
 
 export type MessageStatus = 'generating' | 'unread' | 'read';
 
+export interface TextMessageChunk {
+    type: 'text';
+    content: string;
+}
+
+/** Text that should be render directly without formatting to markdown */
+export interface PlainTextMessageChunk {
+    type: 'plainText';
+    content: string;
+}
+
 export interface ToolCallMessageChunk {
     type: 'toolCall';
     toolName: ToolName;
@@ -20,13 +31,7 @@ export interface EmbeddingSearchResultItem {
     content: string;
 }
 
-/** Text that should be render directly without formatting to markdown */
-export interface PlainTextChunk {
-    type: 'plainText';
-    content: string;
-}
-
-export interface EmbeddingSearchChunk {
+export interface EmbeddingSearchMessageChunk {
     type: 'embeddingSearch';
     query: string;
     results: EmbeddingSearchResultItem[];
@@ -38,18 +43,16 @@ export interface ThinkingMessageChunk {
     status: 'generating' | 'completed';
 }
 
-export type MessageContentChunk = string | ToolCallMessageChunk | ThinkingMessageChunk;
+export type MessageContentChunk = TextMessageChunk | ToolCallMessageChunk | ThinkingMessageChunk;
 
-export type DebugContentChunk = string | PlainTextChunk | EmbeddingSearchChunk;
+export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk | EmbeddingSearchMessageChunk;
 
 export type MessageViewChunk = MessageContentChunk | DebugContentChunk;
 
 function chunkToString(chunk: MessageContentChunk) {
-    if (typeof chunk === 'string') {
-        return chunk;
-    }
-
     switch (chunk.type) {
+        case 'text':
+            return chunk.content;
         case 'thinking':
             return `<thinking>${chunk.content}</thinking>`;
         case 'toolCall':
@@ -253,7 +256,7 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
 }
 
 function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
-    return typeof chunk !== 'string' && chunk.type === 'toolCall';
+    return chunk.type === 'toolCall';
 }
 
 function isReactiveToolCallChunk(chunk: MessageContentChunk) {
@@ -329,13 +332,13 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
 type MaybeChunk = MessageContentChunk | undefined;
 
 function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
-    if (typeof chunk === 'string' || chunk?.type !== 'thinking') {
+    if (chunk?.type !== 'thinking') {
         throw new Error(message);
     }
 }
 
 function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
-    if (typeof chunk === 'string' || chunk?.type !== 'toolCall') {
+    if (chunk?.type !== 'toolCall') {
         throw new Error(message);
     }
 }
@@ -354,11 +357,11 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
     addChunk(chunk: ToolParsedChunk) {
         if (chunk.type === 'text') {
             const lastChunk = this.chunks.at(-1);
-            if (typeof lastChunk === 'string') {
-                this.chunks[this.chunks.length - 1] = lastChunk + chunk.content;
+            if (lastChunk?.type === 'text') {
+                lastChunk.content += chunk.content;
             }
             else {
-                this.chunks.push(chunk.content);
+                this.chunks.push({type: 'text', content: chunk.content});
             }
             return;
         }

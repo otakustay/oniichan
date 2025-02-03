@@ -133,13 +133,13 @@ type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
 type MaybeChunk = MessageContentChunk | undefined;
 
 function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
-    if (typeof chunk === 'string' || chunk?.type !== 'thinking') {
+    if (chunk?.type !== 'thinking') {
         throw new Error(message);
     }
 }
 
 function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
-    if (typeof chunk === 'string' || chunk?.type !== 'toolCall') {
+    if (chunk?.type !== 'toolCall') {
         throw new Error(message);
     }
 }
@@ -148,16 +148,19 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
     if (chunk.type === 'text') {
         const lastChunk = message.chunks.at(-1);
 
-        if (typeof lastChunk === 'string') {
+        if (lastChunk?.type === 'text') {
             return {
                 ...message,
-                chunks: [...message.chunks.slice(0, -1), lastChunk + chunk.content],
+                chunks: [
+                    ...message.chunks.slice(0, -1),
+                    {type: 'text', content: lastChunk.content + chunk.content},
+                ],
             };
         }
 
         return {
             ...message,
-            chunks: [...message.chunks, chunk.content],
+            chunks: [...message.chunks, chunk],
         };
     }
 

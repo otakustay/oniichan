@@ -52,6 +52,7 @@ function resolveMessageContent(message: MessageData): MessageViewChunk | Message
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
+            return {type: 'text', content: message.content};
         case 'debug':
             return message.content;
         case 'assistantText':

@@ -31,6 +31,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
 
             // TODO: Use `ripgrep`, this is now macOS style `grep`
+            // TODO: `grep` can output very very long content, we should try to trim it
             const grep = await execa(
                 'grep',
                 [
