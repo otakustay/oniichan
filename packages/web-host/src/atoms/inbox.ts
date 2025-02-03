@@ -1,9 +1,9 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
-import {InboxSendMessageRequest, InboxMarkMessageStatusRequest} from '@oniichan/kernel/protocol';
+import {InboxSendMessageRequest, InboxMarkRoundtripStatusRequest} from '@oniichan/kernel/protocol';
 import {
     MessageData,
-    MessageStatus,
+    RoundtripStatus,
     MessageThreadData,
     AssistantTextMessageData,
     ToolCallMessageData,
@@ -44,11 +44,11 @@ export function useActiveMessageThreadValue() {
     return uuid ? threads.find(v => v.uuid === uuid) : null;
 }
 
-export function useMarkMessageStatus(threadUuid: string, uuid: string) {
+export function useMarkMessageStatus(threadUuid: string, messageUuid: string) {
     const ipc = useIpcValue();
 
-    return (status: MessageStatus) => {
-        const request: InboxMarkMessageStatusRequest = {threadUuid, uuid, status};
+    return (status: RoundtripStatus) => {
+        const request: InboxMarkRoundtripStatusRequest = {threadUuid, messageUuid, status};
         void ipc.kernel.call(crypto.randomUUID(), 'inboxMarkMessageStatus', request).then(() => {});
     };
 }
@@ -261,7 +261,6 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: ToolPar
                     uuid: messageUuid,
                     type: 'assistantText',
                     chunks: [],
-                    status: 'generating',
                     createdAt: now(),
                 };
                 return handleChunkToAssistantMessage(message, chunk);

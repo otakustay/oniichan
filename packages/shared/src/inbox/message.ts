@@ -3,8 +3,6 @@ import {ChatInputPayload} from '../model';
 import {now} from '../string';
 import {ModelToolCallInput, ModelToolCallInputWithSource, ToolName, ToolParsedChunk} from '../tool';
 
-export type MessageStatus = 'generating' | 'unread' | 'read';
-
 export interface TextMessageChunk {
     type: 'text';
     content: string;
@@ -65,7 +63,6 @@ function chunkToString(chunk: MessageContentChunk) {
 interface MessageDataBase {
     uuid: string;
     createdAt: string;
-    status: MessageStatus;
     error?: string | undefined;
 }
 
@@ -107,6 +104,20 @@ export type MessageData =
 
 export type MessageType = MessageData['type'];
 
+export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
+    return chunk.type === 'toolCall';
+}
+
+export function isReactiveToolCallChunk(chunk: MessageContentChunk) {
+    return isToolCallChunk(chunk)
+        && chunk.toolName !== 'ask_followup_question'
+        && chunk.toolName !== 'attempt_completion';
+}
+
+export function isAssistantMessage(type: MessageType) {
+    return type === 'assistantText' || type === 'toolCall';
+}
+
 abstract class MessageBase<T extends MessageType> {
     readonly uuid: string;
 
@@ -114,23 +125,11 @@ abstract class MessageBase<T extends MessageType> {
 
     createdAt = now();
 
-    status: MessageStatus;
-
     error: string | undefined = undefined;
 
     constructor(uuid: string, type: T) {
         this.uuid = uuid;
         this.type = type;
-        this.status = type === 'assistantText' ? 'generating' : 'read';
-    }
-
-    markStatus(status: MessageStatus) {
-        // A `generating` message can be marked as both `unread` or `read`,
-        // a `unread` message can only be marked as `read`,
-        // a `read` message cannot be marked as `generating` nor `unread`
-        if (this.status === 'generating' || status === 'read') {
-            this.status = status;
-        }
     }
 
     setError(reason: string) {
@@ -139,7 +138,6 @@ abstract class MessageBase<T extends MessageType> {
 
     protected restore(persistData: MessageData) {
         this.createdAt = persistData.createdAt;
-        this.status = persistData.status;
         this.error = persistData.error;
     }
 
@@ -151,7 +149,6 @@ abstract class MessageBase<T extends MessageType> {
         return {
             uuid: this.uuid,
             createdAt: this.createdAt,
-            status: this.status,
             error: this.error,
         };
     }
@@ -253,16 +250,6 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
         super.restore(persistData);
         this.chunks.push(...persistData.chunks);
     }
-}
-
-function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
-    return chunk.type === 'toolCall';
-}
-
-function isReactiveToolCallChunk(chunk: MessageContentChunk) {
-    return isToolCallChunk(chunk)
-        && chunk.toolName !== 'ask_followup_question'
-        && chunk.toolName !== 'attempt_completion';
 }
 
 export class ToolCallMessage extends AssistantMessage<'toolCall'> {

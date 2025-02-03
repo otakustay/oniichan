@@ -103,6 +103,7 @@ function resolveMessageContent(message: MessageData) {
 function ThreadItem({thread}: ThreadItemProps) {
     const setActive = useSetActiveMessageThread();
     const setEditing = useSetEditing();
+    const lastRoundtrip = thread.roundtrips.at(-1);
     const firstMessage = thread.roundtrips.at(0)?.messages.at(0);
     const lastMessage = thread.roundtrips.at(-1)?.messages.at(-1);
     const select = () => {
@@ -113,7 +114,7 @@ function ThreadItem({thread}: ThreadItemProps) {
     return (
         <ItemLayout layout="position" onClick={select}>
             <ItemHeader>
-                <MessageStatusIcon status={lastMessage?.status ?? 'read'} />
+                <MessageStatusIcon status={lastRoundtrip?.status ?? 'read'} />
                 <ItemTitle>
                     {firstMessage ? resolveMessageContent(firstMessage) : '(No Title)'}
                 </ItemTitle>

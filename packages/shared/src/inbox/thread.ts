@@ -1,7 +1,8 @@
 import {MessageData, UserRequestMessage} from './message';
-import {Roundtrip, RoundtripData} from './roundtrip';
+import {Roundtrip, RoundtripData, RoundtripStatus} from './roundtrip';
 
 export interface RoundtripMessageData {
+    status: RoundtripStatus;
     messages: MessageData[];
 }
 
@@ -75,9 +76,15 @@ export class MessageThread {
     }
 
     toThreadData(): MessageThreadData {
+        const roundtripToData = (roundtrip: Roundtrip): RoundtripMessageData => {
+            return {
+                status: roundtrip.getStatus(),
+                messages: roundtrip.toMessages(true).map(v => v.toMessageData()),
+            };
+        };
         return {
             uuid: this.uuid,
-            roundtrips: this.roundtrips.map(v => ({messages: v.toMessages(true).map(v => v.toMessageData())})),
+            roundtrips: this.roundtrips.map(roundtripToData),
         };
     }
 

@@ -29,7 +29,10 @@ interface RoundtripDebugResponseData {
 
 type RoundtripResponseData = RoundtripMessageResponseData | RoundtripWorkflowResponseData | RoundtripDebugResponseData;
 
+export type RoundtripStatus = 'running' | 'unread' | 'read';
+
 export interface RoundtripData {
+    status: RoundtripStatus;
     request: UserRequestMessageData;
     responses: RoundtripResponseData[];
 }
@@ -51,8 +54,6 @@ interface RoundtripDebugResponse {
 
 type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | RoundtripDebugResponse;
 
-// TODO: Add status to roundtrip, mark read on roundtrip
-
 /**
  * A roundtrip is a part of a thread that starts from a user submitted request,
  * then a bunch of messages are involed to handle this request, like tool calls and LLM text responses.
@@ -61,6 +62,7 @@ export class Roundtrip {
     static from(data: RoundtripData): Roundtrip {
         const request = UserRequestMessage.from(data.request);
         const roundtrip = new Roundtrip(request);
+        roundtrip.markStatus(data.status);
         for (const response of data.responses) {
             if (response.type === 'message') {
                 const message = AssistantTextMessage.from(response.message);
@@ -78,12 +80,27 @@ export class Roundtrip {
 
     private readonly responses: RoundtripResponse[] = [];
 
+    private status: RoundtripStatus = 'running';
+
     constructor(request: UserRequestMessage) {
         this.request = request;
     }
 
     getRequestText() {
         return this.request.content;
+    }
+
+    getStatus() {
+        return this.status;
+    }
+
+    markStatus(status: RoundtripStatus) {
+        // A `generating` message can be marked as both `unread` or `read`,
+        // a `unread` message can only be marked as `read`,
+        // a `read` message cannot be marked as `running` nor `unread`
+        if (this.status === 'running' || status === 'read') {
+            this.status = status;
+        }
     }
 
     startTextResponse(messageUuid: string) {
@@ -104,8 +121,6 @@ export class Roundtrip {
     }
 
     startWorkflowResponse(origin: WorkflowOriginMessage) {
-        // Auto-responded workflow always has its origin message in `read` status
-        origin.markStatus('read');
         // Before converted to a workflow, we already have a message response in roundtrip
         const response = this.findMessageResponseStrict(origin.uuid);
         const responseIndex = this.responses.lastIndexOf(response);
@@ -208,6 +223,7 @@ export class Roundtrip {
             }
         };
         return {
+            status: this.status,
             request: this.request.toMessageData(),
             responses: this.responses.map(serializeResponse),
         };

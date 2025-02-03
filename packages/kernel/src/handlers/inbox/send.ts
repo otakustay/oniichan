@@ -114,7 +114,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         finally {
             // Broadcast update when message is fully generated
             logger.trace('MarkMessageUnread', {threadUuid: this.thread.uuid, messageUuid: reply.uuid});
-            reply.markStatus('unread');
+            this.roundtrip.markStatus('unread');
             logger.trace('PushStoreUpdate');
             store.moveThreadToTop(this.thread.uuid);
             this.updateInboxThreadList(store.dump());

@@ -5,7 +5,7 @@ import {BiErrorAlt} from 'react-icons/bi';
 import {IoCaretUpOutline, IoCaretDownOutline} from 'react-icons/io5';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {MessageViewChunk, MessageData} from '@oniichan/shared/inbox';
+import {MessageViewChunk, MessageData, RoundtripStatus, isAssistantMessage} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
@@ -146,10 +146,11 @@ function Toggle({collapsed, onToggle}: ToggleProps) {
 
 interface Props {
     threadUuid: string;
+    roundtripStatus: RoundtripStatus;
     message: MessageData;
 }
 
-export default function Message({threadUuid, message}: Props) {
+export default function Message({threadUuid, roundtripStatus, message}: Props) {
     const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
@@ -157,12 +158,11 @@ export default function Message({threadUuid, message}: Props) {
     const markAsRead = useRef(() => markMessageStatus('read'));
     useEffect(
         () => {
-            // TODO: Seems it doesn't get triggered without scroll of web page
-            if (message.status === 'unread' && inView) {
+            if (isAssistantMessage(message.type) && roundtripStatus === 'unread' && inView) {
                 markAsRead.current();
             }
         },
-        [message.status, inView]
+        [message.type, roundtripStatus, inView]
     );
 
     return (
@@ -170,7 +170,7 @@ export default function Message({threadUuid, message}: Props) {
             <Header>
                 {renderAvatar(message)}
                 <Sender>{resolveSenderName(message)}</Sender>
-                <MessageStatusIcon status={message.status} />
+                <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
                 <Time time={message.createdAt} />
             </Header>
             <Content content={resolveMessageContent(message)} collapsed={collapsed} />

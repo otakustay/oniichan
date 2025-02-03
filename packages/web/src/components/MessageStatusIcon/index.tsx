@@ -1,7 +1,7 @@
 import {createElement} from 'react';
 import {FaCircle, FaDownload} from 'react-icons/fa';
 import {css} from '@emotion/css';
-import {Message} from '@oniichan/shared/inbox';
+import {RoundtripStatus} from '@oniichan/shared/inbox';
 
 const className = css`
     color: var(--color-information);
@@ -10,7 +10,7 @@ const className = css`
 `;
 
 interface Props {
-    status: Message['status'];
+    status: RoundtripStatus;
 }
 
 export default function MessageStatusIcon({status}: Props) {
@@ -18,6 +18,6 @@ export default function MessageStatusIcon({status}: Props) {
         return null;
     }
 
-    const icon = status === 'generating' ? FaDownload : FaCircle;
+    const icon = status === 'running' ? FaDownload : FaCircle;
     return createElement(icon, {className});
 }
