@@ -17,7 +17,6 @@ export interface WorkflowRunResult {
     finished: boolean;
 }
 
-// TODO: Missing solution to allow workflow runner request LLM with logs and streaming response
 export abstract class WorkflowRunner {
     protected readonly threadUuid: string;
 

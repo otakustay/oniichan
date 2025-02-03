@@ -1,7 +1,6 @@
 import OpenAi from 'openai';
 import {ModelResponseMetaRecord} from './utils';
 import {
-    ChatInputPayload,
     ModelChatOptions,
     ModelClient,
     ModelConfiguration,
@@ -11,11 +10,6 @@ import {
 } from './interface';
 
 const OPEN_ROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
-
-function transformInputPayload(input: ChatInputPayload): OpenAi.ChatCompletionMessageParam {
-    // TODO: Maybe we can delete this function
-    return input;
-}
 
 export class OpenAiModelClient implements ModelClient {
     private readonly client: OpenAi;
@@ -68,7 +62,7 @@ export class OpenAiModelClient implements ModelClient {
     }
 
     private getBaseRequest(options: ModelChatOptions) {
-        const messages = options.messages.map(transformInputPayload);
+        const messages: OpenAi.ChatCompletionMessageParam[] = [...options.messages];
         if (options.systemPrompt) {
             messages.unshift({role: 'system', content: options.systemPrompt});
         }

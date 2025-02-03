@@ -63,7 +63,7 @@ interface MessageUpdateOptions {
 }
 
 function createThreadListUpdate(threadUuid: string, messageUuid: string, options: MessageUpdateOptions) {
-    return (threads: MessageThreadData[]) => {
+    return (threads: MessageThreadData[]): MessageThreadData[] => {
         const {create, update} = options;
         const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
 
@@ -72,7 +72,16 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
         }
 
         const targetThread = threads[threadIndex];
-        const messageIndex = targetThread.messages.findIndex(v => v.uuid === messageUuid);
+
+        const roundtripIndex = targetThread.roundtrips.findIndex(v => v.messages.some(v => v.uuid === messageUuid));
+
+        if (roundtripIndex < 0) {
+            return threads;
+        }
+
+        const targetRoundtrip = targetThread.roundtrips[roundtripIndex];
+
+        const messageIndex = targetRoundtrip.messages.findIndex(v => v.uuid === messageUuid);
 
         if (messageIndex < 0) {
             const newMessage = create();
@@ -80,24 +89,38 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                 ...threads.slice(0, threadIndex),
                 {
                     ...targetThread,
-                    messages: [
-                        ...targetThread.messages,
-                        newMessage,
+                    roundtrips: [
+                        ...targetThread.roundtrips.slice(0, roundtripIndex),
+                        {
+                            ...targetRoundtrip,
+                            messages: [
+                                ...targetRoundtrip.messages,
+                                update(newMessage),
+                            ],
+                        },
+                        ...targetThread.roundtrips.slice(roundtripIndex + 1),
                     ],
                 },
                 ...threads.slice(threadIndex + 1),
             ];
         }
 
-        const targetMessage = targetThread.messages[messageIndex];
+        const targetMessage = targetRoundtrip.messages[messageIndex];
         return [
             ...threads.slice(0, threadIndex),
             {
                 ...targetThread,
-                messages: [
-                    ...targetThread.messages.slice(0, messageIndex),
-                    update(targetMessage),
-                    ...targetThread.messages.slice(messageIndex + 1),
+                roundtrips: [
+                    ...targetThread.roundtrips.slice(0, roundtripIndex),
+                    {
+                        ...targetRoundtrip,
+                        messages: [
+                            ...targetRoundtrip.messages.slice(0, messageIndex),
+                            update(targetMessage),
+                            ...targetRoundtrip.messages.slice(messageIndex + 1),
+                        ],
+                    },
+                    ...targetThread.roundtrips.slice(roundtripIndex + 1),
                 ],
             },
             ...threads.slice(threadIndex + 1),

@@ -152,7 +152,6 @@ export interface AttemptCompletionParameter {
     command?: string;
 }
 
-// TODO: Move examples here and loop to prompt
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',

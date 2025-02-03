@@ -1,9 +1,13 @@
 import {MessageData, UserRequestMessage} from './message';
 import {Roundtrip, RoundtripData} from './roundtrip';
 
+export interface RoundtripMessageData {
+    messages: MessageData[];
+}
+
 export interface MessageThreadData {
     uuid: string;
-    messages: MessageData[];
+    roundtrips: RoundtripMessageData[];
 }
 
 export interface MessageThreadPersistData {
@@ -71,10 +75,9 @@ export class MessageThread {
     }
 
     toThreadData(): MessageThreadData {
-        const messages = this.roundtrips.flatMap(v => v.toMessages(true));
         return {
             uuid: this.uuid,
-            messages: messages.map(v => v.toMessageData()),
+            roundtrips: this.roundtrips.map(v => ({messages: v.toMessages(true).map(v => v.toMessageData())})),
         };
     }
 

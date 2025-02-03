@@ -51,6 +51,8 @@ interface RoundtripDebugResponse {
 
 type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | RoundtripDebugResponse;
 
+// TODO: Add status to roundtrip, mark read on roundtrip
+
 /**
  * A roundtrip is a part of a thread that starts from a user submitted request,
  * then a bunch of messages are involed to handle this request, like tool calls and LLM text responses.

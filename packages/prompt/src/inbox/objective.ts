@@ -19,16 +19,13 @@ export function renderObjectiveSection() {
         2. If not using the attempt_completion or ask_followup_question tool, place a <thinking></thinking> tag in which you should think the usage of a tool, it must includes at least the tool name and all its required parameters's value, tool and parameters are expressed in its original names, do not translate them. Carefully explain why and how you are going to use the tool.
         3. A tool call in a XML-style tag, use the tool name as root tag, carefully put every parameter you thought in <thinking></thinkging> as an child tag. You MUST use one tool per message, and the tool usage must happen at the end of the message, you should not output anything after a tool call.
 
-        Note your thoughts inside <thinking></thinking> are required to contain the reason using a tool, the tool name and its parameter values, then you call that tool by using the tool name as root tag, each parameter as a child tag, this is a example using read_directory tool:
+        Note your thoughts inside <thinking></thinking> are required to contain the reason using a tool, a explanation of the tool call XML tag structure is followed, then you call that tool by using the tool name as root tag, each parameter as a child tag, this is a example using read_directory tool:
 
         \`\`\`
         <thinking>
-        Your thoughts and reason for using the tool here...
+        I should use the read_directory tool to inspect the structure of project source.
 
-        Tool: read_directory
-        Parameters:
-        - path: src
-        - recursive: true
+        To call this tool, I need a <read_directory> root element with <path> and <recursive> child tags.
         </thinking>
         <read_directory>
         <path>src</path>

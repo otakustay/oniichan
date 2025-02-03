@@ -78,7 +78,7 @@ const Content = styled(MessageContent)<{collapsed: boolean}>`
 
 const Header = styled.div`
     display: flex;
-    padding-bottom: .5em;
+    padding-bottom: 1em;
     border-bottom: 1px solid var(--color-default-bottom);
     align-items: center;
     gap: .4em;

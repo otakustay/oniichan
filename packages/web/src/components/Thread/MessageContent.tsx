@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import {MessageViewChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
@@ -6,7 +7,7 @@ import Thinking from './Thinking';
 
 function renderChunk(chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) {
     if (typeof chunk === 'string') {
-        return <Markdown key={`string-chunk-${index}`} content={chunk} />;
+        return chunk.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk} /> : null;
     }
     else if (chunk.type === 'thinking') {
         return process.env.NODE_ENV === 'development' || index === dataSource.length - 1
@@ -24,6 +25,27 @@ function renderChunk(chunk: MessageViewChunk, index: number, dataSource: Message
     }
 }
 
+const Layout = styled.div`
+    code {
+        font-family: monospace;
+        padding: 0 .5em;
+        background-color: transparent;
+        color: var(--color-contrast-foreground);
+    }
+
+    pre {
+        background-color: transparent !important;
+    }
+
+    > :first-child {
+        margin-top: 0;
+    }
+
+    > :last-child {
+        margin-bottom: 0;
+    }
+`;
+
 interface Props {
     className?: string;
     content: MessageViewChunk | MessageViewChunk[];
@@ -36,5 +58,5 @@ export default function MessageContent({className, content}: Props) {
         return <>(Empty)</>;
     }
 
-    return <div className={className}>{chunks.map(renderChunk)}</div>;
+    return <Layout className={className}>{chunks.map(renderChunk)}</Layout>;
 }
