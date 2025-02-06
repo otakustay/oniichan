@@ -210,7 +210,7 @@ export const builtinTools: ToolDescription[] = [
     {
         name: 'attempt_completion',
         description:
-            `When you confirm the user request is completed, use this tool to present the result of your work to the user. Optionally you may provide a CLI command to showcase the result of your work.`,
+            'When you confirm the user request is completed, use this tool to present the result of your work to the user, it\'s better to also have an instruction about how to verify the result. Optionally you may provide a CLI command to showcase the result of your work.',
         parameters: attemptCompletionParameters,
         usage: dedent`
             <attempt_completion>
