@@ -13,7 +13,6 @@ export type ToolName =
     | 'read_directory'
     | 'find_files_by_glob'
     | 'find_files_by_regex'
-    | 'search_codebase'
     | 'attempt_completion'
     | 'ask_followup_question';
 
@@ -101,21 +100,6 @@ export interface FindFilesByRegExpParameter {
     // glob?: string;
 }
 
-export const searchEmbeddingParameters = {
-    type: 'object',
-    properties: {
-        query: {
-            type: 'string',
-            description: 'A natural language query to search in codebase',
-        },
-    },
-    required: ['query'],
-} as const satisfies ParameterInfo;
-
-export interface SearchEmbeddingParameter {
-    query: string;
-}
-
 export const askFollowupQuestionParameters = {
     type: 'object',
     properties: {
@@ -194,17 +178,6 @@ export const builtinTools: ToolDescription[] = [
                 <regex>export function [A-Z][a-zA-Z0-9]*\(</regex>
                 <path>src/common</path>
             </find_files_by_regex>
-        `,
-    },
-    {
-        name: 'search_codebase',
-        description:
-            'Search for codebase with a natural language query, returns chunks with filename, line range and code content',
-        parameters: searchEmbeddingParameters,
-        usage: dedent`
-            <search_codebase>
-                <query>function which validate whether a string is a valid email</query>
-            </search_codebase>
         `,
     },
     {

@@ -4,7 +4,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
-import {EjectInternalsCommand, ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug';
+import {ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
@@ -34,7 +34,6 @@ export async function activate(context: ExtensionContext) {
         new OpenDataFolderCommand(),
         new WebApp(globalContainer),
         new ScaffoldCommand(globalContainer),
-        new EjectInternalsCommand(globalContainer),
         new ExportInboxCommand(globalContainer)
     );
     const logger = globalContainer.get(Logger);

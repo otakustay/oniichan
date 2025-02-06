@@ -22,19 +22,6 @@ export interface ToolCallMessageChunk {
     source: string;
 }
 
-export interface EmbeddingSearchResultItem {
-    file: string;
-    startLine: number;
-    endLine: number;
-    content: string;
-}
-
-export interface EmbeddingSearchMessageChunk {
-    type: 'embeddingSearch';
-    query: string;
-    results: EmbeddingSearchResultItem[];
-}
-
 export interface ThinkingMessageChunk {
     type: 'thinking';
     content: string;
@@ -43,8 +30,7 @@ export interface ThinkingMessageChunk {
 
 export type MessageContentChunk = TextMessageChunk | ToolCallMessageChunk | ThinkingMessageChunk;
 
-export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk | EmbeddingSearchMessageChunk;
-
+export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk;
 export type MessageViewChunk = MessageContentChunk | DebugContentChunk;
 
 function chunkToString(chunk: MessageContentChunk) {

@@ -15,7 +15,6 @@ import {detectWorkflow, DetectWorkflowOptions} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
 import {SystemPromptGenerator} from './prompt';
-import {CustomConfig, readCustomConfig} from '../../core/config';
 
 interface TextMessageBody {
     type: 'text';
@@ -44,16 +43,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private roundtrip: Roundtrip = new Roundtrip(new UserRequestMessage(newUuid(), ''));
 
-    private customConfig: CustomConfig = {
-        embeddingRepoId: '',
-        embeddingOnQuery: false,
-        embeddingAsTool: false,
-        embeddingContextMode: 'chunk',
-        minEmbeddingDistance: 0,
-        rootEntriesOnQuery: false,
-    };
-
-    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost, this.customConfig);
+    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost);
 
     private systemPrompt = '';
 
@@ -157,8 +147,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const {logger} = this.context;
         logger.trace('PrepareSystemPromptStart');
 
-        this.systemPromptGenerator.setCustomConfig(this.customConfig);
-        for await (const item of this.systemPromptGenerator.renderSystemPrompt(this.roundtrip.getRequestText())) {
+        for await (const item of this.systemPromptGenerator.renderSystemPrompt()) {
             switch (item.type) {
                 case 'debug':
                     this.addDebugMessage(item.level, item.title, item.message);
@@ -175,7 +164,6 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *chat() {
-        this.customConfig = await readCustomConfig(this.context.editorHost);
         await this.prepareSystemPrompt();
 
         this.addDebugMessage('info', 'System Prompt', {type: 'plainText', content: this.systemPrompt});

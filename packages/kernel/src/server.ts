@@ -10,7 +10,7 @@ import {ModelChatHandler} from './handlers/model';
 import {ScaffoldHandler} from './handlers/scaffold';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
-import {ExportInboxHandler, EjectInternalsHandler} from './handlers/debug';
+import {ExportInboxHandler} from './handlers/debug';
 
 export class KernelServer extends Server<KernelProtocol, Context> {
     static readonly namespace = '-> kernel';
@@ -39,6 +39,5 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.registerHandler(InboxMarkRoundtripStatusHandler);
         this.registerHandler(InboxGetThreadListHandler);
         this.registerHandler(ExportInboxHandler);
-        this.registerHandler(EjectInternalsHandler);
     }
 }

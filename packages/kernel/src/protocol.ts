@@ -5,7 +5,7 @@ import type {ScaffoldHandler} from './handlers/scaffold';
 import type {ModelChatHandler} from './handlers/model';
 import type {ModelTelemetryHandler} from './handlers/telemetry';
 import {InboxSendMessageHandler, InboxMarkRoundtripStatusHandler, InboxGetThreadListHandler} from './handlers/inbox';
-import type {ExportInboxHandler, EjectInternalsHandler} from './handlers/debug';
+import type {ExportInboxHandler} from './handlers/debug';
 
 export type {InboxSendMessageRequest, InboxMarkRoundtripStatusRequest} from './handlers/inbox';
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
@@ -21,5 +21,4 @@ export type KernelProtocol = ProtocolOf<
     | typeof InboxMarkRoundtripStatusHandler
     | typeof InboxGetThreadListHandler
     | typeof ExportInboxHandler
-    | typeof EjectInternalsHandler
 >;

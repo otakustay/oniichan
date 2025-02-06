@@ -3,7 +3,6 @@ import {MessageViewChunk} from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
-import {EmbeddingSearch} from './EmbeddingSearch';
 import Thinking from './Thinking';
 
 function renderChunk(chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) {
@@ -18,8 +17,6 @@ function renderChunk(chunk: MessageViewChunk, index: number, dataSource: Message
             return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;
         case 'plainText':
             return <pre key={`plain-text-chunk-${index}`}>{chunk.content}</pre>;
-        case 'embeddingSearch':
-            return <EmbeddingSearch key={`embedding-chunk-${index}`} query={chunk.query} results={chunk.results} />;
         default:
             assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);
     }
