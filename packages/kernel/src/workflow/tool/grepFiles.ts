@@ -1,4 +1,3 @@
-import url from 'node:url';
 import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
@@ -44,7 +43,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                     '-r',
                     args.path,
                 ],
-                {cwd: url.fileURLToPath(root)}
+                {cwd: root}
             );
 
             if (grep.stdout) {

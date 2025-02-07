@@ -39,7 +39,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'There are no files in directory ${args.path}',
+                    output: `There are no files in directory ${args.path}`,
                 };
             }
 

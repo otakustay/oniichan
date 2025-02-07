@@ -1,3 +1,4 @@
+import url from 'node:url';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {newUuid} from '@oniichan/shared/id';
 
@@ -28,7 +29,8 @@ export class WorkspaceHost {
     }
 
     async getRoot() {
-        return this.client.call(newUuid(this.taskId), 'getWorkspaceRoot');
+        const uri = await this.client.call(newUuid(this.taskId), 'getWorkspaceRoot');
+        return uri && url.fileURLToPath(uri);
     }
 
     async findFiles(glob: string, limit?: number) {

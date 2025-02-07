@@ -1,6 +1,6 @@
 import {ComponentType} from 'react';
 import styled from '@emotion/styled';
-import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
+import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline, IoTerminalOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
@@ -41,6 +41,8 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
             return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
         case 'find_files_by_regex':
             return [IoSearchOutline, 'Grep', input.arguments.regex ?? ''];
+        case 'run_command':
+            return [IoTerminalOutline, 'Run', input.arguments.command ?? ''];
         default:
             throw new Error(`Unknown reference type`);
     }

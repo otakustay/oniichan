@@ -13,6 +13,7 @@ export type ToolName =
     | 'read_directory'
     | 'find_files_by_glob'
     | 'find_files_by_regex'
+    | 'run_command'
     | 'attempt_completion'
     | 'ask_followup_question';
 
@@ -112,6 +113,21 @@ export const askFollowupQuestionParameters = {
     required: ['question'],
 } as const satisfies ParameterInfo;
 
+export const runCommandParameters = {
+    type: 'object',
+    properties: {
+        command: {
+            type: 'string',
+            description: 'The command to run, must be a valid shell command',
+        },
+    },
+    required: ['command'],
+} as const satisfies ParameterInfo;
+
+export interface RunCommandParameter {
+    command: string;
+}
+
 export interface AskFollowupQuestionParameter {
     question: string;
 }
@@ -178,6 +194,17 @@ export const builtinTools: ToolDescription[] = [
                 <regex>export function [A-Z][a-zA-Z0-9]*\(</regex>
                 <path>src/common</path>
             </find_files_by_regex>
+        `,
+    },
+    {
+        name: 'run_command',
+        description:
+            `Execute a CLI command on the system. To operate with system and perform tasks that are not covered by other tools, use this tool with a clear explanation of what the command does.`,
+        parameters: runCommandParameters,
+        usage: dedent`
+            <run_command>
+                <command>ls -la</command>
+            </run_command>
         `,
     },
     {

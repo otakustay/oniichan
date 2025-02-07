@@ -13,11 +13,13 @@ import type {
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
 import {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
+import {ExecuteTerminalHandler} from './handlers/terminal';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
 export type {RenderDiffViewRequest, AcceptEditRequest} from './handlers/diff';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
+export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
 
 export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler
@@ -33,4 +35,5 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof WriteWorkspaceFileHandler
     | typeof RenderDiffViewHandler
     | typeof AcceptFileEditHandler
+    | typeof ExecuteTerminalHandler
 >;

@@ -1,4 +1,3 @@
-import url from 'node:url';
 import {builtinTools} from '@oniichan/shared/tool';
 import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {DebugContentChunk, DebugMessageLevel} from '@oniichan/shared/inbox';
@@ -63,7 +62,7 @@ export class SystemPromptGenerator {
         const root = await this.editorHost.getWorkspace().getRoot();
 
         if (root) {
-            const entries = await this.editorHost.getWorkspace().readDirectory(url.fileURLToPath(root));
+            const entries = await this.editorHost.getWorkspace().readDirectory(root);
             return {rootEntries: entries.map(v => v.name + (v.type === 'directory' ? '/' : ''))};
         }
 

@@ -20,6 +20,9 @@ import {
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
 import {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
+import {ResourceManager} from '../utils/resource';
+import {TerminalManager} from '../utils/terminal';
+import {ExecuteTerminalHandler} from './handlers/terminal';
 
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
@@ -33,9 +36,16 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
 
     private readonly container: DependencyContainer<EditorHostDependency>;
 
+    private readonly resourceManager = new ResourceManager();
+
+    private readonly terminalManager = new TerminalManager();
+
     constructor(container: DependencyContainer<EditorHostDependency>) {
         super({namespace: EditorHostServer.namespace});
         this.container = container;
+        const extensionContext = this.container.get('ExtensionContext');
+        extensionContext.subscriptions.push(this.resourceManager);
+        extensionContext.subscriptions.push(this.terminalManager);
     }
 
     protected initializeHandlers() {
@@ -52,6 +62,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(WriteWorkspaceFileHandler);
         this.registerHandler(RenderDiffViewHandler);
         this.registerHandler(AcceptFileEditHandler);
+        this.registerHandler(ExecuteTerminalHandler);
     }
 
     protected async createContext() {
@@ -60,6 +71,8 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
             logger: this.container.get(Logger),
             extensionHost: this.container.get('ExtensionContext'),
             diffViewManager: this.container.get(DiffViewManager),
+            resourceManager: this.resourceManager,
+            terminalManager: this.terminalManager,
         };
     }
 }

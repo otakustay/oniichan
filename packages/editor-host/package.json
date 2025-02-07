@@ -26,6 +26,7 @@
     "@oniichan/shared": "workspace:*",
     "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
-    "nanoid": "^5.0.9"
+    "nanoid": "^5.0.9",
+    "strip-ansi": "^7.1.0"
   }
 }
