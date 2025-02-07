@@ -2,7 +2,19 @@ import {Terminal, Disposable, window} from 'vscode';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 
 function extractExecutionOutput(content: string) {
-    return /\]633;C([\s\S]*?)\]633;D/.exec(content)?.at(1) ?? '';
+    const fullOutputContent = /\]633;C([\s\S]*?)\]633;D/.exec(content)?.at(1);
+
+    if (typeof fullOutputContent === 'string') {
+        return fullOutputContent;
+    }
+
+    const matchStart = /\]633;C/.exec(content);
+
+    if (matchStart) {
+        return content.slice(matchStart.index + matchStart[0].length);
+    }
+
+    return content;
 }
 
 function removeInvisibleCharacters(content: string) {
@@ -21,34 +33,14 @@ function removeHeadingSymbols(content: string) {
     return content.replace(/^[^a-zA-Z0-9]*/, '');
 }
 
-export async function readTerminalExecution(stream: AsyncIterable<string>): Promise<string> {
-    const {default: stripAnsi} = await import('strip-ansi');
-    const chunks: string[] = [];
-
-    // TODO: Can we get partial output before it exits?
-    for await (const chunk of stream) {
-        chunks.push(chunk);
-    }
-
-    const rawContent = chunks.join('');
-    const commandOutput = extractExecutionOutput(rawContent);
-    const cleanedContent = removeInvisibleCharacters(stripAnsi(commandOutput));
-    const lines = cleanedContent.split('\n');
-    if (lines.length > 0) {
-        lines[0] = removeDuplicatedHeadingCharacter(lines[0]);
-        lines[0] = removeHeadingSymbols(lines[0]);
-    }
-    if (lines.length > 1) {
-        lines[1] = removeHeadingSymbols(lines[1]);
-    }
-    return lines.join('\n');
+function removeUnwantedTailingContent(line: string) {
+    return line.replace(/[%$#>]\s*$/, '');
 }
 
 export type ExecuteStatus = 'exit' | 'timeout' | 'noShellIntegration';
 
 export interface ExecuteResult {
     status: ExecuteStatus;
-    exitCode: number | null;
     output: string;
 }
 
@@ -60,6 +52,8 @@ export class ExecutionTerminal implements Disposable {
     }
 
     private readonly terminal: Terminal;
+
+    private readonly output: string[] = [];
 
     private status: 'running' | 'idle' = 'idle';
 
@@ -90,6 +84,7 @@ export class ExecutionTerminal implements Disposable {
         }
 
         this.status = 'running';
+        this.output.length = 0;
         this.terminal.show();
 
         return Promise.race([this.executeCommand(command), this.reportTimeout(timeout)]);
@@ -101,21 +96,45 @@ export class ExecutionTerminal implements Disposable {
 
     private async reportTimeout(timeout: number): Promise<ExecuteResult> {
         await wait(timeout);
+        const output = await this.parseCommandOutput();
         return {
             status: 'timeout',
-            exitCode: null,
-            output: '',
+            output,
         };
+    }
+
+    private async waitTerminalExecution(stream: AsyncIterable<string>) {
+        for await (const chunk of stream) {
+            this.output.push(chunk);
+        }
+    }
+
+    private async parseCommandOutput() {
+        const {default: stripAnsi} = await import('strip-ansi');
+        const rawContent = this.output.join('');
+        const commandOutput = extractExecutionOutput(rawContent);
+        const cleanedContent = stripAnsi(commandOutput);
+        const lines = cleanedContent.split('\n');
+        if (lines.length > 0) {
+            lines[0] = removeInvisibleCharacters(lines[0]);
+            lines[0] = removeDuplicatedHeadingCharacter(lines[0]);
+            lines[0] = removeHeadingSymbols(lines[0]);
+            lines[lines.length - 1] = removeUnwantedTailingContent(lines[lines.length - 1]);
+        }
+        if (lines.length > 1) {
+            lines[1] = removeHeadingSymbols(lines[1]);
+        }
+        return lines.join('\n').trim();
     }
 
     private async executeCommand(command: string): Promise<ExecuteResult> {
         if (this.terminal.shellIntegration) {
             const execution = this.terminal.shellIntegration.executeCommand(command);
-            const output = await readTerminalExecution(execution.read());
+            await this.waitTerminalExecution(execution.read());
+            const output = await this.parseCommandOutput();
             this.status = 'idle';
             return {
                 status: 'exit',
-                exitCode: this.terminal.exitStatus?.code ?? null,
                 output,
             };
         }
@@ -124,7 +143,6 @@ export class ExecutionTerminal implements Disposable {
         this.terminal.sendText(command);
         return {
             status: 'noShellIntegration',
-            exitCode: null,
             output: '',
         };
     }

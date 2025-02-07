@@ -3,10 +3,6 @@ import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
 import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
 
-function exitCodeString(code: number | null) {
-    return code === null ? 'no exit code' : `code ${code}`;
-}
-
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
     constructor(editorHost: EditorHost) {
         super(editorHost, runCommandParameters);
@@ -42,17 +38,21 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         finished: false,
                         output: result.output
                             ? resultMarkdown(
-                                `Command exited with ${exitCodeString(result.exitCode)}, here is its output:`,
+                                `Command executed, here is its output:`,
                                 result.output
                             )
-                            : `Command exited with ${exitCodeString(result.exitCode)} without any output`,
+                            : `Command exited without any output`,
                     };
                 case 'timeout':
                     return {
                         type: 'success',
                         finished: false,
-                        output:
-                            'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work',
+                        output: result.output
+                            ? 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work'
+                            : resultMarkdown(
+                                'This command is still running, here is its output so far:',
+                                result.output
+                            ),
                     };
                 case 'noShellIntegration':
                     return {

@@ -17,6 +17,6 @@ export class TerminalHost {
     }
 
     async runCommand({command, cwd}: RunCommandOptions) {
-        return this.client.call(newUuid(this.taskId), 'executeTerminal', {command, cwd, timeout: 1000 * 10});
+        return this.client.call(newUuid(this.taskId), 'executeTerminal', {command, cwd, timeout: 1000 * 30});
     }
 }

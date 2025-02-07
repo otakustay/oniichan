@@ -10,7 +10,6 @@ export interface ExecuteTerminalRequest {
 
 export interface ExecuteTerminalResponse {
     status: ExecuteStatus;
-    exitCode: number | null;
     output: string;
 }
 
@@ -30,7 +29,6 @@ export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalReques
 
         yield {
             status: result.status,
-            exitCode: result.exitCode,
             output: result.output,
         };
     }
