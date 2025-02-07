@@ -76,7 +76,22 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
         const roundtripIndex = targetThread.roundtrips.findIndex(v => v.messages.some(v => v.uuid === messageUuid));
 
         if (roundtripIndex < 0) {
-            return threads;
+            return [
+                ...threads.slice(0, threadIndex),
+                {
+                    ...targetThread,
+                    roundtrips: [
+                        ...targetThread.roundtrips,
+                        {
+                            status: 'running',
+                            messages: [
+                                create(),
+                            ],
+                        },
+                    ],
+                },
+                ...threads.slice(threadIndex + 1),
+            ];
         }
 
         const targetRoundtrip = targetThread.roundtrips[roundtripIndex];
