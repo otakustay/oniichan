@@ -1,0 +1,26 @@
+@@ ... @@
+   <head>
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>Vite + React + TS</title>
++    <title>在线五子棋游戏 | Gobang Online</title>
++    <meta name="description" content="一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!" />
++    <meta name="keywords" content="五子棋,在线游戏,gobang,五子棋游戏,棋类游戏,单机游戏,多人游戏" />
++    <meta name="robots" content="index, follow" />
++    <meta name="author" content="Your Name" />
++
++    <!-- Open Graph / Facebook -->
++    <meta property="og:type" content="website" />
++    <meta property="og:url" content="https://yourdomain.com/" />
++    <meta property="og:title" content="在线五子棋游戏 | Gobang Online" />
++    <meta property="og:description" content="一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!" />
++    <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
++
++    <!-- Twitter -->
++    <meta property="twitter:card" content="summary_large_image" />
++    <meta property="twitter:url" content="https://yourdomain.com/" />
++    <meta property="twitter:title" content="在线五子棋游戏 | Gobang Online" />
++    <meta property="twitter:description" content="一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!" />
++    <meta property="twitter:image" content="https://yourdomain.com/og-image.jpg" />
+@@ ... @@

@@ -1,0 +1,105 @@
+[
+  {
+    "changes": [
+      {
+        "type": "normal",
+        "content": "  <head>"
+      },
+      {
+        "type": "normal",
+        "content": "    <meta charset=\"UTF-8\" />"
+      },
+      {
+        "type": "normal",
+        "content": "    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\" />"
+      },
+      {
+        "type": "normal",
+        "content": "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+      },
+      {
+        "type": "delete",
+        "content": "    <title>Vite + React + TS</title>"
+      },
+      {
+        "type": "insert",
+        "content": "    <title>在线五子棋游戏 | Gobang Online</title>"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta name=\"description\" content=\"一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta name=\"keywords\" content=\"五子棋,在线游戏,gobang,五子棋游戏,棋类游戏,单机游戏,多人游戏\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta name=\"robots\" content=\"index, follow\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta name=\"author\" content=\"Your Name\" />"
+      },
+      {
+        "type": "insert",
+        "content": ""
+      },
+      {
+        "type": "insert",
+        "content": "    <!-- Open Graph / Facebook -->"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"og:type\" content=\"website\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"og:url\" content=\"https://yourdomain.com/\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"og:title\" content=\"在线五子棋游戏 | Gobang Online\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"og:description\" content=\"一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"og:image\" content=\"https://yourdomain.com/og-image.jpg\" />"
+      },
+      {
+        "type": "insert",
+        "content": ""
+      },
+      {
+        "type": "insert",
+        "content": "    <!-- Twitter -->"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"twitter:card\" content=\"summary_large_image\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"twitter:url\" content=\"https://yourdomain.com/\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"twitter:title\" content=\"在线五子棋游戏 | Gobang Online\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"twitter:description\" content=\"一个简单好玩的在线五子棋游戏,支持单人和多人对战模式。享受经典的黑白棋大战!\" />"
+      },
+      {
+        "type": "insert",
+        "content": "    <meta property=\"twitter:image\" content=\"https://yourdomain.com/og-image.jpg\" />"
+      }
+    ]
+  },
+  {
+    "changes": []
+  }
+]

@@ -49,5 +49,6 @@ function applySingleHunk(source: string, organized: OrganizedHunk): string {
 }
 
 export function applyHunks(source: string, hunks: Hunk[]): string {
-    return hunks.reduce((result, hunk) => applySingleHunk(result, organizeHunk(hunk)), source);
+    const hasChangeHunks = hunks.filter(v => !!v.changes.length);
+    return hasChangeHunks.reduce((result, hunk) => applySingleHunk(result, organizeHunk(hunk)), source);
 }

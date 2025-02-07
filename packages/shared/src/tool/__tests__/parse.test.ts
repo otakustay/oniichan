@@ -211,7 +211,6 @@ test('xml inside thinking', async () => {
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
     };
-    console.log(chunks.at(0));
     expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
