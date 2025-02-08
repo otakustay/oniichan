@@ -54,10 +54,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
         this.roundtrip = this.thread.startRoundtrip(new UserRequestMessage(payload.uuid, payload.body.content));
-
-        logger.trace('PushStoreUpdate');
         store.moveThreadToTop(this.thread.uuid);
-        this.updateInboxThreadList(store.dump());
 
         try {
             yield* this.telemetry.spyStreaming(() => this.chat());
@@ -72,6 +69,9 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const {logger, editorHost} = this.context;
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
+
+        logger.trace('PushStoreUpdate');
+        this.updateInboxThreadList(store.dump());
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const model = editorHost.getModelAccess(this.getTaskId());
