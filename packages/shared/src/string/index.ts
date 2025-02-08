@@ -1,4 +1,4 @@
-export {trimPathString} from './trim';
+export {trimPathString, joinToMaxLength, JoinToMaxLengthResult} from './trim';
 export {now} from './time';
 export {CodeBlock, extractCodeBlocksFromMarkdown} from './extractCodeBlock';
 export {

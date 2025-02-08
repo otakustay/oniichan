@@ -1,7 +1,49 @@
 import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
+import {joinToMaxLength} from '@oniichan/shared/string';
 import {stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
 import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+
+interface GrepState {
+    currentGroupLines: string[];
+    isCurrentGroupAvailable: boolean;
+    isFiltered: boolean;
+}
+
+function groupGrepOutput(output: string) {
+    const lines = output.split('\n');
+    const groups: string[] = [];
+    const state: GrepState = {
+        currentGroupLines: [],
+        isCurrentGroupAvailable: true,
+        isFiltered: false,
+    };
+    for (const line of lines) {
+        if (line === '--') {
+            if (state.isCurrentGroupAvailable) {
+                groups.push(state.currentGroupLines.join('\n'));
+                state.currentGroupLines = [];
+                state.isCurrentGroupAvailable = true;
+            }
+            continue;
+        }
+
+        if (line.length > 500) {
+            state.isCurrentGroupAvailable = false;
+            state.isFiltered = true;
+        }
+
+        if (state.isCurrentGroupAvailable) {
+            state.currentGroupLines.push(line);
+        }
+    }
+
+    const joined = joinToMaxLength(groups, '\n--\n', 4000);
+    return {
+        content: joined.value,
+        isTruncated: state.isFiltered || joined.includedItems < groups.length,
+    };
+}
 
 export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpParameter> {
     constructor(editorHost: EditorHost) {
@@ -30,7 +72,6 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
 
             // TODO: Use `ripgrep`, this is now macOS style `grep`
-            // TODO: `grep` can output very very long content, we should try to trim it
             const grep = await execa(
                 'grep',
                 [
@@ -47,13 +88,14 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             );
 
             if (grep.stdout) {
+                const output = groupGrepOutput(grep.stdout);
+                const title = output.isTruncated
+                    ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
+                    : 'This is stdout of grep command:';
                 return {
                     type: 'success',
                     finished: false,
-                    output: resultMarkdown(
-                        `This is stdout of grep command:`,
-                        grep.stdout
-                    ),
+                    output: resultMarkdown(title, output.content),
                 };
             }
 

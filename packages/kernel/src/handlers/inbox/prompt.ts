@@ -55,6 +55,11 @@ export class SystemPromptGenerator {
     }
 
     private createToolsView() {
+        if (process.platform === 'darwin') {
+            // TODO: Enable this tool when shipped with `ripgrep`
+            return {tools: builtinTools.filter(v => v.name !== 'find_files_by_regex')};
+        }
+
         return {tools: builtinTools};
     }
 
