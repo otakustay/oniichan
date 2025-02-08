@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/kernel",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Contains core logic for all capabilities with VSCode API decoupled",
   "exports": {
     "./protocol": "./dist/protocol.js",
