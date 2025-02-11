@@ -9,8 +9,5 @@
   },
   "typescript.tsc.autoDetect": "off",
   "editor.defaultFormatter": "dprint.dprint",
-  "files.associations": {
-    "*.prompt": "mustache"
-  },
   "typescript.tsdk": "node_modules/typescript/lib"
 }

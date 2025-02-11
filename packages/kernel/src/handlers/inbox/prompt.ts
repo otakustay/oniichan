@@ -68,7 +68,9 @@ export class SystemPromptGenerator {
 
         if (root) {
             const entries = await this.editorHost.getWorkspace().readDirectory(root);
-            return {rootEntries: entries.map(v => v.name + (v.type === 'directory' ? '/' : ''))};
+            // Entries like `.git` or `.gitignore` are meaningless for code generating
+            const meaningfulEntries = entries.filter(v => !v.name.startsWith('.git'));
+            return {rootEntries: meaningfulEntries.map(v => v.name + (v.type === 'directory' ? '/' : ''))};
         }
 
         return {rootEntries: []};

@@ -1,5 +1,5 @@
 import {ToolDescription} from '@oniichan/shared/tool';
-import {renderRuleSection} from './rule';
+import {renderScratchStartRuleSection, renderRuleSection} from './rule';
 import {renderFormatSection} from './format';
 import {renderToolSection} from './tool';
 import {renderRootEntriesSection} from './rootEntries';
@@ -12,7 +12,7 @@ export interface InboxPromptView {
 
 export async function renderInboxSystemPrompt(view: InboxPromptView) {
     const parts = [
-        renderRuleSection(),
+        view.rootEntries.length ? renderRuleSection() : renderScratchStartRuleSection(),
         renderFormatSection(),
         renderToolSection(view.tools),
         '# Context',
