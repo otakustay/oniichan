@@ -4,31 +4,17 @@ import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline, IoTerminalO
 import {trimPathString} from '@oniichan/shared/string';
 import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
+import ActBar from '@/components/ActBar';
 
-const Layout = styled.div`
-    display: flex;
-    align-items: center;
-    gap: .5em;
-    margin: 1em 0;
-    border: 1px solid var(--color-default-border);
-    border-radius: .5em;
-    padding: .5em 1em;
-    cursor: default;
-
-    + & {
-        margin-top: 0;
-    }
-`;
-
-const ActionLabel = styled.span`
-    color: var(--color-secondary-foreground);
-`;
-
-const ContentLabel = styled.span`
+const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);
     font-size: .8em;
     padding: .25em .5em;
     border-radius: .25em;
+`;
+
+const ActionLabel = styled.span`
+    color: var(--color-secondary-foreground);
 `;
 
 function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string, string] {
@@ -73,13 +59,17 @@ export default function ToolUsage({input}: Props) {
         return input.arguments.question ? <Markdown content={input.arguments.question} /> : null;
     }
 
-    const [Icon, action, content] = renderLabelContent(input);
+    const [Icon, action, parameter] = renderLabelContent(input);
 
     return (
-        <Layout>
-            <Icon />
-            <ActionLabel>{action}</ActionLabel>
-            <ContentLabel>{content}</ContentLabel>
-        </Layout>
+        <ActBar
+            icon={<Icon />}
+            content={
+                <>
+                    <ActionLabel>{action}</ActionLabel>
+                    {parameter && <ParameterLabel>{parameter}</ParameterLabel>}
+                </>
+            }
+        />
     );
 }

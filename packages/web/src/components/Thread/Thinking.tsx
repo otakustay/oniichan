@@ -1,25 +1,11 @@
 import styled from '@emotion/styled';
 import {IoChatbubbleEllipsesOutline} from 'react-icons/io5';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
+import ActBar from '@/components/ActBar';
 
 const Content = styled.p`
     white-space: pre-wrap;
     margin: 0;
-`;
-
-const Layout = styled.div`
-    display: flex;
-    align-items: center;
-    gap: .5em;
-    margin: 1em 0;
-    border: 1px solid var(--color-default-border);
-    border-radius: .5em;
-    padding: .5em 1em;
-    cursor: default;
-
-    + & {
-        margin-top: 0;
-    }
 `;
 
 const DebugTitle = styled.div`
@@ -28,7 +14,7 @@ const DebugTitle = styled.div`
     align-items: center;
 `;
 
-const DebugLayout = styled(Layout)`
+const DebugLayout = styled(ActBar.Layout)`
     flex-direction: column;
     align-items: flex-start;
     background-color: var(--color-contrast-background);
@@ -53,10 +39,5 @@ export default function Thinking({content}: Props) {
         );
     }
 
-    return (
-        <Layout>
-            <IoChatbubbleEllipsesOutline />
-            Oniichan is burning his brain...
-        </Layout>
-    );
+    return <ActBar icon={<IoChatbubbleEllipsesOutline />} content="Oniichan is burning his brain..." />;
 }

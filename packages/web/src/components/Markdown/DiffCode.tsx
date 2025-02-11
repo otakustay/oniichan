@@ -6,7 +6,7 @@ import {trimPathString} from '@oniichan/shared/string';
 import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
-import Toggle from '@/components/Toggle';
+import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from './LanguageIcon';
 
@@ -51,13 +51,6 @@ const DeletedMark = styled.span`
     color: var(--color-deletion);
 `;
 
-const ActionSection = styled.div`
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: .5em;
-`;
-
 const ActionButton = styled(Button)`
     height: 1.5em;
     border-radius: .5em;
@@ -67,24 +60,6 @@ const ActionButton = styled(Button)`
 const ErrorLabel = styled.span`
     margin-left: auto;
     color: var(--color-error);
-`;
-
-const Bar = styled.div`
-    display: flex;
-    align-items: center;
-    gap: .5em;
-`;
-
-const Layout = styled.div`
-    padding: .5em 1em;
-    margin: 1em 0;
-    border: solid 1px var(--color-default-border);
-    border-radius: .5em;
-    background-color: var(--color-contrast-background);
-
-    + & {
-        margin-top: 0;
-    }
 `;
 
 interface SourceFileState {
@@ -155,7 +130,6 @@ interface Props {
 
 export default function DiffCode({action, file, content, closed}: Props) {
     const [sourceFile, setSourceFile] = useState<SourceFileState>({state: 'reading', content: ''});
-    const [showSource, setShowSource] = useState(false);
     const ipc = useIpc();
     useEffect(
         () => {
@@ -197,21 +171,25 @@ export default function DiffCode({action, file, content, closed}: Props) {
     };
 
     return (
-        <Layout>
-            <Bar>
-                {closed ? <LanguageIcon mode="extension" value={extension} /> : <Loading />}
-                <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
-                <CountLabel type="addition" count={insertedCount} />
-                <CountLabel type="deletion" count={deletedCount} />
-                {action === 'delete' && <DeletedMark>D</DeletedMark>}
-                <ActionSection>
+        <ActBar
+            icon={<LanguageIcon mode="extension" value={extension} />}
+            content={
+                <>
+                    <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
+                    {closed && <CountLabel type="addition" count={insertedCount} />}
+                    {closed && <CountLabel type="deletion" count={deletedCount} />}
+                    {action === 'delete' && <DeletedMark>D</DeletedMark>}
+                </>
+            }
+            actions={
+                <>
+                    {!closed && <Loading />}
                     {showAction && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
                     {showAction && <ActionButton onClick={accept}>Accept</ActionButton>}
                     {error && <ErrorLabel>{error}</ErrorLabel>}
-                    {error && content && <Toggle collapsed={showSource} onChange={setShowSource} />}
-                </ActionSection>
-            </Bar>
-            {showSource && <SourceCode code={content.trim()} language="diff" />}
-        </Layout>
+                </>
+            }
+            richContent={error && content.trim() ? <SourceCode code={content.trim()} language="diff" /> : null}
+        />
     );
 }
