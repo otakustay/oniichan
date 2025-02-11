@@ -11,6 +11,7 @@ import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
 import InteractiveLabel from '../InteractiveLabel';
+import {Indicator} from './Indicator';
 
 function resolveSenderName(message: MessageData) {
     switch (message.type) {
@@ -48,13 +49,13 @@ function renderAvatar(message: MessageData) {
     }
 }
 
-function resolveMessageContent(message: MessageData): MessageViewChunk | MessageViewChunk[] {
+function resolveMessageContent(message: MessageData): MessageViewChunk[] {
     switch (message.type) {
         case 'userRequest':
         case 'toolUse':
-            return {type: 'text', content: message.content};
+            return [{type: 'text', content: message.content}];
         case 'debug':
-            return message.content;
+            return [message.content];
         case 'assistantText':
         case 'toolCall':
             return message.chunks;
@@ -148,9 +149,10 @@ interface Props {
     threadUuid: string;
     roundtripStatus: RoundtripStatus;
     message: MessageData;
+    showIndicator: boolean;
 }
 
-export default function Message({threadUuid, roundtripStatus, message}: Props) {
+export default function Message({threadUuid, roundtripStatus, message, showIndicator}: Props) {
     const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
@@ -164,6 +166,7 @@ export default function Message({threadUuid, roundtripStatus, message}: Props) {
         },
         [message.type, roundtripStatus, inView]
     );
+    const chunks = resolveMessageContent(message);
 
     return (
         <Layout ref={ref}>
@@ -173,7 +176,8 @@ export default function Message({threadUuid, roundtripStatus, message}: Props) {
                 <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
                 <Time time={message.createdAt} />
             </Header>
-            <Content content={resolveMessageContent(message)} collapsed={collapsed} />
+            <Content chunks={chunks} collapsed={collapsed} />
+            {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
             {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
             <Error reason={message.error} />
         </Layout>

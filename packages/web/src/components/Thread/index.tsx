@@ -86,12 +86,13 @@ export default function Thread({uuid}: Props) {
 
     const renderRoundtrip = (roundtrip: RoundtripMessageData) => {
         const messages = buildMessageDataSource(roundtrip);
-        const renderMessage = (message: MessageData) => (
+        const renderMessage = (message: MessageData, index: number, dataSource: MessageData[]) => (
             <Message
                 key={message.uuid}
                 threadUuid={thread.uuid}
                 roundtripStatus={roundtrip.status}
                 message={message}
+                showIndicator={roundtrip.status === 'running' && index === dataSource.length - 1}
             />
         );
         return messages.map(renderMessage);

@@ -63,6 +63,14 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});
         }
+        finally {
+            logger.trace('MarkRoundtripUnread', {threadUuid: this.thread.uuid, messageUuid: payload.uuid});
+            this.roundtrip.markStatus('unread');
+
+            logger.trace('PushStoreUpdate');
+            store.moveThreadToTop(this.thread.uuid);
+            this.updateInboxThreadList(store.dump());
+        }
     }
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
@@ -102,9 +110,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             throw ex;
         }
         finally {
-            // Broadcast update when message is fully generated
-            logger.trace('MarkMessageUnread', {threadUuid: this.thread.uuid, messageUuid: reply.uuid});
-            this.roundtrip.markStatus('unread');
+            // Broadcast update when one message is fully generated
             logger.trace('PushStoreUpdate');
             store.moveThreadToTop(this.thread.uuid);
             this.updateInboxThreadList(store.dump());

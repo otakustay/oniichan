@@ -29,12 +29,11 @@ const Layout = styled.div`
 
 interface Props {
     className?: string;
-    content: MessageViewChunk | MessageViewChunk[];
+    chunks: MessageViewChunk[];
 }
 
-export default function MessageContent({className, content}: Props) {
+export default function MessageContent({className, chunks}: Props) {
     const viewMode = useViewModeValue();
-    const chunks = Array.isArray(content) ? content : [content];
     const renderChunk = (chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) => {
         switch (chunk.type) {
             case 'text':
