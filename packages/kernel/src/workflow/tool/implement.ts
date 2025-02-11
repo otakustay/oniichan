@@ -1,5 +1,6 @@
 import {ModelToolCallInput} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
+import {Logger} from '@oniichan/shared/logger';
 import {EditorHost} from '../../editor';
 import {ToolImplementBase, ToolRunResult} from './utils';
 import {ReadFileToolImplement} from './readFile';
@@ -19,12 +20,12 @@ export class ToolImplement {
 
     private readonly runCommand: ToolImplementBase;
 
-    constructor(editorHost: EditorHost) {
+    constructor(editorHost: EditorHost, logger: Logger) {
         this.readFile = new ReadFileToolImplement(editorHost);
         this.readDirectory = new ReadDirectoryToolImplement(editorHost);
         this.globFiles = new GlobFilesToolImplement(editorHost);
-        this.grepFiles = new GrepFilesToolImplement(editorHost);
-        this.runCommand = new RunCommandToolImplement(editorHost);
+        this.grepFiles = new GrepFilesToolImplement(editorHost, logger);
+        this.runCommand = new RunCommandToolImplement(editorHost, logger);
     }
 
     async callTool(input: ModelToolCallInput): Promise<ToolRunResult> {

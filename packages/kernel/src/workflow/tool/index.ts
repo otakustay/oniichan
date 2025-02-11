@@ -1,5 +1,6 @@
 import {newUuid} from '@oniichan/shared/id';
 import {ToolCallMessage, ToolUseMessage} from '@oniichan/shared/inbox';
+import {Logger} from '@oniichan/shared/logger';
 import {EditorHost, ModelAccessHost} from '../../editor';
 import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
@@ -19,22 +20,29 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
 
     private readonly message: ToolCallMessage;
 
+    private readonly logger: Logger;
+
     private retries = 0;
 
     constructor(init: ToolCallWorkflowRunnerInit) {
         super(init);
         this.message = init.origin;
         this.model = init.editorHost.getModelAccess(init.taskId);
-        this.implment = new ToolImplement(init.editorHost);
+        this.implment = new ToolImplement(init.editorHost, init.logger);
+        this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 
     async execute(): Promise<WorkflowRunResult> {
         if (this.retries >= RETRY_LIMIT) {
+            this.logger.error('TooManyRetry');
             this.origin.setError('Model generates an invalid tool call and oniichan is unable to fix it');
             return {finished: true};
         }
 
-        const result = await this.implment.callTool(this.message.getToolCallInput());
+        const toolInput = this.message.getToolCallInput();
+        this.logger.trace('ToolCallStart', {input: toolInput, retry: this.retries});
+        const result = await this.implment.callTool(toolInput);
+        this.logger.trace('ToolCallFinish', {result: result.type});
 
         if (result.type === 'success' || result.type === 'executeError') {
             const responseMessage = new ToolUseMessage(newUuid(), result.output);
@@ -43,6 +51,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             return {finished: result.type === 'success' && result.finished};
         }
 
+        this.logger.trace('FixToolError', {error: result});
         const fixOptions: ToolCallFixOptions = {
             input: this.message.getToolCallInput(),
             response: this.message.getTextContent(),

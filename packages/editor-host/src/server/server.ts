@@ -36,13 +36,19 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
 
     private readonly container: DependencyContainer<EditorHostDependency>;
 
-    private readonly resourceManager = new ResourceManager();
+    private readonly resourceManager;
 
-    private readonly terminalManager = new TerminalManager();
+    private readonly terminalManager;
+
+    private readonly logger: Logger;
 
     constructor(container: DependencyContainer<EditorHostDependency>) {
         super({namespace: EditorHostServer.namespace});
         this.container = container;
+        this.resourceManager = new ResourceManager(container);
+        this.terminalManager = new TerminalManager(container);
+        this.logger = this.container.get(Logger).with({source: 'EditorHostServer'});
+
         const extensionContext = this.container.get('ExtensionContext');
         extensionContext.subscriptions.push(this.resourceManager);
         extensionContext.subscriptions.push(this.terminalManager);
@@ -68,9 +74,9 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
     protected async createContext() {
         return {
             loadingManager: this.container.get(LoadingManager),
-            logger: this.container.get(Logger),
             extensionHost: this.container.get('ExtensionContext'),
             diffViewManager: this.container.get(DiffViewManager),
+            logger: this.logger,
             resourceManager: this.resourceManager,
             terminalManager: this.terminalManager,
         };

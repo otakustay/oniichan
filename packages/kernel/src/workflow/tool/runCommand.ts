@@ -1,11 +1,15 @@
 import {runCommandParameters, RunCommandParameter} from '@oniichan/shared/tool';
+import {Logger} from '@oniichan/shared/logger';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
 import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
 
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
-    constructor(editorHost: EditorHost) {
+    private readonly logger: Logger;
+
+    constructor(editorHost: EditorHost, logger: Logger) {
         super(editorHost, runCommandParameters);
+        this.logger = logger.with({source: 'RunCommandToolImplement'});
     }
 
     protected parseArgs(args: Record<string, string>): RunCommandParameter {
@@ -33,6 +37,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
 
             switch (result.status) {
                 case 'exit':
+                    this.logger.trace('RunCommandExit');
                     return {
                         type: 'success',
                         finished: false,
@@ -44,6 +49,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                             : `Command exited without any output`,
                     };
                 case 'timeout':
+                    this.logger.trace('RunCommandTimeout');
                     return {
                         type: 'success',
                         finished: false,
@@ -55,6 +61,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                             ),
                     };
                 case 'noShellIntegration':
+                    this.logger.trace('RunCommandNoShellIntegration');
                     return {
                         type: 'success',
                         finished: false,
@@ -66,6 +73,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
             }
         }
         catch (ex) {
+            this.logger.error('RunCommandError', {command: args.command, reason: stringifyError(ex)});
             return {
                 type: 'executeError',
                 output: `Unable to execute command \`${args.command}\`: ${stringifyError(ex)}`,

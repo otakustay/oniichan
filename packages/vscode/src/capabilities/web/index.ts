@@ -77,7 +77,9 @@ export class WebApp implements Disposable, WebviewViewProvider {
     private readonly disposables: Disposable[] = [];
 
     constructor(container: DependencyContainer<Dependency>) {
-        this.container = container;
+        const logger = container.get(Logger);
+        this.container = container
+            .bind(Logger, () => logger.with({source: 'WebApp'}), {singleton: true});
         this.webAppServer = new WebAppServer(this.container, {staticDirectory: path.join(__dirname, 'web')});
         this.initializeStatusBar();
         this.initializeSidebar();

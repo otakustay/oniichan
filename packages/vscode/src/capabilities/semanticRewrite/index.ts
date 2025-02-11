@@ -33,7 +33,7 @@ class SemanticRewriteExecutor {
         this.tracks = tracks;
         const logger = container.get(Logger);
         const loggerOverride = {
-            source: this.constructor.name,
+            source: 'SemanticRewriteExecutor',
             taskId: this.taskId,
             functionName: 'SemanticRewrite',
         };

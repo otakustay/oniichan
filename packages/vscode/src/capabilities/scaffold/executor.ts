@@ -33,7 +33,7 @@ export class ScaffoldExecutor {
         const logger = container.get(Logger);
         const context = container.get(TaskContext);
         const loggerOverride = {
-            source: this.constructor.name,
+            source: 'ScaffoldExecutor',
             taskId: context.getTaskId(),
             functionName: 'Scaffold',
         };

@@ -1,4 +1,5 @@
 import {stringifyError} from '@oniichan/shared/error';
+import {Logger} from '@oniichan/shared/logger';
 import {Message, Workflow, WorkflowOriginMessage} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 
@@ -9,6 +10,7 @@ export interface WorkflowRunnerInit {
     origin: WorkflowOriginMessage;
     workflow: Workflow;
     telemetry: FunctionUsageTelemetry;
+    logger: Logger;
     onUpdateThrad: () => void;
 }
 

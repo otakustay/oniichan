@@ -1,5 +1,6 @@
 import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {joinToMaxLength} from '@oniichan/shared/string';
+import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
 import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
@@ -42,12 +43,17 @@ function groupGrepOutput(output: string) {
     return {
         content: joined.value,
         isTruncated: state.isFiltered || joined.includedItems < groups.length,
+        originalCount: groups.length,
+        truncatedCount: joined.includedItems,
     };
 }
 
 export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpParameter> {
-    constructor(editorHost: EditorHost) {
+    private readonly logger: Logger;
+
+    constructor(editorHost: EditorHost, logger: Logger) {
         super(editorHost, findFilesByRegExpParameters);
+        this.logger = logger.with({source: 'GrepFilesToolImplement'});
     }
 
     protected parseArgs(args: Record<string, string>): FindFilesByRegExpParameter {
@@ -72,23 +78,32 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
 
             // TODO: Use `ripgrep`, this is now macOS style `grep`
-            const grep = await execa(
-                'grep',
-                [
-                    '-i',
-                    '-E',
-                    args.regex,
-                    '--context=1',
-                    '--exclude-dir',
-                    '.git,.nx,.husky,node_modules,.webpack,dist',
-                    '-r',
-                    args.path,
-                ],
-                {cwd: root}
-            );
+            const commandLineArgs = [
+                '-i',
+                '-E',
+                args.regex,
+                '--context=1',
+                '--exclude-dir',
+                '.git,.nx,.husky,node_modules,.webpack,dist',
+                '-r',
+                args.path,
+            ];
+            this.logger.trace('ExecuteGrepStart', {args: commandLineArgs});
+            const grep = await execa('grep', commandLineArgs, {cwd: root});
 
             if (grep.stdout) {
                 const output = groupGrepOutput(grep.stdout);
+
+                if (output.isTruncated) {
+                    this.logger.trace(
+                        'ExecuteGrepFinish',
+                        {
+                            original: output.originalCount,
+                            truncated: output.truncatedCount,
+                        }
+                    );
+                }
+
                 const title = output.isTruncated
                     ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
                     : 'This is stdout of grep command:';
@@ -99,6 +114,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 };
             }
 
+            this.logger.trace('ExecuteGrepFinish', {original: 0, truncated: 0});
             return {
                 type: 'success',
                 finished: false,
@@ -106,6 +122,8 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             };
         }
         catch (ex) {
+            this.logger.error('ExecuteGrepFail', {reason: stringifyError(ex)});
+
             if (ex instanceof ExecaError) {
                 if (ex.exitCode === 1) {
                     return {

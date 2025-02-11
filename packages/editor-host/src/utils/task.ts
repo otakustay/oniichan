@@ -84,18 +84,18 @@ export class TaskManager {
 
         const taskContainer = container.bind(TaskContext, () => context, {singleton: true});
         try {
-            const promise = task(taskContainer).catch((ex: unknown) => this.handleError(ex, container));
+            const promise = task(taskContainer).catch((ex: unknown) => this.handleError(taskId, ex, container));
             context.addPending(promise);
             return promise;
         }
         catch (ex) {
-            this.handleError(ex, container);
+            this.handleError(taskId, ex, container);
         }
     }
 
     // In line this method into `runTask` will cause a type error
-    private handleError(ex: unknown, container: DependencyContainer<DependencyBase>) {
-        const logger = container.get(Logger);
+    private handleError(taskId: string, ex: unknown, container: DependencyContainer<DependencyBase>) {
+        const logger = container.get(Logger).with({source: 'TaskManager', taskId});
         logger.error('Fail', {reason: stringifyError(ex)});
     }
 }

@@ -40,7 +40,7 @@ export class DiffViewManager implements Disposable {
     private readonly disposable: Disposable;
 
     constructor(container: DependencyContainer<Dependency>) {
-        this.logger = container.get(Logger);
+        this.logger = container.get(Logger).with({source: 'DiffViewManager'});
 
         this.disposable = window.tabGroups.onDidChangeTabs(
             async e => {

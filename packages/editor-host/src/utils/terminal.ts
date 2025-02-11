@@ -1,5 +1,7 @@
 import {Terminal, Disposable, window} from 'vscode';
 import {wait, waitCondition} from '@oniichan/shared/promise';
+import {Logger} from '@oniichan/shared/logger';
+import {DependencyContainer} from '@oniichan/shared/container';
 
 function extractExecutionOutput(content: string) {
     const fullOutputContent = /\]633;C([\s\S]*?)\]633;D/.exec(content)?.at(1);
@@ -45,20 +47,23 @@ export interface ExecuteResult {
 }
 
 export class ExecutionTerminal implements Disposable {
-    static async create() {
+    static async create(logger: Logger) {
         const teriminal = window.createTerminal('Oniichan');
         await waitCondition(() => !!teriminal.shellIntegration, {interval: 50, timeout: 3000});
-        return new ExecutionTerminal(teriminal);
+        return new ExecutionTerminal(teriminal, logger);
     }
 
     private readonly terminal: Terminal;
 
     private readonly output: string[] = [];
 
+    private readonly logger: Logger;
+
     private status: 'running' | 'idle' = 'idle';
 
-    constructor(terminal: Terminal) {
+    constructor(terminal: Terminal, logger: Logger) {
         this.terminal = terminal;
+        this.logger = logger.with({source: 'ExecutionTerminal'});
     }
 
     hasShellIntegration() {
@@ -80,9 +85,11 @@ export class ExecutionTerminal implements Disposable {
 
     execute(command: string, timeout: number): Promise<ExecuteResult> {
         if (this.status === 'running') {
+            this.logger.warn('TerminalConcurrentUse');
             throw new Error('Terminal is running another command');
         }
 
+        this.logger.trace('TerminalExecute', {command, timeout});
         this.status = 'running';
         this.output.length = 0;
         this.terminal.show();
@@ -148,23 +155,32 @@ export class ExecutionTerminal implements Disposable {
     }
 }
 
+interface Dependency {
+    [Logger.containerKey]: Logger;
+}
+
 export class TerminalManager implements Disposable {
     private readonly terminals: ExecutionTerminal[] = [];
 
     private readonly didCloseTerminal: Disposable;
 
-    constructor() {
+    private readonly logger: Logger;
+
+    constructor(container: DependencyContainer<Dependency>) {
         this.didCloseTerminal = window.onDidCloseTerminal(terminal => this.removeTerminal(terminal));
+        this.logger = container.get(Logger).with({source: 'TerminalManager'});
     }
 
     async getTerminal(cwd: string) {
         const available = this.terminals.find(terminal => terminal.isIdle() && terminal.cwd() === cwd);
 
         if (available) {
+            this.logger.trace('ReuseTerminal');
             return available;
         }
 
-        const terminal = await ExecutionTerminal.create();
+        this.logger.trace('CreateTerminal');
+        const terminal = await ExecutionTerminal.create(this.logger);
         this.terminals.push(terminal);
         return terminal;
     }

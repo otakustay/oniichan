@@ -65,7 +65,7 @@ export class KernelClient extends BaseKernelClient implements Disposable {
 
     constructor(port: Port, container: DependencyContainer<Dependency>) {
         super(port);
-        this.logger = container.get(Logger);
+        this.logger = container.get(Logger).with({source: 'KernelClient'});
         this.ownPort = port;
     }
 
@@ -157,7 +157,7 @@ export class KernelClient extends BaseKernelClient implements Disposable {
 // ```
 
 export async function createKernelClient(container: DependencyContainer<EditorHostDependency>): Promise<KernelClient> {
-    const logger = container.get(Logger);
+    const logger = container.get(Logger).with({source: 'Kernel'});
     logger.trace('ActivateKernelStart');
     const worker = new Worker(path.join(__dirname, 'kernelEntry.js'));
     const port = new WorkerPort(worker);

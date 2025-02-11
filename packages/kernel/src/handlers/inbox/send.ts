@@ -11,7 +11,7 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelChatOptions} from '../../editor';
-import {detectWorkflow, DetectWorkflowOptions} from '../../workflow';
+import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
 import {SystemPromptGenerator} from './prompt';
@@ -112,15 +112,17 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         logger.trace('RequestModelFinish');
 
-        const workflowOptions: DetectWorkflowOptions = {
+        const detectorInit: WorkflowDetectorInit = {
             threadUuid: this.thread.uuid,
             taskId: this.getTaskId(),
             roundtrip: this.roundtrip,
             editorHost: this.context.editorHost,
             telemetry: this.telemetry,
+            logger,
             onUpdateThread: () => this.updateInboxThreadList(store.dump()),
         };
-        const workflowRunner = detectWorkflow(workflowOptions);
+        const detector = new WorkflowDetector(detectorInit);
+        const workflowRunner = detector.detectWorkflow();
 
         if (workflowRunner) {
             try {

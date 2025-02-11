@@ -32,7 +32,9 @@ export class LineWorker {
         this.editorReference = new TextEditorReference(document.uri.toString());
         this.hint = document.lineAt(line).text;
         this.pin = new LinePin(line, this.hint.length);
-        this.container = container;
+        const logger = container.get(Logger);
+        this.container = container
+            .bind(Logger, () => logger.with({source: 'LineWorker'}), {singleton: true});
     }
 
     async run() {
