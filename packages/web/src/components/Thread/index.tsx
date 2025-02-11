@@ -1,39 +1,22 @@
 import styled from '@emotion/styled';
-import {AssistantTextMessageData, MessageData} from '@oniichan/shared/inbox';
+import {
+    AssistantTextMessageData,
+    MessageData,
+    RoundtripMessageData,
+    ToolCallMessageData,
+} from '@oniichan/shared/inbox';
 import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
+import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {mediaWideScreen} from '@/styles';
 import {useKeyboardShortcut} from '@/hooks/keyboard';
 import Draft from '../Draft';
 import Message from './Message';
-import {RoundtripMessageData} from 'node_modules/@oniichan/shared/dist/inbox/thread';
 
-function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageData[] {
-    if (process.env.NODE_ENV === 'development') {
-        return roundtrip.messages;
-    }
+type ProductionMessageData = AssistantTextMessageData | ToolCallMessageData;
 
-    // Combine messages in roundtrip to a single response
-    const messages: MessageData[] = [];
-    const [request, reply, ...reactions] = roundtrip.messages;
-    messages.push(request);
-    const response: AssistantTextMessageData = {
-        type: 'assistantText',
-        chunks: [],
-        uuid: reply.uuid,
-        createdAt: reply.createdAt,
-        error: reply.error,
-    };
-    messages.push(response);
-    for (const reaction of reactions) {
-        if (reaction.type === 'assistantText' || reaction.type === 'toolCall') {
-            response.chunks.push(...reaction.chunks.filter(v => v.type !== 'thinking'));
-            if (reaction.error) {
-                response.error = reaction.error;
-            }
-        }
-    }
-    return messages;
+function isProductionMessage(message: MessageData): message is ProductionMessageData {
+    return message.type === 'assistantText' || message.type === 'toolCall';
 }
 
 const Layout = styled.div`
@@ -52,6 +35,7 @@ interface Props {
 }
 
 export default function Thread({uuid}: Props) {
+    const viewMode = useViewModeValue();
     const thread = useMessageThreadValueByUuid(uuid);
     const editing = useEditingValue();
     const setEditing = useSetEditing();
@@ -63,6 +47,38 @@ export default function Thread({uuid}: Props) {
             }
         }
     );
+    const buildMessageDataSource = (roundtrip: RoundtripMessageData): MessageData[] => {
+        if (viewMode.debug) {
+            return roundtrip.messages;
+        }
+
+        const [request, ...responses] = roundtrip.messages;
+
+        const messages: MessageData[] = [];
+        messages.push(request);
+
+        if (!responses.length) {
+            return messages;
+        }
+
+        // Combine messages in roundtrip to a single response
+        const [reply, ...reactions] = responses.filter(isProductionMessage);
+        const response: AssistantTextMessageData = {
+            type: 'assistantText',
+            chunks: [...reply.chunks],
+            uuid: reply.uuid,
+            createdAt: reply.createdAt,
+            error: reply.error,
+        };
+        messages.push(response);
+        for (const reaction of reactions) {
+            response.chunks.push(...reaction.chunks.filter(v => v.type !== 'thinking'));
+            if (reaction.error) {
+                response.error = reaction.error;
+            }
+        }
+        return messages;
+    };
 
     if (!thread) {
         return <div>Not Found</div>;

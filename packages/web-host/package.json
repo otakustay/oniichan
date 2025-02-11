@@ -7,6 +7,7 @@
     "./protocol": "./dist/protocol.js",
     "./server": "./dist/server.js",
     "./client": "./dist/client.js",
+    "./atoms/view": "./dist/atoms/view.js",
     "./atoms/ipc": "./dist/atoms/ipc/index.js",
     "./atoms/draft": "./dist/atoms/draft.js",
     "./atoms/inbox": "./dist/atoms/inbox.js"

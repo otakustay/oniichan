@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import {IoChatbubbleEllipsesOutline} from 'react-icons/io5';
+import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 
 const Content = styled.p`
     white-space: pre-wrap;
@@ -39,7 +40,8 @@ interface Props {
 }
 
 export default function Thinking({content}: Props) {
-    if (process.env.NODE_ENV === 'development') {
+    const viewMode = useViewModeValue();
+    if (viewMode.debug) {
         return (
             <DebugLayout>
                 <DebugTitle>

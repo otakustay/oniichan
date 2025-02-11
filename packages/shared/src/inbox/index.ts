@@ -26,7 +26,7 @@ export {
     isAssistantMessage,
 } from './message';
 export {RoundtripStatus, Roundtrip, RoundtripData} from './roundtrip';
-export {MessageThread, MessageThreadData, MessageThreadPersistData} from './thread';
+export {MessageThread, MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
 export {Workflow, WorkflowOriginMessage, WorkflowStatus} from './workflow';
 
 const debugMessageThreadFixtures: MessageThreadPersistData[] = [
