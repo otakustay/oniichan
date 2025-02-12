@@ -26,7 +26,7 @@ export function CopyCode({text}: Props) {
         <CopyToClipboard text={text} onCopy={copy}>
             <Layout>
                 {noticing ? <IoCheckmarkOutline /> : <IoCopyOutline />}
-                {noticing ? '已复制到剪贴板' : '复制代码'}
+                {noticing ? 'Copied to clipboard' : 'Copy'}
             </Layout>
         </CopyToClipboard>
     );

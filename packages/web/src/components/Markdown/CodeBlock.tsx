@@ -1,8 +1,9 @@
-import {ReactElement} from 'react';
-import {DiffAction} from '@oniichan/shared/diff';
-import DiffCode from './DiffCode';
-import TextCode from './TextCode';
+import {Suspense, ReactElement} from 'react';
+import styled from '@emotion/styled';
+import SourceCode from '@/components/SourceCode';
+import LanguageIcon from '@/components/LanguageIcon';
 import {useMarkdownContent} from './ContentProvider';
+import {CopyCode} from './CopyCode';
 
 interface CodeInPreProps {
     className?: string;
@@ -40,9 +41,43 @@ function isCodeElement(element: any): element is CodeInPreElement {
     return element?.type === 'code';
 }
 
-function isDiffAction(action: string | undefined): action is DiffAction {
-    return action === 'create' || action === 'diff' || action === 'delete';
-}
+const Header = styled.div`
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: .5em;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.5em;
+    padding: 0 1em;
+    border-radius: .5em .5em 0 0;
+    border: 1px solid var(--color-default-border);
+    border-bottom: none;
+    background-color: var(--color-contrast-background);
+`;
+
+const LanguageLabel = styled.span`
+    font-family: monospace;
+`;
+
+const SourceCodeLayout = styled.div`
+    border: 1px solid var(--color-default-border);
+    padding: .5em;
+    border-radius: 0 0 .5em .5em;
+`;
+
+const Layout = styled.div`
+    margin: 0;
+    overflow: hidden;
+
+    pre {
+        margin: 0;
+        padding: 0;
+    }
+
+    code {
+        all: unset;
+    }
+`;
 
 export default function CodeBlock({children, node}: Props) {
     if (!isCodeElement(children)) {
@@ -51,12 +86,22 @@ export default function CodeBlock({children, node}: Props) {
 
     const markdownText = useMarkdownContent();
     const closed = markdownText.slice(node.position.end.offset - 3, node.position.end.offset) === '```';
-    const {className, children: content = ''} = children.props;
-    const matches = /language-(\w+)(:(\S+)+)?/.exec(className ?? '');
+    const {className, children: code = ''} = children.props;
+    const matches = /language-(\w+)?/.exec(className ?? '');
     const language = matches?.at(1);
-    const file = matches?.at(3);
 
-    return file && isDiffAction(language)
-        ? <DiffCode file={file} content={content} closed={closed} action={language} />
-        : <TextCode language={language} code={content} closed={closed} />;
+    return (
+        <Layout>
+            <Header>
+                <LanguageIcon mode="language" value={language} />
+                <LanguageLabel>{language}</LanguageLabel>
+                {closed && <CopyCode text={code + '\n'} />}
+            </Header>
+            <SourceCodeLayout>
+                <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
+                    <SourceCode code={code} language={language} />
+                </Suspense>
+            </SourceCodeLayout>
+        </Layout>
+    );
 }
