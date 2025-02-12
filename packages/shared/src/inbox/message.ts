@@ -189,7 +189,8 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
     }
 
     replaceToolCallInput(input: ModelToolCallInputWithSource) {
-        const index = this.chunks.findIndex(isToolCallChunk);
+        const chunk = this.findToolCallChunkStrict();
+        const index = this.chunks.indexOf(chunk);
 
         if (index < 0) {
             throw new Error('Invalid tool call message without tool chunk');
@@ -199,9 +200,14 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
             type: 'toolCall',
             toolName: input.name,
             arguments: input.arguments,
-            status: 'completed',
+            status: chunk.status,
             source: input.source,
         };
+    }
+
+    completeToolCall() {
+        const chunk = this.findToolCallChunkStrict();
+        chunk.status = 'completed';
     }
 
     toMessageData(): ToolCallMessageData {

@@ -15,7 +15,7 @@ export interface ToolCallMessageChunk {
     type: 'toolCall';
     toolName: ToolName;
     arguments: Record<string, string | undefined>;
-    status: 'generating' | 'completed';
+    status: 'generating' | 'executing' | 'completed';
     source: string;
 }
 

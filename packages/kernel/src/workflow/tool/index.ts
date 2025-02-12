@@ -42,6 +42,8 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         const toolInput = this.message.getToolCallInput();
         this.logger.trace('ToolCallStart', {input: toolInput, retry: this.retries});
         const result = await this.implment.callTool(toolInput);
+        // TODO: Allow result to report fixing of tool call, in this case do not call `completeToolCall`
+        this.origin.completeToolCall();
         this.logger.trace('ToolCallFinish', {result: result.type});
 
         if (result.type === 'success' || result.type === 'executeError') {
