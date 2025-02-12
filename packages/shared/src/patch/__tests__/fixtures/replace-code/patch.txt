@@ -1,0 +1,23 @@
+<<<<<<< SEARCH
+import {chunk} from './operators/chunk.js';
+=======
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+    chunk(size: number): OverAsyncIterator<T[]>;
+=======
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+        /**
+         * Group elements into chunks by a size
+         *
+         * @param size Chunk size
+         * @returns A new `OverAsyncIterator` instance including the `chunk` operator
+         */
+        chunk(size: number): OverAsyncIterator<T[]> {
+            return over(chunk(iterable, size));
+        },
+
+=======
+>>>>>>> REPLACE

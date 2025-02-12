@@ -3,8 +3,9 @@ import path from 'node:path';
 import {RequestHandler} from '@otakustay/ipc';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {DiffAction} from '@oniichan/shared/diff';
 import {Context} from '../interface';
+
+export type DiffAction = 'create' | 'diff' | 'delete';
 
 export interface RenderDiffViewRequest {
     action: DiffAction;

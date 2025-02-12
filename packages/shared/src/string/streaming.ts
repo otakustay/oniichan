@@ -112,7 +112,7 @@ export class StreamXmlParser {
     private *yieldInPendingTagStartContext(char: string): Iterable<XmlParsedChunk> {
         // 1. Meet `/` immediately after `<` -> pendingTagEnd
         // 2. Meet `>` -> yield tagStart -> tagContent
-        // 3. Line break means invalid tag grammar  -> back to parent
+        // 3. None identifier character means invalid tag grammar -> back to parent
         this.buffer += char;
 
         if (this.buffer === '</') {
@@ -130,7 +130,8 @@ export class StreamXmlParser {
             return;
         }
 
-        if (this.buffer.endsWith('\n')) {
+        // This does not strictly satisfy W3C grammar, but enough for most cases
+        if (!/[a-zA-Z0-9_-]$/.test(this.buffer)) {
             yield {type: 'text', content: this.buffer};
             this.buffer = '';
             this.popContextType();

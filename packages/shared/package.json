@@ -15,6 +15,7 @@
     "./error": "./dist/error.js",
     "./tool": "./dist/tool/index.js",
     "./diff": "./dist/diff/index.js",
+    "./patch": "./dist/patch/index.js",
     "./promise": "./dist/promise.js"
   },
   "scripts": {

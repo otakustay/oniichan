@@ -7,12 +7,6 @@ export {
     MessageContentChunk,
     DebugContentChunk,
     MessageViewChunk,
-    Message,
-    ToolUseMessage,
-    ToolCallMessage,
-    UserRequestMessage,
-    AssistantTextMessage,
-    DebugMessage,
     MessageData,
     ToolUseMessageData,
     ToolCallMessageData,
@@ -21,10 +15,20 @@ export {
     DebugMessageLevel,
     DebugMessageData,
     MessageType,
+} from './interface';
+export {
+    Message,
+    ToolUseMessage,
+    ToolCallMessage,
+    UserRequestMessage,
+    AssistantTextMessage,
+    DebugMessage,
+} from './message';
+export {
     isToolCallChunk,
     isReactiveToolCallChunk,
     isAssistantMessage,
-} from './message';
+} from './utils';
 export {RoundtripStatus, Roundtrip, RoundtripData} from './roundtrip';
 export {MessageThread, MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
 export {Workflow, WorkflowOriginMessage, WorkflowStatus} from './workflow';

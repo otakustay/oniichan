@@ -1,108 +1,29 @@
 import {assertNever} from '../error';
 import {ChatInputPayload} from '../model';
 import {now} from '../string';
-import {ModelToolCallInput, ModelToolCallInputWithSource, ToolName, ToolParsedChunk} from '../tool';
-
-export interface TextMessageChunk {
-    type: 'text';
-    content: string;
-}
-
-/** Text that should be render directly without formatting to markdown */
-export interface PlainTextMessageChunk {
-    type: 'plainText';
-    content: string;
-}
-
-export interface ToolCallMessageChunk {
-    type: 'toolCall';
-    toolName: ToolName;
-    arguments: Record<string, string>;
-    status: 'generating' | 'completed';
-    source: string;
-}
-
-export interface ThinkingMessageChunk {
-    type: 'thinking';
-    content: string;
-    status: 'generating' | 'completed';
-}
-
-export type MessageContentChunk = TextMessageChunk | ToolCallMessageChunk | ThinkingMessageChunk;
-
-export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk;
-export type MessageViewChunk = MessageContentChunk | DebugContentChunk;
-
-function chunkToString(chunk: MessageContentChunk) {
-    switch (chunk.type) {
-        case 'text':
-            return chunk.content;
-        case 'thinking':
-            return `<thinking>${chunk.content}</thinking>`;
-        case 'toolCall':
-            return chunk.source;
-        default:
-            assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);
-    }
-}
-
-interface MessageDataBase {
-    uuid: string;
-    createdAt: string;
-    error?: string | undefined;
-}
-
-export type DebugMessageLevel = 'error' | 'warning' | 'info';
-
-export interface DebugMessageData extends MessageDataBase {
-    type: 'debug';
-    level: DebugMessageLevel;
-    title: string;
-    content: DebugContentChunk;
-}
-
-export interface UserRequestMessageData extends MessageDataBase {
-    type: 'userRequest';
-    content: string;
-}
-
-export interface AssistantTextMessageData extends MessageDataBase {
-    type: 'assistantText';
-    chunks: MessageContentChunk[];
-}
-
-export interface ToolCallMessageData extends MessageDataBase {
-    type: 'toolCall';
-    chunks: MessageContentChunk[];
-}
-
-export interface ToolUseMessageData extends MessageDataBase {
-    type: 'toolUse';
-    content: string;
-}
-
-export type MessageData =
-    | DebugMessageData
-    | UserRequestMessageData
-    | AssistantTextMessageData
-    | ToolCallMessageData
-    | ToolUseMessageData;
-
-export type MessageType = MessageData['type'];
-
-export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
-    return chunk.type === 'toolCall';
-}
-
-export function isReactiveToolCallChunk(chunk: MessageContentChunk) {
-    return isToolCallChunk(chunk)
-        && chunk.toolName !== 'ask_followup_question'
-        && chunk.toolName !== 'attempt_completion';
-}
-
-export function isAssistantMessage(type: MessageType) {
-    return type === 'assistantText' || type === 'toolCall';
-}
+import {ModelToolCallInput, ModelToolCallInputWithSource, ToolParsedChunk} from '../tool';
+import {
+    MessageType,
+    MessageData,
+    DebugMessageLevel,
+    DebugContentChunk,
+    DebugMessageData,
+    UserRequestMessageData,
+    MessageContentChunk,
+    AssistantTextMessageData,
+    ToolCallMessageData,
+    ToolCallMessageChunk,
+    ToolUseMessageData,
+    MessageDataBase,
+} from './interface';
+import {
+    isToolCallChunk,
+    isReactiveToolCallChunk,
+    assertThinkingChunk,
+    assertToolCallChunk,
+    chunkToString,
+    normalizeArguments,
+} from './utils';
 
 abstract class MessageBase<T extends MessageType> {
     readonly uuid: string;
@@ -249,22 +170,21 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         this.restore(source);
     }
 
-    getToolCallInput(): ModelToolCallInput {
-        const toolCall = this.findToolCallChunkStrict();
-
-        return {
-            name: toolCall.toolName,
-            arguments: toolCall.arguments,
-        };
-    }
-
     getToolCallInputWithSource(): ModelToolCallInputWithSource {
         const toolCall = this.findToolCallChunkStrict();
 
         return {
             name: toolCall.toolName,
-            arguments: toolCall.arguments,
+            arguments: normalizeArguments(toolCall.arguments),
             source: toolCall.source,
+        };
+    }
+
+    getToolCallInput(): ModelToolCallInput {
+        const withSource = this.getToolCallInputWithSource();
+        return {
+            name: withSource.name,
+            arguments: withSource.arguments,
         };
     }
 
@@ -299,20 +219,6 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         }
 
         return chunk;
-    }
-}
-
-type MaybeChunk = MessageContentChunk | undefined;
-
-function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
-    if (chunk?.type !== 'thinking') {
-        throw new Error(message);
-    }
-}
-
-function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
-    if (chunk?.type !== 'toolCall') {
-        throw new Error(message);
     }
 }
 

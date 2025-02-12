@@ -99,9 +99,15 @@ export class StreamingToolParser {
             yield {type: 'thinkingDelta', source: chunk.source};
         }
         else if (activeTag) {
-            // We're already in a tool call, a tag start means a start of parameter, just push a parameter name
-            this.tagStack.push(chunk.tagName);
-            yield {type: 'toolDelta', arguments: {[chunk.tagName]: ''}, source: chunk.source};
+            // We're already in a tool call, a tool call allow one level of nested tag to be parameters
+            if (this.tagStack.length === 1) {
+                this.tagStack.push(chunk.tagName);
+                yield {type: 'toolDelta', arguments: {[chunk.tagName]: ''}, source: chunk.source};
+            }
+            // Further nested tags are just a part of parameter's value
+            else {
+                yield {type: 'toolDelta', arguments: {[activeTag]: chunk.source}, source: chunk.source};
+            }
         }
         else if (chunk.tagName === 'thinking') {
             this.tagStack.push(chunk.tagName);
@@ -130,6 +136,12 @@ export class StreamingToolParser {
             else {
                 yield {type: 'thinkingDelta', source: chunk.source};
             }
+            return;
+        }
+
+        // Not a matching tag, treat as text
+        if (chunk.tagName !== this.tagStack.at(-1)) {
+            yield* this.yieldForTextChunk({type: 'text', content: chunk.source});
             return;
         }
 

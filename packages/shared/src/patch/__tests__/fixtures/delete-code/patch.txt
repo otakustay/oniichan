@@ -1,0 +1,56 @@
+<<<<<<< SEARCH
+        /**
+         * Filter elements wiht a predicate
+         *
+         * @param predicate Predicate function to decide if an element should be yielded or not
+         * @returns A new `OverAsyncIterator` instance including the `filter` operator
+         */
+=======
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        /**
+         * Map elements wiht a transformer
+         *
+         * @param transform Transform function to transform an element into another
+         * @returns A new `OverAsyncIterator` instance including the `map` operator
+         */
+=======
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        /**
+         * Group elements into chunks by a size
+         *
+         * @param size Chunk size
+         * @returns A new `OverAsyncIterator` instance including the `chunk` operator
+         */
+=======
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        /**
+         * Debounce the emit of element by a given amount of time,
+         * all elements within debounce timeout will emit once as an array
+         *
+         * @param ms Debounce timeout
+         * @returns A new `OverAsyncIterator` instance including the `debounce` operator
+         */
+=======
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        /**
+         * Take the first n elements
+         *
+         * @param count element count to be token
+         * @returns A new `OverAsyncIterator` instance including the `take` operator
+         */
+=======
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        /**
+         * Take elements until a predicate match
+         *
+         * @param predicate Predicate function to decide if the iterator should stop,
+         * the element match the predicate will not yield
+         * @returns A new `OverAsyncIterator` instance including the `until` operator
+         */
+=======
+>>>>>>> REPLACE

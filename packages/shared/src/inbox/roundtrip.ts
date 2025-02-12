@@ -1,15 +1,12 @@
 import {assertNever} from '../error';
 import {
-    AssistantTextMessage,
-    UserRequestMessage,
-    Message,
-    DebugMessage,
     DebugMessageLevel,
     DebugContentChunk,
     AssistantTextMessageData,
     UserRequestMessageData,
     DebugMessageData,
-} from './message';
+} from './interface';
+import {AssistantTextMessage, UserRequestMessage, Message, DebugMessage} from './message';
 import {Workflow, WorkflowOriginMessage, WorkflowData} from './workflow';
 
 interface RoundtripMessageResponseData {

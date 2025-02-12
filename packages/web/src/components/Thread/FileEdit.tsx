@@ -1,9 +1,10 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
-import {DiffAction, DiffSummary, applyDiff, summarizeDiff} from '@oniichan/shared/diff';
+import {patchContent} from '@oniichan/shared/patch';
 import {trimPathString} from '@oniichan/shared/string';
-import {RenderDiffViewRequest, AcceptEditRequest} from '@oniichan/editor-host/protocol';
+import {RenderDiffViewRequest, AcceptEditRequest, DiffAction} from '@oniichan/editor-host/protocol';
+import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {useIpc} from '@/components/AppProvider';
 import Button from '@/components/Button';
 import ActBar from '@/components/ActBar';
@@ -67,43 +68,21 @@ interface SourceFileState {
     content: string;
 }
 
-interface ViewState extends DiffSummary {
-    showAction: boolean;
+interface ViewState {
+    diffAction: DiffAction | 'none';
     error: string;
     newContent: string;
+    insertedCount: number;
+    deletedCount: number;
 }
 
-function computeState(closed: boolean, action: DiffAction, source: SourceFileState, generated: string): ViewState {
+export type EditAction = 'write' | 'patch' | 'delete';
+
+function computeState(closed: boolean, action: EditAction, source: SourceFileState, patch: string): ViewState {
     if (!closed || source.state === 'reading') {
-        const summary = summarizeDiff(action, source.content, generated);
+        // Do not waste CPU when source or patch is still generating
         return {
-            showAction: false,
-            error: '',
-            newContent: '',
-            ...summary,
-        };
-    }
-    if (source.state === 'notFound' && action !== 'create') {
-        const summary = summarizeDiff(action, source.content, generated);
-        return {
-            showAction: false,
-            error: 'No Source File',
-            newContent: '',
-            ...summary,
-        };
-    }
-    if (source.state === 'fail') {
-        const summary = summarizeDiff(action, source.content, generated);
-        return {
-            showAction: false,
-            error: 'Read Source Failed',
-            newContent: '',
-            ...summary,
-        };
-    }
-    if (action === 'delete') {
-        return {
-            showAction: true,
+            diffAction: 'none',
             error: '',
             newContent: '',
             insertedCount: 0,
@@ -111,24 +90,78 @@ function computeState(closed: boolean, action: DiffAction, source: SourceFileSta
         };
     }
 
-    const applied = applyDiff(action, source.content, generated);
-    return {
-        showAction: applied.success,
-        error: applied.success ? '' : 'Not Appliable',
-        newContent: applied.newContent,
-        insertedCount: applied.insertedCount,
-        deletedCount: applied.deletedCount,
-    };
+    if (source.state === 'notFound' && action !== 'write') {
+        return {
+            diffAction: 'none',
+            error: 'No Source File',
+            newContent: '',
+            insertedCount: 0,
+            deletedCount: 0,
+        };
+    }
+
+    if (source.state === 'fail') {
+        return {
+            diffAction: 'none',
+            error: 'Read Source Failed',
+            newContent: '',
+            insertedCount: 0,
+            deletedCount: 0,
+        };
+    }
+
+    if (action === 'delete') {
+        return {
+            diffAction: 'delete',
+            error: '',
+            newContent: '',
+            insertedCount: 0,
+            // Don't show lines count for delete action
+            deletedCount: 0,
+        };
+    }
+
+    if (action === 'write') {
+        const content = patch.replaceAll(/^\n|\n$/g, '');
+        return {
+            diffAction: source.state === 'notFound' ? 'create' : 'diff',
+            error: '',
+            newContent: content,
+            insertedCount: closed ? content.split('\n').length : 0,
+            deletedCount: source.state === 'success' ? source.content.split('\n').length : 0,
+        };
+    }
+
+    try {
+        const patched = patchContent(source.content, patch);
+        return {
+            diffAction: 'diff',
+            error: '',
+            newContent: patched.newContent,
+            insertedCount: patched.insertedCount,
+            deletedCount: patched.deletedCount,
+        };
+    }
+    catch {
+        return {
+            diffAction: 'none',
+            error: 'Not Appliable',
+            newContent: '',
+            insertedCount: 0,
+            deletedCount: 0,
+        };
+    }
 }
 
 interface Props {
-    action: DiffAction;
+    action: EditAction;
     file: string;
-    content: string;
+    patch: string;
     closed: boolean;
 }
 
-export default function DiffCode({action, file, content, closed}: Props) {
+export default function FileEdit({action, file, patch, closed}: Props) {
+    const viewMode = useViewModeValue();
     const [sourceFile, setSourceFile] = useState<SourceFileState>({state: 'reading', content: ''});
     const ipc = useIpc();
     useEffect(
@@ -146,50 +179,55 @@ export default function DiffCode({action, file, content, closed}: Props) {
         [ipc, file]
     );
     const extension = file.split('.').pop();
-    const {showAction, error, newContent, insertedCount, deletedCount} = computeState(
-        closed,
-        action,
-        sourceFile,
-        content
-    );
+    const view = computeState(closed, action, sourceFile, patch);
     const openDiffView = async () => {
+        if (view.diffAction === 'none') {
+            return;
+        }
+
         const request: RenderDiffViewRequest = {
-            action,
+            action: view.diffAction,
             file,
             oldContent: sourceFile.content,
-            newContent,
+            newContent: view.newContent,
         };
         await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
     };
     const accept = async () => {
+        if (view.diffAction === 'none') {
+            return;
+        }
+
         const request: AcceptEditRequest = {
-            action,
+            action: view.diffAction,
             file,
-            newContent,
+            newContent: view.newContent,
         };
         await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', request);
     };
+    const showRichContent = viewMode.debug || (view.error && patch.trim());
 
     return (
         <ActBar
+            mode="contrast"
             icon={<LanguageIcon mode="extension" value={extension} />}
             content={
                 <>
                     <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
-                    {closed && <CountLabel type="addition" count={insertedCount} />}
-                    {closed && <CountLabel type="deletion" count={deletedCount} />}
+                    {closed && <CountLabel type="addition" count={view.insertedCount} />}
+                    {closed && <CountLabel type="deletion" count={view.deletedCount} />}
                     {action === 'delete' && <DeletedMark>D</DeletedMark>}
                 </>
             }
             actions={
                 <>
                     {!closed && <Loading />}
-                    {showAction && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
-                    {showAction && <ActionButton onClick={accept}>Accept</ActionButton>}
-                    {error && <ErrorLabel>{error}</ErrorLabel>}
+                    {view.diffAction !== 'none' && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
+                    {view.diffAction !== 'none' && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {view.error && <ErrorLabel>{view.error}</ErrorLabel>}
                 </>
             }
-            richContent={error && content.trim() ? <SourceCode code={content.trim()} language="diff" /> : null}
+            richContent={showRichContent ? <SourceCode code={patch.trim()} language="diff" /> : null}
         />
     );
 }

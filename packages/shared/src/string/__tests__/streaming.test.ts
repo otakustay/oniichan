@@ -134,7 +134,7 @@ describe('StreamXmlParser', () => {
         expect(readContent(chunks)).toBe(message);
     });
 
-    test('Mixed tag and text', async () => {
+    test('mixed tag and text', async () => {
         const message = dedent`
             <write_file>Hello!
                 Nice day.</write_file>
@@ -144,5 +144,14 @@ describe('StreamXmlParser', () => {
         expect(tags.at(0)).toEqual({type: 'tagStart', tagName: 'write_file', source: '<write_file>'});
         expect(tags.at(1)).toEqual({type: 'tagEnd', tagName: 'write_file', source: '</write_file>'});
         expect(readContent(chunks)).toBe(message);
+    });
+
+    test('invalid tag name', async () => {
+        const message = dedent`
+            <html lang="en"></html>
+        `;
+        const chunks = await parse(message);
+        const tags = chunks.filter(v => v.type !== 'text');
+        expect(tags.length).toBe(0);
     });
 });

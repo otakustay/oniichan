@@ -14,6 +14,7 @@ interface ToolCall {
     type: 'tool';
     toolName: string;
     args: Record<string, string>;
+    closed: boolean;
 }
 
 interface Thinking {
@@ -29,7 +30,7 @@ async function consume(content: string) {
             continue;
         }
         if (chunk.type === 'toolStart') {
-            chunks.push({type: 'tool', toolName: chunk.toolName, args: {}});
+            chunks.push({type: 'tool', toolName: chunk.toolName, args: {}, closed: false});
             continue;
         }
         if (chunk.type === 'thinkingStart') {
@@ -68,6 +69,13 @@ async function consume(content: string) {
             const call = chunks.at(-1);
             if (call?.type === 'thinking') {
                 call.content += chunk.source;
+            }
+        }
+
+        if (chunk.type === 'toolEnd') {
+            const call = chunks.at(-1);
+            if (call?.type === 'tool') {
+                call.closed = true;
             }
         }
     }
@@ -116,6 +124,7 @@ test('simple tool call', async () => {
         type: 'tool',
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
+        closed: true,
     };
     expect(tools.at(0)).toEqual(expected);
 });
@@ -135,6 +144,7 @@ test('multiple parameters', async () => {
         type: 'tool',
         toolName: 'read_directory',
         args: {path: 'src/main.ts', recursive: 'true'},
+        closed: true,
     };
     expect(tools.at(0)).toEqual(expected);
 });
@@ -155,6 +165,7 @@ test('cross line parameters', async () => {
         type: 'tool',
         toolName: 'read_directory',
         args: {path: 'src/\nmain.ts', recursive: 'true'},
+        closed: true,
     };
     expect(tools.at(0)).toEqual(expected);
 });
@@ -185,6 +196,7 @@ test('with thinking', async () => {
         type: 'tool',
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
+        closed: true,
     };
     expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
@@ -210,7 +222,35 @@ test('xml inside thinking', async () => {
         type: 'tool',
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
+        closed: true,
     };
     expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
+});
+
+test('nested xml tags inside parameter', async () => {
+    const content = dedent`
+        <html lang="en">
+            <div>Hello</div>
+        </html>
+    `;
+    const message = dedent`
+        <write_file>
+        <path>src/index.html</path>
+        <content>
+        <html lang="en">
+            <div>Hello</div>
+        </html>
+        </content>
+        </write_file>
+    `;
+    const tools = await consume(message);
+    expect(tools.length).toBe(1);
+    const expected = {
+        type: 'tool',
+        toolName: 'write_file',
+        args: {path: 'src/index.html', content: `\n${content}\n`},
+        closed: true,
+    };
+    expect(tools.at(0)).toEqual(expected);
 });

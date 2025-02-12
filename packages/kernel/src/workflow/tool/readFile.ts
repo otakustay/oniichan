@@ -9,7 +9,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
         super(editorHost, readFileParameters);
     }
 
-    protected parseArgs(args: Record<string, string>): ReadFileParameter {
+    protected parseArgs(args: Record<string, string | undefined>) {
         return {
             path: args.path,
         };

@@ -9,7 +9,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         super(editorHost, findFilesByGlobParameters);
     }
 
-    protected parseArgs(args: Record<string, string>): FindFilesByGlobParameter {
+    protected parseArgs(args: Record<string, string | undefined>) {
         return {
             glob: args.glob,
         };

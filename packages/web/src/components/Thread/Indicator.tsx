@@ -8,7 +8,11 @@ function resolveTextFromChunk(chunk: MessageViewChunk | null): string {
             case 'read_directory':
             case 'find_files_by_glob':
             case 'find_files_by_regex':
-                return `Oniichan is analyzing your project...`;
+                return 'Oniichan is analyzing your project...';
+            case 'write_file':
+            case 'patch_file':
+            case 'delete_file':
+                return 'Oniichan is coding...';
             case 'run_command':
                 return 'Oniichan is waiting for command...';
         }

@@ -5,6 +5,7 @@ import {trimPathString} from '@oniichan/shared/string';
 import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
 import ActBar from '@/components/ActBar';
+import FileEdit from './FileEdit';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);
@@ -57,6 +58,39 @@ export default function ToolUsage({input}: Props) {
 
     if (input.toolName === 'ask_followup_question') {
         return input.arguments.question ? <Markdown content={input.arguments.question} /> : null;
+    }
+
+    if (input.toolName === 'write_file') {
+        return (
+            <FileEdit
+                action="write"
+                file={input.arguments.path ?? ''}
+                patch={input.arguments.content ?? ''}
+                closed={input.status === 'completed'}
+            />
+        );
+    }
+
+    if (input.toolName === 'patch_file') {
+        return (
+            <FileEdit
+                action="patch"
+                file={input.arguments.path ?? ''}
+                patch={input.arguments.patch ?? ''}
+                closed={input.status === 'completed'}
+            />
+        );
+    }
+
+    if (input.toolName === 'delete_file') {
+        return (
+            <FileEdit
+                action="delete"
+                file={input.arguments.path ?? ''}
+                patch=""
+                closed={input.status === 'completed'}
+            />
+        );
     }
 
     const [Icon, action, parameter] = renderLabelContent(input);

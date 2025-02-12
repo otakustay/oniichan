@@ -7,7 +7,10 @@ import {ReadFileToolImplement} from './readFile';
 import {ReadDirectoryToolImplement} from './readDirectory';
 import {GlobFilesToolImplement} from './globFiles';
 import {GrepFilesToolImplement} from './grepFiles';
+import {WriteFileToolImplement} from './writeFile';
+import {PatchFilesToolImplement} from './patchFile';
 import {RunCommandToolImplement} from './runCommand';
+import {DeleteFileToolImplement} from './deleteFile';
 
 export class ToolImplement {
     private readonly readFile: ToolImplementBase;
@@ -18,6 +21,12 @@ export class ToolImplement {
 
     private readonly grepFiles: ToolImplementBase;
 
+    private readonly writeFile: ToolImplementBase;
+
+    private readonly patchFile: ToolImplementBase;
+
+    private readonly deleteFile: ToolImplementBase;
+
     private readonly runCommand: ToolImplementBase;
 
     constructor(editorHost: EditorHost, logger: Logger) {
@@ -25,6 +34,9 @@ export class ToolImplement {
         this.readDirectory = new ReadDirectoryToolImplement(editorHost);
         this.globFiles = new GlobFilesToolImplement(editorHost);
         this.grepFiles = new GrepFilesToolImplement(editorHost, logger);
+        this.writeFile = new WriteFileToolImplement(editorHost);
+        this.patchFile = new PatchFilesToolImplement(editorHost);
+        this.deleteFile = new DeleteFileToolImplement(editorHost);
         this.runCommand = new RunCommandToolImplement(editorHost, logger);
     }
 
@@ -38,6 +50,12 @@ export class ToolImplement {
                 return this.globFiles.run(input.arguments);
             case 'find_files_by_regex':
                 return this.grepFiles.run(input.arguments);
+            case 'write_file':
+                return this.writeFile.run(input.arguments);
+            case 'patch_file':
+                return this.patchFile.run(input.arguments);
+            case 'delete_file':
+                return this.deleteFile.run(input.arguments);
             case 'run_command':
                 return this.runCommand.run(input.arguments);
             case 'attempt_completion':

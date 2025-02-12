@@ -13,6 +13,9 @@ export type ToolName =
     | 'read_directory'
     | 'find_files_by_glob'
     | 'find_files_by_regex'
+    | 'write_file'
+    | 'patch_file'
+    | 'delete_file'
     | 'run_command'
     | 'attempt_completion'
     | 'ask_followup_question';
@@ -101,17 +104,77 @@ export interface FindFilesByRegExpParameter {
     // glob?: string;
 }
 
-export const askFollowupQuestionParameters = {
+export const writeFileParameters = {
     type: 'object',
     properties: {
-        question: {
+        path: {
+            type: 'string',
+            description: 'The path to the file you want to write, must be a relative path',
+        },
+        content: {
             type: 'string',
             description:
-                'The question to ask the user. This should be a clear, specific question that addresses the information you need',
+                'The full content of the file, DO NOT lose anything in content, DO NOT use comments like "// existing..." to omit content',
         },
     },
-    required: ['question'],
+    required: ['path', 'content'],
 } as const satisfies ParameterInfo;
+
+export interface WriteFileParameter {
+    path: string;
+    content: string;
+}
+
+export const patchFileParameters = {
+    type: 'object',
+    properties: {
+        path: {
+            type: 'string',
+            description: 'The path to the file you want to patch, must be a relative path',
+        },
+        patch: {
+            type: 'string',
+            description: dedent`
+                One or more patch blocks exactly in the format illustrated below:
+                \`\`\`
+                <<<<<<< SEARCH
+                [Exact content to search]
+                =======
+                [New content to replace with]
+                >>>>>>> REPLACE
+                \`\`\`
+                Rules for search and replace:
+                1. \`SEARCH\` content must exactly match what in original file, including whitespace, indentation and line endings.
+                2. Keep \`SEARCH\` part minimum, only include surrounding unmodified context lines if needed to locate content uniquely.
+                3. Use multiple patch blocks if multiple parts of the file need to be modified.
+                4. Use small patch blocks, split into multiple blocks if one includes unchanged lines in the middle.
+                5. To move code, use two patch blocks, one to delete the original code and another to add it in a new location.
+                6. To delete code, use a patch block with \`REPLACE\` part empty.
+            `,
+        },
+    },
+    required: ['path', 'patch'],
+} as const satisfies ParameterInfo;
+
+export interface PatchFileParameter {
+    path: string;
+    patch: string;
+}
+
+export const deleteFileParameters = {
+    type: 'object',
+    properties: {
+        path: {
+            type: 'string',
+            description: 'The path to the file you want to delete, must be a relative path',
+        },
+    },
+    required: ['path'],
+} as const satisfies ParameterInfo;
+
+export interface DeleteFileParameter {
+    path: string;
+}
 
 export const runCommandParameters = {
     type: 'object',
@@ -127,6 +190,18 @@ export const runCommandParameters = {
 export interface RunCommandParameter {
     command: string;
 }
+
+export const askFollowupQuestionParameters = {
+    type: 'object',
+    properties: {
+        question: {
+            type: 'string',
+            description:
+                'The question to ask the user. This should be a clear, specific question that addresses the information you need',
+        },
+    },
+    required: ['question'],
+} as const satisfies ParameterInfo;
 
 export interface AskFollowupQuestionParameter {
     question: string;
@@ -197,6 +272,50 @@ export const builtinTools: ToolDescription[] = [
         `,
     },
     {
+        name: 'write_file',
+        description: `Write content to a file, creates the file if it does not exist`,
+        parameters: writeFileParameters,
+        usage: dedent`
+            <write_file>
+                <path>src/greeting.ts</path>
+                <content>
+                export function hello() {
+                    return "hello";
+                }
+                </content>
+            </write_file>
+        `,
+    },
+    {
+        name: 'patch_file',
+        description: 'Patch a file with one or more patch blocks in special format',
+        parameters: patchFileParameters,
+        usage: dedent`
+            <patch_file>
+                <path>src/utils/index.ts</path>
+                <patch>
+                <<<<<<< SEARCH
+                @media (prefers-color-scheme: light) {
+                    color: #000;
+                =======
+                @media (prefers-color-scheme: dark) {
+                    color: #fff;
+                >>>>>>> REPLACE
+                </patch>
+            </patch_file>
+        `,
+    },
+    {
+        name: 'delete_file',
+        description: 'Delete a file from the workspace',
+        parameters: deleteFileParameters,
+        usage: dedent`
+                <delete_file>
+                    <path>src/old-file.ts</path>
+                </delete_file>
+            `,
+    },
+    {
         name: 'run_command',
         description:
             `Execute a CLI command on the system. To operate with system and perform tasks that are not covered by other tools, use this tool with a clear explanation of what the command does.`,
@@ -238,7 +357,7 @@ export function isToolName(name: string): name is ToolName {
 
 export interface ModelToolCallInput {
     name: ToolName;
-    arguments: Record<string, string>;
+    arguments: Record<string, string | undefined>;
 }
 
 export interface ModelToolCallInputWithSource extends ModelToolCallInput {

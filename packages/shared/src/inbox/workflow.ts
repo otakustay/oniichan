@@ -1,11 +1,5 @@
-import {
-    AssistantTextMessage,
-    deserializeMessage,
-    Message,
-    MessageData,
-    ToolCallMessage,
-    ToolCallMessageData,
-} from './message';
+import {MessageData, ToolCallMessageData} from './interface';
+import {AssistantTextMessage, deserializeMessage, Message, ToolCallMessage} from './message';
 
 export type WorkflowStatus = 'running' | 'completed' | 'failed';
 

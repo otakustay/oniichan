@@ -56,7 +56,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
         this.logger = logger.with({source: 'GrepFilesToolImplement'});
     }
 
-    protected parseArgs(args: Record<string, string>): FindFilesByRegExpParameter {
+    protected parseArgs(args: Record<string, string | undefined>) {
         return {
             regex: args.regex,
             path: args.path,

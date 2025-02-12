@@ -12,7 +12,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
         this.logger = logger.with({source: 'RunCommandToolImplement'});
     }
 
-    protected parseArgs(args: Record<string, string>): RunCommandParameter {
+    protected parseArgs(args: Record<string, string | undefined>) {
         return {
             command: args.command,
         };

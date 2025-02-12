@@ -22,8 +22,9 @@ class ValidatorCache {
 
 const cache = new ValidatorCache();
 
-interface ValidationSuccess {
+interface ValidationSuccess<A> {
     type: 'valid';
+    args: A;
 }
 
 interface MissingValidationError {
@@ -42,15 +43,20 @@ interface UnknownValidationError {
     message: string;
 }
 
-type ValidationResult = ValidationSuccess | MissingValidationError | TypeValidationError | UnknownValidationError;
+type ValidationResult<A> = ValidationSuccess<A> | MissingValidationError | TypeValidationError | UnknownValidationError;
 
-function validateArguments(schema: Schema, args: Record<string, unknown>): ValidationResult {
+function validateArguments<A>(schema: Schema, args: Partial<A>): ValidationResult<A> {
     const validator = cache.getValidator(schema);
     const valid = validator(args);
     const error = validator.errors?.at(0);
 
     if (valid || !error) {
-        return {type: 'valid'};
+        return {
+            type: 'valid',
+            // Schema validation can hijack all property missing errors,
+            // a valid arguments always satisfies the original type
+            args: args as A,
+        };
     }
 
     if (error.keyword === 'required') {
@@ -114,12 +120,12 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         this.schema = schema;
     }
 
-    async run(generated: Record<string, string>): Promise<ToolRunResult> {
+    async run(generated: Record<string, string | undefined>): Promise<ToolRunResult> {
         const parsed = this.parseArgs(generated);
         const validateResult = validateArguments(this.schema, parsed);
 
         if (validateResult.type === 'valid') {
-            return this.execute(parsed);
+            return this.execute(validateResult.args);
         }
 
         switch (validateResult.type) {
@@ -136,7 +142,7 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         }
     }
 
-    protected abstract parseArgs(args: Record<string, string>): A;
+    protected abstract parseArgs(args: Record<string, string | undefined>): Partial<A>;
 
     protected abstract execute(args: A): Promise<ToolRunResult>;
 }

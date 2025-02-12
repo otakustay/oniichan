@@ -16,6 +16,10 @@ const Layout = styled.div`
 
     pre {
         background-color: transparent !important;
+
+        code {
+            padding: 0;
+        }
     }
 
     > :first-child {
@@ -50,10 +54,6 @@ export default function MessageContent({className, chunks}: Props) {
                 assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);
         }
     };
-
-    if (!chunks.length) {
-        return <>(Empty)</>;
-    }
 
     return <Layout className={className}>{chunks.map(renderChunk)}</Layout>;
 }

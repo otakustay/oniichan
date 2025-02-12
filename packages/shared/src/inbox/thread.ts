@@ -1,4 +1,5 @@
-import {MessageData, UserRequestMessage} from './message';
+import {MessageData} from './interface';
+import {UserRequestMessage} from './message';
 import {Roundtrip, RoundtripData, RoundtripStatus} from './roundtrip';
 
 export interface RoundtripMessageData {
