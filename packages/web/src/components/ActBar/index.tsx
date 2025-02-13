@@ -2,6 +2,7 @@ import {ReactElement, ReactNode, useState} from 'react';
 import styled from '@emotion/styled';
 import {css} from '@emotion/react';
 import Toggle from '@/components/Toggle';
+import Button from '@/components/Button';
 
 interface ModeProps {
     mode?: 'default' | 'contrast';
@@ -34,6 +35,12 @@ const ActionSection = styled.div`
     gap: .5em;
 `;
 
+const ActionButton = styled(Button)`
+    height: 1.5em;
+    border-radius: .5em;
+    min-width: fit-content;
+`;
+
 const Bar = styled.div`
     ${barStyle};
 `;
@@ -50,7 +57,7 @@ const Layout = styled.div<ModeProps>`
 interface Props extends ModeProps {
     icon: ReactElement;
     content: ReactNode;
-    actions?: ReactElement;
+    actions?: ReactElement | null | undefined | false;
     richContent?: ReactElement | null | undefined | false;
 }
 
@@ -82,4 +89,4 @@ function ActBar({icon, content, actions, richContent, mode}: Props) {
     );
 }
 
-export default Object.assign(ActBar, {Layout});
+export default Object.assign(ActBar, {Layout, ActionButton});

@@ -1,5 +1,6 @@
 import dedent from 'dedent';
-import {ToolDescription} from '@oniichan/shared/tool';
+import {ToolDescription, ToolName} from '@oniichan/shared/tool';
+import {InboxPromptView} from './interface';
 
 const prefix = dedent`
     # Tool
@@ -76,7 +77,16 @@ function renderItem(item: ToolDescription) {
     return lines.join('\n');
 }
 
-export function renderToolSection(tools: ToolDescription[]) {
+export function renderToolSection(view: InboxPromptView) {
+    const excludsTools: ToolName[] = [];
+    if (view.rootEntries.length) {
+        excludsTools.push('browser_preview');
+    }
+    if (process.platform !== 'darwin') {
+        // TODO: Enable this tool when shipped with `ripgrep`
+        excludsTools.push('find_files_by_regex');
+    }
+    const tools = view.tools.filter(v => !excludsTools.includes(v.name));
     const parts = [
         prefix,
         '## Available tools',

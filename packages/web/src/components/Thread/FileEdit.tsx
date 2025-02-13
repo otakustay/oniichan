@@ -6,10 +6,11 @@ import {trimPathString} from '@oniichan/shared/string';
 import {RenderDiffViewRequest, AcceptEditRequest, DiffAction} from '@oniichan/editor-host/protocol';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {useIpc} from '@/components/AppProvider';
-import Button from '@/components/Button';
 import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
+
+const {ActionButton} = ActBar;
 
 const Loading = styled(AiOutlineLoading3Quarters)`
     animation: spin 1s linear infinite;
@@ -50,12 +51,6 @@ const DeletedMark = styled.span`
     justify-content: center;
     align-items: center;
     color: var(--color-deletion);
-`;
-
-const ActionButton = styled(Button)`
-    height: 1.5em;
-    border-radius: .5em;
-    min-width: fit-content;
 `;
 
 const ErrorLabel = styled.span`

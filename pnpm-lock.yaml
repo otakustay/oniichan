@@ -47,6 +47,9 @@ importers:
       nanoid:
         specifier: ^5.0.9
         version: 5.0.9
+      open:
+        specifier: ^10.1.0
+        version: 10.1.0
       strip-ansi:
         specifier: ^7.1.0
         version: 7.1.0

@@ -1,7 +1,7 @@
 import {CSSProperties, ReactNode} from 'react';
 import styled from '@emotion/styled';
 
-interface Props {
+export interface Props {
     style?: CSSProperties;
     className?: string;
     disabled?: boolean;

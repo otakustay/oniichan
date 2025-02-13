@@ -6,6 +6,7 @@ import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
 import ActBar from '@/components/ActBar';
 import FileEdit from './FileEdit';
+import PreviewUrl from './PreviewUrl';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);
@@ -91,6 +92,10 @@ export default function ToolUsage({input}: Props) {
                 closed={input.status === 'completed'}
             />
         );
+    }
+
+    if (input.toolName === 'browser_preview') {
+        return <PreviewUrl url={input.arguments.url ?? ''} closed={input.status !== 'generating'} />;
     }
 
     const [Icon, action, parameter] = renderLabelContent(input);

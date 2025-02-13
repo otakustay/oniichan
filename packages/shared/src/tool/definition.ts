@@ -17,6 +17,7 @@ export type ToolName =
     | 'patch_file'
     | 'delete_file'
     | 'run_command'
+    | 'browser_preview'
     | 'attempt_completion'
     | 'ask_followup_question';
 
@@ -176,6 +177,21 @@ export interface DeleteFileParameter {
     path: string;
 }
 
+export const browserPreviewParameters = {
+    type: 'object',
+    properties: {
+        url: {
+            type: 'string',
+            description: 'The URL to open in the browser preview window',
+        },
+    },
+    required: ['url'],
+} as const satisfies ParameterInfo;
+
+export interface BrowserPreviewParameter {
+    url: string;
+}
+
 export const runCommandParameters = {
     type: 'object',
     properties: {
@@ -314,6 +330,17 @@ export const builtinTools: ToolDescription[] = [
                     <path>src/old-file.ts</path>
                 </delete_file>
             `,
+    },
+    {
+        name: 'browser_preview',
+        description:
+            'Open a URL in browser to preview current application, be sure the URL is accessible before using this tool',
+        parameters: browserPreviewParameters,
+        usage: dedent`
+            <browser_preview>
+                <url>https://example.com</url>
+            </browser_preview>
+        `,
     },
     {
         name: 'run_command',

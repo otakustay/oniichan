@@ -23,6 +23,7 @@ import {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
 import {ResourceManager} from '../utils/resource';
 import {TerminalManager} from '../utils/terminal';
 import {ExecuteTerminalHandler} from './handlers/terminal';
+import {OpenUrlHandler} from './handlers/external';
 
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
@@ -69,6 +70,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(RenderDiffViewHandler);
         this.registerHandler(AcceptFileEditHandler);
         this.registerHandler(ExecuteTerminalHandler);
+        this.registerHandler(OpenUrlHandler);
     }
 
     protected async createContext() {

@@ -11,6 +11,7 @@ import {WriteFileToolImplement} from './writeFile';
 import {PatchFilesToolImplement} from './patchFile';
 import {RunCommandToolImplement} from './runCommand';
 import {DeleteFileToolImplement} from './deleteFile';
+import {BrowserPreviewToolImplement} from './browserPreview';
 
 export class ToolImplement {
     private readonly readFile: ToolImplementBase;
@@ -29,6 +30,8 @@ export class ToolImplement {
 
     private readonly runCommand: ToolImplementBase;
 
+    private readonly browserPreview: ToolImplementBase;
+
     constructor(editorHost: EditorHost, logger: Logger) {
         this.readFile = new ReadFileToolImplement(editorHost);
         this.readDirectory = new ReadDirectoryToolImplement(editorHost);
@@ -38,6 +41,7 @@ export class ToolImplement {
         this.patchFile = new PatchFilesToolImplement(editorHost);
         this.deleteFile = new DeleteFileToolImplement(editorHost);
         this.runCommand = new RunCommandToolImplement(editorHost, logger);
+        this.browserPreview = new BrowserPreviewToolImplement(editorHost);
     }
 
     async callTool(input: ModelToolCallInput): Promise<ToolRunResult> {
@@ -58,6 +62,8 @@ export class ToolImplement {
                 return this.deleteFile.run(input.arguments);
             case 'run_command':
                 return this.runCommand.run(input.arguments);
+            case 'browser_preview':
+                return this.browserPreview.run(input.arguments);
             case 'attempt_completion':
             case 'ask_followup_question':
                 return {
