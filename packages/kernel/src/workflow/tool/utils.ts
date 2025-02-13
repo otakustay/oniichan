@@ -100,6 +100,12 @@ export interface ExecuteError {
     output: string;
 }
 
+export interface RequireFix {
+    type: 'requireFix';
+    prompt: string;
+    includesBase: boolean;
+}
+
 export interface Success {
     type: 'success';
     finished: boolean;
@@ -108,7 +114,11 @@ export interface Success {
 
 export type ToolInputError = ParameterMissingError | ParameterTypeError | ValidationError;
 
-export type ToolRunResult = Success | ExecuteError | ToolInputError;
+export type ToolRunResult = Success | ExecuteError | RequireFix | ToolInputError;
+
+export function isToolInputError(result: ToolRunResult): result is ToolInputError {
+    return result.type === 'parameterMissing' || result.type === 'parameterType' || result.type === 'validationError';
+}
 
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
     protected readonly editorHost: EditorHost;

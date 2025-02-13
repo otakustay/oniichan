@@ -48,7 +48,7 @@ async function fix(view: FixToolCallView, options: FixOptions) {
         messages: [
             {role: 'user', content: prompt},
         ],
-        telemetry: telemetry.createModelTelemetry(newUuid()),
+        telemetry: telemetry.createModelTelemetry(),
     };
     const result = await model.chat(chatOptions);
     const toolCall = await parseToolMessage(result.content);
@@ -80,6 +80,5 @@ export async function fixToolCall(options: ToolCallFixOptions) {
         {retries: 3}
     );
 
-    // TODO: If this still errors a lot, try to fix by providing all previous messages with prompt from Cline.
     return result;
 }

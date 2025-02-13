@@ -42,11 +42,10 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         }
         catch (ex) {
             if (ex instanceof PatchParseError) {
-                // TODO: Allow this fix to not exposed to model and user
-                // TODO: Maybe we can provide more detailed error like which search content is not found
                 return {
-                    type: 'executeError',
-                    output: dedent`
+                    type: 'requireFix',
+                    includesBase: true,
+                    prompt: dedent`
                         Parse <patch> parameter error: ${stringifyError(ex)}.
 
                         A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
@@ -63,6 +62,7 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
                     `,
                 };
             }
+
             return {
                 type: 'executeError',
                 output: `Patch file ${args.path} failed: ${stringifyError(ex)}`,

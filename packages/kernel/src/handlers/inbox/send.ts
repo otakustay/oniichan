@@ -83,7 +83,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const model = editorHost.getModelAccess(this.getTaskId());
-        const modelTelemetry = this.telemetry.createModelTelemetry(this.getTaskId());
+        const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
             messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
             telemetry: modelTelemetry,
@@ -121,6 +121,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         const detectorInit: WorkflowDetectorInit = {
             threadUuid: this.thread.uuid,
             taskId: this.getTaskId(),
+            systemPrompt: this.systemPrompt,
             roundtrip: this.roundtrip,
             editorHost: this.context.editorHost,
             telemetry: this.telemetry,

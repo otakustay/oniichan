@@ -8,6 +8,7 @@ import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
 export interface WorkflowDetectorInit {
     threadUuid: string;
     taskId: string;
+    systemPrompt: string;
     roundtrip: Roundtrip;
     editorHost: EditorHost;
     telemetry: FunctionUsageTelemetry;
@@ -19,6 +20,8 @@ export class WorkflowDetector {
     private readonly threadUuid: string;
 
     private readonly taskId: string;
+
+    private readonly systemPrompt: string;
 
     private readonly roundtrip: Roundtrip;
 
@@ -33,6 +36,7 @@ export class WorkflowDetector {
     constructor(init: WorkflowDetectorInit) {
         this.threadUuid = init.threadUuid;
         this.taskId = init.taskId;
+        this.systemPrompt = init.systemPrompt;
         this.roundtrip = init.roundtrip;
         this.editorHost = init.editorHost;
         this.telemetry = init.telemetry;
@@ -62,6 +66,7 @@ export class WorkflowDetector {
         const init: ToolCallWorkflowRunnerInit = {
             ...baseInit,
             workflow,
+            systemPrompt: this.systemPrompt,
             editorHost: this.editorHost,
             origin: toolCallMessage,
         };
