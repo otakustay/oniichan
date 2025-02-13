@@ -42,10 +42,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         type: 'success',
                         finished: false,
                         output: result.output
-                            ? resultMarkdown(
-                                `Command executed, here is its output:`,
-                                result.output
-                            )
+                            ? resultMarkdown(`Command executed, here is its output:`, result.output, 'shell')
                             : `Command exited without any output`,
                     };
                 case 'timeout':
@@ -57,7 +54,8 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                             ? 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work'
                             : resultMarkdown(
                                 'This command is still running, here is its output so far:',
-                                result.output
+                                result.output,
+                                'shell'
                             ),
                     };
                 case 'noShellIntegration':
@@ -76,7 +74,8 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         // It's quite impossible that a long running command has no output
                         output: resultMarkdown(
                             'This command is a long running one such as a dev server, this means it will not exit in forseeable future, here is its output so far:',
-                            result.output
+                            result.output,
+                            'shell'
                         ),
                     };
                 default:

@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {AiOutlineLoading3Quarters} from 'react-icons/ai';
 import {patchContent} from '@oniichan/shared/patch';
 import {trimPathString} from '@oniichan/shared/string';
 import {RenderDiffViewRequest, AcceptEditRequest, DiffAction} from '@oniichan/editor-host/protocol';
@@ -11,20 +10,6 @@ import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 
 const {ActionButton} = ActBar;
-
-const Loading = styled(AiOutlineLoading3Quarters)`
-    animation: spin 1s linear infinite;
-    font-size: .8em;
-
-    @keyframes spin {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
-`;
 
 interface CountLabelProps {
     type: 'addition' | 'deletion';
@@ -216,7 +201,7 @@ export default function FileEdit({action, file, patch, closed}: Props) {
             }
             actions={
                 <>
-                    {!closed && <Loading />}
+                    {!closed && <ActBar.Loading />}
                     {view.diffAction !== 'none' && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
                     {view.diffAction !== 'none' && <ActionButton onClick={accept}>Accept</ActionButton>}
                     {view.error && <ErrorLabel>{view.error}</ErrorLabel>}

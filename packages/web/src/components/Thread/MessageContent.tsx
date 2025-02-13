@@ -7,14 +7,14 @@ import ToolUsage from './ToolUsage';
 import Thinking from './Thinking';
 
 const Layout = styled.div`
-    code {
+    & :where(code) {
         font-family: monospace;
         padding: 0 .5em;
         background-color: transparent;
         color: var(--color-contrast-foreground);
     }
 
-    pre {
+    & :where(pre) {
         background-color: transparent !important;
 
         code {

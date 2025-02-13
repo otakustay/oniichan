@@ -69,12 +69,12 @@ const Layout = styled.div`
     margin: 0;
     overflow: hidden;
 
-    pre {
+    & :where(pre) {
         margin: 0;
         padding: 0;
     }
 
-    code {
+    & :where(code) {
         all: unset;
     }
 `;
