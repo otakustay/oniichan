@@ -149,13 +149,17 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     toChatInputPayload(): ChatInputPayload {
         return {
             role: 'assistant',
-            content: this.getTextContent(),
+            content: this.getModelVisibleTextContent(),
         };
     }
 
     protected restore(persistData: AssistantTextMessageData | ToolCallMessageData) {
         super.restore(persistData);
         this.chunks.push(...persistData.chunks);
+    }
+
+    private getModelVisibleTextContent() {
+        return this.chunks.filter(v => v.type !== 'thinking').map(chunkToString).join('');
     }
 }
 
