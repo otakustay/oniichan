@@ -9,9 +9,21 @@ export interface PatchResult {
 
 export function patchContent(content: string, patch: string): PatchResult {
     const patches = parsePatchString(patch);
+    const {deletedCount, insertedCount} = patches.reduce(
+        (result, patch) => {
+            const deleted = patch.search.filter(v => !patch.replace.includes(v));
+            const inserted = patch.replace.filter(v => !patch.search.includes(v));
+
+            return {
+                deletedCount: result.deletedCount + deleted.length,
+                insertedCount: result.insertedCount + inserted.length,
+            };
+        },
+        {deletedCount: 0, insertedCount: 0}
+    );
     return {
         newContent: applyPatch(content, patches),
-        deletedCount: patches.reduce((sum, v) => sum + v.search.length, 0),
-        insertedCount: patches.reduce((sum, v) => sum + v.replace.length, 0),
+        deletedCount,
+        insertedCount,
     };
 }
