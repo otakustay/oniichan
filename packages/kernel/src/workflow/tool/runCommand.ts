@@ -68,6 +68,17 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         output:
                             'We have already start this command in terminal, unfortunately we are not able to determine whether its finished, and we cannot retrieve any command output at this time, please continue your work',
                     };
+                case 'longRunning':
+                    this.logger.trace('RunCommandLongRunning');
+                    return {
+                        type: 'success',
+                        finished: false,
+                        // It's quite impossible that a long running command has no output
+                        output: resultMarkdown(
+                            'This command is a long running one such as a dev server, this means it will not exit in forseeable future, here is its output so far:',
+                            result.output
+                        ),
+                    };
                 default:
                     assertNever<string>(result.status, v => `Unknown terminal run status ${v}`);
             }

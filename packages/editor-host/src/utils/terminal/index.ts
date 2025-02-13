@@ -2,6 +2,8 @@ import {Terminal, Disposable, window} from 'vscode';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 import {Logger} from '@oniichan/shared/logger';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {defer} from '@oniichan/shared/promise';
+import {isLongRunningCommand} from './detection';
 
 function extractExecutionOutput(content: string) {
     const fullOutputContent = /\]633;C([\s\S]*?)\]633;D/.exec(content)?.at(1);
@@ -39,7 +41,7 @@ function removeUnwantedTailingContent(line: string) {
     return line.replace(/[%$#>]\s*$/, '');
 }
 
-export type ExecuteStatus = 'exit' | 'timeout' | 'noShellIntegration';
+export type ExecuteStatus = 'exit' | 'timeout' | 'noShellIntegration' | 'longRunning';
 
 export interface ExecuteResult {
     status: ExecuteStatus;
@@ -110,10 +112,28 @@ export class ExecutionTerminal implements Disposable {
         };
     }
 
-    private async waitTerminalExecution(stream: AsyncIterable<string>) {
-        for await (const chunk of stream) {
-            this.output.push(chunk);
-        }
+    private async waitTerminalExecution(stream: AsyncIterable<string>): Promise<'exit' | 'longRunning'> {
+        const deferred = defer<'exit' | 'longRunning'>();
+        void (async () => {
+            for await (const chunk of stream) {
+                this.output.push(chunk);
+
+                const output = await this.parseCommandOutput();
+                const isLongRunning = isLongRunningCommand(output);
+                if (isLongRunning) {
+                    // We may encounter key output too soon, still wait 3 seconds for command to be stable,
+                    // but we don't block the process of command, so do not use `await wait(3000)` here
+                    setTimeout(
+                        () => {
+                            deferred.resolve('longRunning');
+                        },
+                        3000
+                    );
+                }
+            }
+            deferred.resolve('exit');
+        })();
+        return deferred.promise;
     }
 
     private async parseCommandOutput() {
@@ -137,11 +157,11 @@ export class ExecutionTerminal implements Disposable {
     private async executeCommand(command: string): Promise<ExecuteResult> {
         if (this.terminal.shellIntegration) {
             const execution = this.terminal.shellIntegration.executeCommand(command);
-            await this.waitTerminalExecution(execution.read());
+            const result = await this.waitTerminalExecution(execution.read());
             const output = await this.parseCommandOutput();
             this.status = 'idle';
             return {
-                status: 'exit',
+                status: result === 'exit' ? 'exit' : 'longRunning',
                 output,
             };
         }
