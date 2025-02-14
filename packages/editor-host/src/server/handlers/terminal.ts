@@ -1,6 +1,5 @@
-import {RequestHandler} from '@otakustay/ipc';
 import {ExecuteStatus} from '../../utils/terminal';
-import {Context} from '../interface';
+import {RequestHandler} from './handler';
 
 export interface ExecuteTerminalRequest {
     command: string;
@@ -13,7 +12,7 @@ export interface ExecuteTerminalResponse {
     output: string;
 }
 
-export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalRequest, ExecuteTerminalResponse, Context> {
+export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalRequest, ExecuteTerminalResponse> {
     static readonly action = 'executeTerminal';
 
     async *handleRequest(payload: ExecuteTerminalRequest): AsyncIterable<ExecuteTerminalResponse> {

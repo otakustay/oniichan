@@ -12,13 +12,13 @@ import type {
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
-import type {AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
+import type {AcceptFileEditHandler, RenderDiffViewHandler, VirtualEditFile} from './handlers/diff';
 import type {ExecuteTerminalHandler} from './handlers/terminal';
 import type {OpenUrlHandler} from './handlers/external';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
-export type {RenderDiffViewRequest, AcceptEditRequest, DiffAction} from './handlers/diff';
+export type {VirtualEditFileAction, VirtualEditFileRequest} from './handlers/diff';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
 export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
 
@@ -36,6 +36,7 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof WriteWorkspaceFileHandler
     | typeof RenderDiffViewHandler
     | typeof AcceptFileEditHandler
+    | typeof VirtualEditFile
     | typeof ExecuteTerminalHandler
     | typeof OpenUrlHandler
 >;

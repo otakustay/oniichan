@@ -1,8 +1,7 @@
 import {Diagnostic, DiagnosticSeverity, languages, Uri, window} from 'vscode';
-import {RequestHandler} from '@otakustay/ipc';
-import {Context} from '../interface';
+import {RequestHandler} from './handler';
 
-export class GetDocumentTextHandler extends RequestHandler<string, string, Context> {
+export class GetDocumentTextHandler extends RequestHandler<string, string> {
     static readonly action = 'getDocumentText';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
@@ -16,7 +15,7 @@ export class GetDocumentTextHandler extends RequestHandler<string, string, Conte
     }
 }
 
-export class GetDocumentLanguageIdHandler extends RequestHandler<string, string, Context> {
+export class GetDocumentLanguageIdHandler extends RequestHandler<string, string> {
     static readonly action = 'getDocumentLanguageId';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
@@ -60,7 +59,7 @@ function toLineDiagnostic(diagnostic: Diagnostic): LineDiagnostic {
     };
 }
 
-export class GetDocumentDiagnosticAtLineHandler extends RequestHandler<DocumentLine, LineDiagnostic[], Context> {
+export class GetDocumentDiagnosticAtLineHandler extends RequestHandler<DocumentLine, LineDiagnostic[]> {
     static readonly action = 'getDocumentDiagnosticAtLine';
 
     async *handleRequest(payload: DocumentLine): AsyncIterable<LineDiagnostic[]> {

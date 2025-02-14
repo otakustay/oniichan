@@ -1,7 +1,7 @@
 import {builtinTools, ModelToolCallInput, StreamingToolParser} from '@oniichan/shared/tool';
 import {FixToolCallView, renderFixToolCallPrompt} from '@oniichan/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {ModelAccessHost, ModelChatOptions} from '../../editor';
+import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
 import {AssistantTextMessage} from '../../inbox';
 import {ToolInputError} from './utils';
 import {newUuid} from '@oniichan/shared/id';
@@ -10,13 +10,13 @@ async function* iterable(content: string): AsyncIterable<string> {
     yield content;
 }
 
-export async function parseToolMessage(content: string) {
+export async function parseToolMessage(content: string, editorHost: EditorHost) {
     const parser = new StreamingToolParser();
     const message = new AssistantTextMessage(newUuid());
     for await (const chunk of parser.parse(iterable(content))) {
         message.addChunk(chunk);
     }
-    const toolCall = message.toToolCallMessage();
+    const toolCall = await message.toToolCallMessage(editorHost);
 
     if (!toolCall) {
         throw new Error('No tool call found in response');
@@ -37,6 +37,7 @@ function formatErrorMessage(error: ToolInputError) {
 }
 
 interface FixOptions {
+    editorHost: EditorHost;
     model: ModelAccessHost;
     telemetry: FunctionUsageTelemetry;
 }
@@ -51,7 +52,7 @@ async function fix(view: FixToolCallView, options: FixOptions) {
         telemetry: telemetry.createModelTelemetry(),
     };
     const result = await model.chat(chatOptions);
-    const toolCall = await parseToolMessage(result.content);
+    const toolCall = await parseToolMessage(result.content, options.editorHost);
     return toolCall;
 }
 
@@ -62,7 +63,7 @@ export interface ToolCallFixOptions extends FixOptions {
 }
 
 export async function fixToolCall(options: ToolCallFixOptions) {
-    const {input, response, error, model, telemetry} = options;
+    const {input, response, error, model, telemetry, editorHost} = options;
     const tool = builtinTools.find(v => v.name === input.name);
 
     if (!tool) {
@@ -76,7 +77,7 @@ export async function fixToolCall(options: ToolCallFixOptions) {
     };
     const {default: pRetry} = await import('p-retry');
     const result = await pRetry(
-        () => fix(view, {model, telemetry}),
+        () => fix(view, {model, telemetry, editorHost}),
         {retries: 3}
     );
 

@@ -24,6 +24,8 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
 
     private readonly message: ToolCallMessage;
 
+    private readonly editorHost: EditorHost;
+
     private readonly logger: Logger;
 
     private retries = 0;
@@ -32,6 +34,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         super(init);
         this.message = init.origin;
         this.systemPrompt = init.systemPrompt;
+        this.editorHost = init.editorHost;
         this.model = init.editorHost.getModelAccess(init.taskId);
         this.implment = new ToolImplement(init.editorHost, init.logger);
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
@@ -56,11 +59,12 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
                 input: this.message.getToolCallInput(),
                 response: this.message.getTextContent(),
                 error: result,
+                editorHost: this.editorHost,
                 model: this.model,
                 telemetry: this.telemetry,
             };
             const newToolCall = await fixToolCall(fixOptions);
-            this.origin.replaceToolCallInput(newToolCall);
+            await this.origin.replaceToolCallInput(newToolCall, this.editorHost);
             this.updateThread();
             return this.retry();
         }
@@ -98,7 +102,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             systemPrompt: this.systemPrompt,
         };
         const response = await this.model.chat(options);
-        const toolCall = await parseToolMessage(response.content);
-        this.origin.replaceToolCallInput(toolCall);
+        const toolCall = await parseToolMessage(response.content, this.editorHost);
+        await this.origin.replaceToolCallInput(toolCall, this.editorHost);
     }
 }

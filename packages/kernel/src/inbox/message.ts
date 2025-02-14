@@ -1,7 +1,7 @@
-import {assertNever} from '@oniichan/shared/error';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {ChatInputPayload} from '@oniichan/shared/model';
 import {now} from '@oniichan/shared/string';
-import {ModelToolCallInput, ModelToolCallInputWithSource, ToolParsedChunk} from '@oniichan/shared/tool';
+import {isEditToolName, ModelToolCallInput, ModelToolCallInputWithSource, ToolParsedChunk} from '@oniichan/shared/tool';
 import {
     MessageType,
     MessageData,
@@ -22,6 +22,8 @@ import {
     chunkToString,
     normalizeArguments,
 } from '@oniichan/shared/inbox';
+import {EditorHost} from '../editor';
+import {VirtualEditFileAction} from '@oniichan/editor-host/protocol';
 
 abstract class MessageBase<T extends MessageType> {
     readonly uuid: string;
@@ -185,7 +187,7 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         };
     }
 
-    replaceToolCallInput(input: ModelToolCallInputWithSource) {
+    async replaceToolCallInput(input: ModelToolCallInputWithSource, editorHost: EditorHost) {
         const chunk = this.findToolCallChunkStrict();
         const index = this.chunks.indexOf(chunk);
 
@@ -198,8 +200,10 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
             toolName: input.name,
             arguments: input.arguments,
             status: chunk.status,
+            fileEdit: null,
             source: input.source,
         };
+        await this.takeFileEditSnapshot(editorHost);
     }
 
     completeToolCall() {
@@ -212,6 +216,39 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
             ...super.toMessageData(),
             type: this.type,
         };
+    }
+
+    async takeFileEditSnapshot(editorHost: EditorHost) {
+        const toolCall = this.findToolCallChunkStrict();
+
+        if (toolCall.fileEdit || toolCall.status === 'generating') {
+            return;
+        }
+
+        if (isEditToolName(toolCall.toolName)) {
+            const action: VirtualEditFileAction = toolCall.toolName === 'write_file'
+                ? 'write'
+                : (
+                    toolCall.toolName === 'patch_file'
+                        ? 'patch'
+                        : 'delete'
+                );
+            const workspace = editorHost.getWorkspace();
+            try {
+                const edit = await workspace.virtualEditFile(
+                    toolCall.arguments.path ?? '',
+                    action,
+                    toolCall.arguments.patch ?? ''
+                );
+                toolCall.fileEdit = edit;
+            }
+            catch (ex) {
+                toolCall.fileEdit = {
+                    type: 'error',
+                    message: stringifyError(ex),
+                };
+            }
+        }
     }
 
     private findToolCallChunkStrict() {
@@ -259,6 +296,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
                 toolName: chunk.toolName,
                 arguments: {},
                 status: 'generating',
+                fileEdit: null,
                 source: chunk.source,
             };
             this.chunks.push(toolChunk);
@@ -301,11 +339,13 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         };
     }
 
-    // TODO: Snapshot file edit
-    toToolCallMessage(): ToolCallMessage | null {
+    async toToolCallMessage(editorHost: EditorHost): Promise<ToolCallMessage | null> {
         if (this.chunks.some(isReactiveToolCallChunk)) {
-            return new ToolCallMessage(this.toMessageData());
+            const message = new ToolCallMessage(this.toMessageData());
+            await message.takeFileEditSnapshot(editorHost);
+            return message;
         }
+
         return null;
     }
 }

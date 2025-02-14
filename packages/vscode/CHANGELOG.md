@@ -1,5 +1,11 @@
 # Change Log
 
+## [UNRELEASED]
+
+### Added
+
+- Oniichan编辑文件以前会记住一个快照，每一个修改都可以重复审查和应用。
+
 ## [2.2.0] - 2024-02-13
 
 ### Added

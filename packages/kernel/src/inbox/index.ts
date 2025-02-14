@@ -99,6 +99,7 @@ const debugMessageThreadFixtures: MessageThreadPersistData[] = [
                                             'Implemented bubble sort algorithm in TypeScript with generic type support and proper type annotations.',
                                     },
                                     status: 'completed',
+                                    fileEdit: null,
                                     source:
                                         '<attempt_completion>\n<result>Implemented bubble sort algorithm in TypeScript with generic type support and proper type annotations.</result>\n</attempt_completion>',
                                 },

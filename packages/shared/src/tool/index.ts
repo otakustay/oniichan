@@ -28,5 +28,6 @@ export {
     ToolName,
     builtinTools,
     isToolName,
+    isEditToolName,
 } from './definition';
 export {StreamingToolParser, ToolParsedChunk} from './parse';

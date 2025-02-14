@@ -1,9 +1,8 @@
 import {FileType, Uri, workspace} from 'vscode';
-import {RequestHandler} from '@otakustay/ipc';
-import {Context} from '../interface';
 import {isWellKnownExcludingDirectory} from '@oniichan/shared/dir';
+import {RequestHandler} from './handler';
 
-export class ReadFileHandler extends RequestHandler<string, string, Context> {
+export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
@@ -38,7 +37,7 @@ function toFileEntryType(input: FileType): FileEntryType {
     }
 }
 
-export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, FileEntry[], Context> {
+export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, FileEntry[]> {
     static readonly action = 'readDirectory';
 
     async *handleRequest({path, depth}: ReadDirectoryRequest): AsyncIterable<FileEntry[]> {

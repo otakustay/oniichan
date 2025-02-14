@@ -1,15 +1,21 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {patchContent} from '@oniichan/shared/patch';
+import {IoAlertCircleOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
-import {RenderDiffViewRequest, AcceptEditRequest, DiffAction} from '@oniichan/editor-host/protocol';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
+import {FileEditData} from '@oniichan/shared/inbox';
 import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 
 const {ActionButton} = ActBar;
+
+const ErrorLabel = styled.div`
+    color: var(--color-error);
+    padding-top: .5em;
+    white-space: pre-wrap;
+`;
 
 interface CountLabelProps {
     type: 'addition' | 'deletion';
@@ -38,154 +44,94 @@ const DeletedMark = styled.span`
     color: var(--color-deletion);
 `;
 
-const ErrorLabel = styled.span`
-    margin-left: auto;
+const ErrorSign = styled(IoAlertCircleOutline)`
     color: var(--color-error);
 `;
 
-interface SourceFileState {
-    state: 'reading' | 'success' | 'fail' | 'notFound';
-    content: string;
-}
-
-interface ViewState {
-    diffAction: DiffAction | 'none';
-    error: string;
-    newContent: string;
-    insertedCount: number;
-    deletedCount: number;
+interface ApplyCheckState {
+    state: 'reading' | 'success' | 'fail';
+    appliable: boolean;
 }
 
 export type EditAction = 'write' | 'patch' | 'delete';
 
-function computeState(closed: boolean, action: EditAction, source: SourceFileState, patch: string): ViewState {
-    if (!closed || source.state === 'reading') {
-        // Do not waste CPU when source or patch is still generating
-        return {
-            diffAction: 'none',
-            error: '',
-            newContent: '',
-            insertedCount: 0,
-            deletedCount: 0,
-        };
-    }
-
-    if (source.state === 'notFound' && action !== 'write') {
-        return {
-            diffAction: 'none',
-            error: 'No Source File',
-            newContent: '',
-            insertedCount: 0,
-            deletedCount: 0,
-        };
-    }
-
-    if (source.state === 'fail') {
-        return {
-            diffAction: 'none',
-            error: 'Read Source Failed',
-            newContent: '',
-            insertedCount: 0,
-            deletedCount: 0,
-        };
-    }
-
-    if (action === 'delete') {
-        return {
-            diffAction: 'delete',
-            error: '',
-            newContent: '',
-            insertedCount: 0,
-            // Don't show lines count for delete action
-            deletedCount: 0,
-        };
-    }
-
-    if (action === 'write') {
-        const content = patch.replaceAll(/^\n|\n$/g, '');
-        return {
-            diffAction: source.state === 'notFound' ? 'create' : 'diff',
-            error: '',
-            newContent: content,
-            insertedCount: closed ? content.split('\n').length : 0,
-            deletedCount: source.state === 'success' ? source.content.split('\n').length : 0,
-        };
-    }
-
-    try {
-        const patched = patchContent(source.content, patch);
-        return {
-            diffAction: 'diff',
-            error: '',
-            newContent: patched.newContent,
-            insertedCount: patched.insertedCount,
-            deletedCount: patched.deletedCount,
-        };
-    }
-    catch {
-        return {
-            diffAction: 'none',
-            error: 'Not Appliable',
-            newContent: '',
-            insertedCount: 0,
-            deletedCount: 0,
-        };
-    }
-}
-
 interface Props {
-    action: EditAction;
     file: string;
     patch: string;
-    closed: boolean;
+    edit: FileEditData | null;
 }
 
-export default function FileEdit({action, file, patch, closed}: Props) {
+export default function FileEdit({file, edit, patch}: Props) {
     const viewMode = useViewModeValue();
-    const [sourceFile, setSourceFile] = useState<SourceFileState>({state: 'reading', content: ''});
+    const editType = edit?.type ?? 'none';
+    const expectedFileContent = edit && edit.type !== 'error' ? edit.oldContent : '';
+    // TODO: Validate file modification before edit action is shown to user
+    const [check, setCheck] = useState<ApplyCheckState>({state: 'reading', appliable: false});
     const ipc = useIpc();
     useEffect(
         () => {
+            if (editType === 'none') {
+                return;
+            }
+
             void (async () => {
                 try {
+                    if (editType === 'error') {
+                        setCheck({state: 'success', appliable: true});
+                        return;
+                    }
+
                     const content = await ipc.editor.call(crypto.randomUUID(), 'readWorkspaceFile', file);
-                    setSourceFile({state: content === null ? 'notFound' : 'success', content: content ?? ''});
+                    // We allow to apply an edit in some cases even if the file is not modified:
+                    //
+                    // 1. To create a file, it already exists but its content is empty
+                    // 2. To write a file with full content, the original file has been deleted
+                    // 3. To modify a file, the file content has different heading and trailing whitespace
+                    // 4. To delete a file, but it has been modified, this means all delete actions are appliable
+                    if (editType === 'create') {
+                        setCheck({state: 'success', appliable: !content});
+                    }
+                    else if (editType === 'edit') {
+                        const appliable = content === null || content.trim() === expectedFileContent.trim();
+                        setCheck({state: 'success', appliable});
+                    }
+                    else {
+                        setCheck({state: 'success', appliable: true});
+                    }
                 }
                 catch {
-                    setSourceFile({state: 'fail', content: ''});
+                    setCheck({state: 'fail', appliable: false});
                 }
             })();
         },
-        [ipc, file]
+        [ipc, file, editType, expectedFileContent]
     );
     const extension = file.split('.').pop();
-    const view = computeState(closed, action, sourceFile, patch);
     const openDiffView = async () => {
-        if (view.diffAction === 'none') {
-            return;
+        if (edit && edit.type !== 'error') {
+            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', edit);
         }
-
-        const request: RenderDiffViewRequest = {
-            action: view.diffAction,
-            file,
-            oldContent: sourceFile.content,
-            newContent: view.newContent,
-        };
-        await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', request);
     };
     const accept = async () => {
-        if (view.diffAction === 'none') {
-            return;
+        if (edit && edit.type !== 'error') {
+            await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', edit);
+        }
+    };
+    const renderDetail = () => {
+        const error = edit?.type === 'error' ? edit.message : (check.appliable ? '' : 'This patch is not appliable');
+        const content = patch.trim();
+
+        if (viewMode.debug || error || content) {
+            return (
+                <>
+                    {error && <ErrorLabel>{error}</ErrorLabel>}
+                    <SourceCode code={content} language="text" />
+                </>
+            );
         }
 
-        const request: AcceptEditRequest = {
-            action: view.diffAction,
-            file,
-            newContent: view.newContent,
-        };
-        await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', request);
+        return null;
     };
-    const showRichContent = viewMode.debug || (view.error && patch.trim());
 
     return (
         <ActBar
@@ -194,20 +140,20 @@ export default function FileEdit({action, file, patch, closed}: Props) {
             content={
                 <>
                     <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
-                    {closed && <CountLabel type="addition" count={view.insertedCount} />}
-                    {closed && <CountLabel type="deletion" count={view.deletedCount} />}
-                    {action === 'delete' && <DeletedMark>D</DeletedMark>}
+                    {edit && edit.type !== 'error' && <CountLabel type="addition" count={edit.insertedCount} />}
+                    {edit && edit.type !== 'error' && <CountLabel type="deletion" count={edit.deletedCount} />}
+                    {edit && edit.type === 'delete' && <DeletedMark>D</DeletedMark>}
                 </>
             }
             actions={
                 <>
-                    {!closed && <ActBar.Loading />}
-                    {view.diffAction !== 'none' && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
-                    {view.diffAction !== 'none' && <ActionButton onClick={accept}>Accept</ActionButton>}
-                    {view.error && <ErrorLabel>{view.error}</ErrorLabel>}
+                    {check.state === 'reading' && <ActBar.Loading />}
+                    {check.appliable && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
+                    {check.appliable && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {!check.appliable && <ErrorSign title="Expand to get detail">Errored</ErrorSign>}
                 </>
             }
-            richContent={showRichContent ? <SourceCode code={patch.trim()} language="diff" /> : null}
+            richContent={renderDetail()}
         />
     );
 }

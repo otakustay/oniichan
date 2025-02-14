@@ -1,7 +1,6 @@
-import {RequestHandler} from '@otakustay/ipc';
-import {Context} from '../interface';
+import {RequestHandler} from './handler';
 
-export class OpenUrlHandler extends RequestHandler<string, void, Context> {
+export class OpenUrlHandler extends RequestHandler<string, void> {
     static readonly action = 'openUrl';
 
     // eslint-disable-next-line require-yield

@@ -1,15 +1,14 @@
 import path from 'node:path';
 import {Uri, workspace} from 'vscode';
-import {RequestHandler} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
-import {Context} from '../interface';
+import {RequestHandler} from './handler';
 
 export interface FindFilesRequest {
     glob: string;
     limit?: number;
 }
 
-export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[], Context> {
+export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[]> {
     static readonly action = 'findFiles';
 
     async *handleRequest({glob, limit}: FindFilesRequest): AsyncIterable<string[]> {
@@ -18,7 +17,7 @@ export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[],
     }
 }
 
-export class GetWorkspaceRootHandler extends RequestHandler<void, string | null, Context> {
+export class GetWorkspaceRootHandler extends RequestHandler<void, string | null> {
     static readonly action = 'getWorkspaceRoot';
 
     async *handleRequest(): AsyncIterable<string | null> {
@@ -26,7 +25,7 @@ export class GetWorkspaceRootHandler extends RequestHandler<void, string | null,
     }
 }
 
-export class ReadWorkspaceFileHandler extends RequestHandler<string, string | null, Context> {
+export class ReadWorkspaceFileHandler extends RequestHandler<string, string | null> {
     static readonly action = 'readWorkspaceFile';
 
     async *handleRequest(file: string): AsyncIterable<string | null> {
@@ -50,7 +49,7 @@ export interface WriteWorkspaceFileRequest {
     content: string;
 }
 
-export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFileRequest, void, Context> {
+export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFileRequest, void> {
     static readonly action = 'writeWorkspaceFile';
 
     // eslint-disable-next-line require-yield
@@ -58,16 +57,9 @@ export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFile
         const {logger} = this.context;
         logger.info('Start', payload);
 
-        const root = workspace.workspaceFolders?.at(0)?.uri.fsPath;
-
-        if (!root) {
-            logger.error('Fail', {reason: 'No open workspace'});
-            throw new Error('No open workspace');
-        }
-
-        const absolute = path.join(root, payload.file);
+        const fileUri = this.resolveFileUri(payload.file);
         try {
-            await workspace.fs.writeFile(Uri.file(absolute), Buffer.from(payload.content, 'utf-8'));
+            await workspace.fs.writeFile(fileUri, Buffer.from(payload.content, 'utf-8'));
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});

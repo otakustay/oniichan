@@ -19,6 +19,7 @@
     "dist"
   ],
   "devDependencies": {
+    "@types/diff": "^7.0.1",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0"
   },
@@ -26,6 +27,7 @@
     "@oniichan/shared": "workspace:*",
     "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
+    "diff": "^7.0.0",
     "nanoid": "^5.0.9",
     "open": "^10.1.0",
     "strip-ansi": "^7.1.0"

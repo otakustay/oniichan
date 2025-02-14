@@ -44,10 +44,10 @@ export class WorkflowDetector {
         this.onUpdateThread = init.onUpdateThread;
     }
 
-    detectWorkflow(): WorkflowRunner | null {
+    async detectWorkflow(): Promise<WorkflowRunner | null> {
         const messages = this.roundtrip.toMessages();
         const assistantTextMessage = this.roundtrip.getLatestTextMessageStrict();
-        const toolCallMessage = assistantTextMessage.toToolCallMessage();
+        const toolCallMessage = await assistantTextMessage.toToolCallMessage(this.editorHost);
 
         if (!toolCallMessage) {
             return null;

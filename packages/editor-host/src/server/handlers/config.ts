@@ -1,8 +1,7 @@
 import {commands, InputBoxOptions, window, workspace} from 'vscode';
-import {RequestHandler} from '@otakustay/ipc';
 import {ModelConfiguration} from '@oniichan/shared/model';
 import {getModelConfig} from '../../utils/config';
-import {Context} from '../interface';
+import {RequestHandler} from './handler';
 
 interface NotConfiguredAction {
     title: string;
@@ -20,7 +19,7 @@ async function updateModelConfiguration(input: ModelConfiguration) {
     await Promise.all([update('apiKey'), update('modelName')]);
 }
 
-export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration, Context> {
+export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration> {
     static readonly action = 'getModelConfig';
 
     async *handleRequest(): AsyncIterable<ModelConfiguration> {
@@ -29,7 +28,7 @@ export class GetModelConfigHandler extends RequestHandler<string, ModelConfigura
     }
 }
 
-export class RequestModelConfigureHandler extends RequestHandler<void, void, Context> {
+export class RequestModelConfigureHandler extends RequestHandler<void, void> {
     static readonly action = 'requestModelConfigure';
 
     // eslint-disable-next-line require-yield

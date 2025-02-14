@@ -124,9 +124,13 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             onUpdateThread: () => this.updateInboxThreadList(store.dump()),
         };
         const detector = new WorkflowDetector(detectorInit);
-        const workflowRunner = detector.detectWorkflow();
+        const workflowRunner = await detector.detectWorkflow();
 
         if (workflowRunner) {
+            // Detecting workflow can change message content, such as move a text message to tool call message
+            logger.trace('PushStoreUpdate');
+            this.updateInboxThreadList(store.dump());
+
             try {
                 logger.trace('RunWorkflow', {originUuid: reply.uuid});
                 await workflowRunner.run();

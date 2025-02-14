@@ -19,6 +19,7 @@ const Layout = styled.div`
 
         code {
             padding: 0;
+            color: unset;
         }
     }
 

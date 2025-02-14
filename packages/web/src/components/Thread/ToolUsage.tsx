@@ -1,6 +1,7 @@
 import {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
+import {isEditToolName} from '@oniichan/shared/tool';
 import {trimPathString} from '@oniichan/shared/string';
 import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
@@ -60,35 +61,13 @@ export default function ToolUsage({input}: Props) {
         return input.arguments.question ? <Markdown content={input.arguments.question} /> : null;
     }
 
-    if (input.toolName === 'write_file') {
+    if (isEditToolName(input.toolName)) {
         return (
             <FileEdit
-                action="write"
                 file={input.arguments.path ?? ''}
-                patch={input.arguments.content ?? ''}
-                closed={input.status === 'completed'}
-            />
-        );
-    }
-
-    if (input.toolName === 'patch_file') {
-        return (
-            <FileEdit
-                action="patch"
-                file={input.arguments.path ?? ''}
-                patch={input.arguments.patch ?? ''}
-                closed={input.status === 'completed'}
-            />
-        );
-    }
-
-    if (input.toolName === 'delete_file') {
-        return (
-            <FileEdit
-                action="delete"
-                file={input.arguments.path ?? ''}
-                patch=""
-                closed={input.status === 'completed'}
+                // `patch` for `patch_file`, `content` for `write_file`
+                patch={input.arguments.patch ?? input.arguments.content ?? ''}
+                edit={input.fileEdit}
             />
         );
     }

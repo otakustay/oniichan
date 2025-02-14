@@ -382,6 +382,10 @@ export function isToolName(name: string): name is ToolName {
     return builtinTools.some(tool => tool.name === name);
 }
 
+export function isEditToolName(name: ToolName) {
+    return name === 'delete_file' || name === 'patch_file' || name === 'write_file';
+}
+
 export interface ModelToolCallInput {
     name: ToolName;
     arguments: Record<string, string | undefined>;

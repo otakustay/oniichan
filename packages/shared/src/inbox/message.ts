@@ -16,6 +16,7 @@ export interface ToolCallMessageChunk {
     toolName: ToolName;
     arguments: Record<string, string | undefined>;
     status: 'generating' | 'executing' | 'completed';
+    fileEdit: FileEditData | null;
     source: string;
 }
 
@@ -75,8 +76,20 @@ export type MessageData =
 
 export type MessageType = MessageData['type'];
 
-export interface FileEditData {
+export type FileEditAction = 'create' | 'delete' | 'edit';
+
+export interface FileEditResult {
+    type: FileEditAction;
     file: string;
     oldContent: string;
     newContent: string;
+    deletedCount: number;
+    insertedCount: number;
 }
+
+export interface FileEditError {
+    type: 'error';
+    message: string;
+}
+
+export type FileEditData = FileEditResult | FileEditError;

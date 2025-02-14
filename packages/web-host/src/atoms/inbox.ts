@@ -182,7 +182,14 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
             ...message,
             chunks: [
                 ...message.chunks,
-                {type: 'toolCall', toolName: chunk.toolName, arguments: {}, status: 'generating', source: chunk.source},
+                {
+                    type: 'toolCall',
+                    toolName: chunk.toolName,
+                    arguments: {},
+                    status: 'generating',
+                    fileEdit: null,
+                    source: chunk.source,
+                },
             ],
         };
     }
