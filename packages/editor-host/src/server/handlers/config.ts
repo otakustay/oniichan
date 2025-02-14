@@ -23,8 +23,13 @@ export class GetModelConfigHandler extends RequestHandler<string, ModelConfigura
     static readonly action = 'getModelConfig';
 
     async *handleRequest(): AsyncIterable<ModelConfiguration> {
+        const {logger} = this.context;
+        logger.info('Start');
+
         const config = getModelConfig();
         yield config;
+
+        logger.info('Finish');
     }
 }
 
@@ -33,6 +38,9 @@ export class RequestModelConfigureHandler extends RequestHandler<void, void> {
 
     // eslint-disable-next-line require-yield
     async *handleRequest() {
+        const {logger} = this.context;
+        logger.info('Start');
+
         const result = await window.showWarningMessage<NotConfiguredAction>(
             '在你配置好模型服务前，欧尼酱可没法干活哦，还请去配置里填写相关信息。',
             {
@@ -50,11 +58,14 @@ export class RequestModelConfigureHandler extends RequestHandler<void, void> {
         }
 
         if (result.action === 'go-to-settings') {
+            logger.trace('OpenSetting');
             await commands.executeCommand('workbench.action.openSettings', `oniichan.model`);
             return false;
         }
-
+        logger.trace('QuickConfigure');
         await this.configureModel();
+
+        logger.info('Finish');
     }
 
     private async configureModel() {

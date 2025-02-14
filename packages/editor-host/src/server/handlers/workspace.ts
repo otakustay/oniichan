@@ -11,9 +11,14 @@ export interface FindFilesRequest {
 export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[]> {
     static readonly action = 'findFiles';
 
-    async *handleRequest({glob, limit}: FindFilesRequest): AsyncIterable<string[]> {
-        const files = await workspace.findFiles(glob, null, limit);
+    async *handleRequest(payload: FindFilesRequest): AsyncIterable<string[]> {
+        const {logger} = this.context;
+        logger.info('Start', payload);
+
+        const files = await workspace.findFiles(payload.glob, null, payload.limit);
         yield files.map(v => v.toString());
+
+        logger.info('Finish');
     }
 }
 
@@ -29,17 +34,23 @@ export class ReadWorkspaceFileHandler extends RequestHandler<string, string | nu
     static readonly action = 'readWorkspaceFile';
 
     async *handleRequest(file: string): AsyncIterable<string | null> {
+        const {logger} = this.context;
+        logger.info('Start', {file});
+
         for (const folder of workspace.workspaceFolders ?? []) {
             const absolute = path.join(folder.uri.fsPath, file);
             try {
                 const content = await workspace.fs.readFile(Uri.file(absolute));
                 yield Buffer.from(content).toString('utf-8');
+
+                logger.info('Finish');
             }
             catch {
                 // Go next workspace folder
             }
         }
 
+        logger.info('NotFound');
         yield null;
     }
 }
@@ -60,6 +71,7 @@ export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFile
         const fileUri = this.resolveFileUri(payload.file);
         try {
             await workspace.fs.writeFile(fileUri, Buffer.from(payload.content, 'utf-8'));
+            logger.info('Finish');
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});

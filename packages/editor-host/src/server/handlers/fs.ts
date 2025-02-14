@@ -6,8 +6,13 @@ export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';
 
     async *handleRequest(uri: string): AsyncIterable<string> {
+        const {logger} = this.context;
+        logger.info('Start', {uri});
+
         const content = await workspace.fs.readFile(Uri.parse(uri));
         yield Buffer.from(content).toString('utf-8');
+
+        logger.info('Finish');
     }
 }
 
@@ -40,9 +45,14 @@ function toFileEntryType(input: FileType): FileEntryType {
 export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, FileEntry[]> {
     static readonly action = 'readDirectory';
 
-    async *handleRequest({path, depth}: ReadDirectoryRequest): AsyncIterable<FileEntry[]> {
-        const entries = await this.read(Uri.parse(path), depth);
+    async *handleRequest(payload: ReadDirectoryRequest): AsyncIterable<FileEntry[]> {
+        const {logger} = this.context;
+        logger.info('Start', payload);
+
+        const entries = await this.read(Uri.parse(payload.path), payload.depth);
         yield entries;
+
+        logger.info('Finish');
     }
 
     private async read(uri: Uri, depth?: number): Promise<FileEntry[]> {

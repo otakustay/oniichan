@@ -24,6 +24,7 @@ export class RenderDiffViewHandler extends RequestHandler<FileEditData, void> {
         try {
             logger.trace('OpenDiffView');
             await diffViewManager.open(payload);
+            logger.info('Finish');
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});
@@ -53,6 +54,8 @@ export class AcceptFileEditHandler extends RequestHandler<FileEditData, void> {
                 logger.trace('OpenDocument');
                 await commands.executeCommand('vscode.open', fileUri);
             }
+
+            logger.info('Finish');
         }
         catch (ex) {
             logger.error('Fail', {reason: stringifyError(ex)});
@@ -114,18 +117,24 @@ export class VirtualEditFile extends RequestHandler<VirtualEditFileRequest, File
         const {logger} = this.context;
         logger.info('Start', payload);
 
-        switch (payload.action) {
-            case 'write':
-                yield await this.write(payload);
-                break;
-            case 'delete':
-                yield await this.delete(payload);
-                break;
-            case 'patch':
-                yield await this.patch(payload);
-                break;
-            default:
-                assertNever<string>(payload.action, v => `Unknown file edit action ${v}`);
+        try {
+            switch (payload.action) {
+                case 'write':
+                    yield await this.write(payload);
+                    break;
+                case 'delete':
+                    yield await this.delete(payload);
+                    break;
+                case 'patch':
+                    yield await this.patch(payload);
+                    break;
+                default:
+                    assertNever<string>(payload.action, v => `Unknown file edit action ${v}`);
+            }
+        }
+        catch (ex) {
+            logger.error('Fail', {reason: stringifyError(ex)});
+            throw ex;
         }
 
         logger.info('Finish');
