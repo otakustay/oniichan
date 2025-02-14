@@ -2,9 +2,9 @@ import {builtinTools, ModelToolCallInput, StreamingToolParser} from '@oniichan/s
 import {FixToolCallView, renderFixToolCallPrompt} from '@oniichan/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {ModelAccessHost, ModelChatOptions} from '../../editor';
+import {AssistantTextMessage} from '../../inbox';
 import {ToolInputError} from './utils';
 import {newUuid} from '@oniichan/shared/id';
-import {AssistantTextMessage} from '@oniichan/shared/inbox';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;

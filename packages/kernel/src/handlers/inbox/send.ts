@@ -1,15 +1,10 @@
 import {over} from '@otakustay/async-iterator';
-import {
-    DebugMessageLevel,
-    DebugContentChunk,
-    MessageThread,
-    Roundtrip,
-    UserRequestMessage,
-} from '@oniichan/shared/inbox';
+import {DebugMessageLevel, DebugContentChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
+import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
 import {ModelChatOptions} from '../../editor';
 import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';

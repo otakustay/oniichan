@@ -1,5 +1,5 @@
 import {assertNever} from '../error';
-import {MessageContentChunk, ToolCallMessageChunk, MessageType, ThinkingMessageChunk} from './interface';
+import {MessageContentChunk, ToolCallMessageChunk, MessageType, ThinkingMessageChunk} from './message';
 
 export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
     return chunk.type === 'toolCall';

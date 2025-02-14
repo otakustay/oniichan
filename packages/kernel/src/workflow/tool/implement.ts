@@ -9,8 +9,8 @@ import {GlobFilesToolImplement} from './globFiles';
 import {GrepFilesToolImplement} from './grepFiles';
 import {WriteFileToolImplement} from './writeFile';
 import {PatchFilesToolImplement} from './patchFile';
-import {RunCommandToolImplement} from './runCommand';
 import {DeleteFileToolImplement} from './deleteFile';
+import {RunCommandToolImplement} from './runCommand';
 import {BrowserPreviewToolImplement} from './browserPreview';
 
 export class ToolImplement {

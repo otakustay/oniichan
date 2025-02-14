@@ -1,6 +1,6 @@
-import {Roundtrip} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {Logger} from '@oniichan/shared/logger';
+import {Roundtrip} from '../inbox';
 import {EditorHost} from '../editor';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';

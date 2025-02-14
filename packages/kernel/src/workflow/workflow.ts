@@ -1,7 +1,7 @@
 import {stringifyError} from '@oniichan/shared/error';
 import {Logger} from '@oniichan/shared/logger';
-import {Message, Workflow, WorkflowOriginMessage} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import {Message, Workflow, WorkflowOriginMessage} from '../inbox';
 
 export interface WorkflowRunnerInit {
     threadUuid: string;

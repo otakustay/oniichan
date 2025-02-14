@@ -1,6 +1,6 @@
 import {newUuid} from '@oniichan/shared/id';
-import {ToolCallMessage, ToolUseMessage} from '@oniichan/shared/inbox';
 import {Logger} from '@oniichan/shared/logger';
+import {ToolCallMessage, ToolUseMessage} from '../../inbox';
 import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
 import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
