@@ -11,7 +11,23 @@ interface GrepState {
     isFiltered: boolean;
 }
 
-function groupGrepOutput(output: string) {
+interface GrepGroupedOutput {
+    content: string;
+    isTruncated: boolean;
+    originalCount: number;
+    truncatedCount: number;
+}
+
+function groupGrepOutput(output: string): GrepGroupedOutput {
+    if (!output.trim()) {
+        return {
+            content: '',
+            isTruncated: false,
+            originalCount: 0,
+            truncatedCount: 0,
+        };
+    }
+
     const lines = output.split('\n');
     const groups: string[] = [];
     const state: GrepState = {
@@ -90,35 +106,21 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             ];
             this.logger.trace('ExecuteGrepStart', {args: commandLineArgs});
             const grep = await execa('grep', commandLineArgs, {cwd: root});
+            const output = groupGrepOutput(grep.stdout);
 
-            if (grep.stdout) {
-                const output = groupGrepOutput(grep.stdout);
-
-                if (output.isTruncated) {
-                    this.logger.trace(
-                        'ExecuteGrepFinish',
-                        {
-                            original: output.originalCount,
-                            truncated: output.truncatedCount,
-                        }
-                    );
+            this.logger.trace(
+                'ExecuteGrepFinish',
+                {
+                    regex: args.regex,
+                    original: output.originalCount,
+                    truncated: output.truncatedCount,
                 }
+            );
 
-                const title = output.isTruncated
-                    ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
-                    : 'This is stdout of grep command:';
-                return {
-                    type: 'success',
-                    finished: false,
-                    output: resultMarkdown(title, output.content),
-                };
-            }
-
-            this.logger.trace('ExecuteGrepFinish', {original: 0, truncated: 0});
             return {
                 type: 'success',
                 finished: false,
-                output: 'There are no files matching this regex',
+                output: this.constructResponseText(output),
             };
         }
         catch (ex) {
@@ -144,5 +146,16 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 output: `Unsable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
             };
         }
+    }
+
+    private constructResponseText(output: GrepGroupedOutput): string {
+        if (!output.content) {
+            return 'There are no files matching this regex';
+        }
+
+        const title = output.isTruncated
+            ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
+            : 'This is stdout of grep command:';
+        return resultMarkdown(title, output.content);
     }
 }
