@@ -52,17 +52,21 @@ export default function Thread({uuid}: Props) {
             return roundtrip.messages;
         }
 
-        const [request, ...responses] = roundtrip.messages;
+        const request = roundtrip.messages.at(0);
+        const responses = roundtrip.messages.slice(1).filter(isProductionMessage);
 
         const messages: MessageData[] = [];
-        messages.push(request);
+
+        if (request) {
+            messages.push(request);
+        }
 
         if (!responses.length) {
             return messages;
         }
 
         // Combine messages in roundtrip to a single response
-        const [reply, ...reactions] = responses.filter(isProductionMessage);
+        const [reply, ...reactions] = responses;
         const response: AssistantTextMessageData = {
             type: 'assistantText',
             chunks: [...reply.chunks],
