@@ -81,7 +81,9 @@ export default function Thread({uuid}: Props) {
                 response.error = reaction.error;
             }
         }
-        return messages;
+
+        // As a mail inbox, the latest message is on top
+        return messages.reverse();
     };
 
     if (!thread) {
@@ -102,10 +104,13 @@ export default function Thread({uuid}: Props) {
         return messages.map(renderMessage);
     };
 
+    // As a mail inbox, the latest roundtrip is on top
+    const roundtrips = viewMode.debug ? thread.roundtrips : [...thread.roundtrips].reverse();
+
     return (
         <Layout>
             {editing?.mode === 'reply' && <Draft />}
-            {thread.roundtrips.map(renderRoundtrip)}
+            {roundtrips.map(renderRoundtrip)}
         </Layout>
     );
 }
