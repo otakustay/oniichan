@@ -1,3 +1,5 @@
+import {ModelFeature} from './feature';
+
 export interface ChatUserMessagePayload {
     role: 'user';
     content: string;
@@ -41,4 +43,5 @@ export interface ModelChatOptions {
 export interface ModelClient {
     chat(options: ModelChatOptions): Promise<[ModelResponse, ModelMetaResponse]>;
     chatStreaming(options: ModelChatOptions): AsyncIterable<ModelStreamingResponse>;
+    getModelFeature(): ModelFeature;
 }

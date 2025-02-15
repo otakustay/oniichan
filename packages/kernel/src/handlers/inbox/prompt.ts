@@ -3,6 +3,7 @@ import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {DebugContentChunk, DebugMessageLevel} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../editor';
+import {ModelFeature} from '@oniichan/shared/model';
 
 interface DebugResult {
     type: 'debug';
@@ -21,14 +22,25 @@ export type SystemPromptYieldResult = DebugResult | PromptResult;
 export class SystemPromptGenerator {
     private readonly editorHost: EditorHost;
 
+    private modelFeature: ModelFeature = {
+        supportReasoning: false,
+        requireToolThinking: false,
+        shouldAvoidSystemPrompt: false,
+    };
+
     constructor(editorHost: EditorHost) {
         this.editorHost = editorHost;
+    }
+
+    setModelFeature(feature: ModelFeature) {
+        this.modelFeature = feature;
     }
 
     async *renderSystemPrompt(): AsyncIterable<SystemPromptYieldResult> {
         const view: InboxPromptView = {
             tools: [],
             rootEntries: [],
+            modelFeature: this.modelFeature,
         };
 
         const toolsView = this.createToolsView();

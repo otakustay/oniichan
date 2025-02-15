@@ -246,7 +246,7 @@ export interface AttemptCompletionParameter {
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
-        description: `Read the content of a file, returns null if the file does not exist`,
+        description: `Read the content of a file`,
         parameters: readFileParameters,
         usage: dedent`
                 <read_file>

@@ -152,9 +152,11 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async prepareSystemPrompt() {
-        const {logger} = this.context;
+        const {logger, editorHost} = this.context;
         logger.trace('PrepareSystemPromptStart');
 
+        const modelFeature = await editorHost.getModelAccess().getModelFeature();
+        this.systemPromptGenerator.setModelFeature(modelFeature);
         for await (const item of this.systemPromptGenerator.renderSystemPrompt()) {
             switch (item.type) {
                 case 'debug':

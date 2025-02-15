@@ -13,6 +13,7 @@ export {
     ModelStreamingResponse,
     ChatInputPayload,
 } from './interface';
+export {ModelFeature} from './feature';
 
 function validateModelConfiguration(config: ModelConfiguration): void {
     if (!config.modelName) {
@@ -33,4 +34,8 @@ export function createModelClient(config: ModelConfiguration): ModelClient {
 
 export function isModelConfigValid(config: ModelConfiguration) {
     return !!(config.apiKey && config.modelName);
+}
+
+export function modelRequiresToolThinking(modelName: string) {
+    return modelName.includes('claude');
 }

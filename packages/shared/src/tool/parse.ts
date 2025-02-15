@@ -53,6 +53,12 @@ export type ToolParsedChunk =
     | ToolDeltaChunk
     | ToolEndChunk;
 
+const THINKING_TAGS = ['thinking', 'think'];
+
+function isThinkingTag(tag: string | undefined) {
+    return !!tag && THINKING_TAGS.includes(tag);
+}
+
 export class StreamingToolParser {
     private tagStack: string[] = [];
 
@@ -76,7 +82,7 @@ export class StreamingToolParser {
     *yieldForTextChunk(chunk: XmlParseTextChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
         // `<thinking>` tag has plain text inside it
-        if (activeTag === 'thinking') {
+        if (isThinkingTag(activeTag)) {
             yield {type: 'thinkingDelta', source: chunk.content};
         }
         // We don't allow text content in top level tag, all tool calls contains only parameters
@@ -95,7 +101,7 @@ export class StreamingToolParser {
 
     *yieldForTagStart(chunk: XmlParseTagStartChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
-        if (activeTag === 'thinking') {
+        if (isThinkingTag(activeTag)) {
             yield {type: 'thinkingDelta', source: chunk.source};
         }
         else if (activeTag) {
@@ -109,7 +115,7 @@ export class StreamingToolParser {
                 yield {type: 'toolDelta', arguments: {[activeTag]: chunk.source}, source: chunk.source};
             }
         }
-        else if (chunk.tagName === 'thinking') {
+        else if (isThinkingTag(chunk.tagName)) {
             this.tagStack.push(chunk.tagName);
             yield {type: 'thinkingStart', source: chunk.source};
         }
@@ -128,8 +134,9 @@ export class StreamingToolParser {
             return;
         }
 
-        if (this.tagStack.at(-1) === 'thinking') {
-            if (chunk.tagName === 'thinking') {
+        // TODO: This is wrong when `</thinking>` inside `<think>`
+        if (isThinkingTag(this.tagStack.at(-1))) {
+            if (isThinkingTag(chunk.tagName)) {
                 yield {type: 'thinkingEnd', source: chunk.source};
                 this.tagStack.pop();
             }

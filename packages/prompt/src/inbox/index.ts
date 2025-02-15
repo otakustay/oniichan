@@ -14,8 +14,8 @@ export async function renderInboxSystemPrompt(view: InboxPromptView) {
         renderToolSection(view),
         '# Context',
         'This section provides some already known information for user\'s request.',
-        view.rootEntries.length ? renderRootEntriesSection(view.rootEntries) : '',
-        renderObjectiveSection(),
+        view.rootEntries.length ? renderRootEntriesSection(view) : '',
+        renderObjectiveSection(view),
     ];
     return parts.filter(v => !!v).join('\n\n');
 }

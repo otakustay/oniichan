@@ -26,6 +26,11 @@ export class ModelAccessHost {
         this.client = client;
     }
 
+    async getModelFeature() {
+        const client = await this.createModelClient();
+        return client.getModelFeature();
+    }
+
     async chat(options: ModelChatOptions): Promise<ModelResponse> {
         const {messages, systemPrompt, telemetry} = options;
         const client = await this.createModelClient();

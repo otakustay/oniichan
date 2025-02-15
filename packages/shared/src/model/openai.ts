@@ -8,6 +8,7 @@ import {
     ModelResponse,
     ModelStreamingResponse,
 } from './interface';
+import {getModelFeature, ModelFeature} from './feature';
 
 const OPEN_ROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
@@ -62,15 +63,45 @@ export class OpenAiModelClient implements ModelClient {
     }
 
     private getBaseRequest(options: ModelChatOptions) {
+        const feature = this.getModelFeature();
         const messages: OpenAi.ChatCompletionMessageParam[] = [...options.messages];
+
+        if (!messages.length) {
+            throw new Error('No messages provided for chat');
+        }
+
         if (options.systemPrompt) {
-            messages.unshift({role: 'system', content: options.systemPrompt});
+            if (feature.shouldAvoidSystemPrompt) {
+                const content = this.combineSystemAndUserPrompt(options.systemPrompt, options.messages[0].content);
+                messages[0] = {role: 'user', content};
+            }
+            else {
+                messages.unshift({role: 'system', content: options.systemPrompt});
+            }
         }
         const request: OpenAi.ChatCompletionCreateParams = {
             messages,
             model: this.modelName,
             max_tokens: 8000,
+            temperature: feature.temperature,
         };
         return request;
+    }
+
+    getModelFeature(): ModelFeature {
+        return getModelFeature(this.modelName);
+    }
+
+    private combineSystemAndUserPrompt(system: string, user: string): string {
+        const lines = [
+            system,
+            '',
+            '# User Request',
+            '',
+            'This is the user\'s request, respond with the same language as content below.',
+            '',
+            user,
+        ];
+        return lines.join('\n');
     }
 }
