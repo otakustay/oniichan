@@ -16,7 +16,7 @@ export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[]>
         logger.info('Start', payload);
 
         const files = await workspace.findFiles(payload.glob, null, payload.limit);
-        yield files.map(v => v.toString());
+        yield files.map(v => v.fsPath);
 
         logger.info('Finish');
     }
