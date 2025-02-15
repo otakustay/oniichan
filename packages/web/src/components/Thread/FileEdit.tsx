@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
+import {useOriginalCopy} from 'huse';
 import {IoAlertCircleOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
@@ -8,6 +9,8 @@ import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
+import {showToast} from '@/components/Toast';
+import {stringifyError} from '@oniichan/shared/error';
 
 const {ActionButton} = ActBar;
 
@@ -63,58 +66,52 @@ interface Props {
 
 export default function FileEdit({file, edit, patch}: Props) {
     const viewMode = useViewModeValue();
-    const editType = edit?.type ?? 'none';
-    const expectedFileContent = edit && edit.type !== 'error' ? edit.oldContent : '';
-    // TODO: Validate file modification before edit action is shown to user
+    const editForCheck = useOriginalCopy(edit);
     const [check, setCheck] = useState<ApplyCheckState>({state: 'reading', appliable: false});
     const ipc = useIpc();
     useEffect(
         () => {
-            if (editType === 'none') {
+            if (!editForCheck) {
                 return;
             }
 
             void (async () => {
                 try {
-                    if (editType === 'error') {
-                        setCheck({state: 'success', appliable: true});
-                        return;
-                    }
-
-                    const content = await ipc.editor.call(crypto.randomUUID(), 'readWorkspaceFile', file);
-                    // We allow to apply an edit in some cases even if the file is not modified:
-                    //
-                    // 1. To create a file, it already exists but its content is empty
-                    // 2. To write a file with full content, the original file has been deleted
-                    // 3. To modify a file, the file content has different heading and trailing whitespace
-                    // 4. To delete a file, but it has been modified, this means all delete actions are appliable
-                    if (editType === 'create') {
-                        setCheck({state: 'success', appliable: !content});
-                    }
-                    else if (editType === 'edit') {
-                        const appliable = content === null || content.trim() === expectedFileContent.trim();
-                        setCheck({state: 'success', appliable});
-                    }
-                    else {
-                        setCheck({state: 'success', appliable: true});
-                    }
+                    const appliable = await ipc.editor.call(crypto.randomUUID(), 'checkEditAppliable', editForCheck);
+                    setCheck({state: 'success', appliable});
                 }
                 catch {
                     setCheck({state: 'fail', appliable: false});
                 }
             })();
         },
-        [ipc, file, editType, expectedFileContent]
+        [ipc, editForCheck]
     );
     const extension = file.split('.').pop();
     const openDiffView = async () => {
-        if (edit && edit.type !== 'error') {
+        if (!edit || edit.type === 'error') {
+            return;
+        }
+
+        try {
             await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', edit);
+        }
+        catch (ex) {
+            setCheck({state: 'success', appliable: false});
+            showToast('error', stringifyError(ex), {timeout: 3000});
         }
     };
     const accept = async () => {
-        if (edit && edit.type !== 'error') {
+        if (!edit || edit.type === 'error') {
+            return;
+        }
+
+        try {
             await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', edit);
+        }
+        catch (ex) {
+            setCheck({state: 'success', appliable: false});
+            showToast('error', stringifyError(ex), {timeout: 3000});
         }
     };
     const renderDetail = () => {
@@ -147,8 +144,8 @@ export default function FileEdit({file, edit, patch}: Props) {
             }
             actions={
                 <>
-                    {check.state === 'reading' && <ActBar.Loading />}
-                    {check.appliable && <ActionButton onClick={openDiffView}>Open Diff</ActionButton>}
+                    {!edit && <ActBar.Loading />}
+                    {check.appliable && <ActionButton onClick={openDiffView}>Review</ActionButton>}
                     {check.appliable && <ActionButton onClick={accept}>Accept</ActionButton>}
                     {!check.appliable && <ErrorSign title="Expand to get detail">Errored</ErrorSign>}
                 </>

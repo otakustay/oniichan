@@ -6,7 +6,48 @@ import {FileEditData, FileEditResult} from '@oniichan/shared/inbox';
 import {patchContent} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
-export class RenderDiffViewHandler extends RequestHandler<FileEditData, void> {
+abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
+    protected async checkEditAppliable(edit: FileEditData) {
+        if (edit.type === 'error') {
+            return false;
+        }
+
+        const content = await this.readFileContent(edit.file);
+        // We allow to apply an edit in some cases even if the file is not modified:
+        //
+        // 1. To create a file, it already exists but its content is empty
+        // 2. To write a file with full content, the original file has been deleted
+        // 3. To modify a file, the file content has different heading and trailing whitespace
+        // 4. To delete a file, but it has been modified, this means all delete actions are appliable
+        switch (edit.type) {
+            case 'create':
+                return !content;
+            case 'edit':
+                return content === null || content.trim() === edit.oldContent.trim();
+            default:
+                return true;
+        }
+    }
+
+    protected async ensureEditAppliable(edit: FileEditData) {
+        const appliable = await this.checkEditAppliable(edit);
+
+        if (!appliable) {
+            throw new Error('Patch is not appliable to file');
+        }
+    }
+}
+
+export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData, boolean> {
+    static readonly action = 'checkEditAppliable';
+
+    async *handleRequest(payload: FileEditData) {
+        const appliable = await this.checkEditAppliable(payload);
+        yield appliable;
+    }
+}
+
+export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, void> {
     static readonly action = 'renderDiffView';
 
     // eslint-disable-next-line require-yield
@@ -14,14 +55,16 @@ export class RenderDiffViewHandler extends RequestHandler<FileEditData, void> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
-        const directory = await tmpDirectory('inbox-diff');
-
-        if (!directory) {
-            logger.error('Fail', {reason: 'Unable to use temp directory'});
-            throw new Error('Unable to use temp directory');
-        }
-
         try {
+            await this.ensureEditAppliable(payload);
+
+            const directory = await tmpDirectory('inbox-diff');
+
+            if (!directory) {
+                logger.error('Fail', {reason: 'Unable to use temp directory'});
+                throw new Error('Unable to use temp directory');
+            }
+
             logger.trace('OpenDiffView');
             await diffViewManager.open(payload);
             logger.info('Finish');
@@ -33,7 +76,7 @@ export class RenderDiffViewHandler extends RequestHandler<FileEditData, void> {
     }
 }
 
-export class AcceptFileEditHandler extends RequestHandler<FileEditData, void> {
+export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, void> {
     static readonly action = 'acceptFileEdit';
 
     // eslint-disable-next-line require-yield
@@ -41,9 +84,12 @@ export class AcceptFileEditHandler extends RequestHandler<FileEditData, void> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
-        const fileUri = this.resolveFileUri(payload.file);
-        const edit = new WorkspaceEdit();
         try {
+            await this.ensureEditAppliable(payload);
+
+            const fileUri = this.resolveFileUri(payload.file);
+            const edit = new WorkspaceEdit();
+
             logger.trace('ApplyEdit');
             await this.applyEdit(payload, edit, fileUri);
 
@@ -64,7 +110,6 @@ export class AcceptFileEditHandler extends RequestHandler<FileEditData, void> {
     }
 
     private async applyEdit(payload: FileEditResult, edit: WorkspaceEdit, uri: Uri) {
-        // TODO: We should check if the original file is modified, report error if so
         const {logger} = this.context;
 
         if (payload.type === 'delete') {
