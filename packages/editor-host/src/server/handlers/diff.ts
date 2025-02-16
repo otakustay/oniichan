@@ -6,10 +6,12 @@ import {FileEditData, FileEditResult} from '@oniichan/shared/inbox';
 import {patchContent} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
+export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';
+
 abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
-    protected async checkEditAppliable(edit: FileEditData) {
+    protected async checkEditAppliable(edit: FileEditData): Promise<AppliableState> {
         if (edit.type === 'error') {
-            return false;
+            return 'error';
         }
 
         try {
@@ -22,16 +24,21 @@ abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
             // 4. To delete a file, but it has been modified, this means all delete actions are appliable
             switch (edit.type) {
                 case 'create':
-                    return !content;
+                    return content ? 'conflict' : 'appliable';
                 case 'edit':
-                    return content === null || content.trim() === edit.oldContent.trim();
+                    return content.trim() === edit.newContent.trim()
+                        ? 'applied'
+                        : (content.trim() === edit.oldContent.trim() ? 'appliable' : 'conflict');
                 default:
-                    return true;
+                    return 'appliable';
             }
         }
         catch (ex) {
             if (edit.type === 'create') {
-                return true;
+                return 'appliable';
+            }
+            if (edit.type === 'delete') {
+                return 'applied';
             }
 
             throw ex;
@@ -41,13 +48,17 @@ abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
     protected async ensureEditAppliable(edit: FileEditData) {
         const appliable = await this.checkEditAppliable(edit);
 
-        if (!appliable) {
+        if (appliable === 'applied') {
+            throw new Error('Patch is already applied to file');
+        }
+
+        if (appliable !== 'appliable') {
             throw new Error('Patch is not appliable to file');
         }
     }
 }
 
-export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData, boolean> {
+export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData, AppliableState> {
     static readonly action = 'checkEditAppliable';
 
     async *handleRequest(payload: FileEditData) {
@@ -56,16 +67,20 @@ export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData, 
     }
 }
 
-export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, void> {
+export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, AppliableState> {
     static readonly action = 'renderDiffView';
 
-    // eslint-disable-next-line require-yield
-    async *handleRequest(payload: FileEditResult) {
+    async *handleRequest(payload: FileEditResult): AsyncIterable<AppliableState> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
         try {
-            await this.ensureEditAppliable(payload);
+            const appliable = await this.checkEditAppliable(payload);
+
+            if (appliable !== 'appliable') {
+                yield appliable;
+                return;
+            }
 
             const directory = await tmpDirectory('inbox-diff');
 
@@ -76,6 +91,8 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, vo
 
             logger.trace('OpenDiffView');
             await diffViewManager.open(payload);
+
+            yield appliable;
             logger.info('Finish');
         }
         catch (ex) {
@@ -85,16 +102,20 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, vo
     }
 }
 
-export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, void> {
+export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, AppliableState> {
     static readonly action = 'acceptFileEdit';
 
-    // eslint-disable-next-line require-yield
-    async *handleRequest(payload: FileEditResult) {
+    async *handleRequest(payload: FileEditResult): AsyncIterable<AppliableState> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
         try {
-            await this.ensureEditAppliable(payload);
+            const appliable = await this.checkEditAppliable(payload);
+
+            if (appliable !== 'appliable') {
+                yield appliable;
+                return;
+            }
 
             const fileUri = this.resolveFileUri(payload.file);
             const edit = new WorkspaceEdit();
@@ -110,6 +131,7 @@ export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, vo
                 await commands.executeCommand('vscode.open', fileUri);
             }
 
+            yield 'applied';
             logger.info('Finish');
         }
         catch (ex) {

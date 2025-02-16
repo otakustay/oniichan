@@ -1,16 +1,17 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {useOriginalCopy} from 'huse';
-import {IoAlertCircleOutline} from 'react-icons/io5';
+import {IoAlertCircleOutline, IoCheckmarkCircleOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
+import {stringifyError} from '@oniichan/shared/error';
+import {AppliableState} from '@oniichan/editor-host/protocol';
 import {FileEditData} from '@oniichan/shared/inbox';
 import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
-import {stringifyError} from '@oniichan/shared/error';
 
 const {ActionButton} = ActBar;
 
@@ -51,10 +52,9 @@ const ErrorSign = styled(IoAlertCircleOutline)`
     color: var(--color-error);
 `;
 
-interface ApplyCheckState {
-    state: 'reading' | 'success' | 'fail';
-    appliable: boolean;
-}
+const AppliedSign = styled(IoCheckmarkCircleOutline)`
+    color: var(--color-success);
+`;
 
 export type EditAction = 'write' | 'patch' | 'delete';
 
@@ -67,7 +67,7 @@ interface Props {
 export default function FileEdit({file, edit, patch}: Props) {
     const viewMode = useViewModeValue();
     const editForCheck = useOriginalCopy(edit);
-    const [check, setCheck] = useState<ApplyCheckState>({state: 'reading', appliable: false});
+    const [check, setCheck] = useState<AppliableState | 'reading'>('reading');
     const ipc = useIpc();
     useEffect(
         () => {
@@ -78,44 +78,47 @@ export default function FileEdit({file, edit, patch}: Props) {
             void (async () => {
                 try {
                     const appliable = await ipc.editor.call(crypto.randomUUID(), 'checkEditAppliable', editForCheck);
-                    setCheck({state: 'success', appliable});
+                    setCheck(appliable);
                 }
                 catch {
-                    setCheck({state: 'fail', appliable: false});
+                    setCheck('error');
                 }
             })();
         },
         [ipc, editForCheck]
     );
     const extension = file.split('.').pop();
-    const openDiffView = async () => {
+    const invokeDiffAction = async (action: 'renderDiffView' | 'acceptFileEdit') => {
         if (!edit || edit.type === 'error') {
             return;
         }
 
         try {
-            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', edit);
+            const appliable = await ipc.editor.call(crypto.randomUUID(), action, edit);
+            console.log(appliable);
+            setCheck(appliable);
+            switch (appliable) {
+                case 'applied':
+                    showToast('information', 'This patch is already applied', {timeout: 3000});
+                    break;
+                case 'conflict':
+                    showToast('error', 'This patch is not appliable to file', {timeout: 3000});
+                    break;
+                case 'error':
+                    showToast('error', 'An unexpected error occured while applying patch to file', {timeout: 3000});
+            }
         }
         catch (ex) {
-            setCheck({state: 'success', appliable: false});
+            setCheck('error');
             showToast('error', stringifyError(ex), {timeout: 3000});
         }
     };
-    const accept = async () => {
-        if (!edit || edit.type === 'error') {
-            return;
-        }
-
-        try {
-            await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', edit);
-        }
-        catch (ex) {
-            setCheck({state: 'success', appliable: false});
-            showToast('error', stringifyError(ex), {timeout: 3000});
-        }
-    };
+    const openDiffView = async () => invokeDiffAction('renderDiffView');
+    const accept = async () => invokeDiffAction('acceptFileEdit');
     const renderDetail = () => {
-        const error = edit?.type === 'error' ? edit.message : (check.appliable ? '' : 'This patch is not appliable');
+        const error = edit?.type === 'error'
+            ? edit.message
+            : (check === 'conflict' ? 'This patch is not appliable' : '');
         const content = patch.trim();
 
         if (viewMode.debug || error || content) {
@@ -129,7 +132,8 @@ export default function FileEdit({file, edit, patch}: Props) {
 
         return null;
     };
-    const hasError = check.state !== 'reading' && !check.appliable;
+    const isLoading = !edit || check === 'reading';
+    const hasError = check === 'conflict' || check === 'error';
 
     return (
         <ActBar
@@ -145,10 +149,11 @@ export default function FileEdit({file, edit, patch}: Props) {
             }
             actions={
                 <>
-                    {!edit && <ActBar.Loading />}
-                    {check.appliable && <ActionButton onClick={openDiffView}>Review</ActionButton>}
-                    {check.appliable && <ActionButton onClick={accept}>Accept</ActionButton>}
-                    {hasError && <ErrorSign title="Expand to get detail">Errored</ErrorSign>}
+                    {isLoading && <ActBar.Loading />}
+                    {check === 'appliable' && <ActionButton onClick={openDiffView}>Review</ActionButton>}
+                    {check === 'appliable' && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {check === 'applied' && <AppliedSign title="Already applied" />}
+                    {hasError && <ErrorSign title="Expand to get detail" />}
                 </>
             }
             richContent={renderDetail()}

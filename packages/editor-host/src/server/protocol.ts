@@ -23,7 +23,7 @@ import type {OpenUrlHandler} from './handlers/external';
 
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
-export type {VirtualEditFileAction, VirtualEditFileRequest} from './handlers/diff';
+export type {VirtualEditFileAction, VirtualEditFileRequest, AppliableState} from './handlers/diff';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
 export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
 
