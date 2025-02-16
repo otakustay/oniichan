@@ -134,7 +134,6 @@ export class StreamingToolParser {
             return;
         }
 
-        // TODO: This is wrong when `</thinking>` inside `<think>`
         if (isThinkingTag(this.tagStack.at(-1))) {
             if (isThinkingTag(chunk.tagName)) {
                 yield {type: 'thinkingEnd', source: chunk.source};
