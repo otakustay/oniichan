@@ -53,7 +53,7 @@ export type ToolParsedChunk =
     | ToolDeltaChunk
     | ToolEndChunk;
 
-const THINKING_TAGS = ['thinking', 'think'];
+const THINKING_TAGS = ['thinking'];
 
 function isThinkingTag(tag: string | undefined) {
     return !!tag && THINKING_TAGS.includes(tag);

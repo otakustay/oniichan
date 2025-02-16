@@ -4,12 +4,14 @@
   "version": "2.2.0",
   "description": "Shared elements without any platform dependencies",
   "exports": {
+    "./array": "./dist/array.js",
     "./container": "./dist/container.js",
     "./dir": "./dist/dir.js",
     "./id": "./dist/id.js",
     "./inbox": "./dist/inbox/index.js",
     "./language": "./dist/language.js",
     "./logger": "./dist/logger.js",
+    "./iterable": "./dist/iterable.js",
     "./model": "./dist/model/index.js",
     "./string": "./dist/string/index.js",
     "./error": "./dist/error.js",
@@ -26,14 +28,14 @@
     "dist"
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.33.1",
+    "@openrouter/ai-sdk-provider": "^0.2.1",
+    "@otakustay/async-iterator": "^1.1.1",
     "@types/json-schema": "^7.0.15",
-    "dedent": "^1.5.3",
-    "mustache": "^4.2.0",
-    "openai": "^4.77.3"
+    "ai": "^4.1.41",
+    "dedent": "^1.5.3"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.5",
+    "@types/node": "20.x",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
   }

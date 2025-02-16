@@ -1,5 +1,5 @@
 import {ModelConfiguration, ModelClient} from './interface';
-import {OpenAiModelClient} from './openai';
+import {OpenRouterModelClient} from './openRouter';
 
 export {
     ChatUserMessagePayload,
@@ -28,7 +28,7 @@ function validateModelConfiguration(config: ModelConfiguration): void {
 export function createModelClient(config: ModelConfiguration): ModelClient {
     validateModelConfiguration(config);
 
-    const client = new OpenAiModelClient(config);
+    const client = new OpenRouterModelClient(config);
     return client;
 }
 

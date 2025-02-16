@@ -1,6 +1,8 @@
 import {over} from '@otakustay/async-iterator';
-import {DebugMessageLevel, DebugContentChunk} from '@oniichan/shared/inbox';
-import {StreamingToolParser, ToolParsedChunk} from '@oniichan/shared/tool';
+import {DebugMessageLevel, DebugContentChunk, ReasoningMessageChunk, MessageInputChunk} from '@oniichan/shared/inbox';
+import {duplicate, merge} from '@oniichan/shared/iterable';
+import {ModelResponse} from '@oniichan/shared/model';
+import {StreamingToolParser} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
@@ -26,7 +28,7 @@ export interface InboxSendMessageRequest {
 
 export interface InboxSendMessageResponse {
     replyUuid: string;
-    value: ToolParsedChunk;
+    value: MessageInputChunk;
 }
 
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
@@ -68,6 +70,16 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         }
     }
 
+    private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {
+        const parser = new StreamingToolParser();
+        const [reasoningFork, textFork] = duplicate(chatStream);
+        const reasonineStream = over(reasoningFork)
+            .filter(v => v.type === 'reasoning')
+            .map((v: ModelResponse): ReasoningMessageChunk => ({type: 'reasoning', content: v.content}));
+        const textStream = over(textFork).filter(v => v.type === 'text').map(v => v.content);
+        return merge(reasonineStream, parser.parse(textStream));
+    }
+
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
         const {logger, editorHost} = this.context;
         const messages = this.thread.toMessages();
@@ -84,17 +96,16 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             telemetry: modelTelemetry,
             systemPrompt: this.systemPrompt,
         };
-        const parser = new StreamingToolParser();
-        const stream = over(model.chatStreaming(options)).map(v => v.content);
+        const chatStream = model.chatStreaming(options);
 
         try {
-            for await (const chunk of parser.parse(stream)) {
-                logger.trace('RequestModelChunk', chunk);
-                yield {replyUuid: reply.uuid, value: chunk};
+            for await (const chunk of this.consumeChatStream(chatStream)) {
                 // We update the store but don't broadcast to all views on streaming
                 reply.addChunk(chunk);
+                yield {replyUuid: reply.uuid, value: chunk};
 
-                if (chunk.type !== 'text') {
+                // Less frequently flush message to frontend
+                if (chunk.type !== 'text' && chunk.type !== 'reasoning') {
                     this.updateInboxThreadList(store.dump());
                 }
             }

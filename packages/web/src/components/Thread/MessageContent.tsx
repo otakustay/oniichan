@@ -5,6 +5,7 @@ import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import Thinking from './Thinking';
+import Reasoning from './Reasoning';
 
 const Layout = styled.div`
     & :where(code) {
@@ -41,6 +42,8 @@ export default function MessageContent({className, chunks}: Props) {
     const viewMode = useViewModeValue();
     const renderChunk = (chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) => {
         switch (chunk.type) {
+            case 'reasoning':
+                return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} />;
             case 'text':
                 return chunk.content.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk.content} /> : null;
             case 'thinking':

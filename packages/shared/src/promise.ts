@@ -48,3 +48,21 @@ export function waitCondition(test: () => boolean, options: WaitConditionOptions
 export function wait(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function counter(count: number) {
+    const current = {value: 0};
+    // https://github.com/typescript-eslint/typescript-eslint/issues/8113
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    const deferred = defer<void>();
+    return {
+        increment: () => {
+            current.value++;
+            if (current.value >= count) {
+                deferred.resolve();
+            }
+        },
+        meet() {
+            return deferred.promise;
+        },
+    };
+}

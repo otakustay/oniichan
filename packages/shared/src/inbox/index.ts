@@ -1,8 +1,10 @@
 export {
+    ReasoningMessageChunk,
     TextMessageChunk,
     ToolCallMessageChunk,
     PlainTextMessageChunk,
     ThinkingMessageChunk,
+    MessageInputChunk,
     MessageContentChunk,
     DebugContentChunk,
     MessageViewChunk,

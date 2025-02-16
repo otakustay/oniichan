@@ -39,5 +39,5 @@ export default function Thinking({content}: Props) {
         );
     }
 
-    return <ActBar icon={<IoChatbubbleEllipsesOutline />} content="Oniichan is burning his brain..." />;
+    return <ActBar icon={<IoChatbubbleEllipsesOutline />} content="Oniichan is figuring out a best action..." />;
 }

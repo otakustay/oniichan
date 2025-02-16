@@ -1,4 +1,9 @@
-import {ToolName} from '../tool';
+import {ToolName, ToolParsedChunk} from '../tool';
+
+export interface ReasoningMessageChunk {
+    type: 'reasoning';
+    content: string;
+}
 
 export interface TextMessageChunk {
     type: 'text';
@@ -26,7 +31,13 @@ export interface ThinkingMessageChunk {
     status: 'generating' | 'completed';
 }
 
-export type MessageContentChunk = TextMessageChunk | ToolCallMessageChunk | ThinkingMessageChunk;
+export type MessageInputChunk = ReasoningMessageChunk | ToolParsedChunk;
+
+export type MessageContentChunk =
+    | ReasoningMessageChunk
+    | TextMessageChunk
+    | ToolCallMessageChunk
+    | ThinkingMessageChunk;
 
 export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk;
 

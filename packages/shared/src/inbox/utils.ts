@@ -17,6 +17,11 @@ export function isAssistantMessage(type: MessageType) {
 
 export function chunkToString(chunk: MessageContentChunk) {
     switch (chunk.type) {
+        case 'reasoning':
+            // Although reasoning content is mapped to a `<think>` tag,
+            // actually all messages omit reasoning chunks when serializing to string,
+            // we expect this branch to be unreachable
+            return `<think>${chunk.content}</think}`;
         case 'text':
             return chunk.content;
         case 'thinking':

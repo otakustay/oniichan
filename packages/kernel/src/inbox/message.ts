@@ -1,7 +1,7 @@
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {ChatInputPayload} from '@oniichan/shared/model';
 import {now} from '@oniichan/shared/string';
-import {isEditToolName, ModelToolCallInput, ModelToolCallInputWithSource, ToolParsedChunk} from '@oniichan/shared/tool';
+import {isEditToolName, ModelToolCallInput, ModelToolCallInputWithSource} from '@oniichan/shared/tool';
 import {
     MessageType,
     MessageData,
@@ -21,6 +21,7 @@ import {
     assertToolCallChunk,
     chunkToString,
     normalizeArguments,
+    MessageInputChunk,
 } from '@oniichan/shared/inbox';
 import {EditorHost} from '../editor';
 import {VirtualEditFileAction} from '@oniichan/editor-host/protocol';
@@ -130,7 +131,7 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     }
 
     getTextContent() {
-        return this.chunks.map(chunkToString).join('');
+        return this.chunks.filter(v => v.type !== 'reasoning').map(chunkToString).join('');
     }
 
     toMessageData(): AssistantTextMessageData | ToolCallMessageData {
@@ -154,7 +155,7 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     }
 
     private getModelVisibleTextContent() {
-        return this.chunks.filter(v => v.type !== 'thinking').map(chunkToString).join('');
+        return this.chunks.filter(v => v.type !== 'reasoning' && v.type !== 'thinking').map(chunkToString).join('');
     }
 }
 
@@ -273,7 +274,21 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         super(uuid, 'assistantText');
     }
 
-    addChunk(chunk: ToolParsedChunk) {
+    addChunk(chunk: MessageInputChunk) {
+        // Reasoning chunk should be unique and on top of all chunks
+        if (chunk.type === 'reasoning') {
+            const firstChunk = this.chunks.at(0);
+
+            if (firstChunk?.type === 'reasoning') {
+                firstChunk.content += chunk.content;
+            }
+            else {
+                this.chunks.unshift({type: 'reasoning', content: chunk.content});
+            }
+
+            return;
+        }
+
         if (chunk.type === 'text') {
             const lastChunk = this.chunks.at(-1);
             if (lastChunk?.type === 'text') {

@@ -147,6 +147,7 @@ export default function FileEdit({file, edit, patch}: Props) {
                     {!edit && <ActBar.Loading />}
                     {check.appliable && <ActionButton onClick={openDiffView}>Review</ActionButton>}
                     {check.appliable && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {/* TODO: Do not display when patch is still generating */}
                     {!check.appliable && <ErrorSign title="Expand to get detail">Errored</ErrorSign>}
                 </>
             }

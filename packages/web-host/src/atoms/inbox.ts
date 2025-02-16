@@ -1,5 +1,6 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
+import {updateItemInArray} from '@oniichan/shared/array';
 import {InboxSendMessageRequest, InboxMarkRoundtripStatusRequest} from '@oniichan/kernel/protocol';
 import {
     MessageData,
@@ -10,8 +11,9 @@ import {
     MessageContentChunk,
     ToolCallMessageChunk,
     ThinkingMessageChunk,
+    MessageInputChunk,
+    ReasoningMessageChunk,
 } from '@oniichan/shared/inbox';
-import {ToolParsedChunk} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
 import {useSetDraftContent, useSetEditing} from './draft';
@@ -144,7 +146,22 @@ function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk 
     }
 }
 
-function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: ToolParsedChunk): MessageData {
+function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: MessageInputChunk): MessageData {
+    // Reasoning chunk should be unique and on top of all chunks
+    if (chunk.type === 'reasoning') {
+        return {
+            ...message,
+            chunks: updateItemInArray<MessageContentChunk, ReasoningMessageChunk>(
+                message.chunks,
+                {
+                    find: item => item.type === 'reasoning',
+                    create: () => ({type: 'reasoning', content: chunk.content}),
+                    update: current => ({type: 'reasoning', content: current.content + chunk.content}),
+                    moveToTop: true,
+                }
+            ),
+        };
+    }
     if (chunk.type === 'text') {
         const lastChunk = message.chunks.at(-1);
 
@@ -258,7 +275,7 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Too
     }
 }
 
-function appendMessageBy(threadUuid: string, messageUuid: string, chunk: ToolParsedChunk) {
+function appendMessageBy(threadUuid: string, messageUuid: string, chunk: MessageInputChunk) {
     return createThreadListUpdate(
         threadUuid,
         messageUuid,

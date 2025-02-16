@@ -17,10 +17,17 @@ export interface ModelConfiguration {
     apiKey: string;
 }
 
-export interface ModelResponse {
+export interface ModelTextResponse {
     type: 'text';
     content: string;
 }
+
+export interface ModelReasoningResponse {
+    type: 'reasoning';
+    content: string;
+}
+
+export type ModelResponse = ModelTextResponse | ModelReasoningResponse;
 
 export interface ModelMetaResponse {
     type: 'meta';

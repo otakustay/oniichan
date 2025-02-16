@@ -1,4 +1,4 @@
-import {stringifyError} from '@oniichan/shared/error';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {ChatInputPayload, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
 import {createJsonlStore} from './jsonl';
@@ -10,7 +10,8 @@ export interface ModelUsageRecord {
     endTime: string;
     modelName: string;
     input: ChatInputPayload[];
-    output: unknown;
+    reasoning: string;
+    output: string;
     inputTokens: number | null;
     outputTokens: number | null;
 }
@@ -20,7 +21,8 @@ export class ModelUsageTelemetry {
     private readonly parentUuid: string;
     private modelName = 'unknown';
     private input: ChatInputPayload[] = [];
-    private output: unknown = null;
+    private reasoning = '';
+    private output = '';
     private inputTokens: number | null = null;
     private outputTokens: number | null = null;
     private startTime = new Date();
@@ -36,20 +38,22 @@ export class ModelUsageTelemetry {
         this.startTime = new Date();
     }
 
-    setResponseChunk(output: ModelStreamingResponse) {
-        if (output.type === 'text') {
-            if (typeof this.output === 'string') {
-                this.output += output.content;
-            }
-            else {
-                this.output = output.content;
-            }
-        }
-        else {
-            this.modelName = output.model;
-            this.inputTokens = output.usage.inputTokens ?? null;
-            this.outputTokens = output.usage.outputTokens ?? null;
-            this.endTime = new Date();
+    setResponseChunk(chunk: ModelStreamingResponse) {
+        switch (chunk.type) {
+            case 'text':
+                this.output += chunk.content;
+                break;
+            case 'reasoning':
+                this.reasoning += chunk.content;
+                break;
+            case 'meta':
+                this.modelName = chunk.model;
+                this.inputTokens = chunk.usage.inputTokens ?? null;
+                this.outputTokens = chunk.usage.outputTokens ?? null;
+                this.endTime = new Date();
+                break;
+            default:
+                assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type} from model chat`);
         }
     }
 
@@ -59,6 +63,7 @@ export class ModelUsageTelemetry {
             parentUuid: this.parentUuid,
             modelName: this.modelName,
             input: this.input,
+            reasoning: this.reasoning,
             output: this.output,
             startTime: this.startTime.toISOString(),
             endTime: this.endTime.toISOString(),
