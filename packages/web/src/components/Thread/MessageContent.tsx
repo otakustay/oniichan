@@ -36,14 +36,15 @@ const Layout = styled.div`
 interface Props {
     className?: string;
     chunks: MessageViewChunk[];
+    reasoning: boolean;
 }
 
-export default function MessageContent({className, chunks}: Props) {
+export default function MessageContent({className, chunks, reasoning}: Props) {
     const viewMode = useViewModeValue();
     const renderChunk = (chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) => {
         switch (chunk.type) {
             case 'reasoning':
-                return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} />;
+                return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} running={reasoning} />;
             case 'text':
                 return chunk.content.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk.content} /> : null;
             case 'thinking':

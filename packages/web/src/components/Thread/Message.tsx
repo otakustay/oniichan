@@ -150,9 +150,10 @@ interface Props {
     roundtripStatus: RoundtripStatus;
     message: MessageData;
     showIndicator: boolean;
+    reasoning: boolean;
 }
 
-export default function Message({threadUuid, roundtripStatus, message, showIndicator}: Props) {
+export default function Message({threadUuid, roundtripStatus, message, showIndicator, reasoning}: Props) {
     const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
@@ -176,7 +177,7 @@ export default function Message({threadUuid, roundtripStatus, message, showIndic
                 <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
                 <Time time={message.createdAt} />
             </Header>
-            <Content chunks={chunks} collapsed={collapsed} />
+            <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
             {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
             {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
             <Error reason={message.error} />
