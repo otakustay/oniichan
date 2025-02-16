@@ -50,7 +50,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         catch (ex) {
             return {
                 type: 'executeError',
-                output: `Unsable to find files with pattern ${args.glob}: ${stringifyError(ex)}`,
+                output: `Unable to find files with pattern ${args.glob}: ${stringifyError(ex)}`,
             };
         }
     }

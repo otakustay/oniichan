@@ -143,7 +143,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
             return {
                 type: 'executeError',
-                output: `Unsable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
+                output: `Unable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
             };
         }
     }

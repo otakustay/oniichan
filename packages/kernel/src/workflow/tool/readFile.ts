@@ -24,7 +24,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
                 return {
                     type: 'success',
                     finished: false,
-                    output: `Unsable to read file ${args.path}: file not exists`,
+                    output: `Unable to read file ${args.path}: file not exists`,
                 };
             }
 
@@ -54,7 +54,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
         catch (ex) {
             return {
                 type: 'executeError',
-                output: `Unsable to read file ${args.path}: ${stringifyError(ex)}`,
+                output: `Unable to read file ${args.path}: ${stringifyError(ex)}`,
             };
         }
     }
