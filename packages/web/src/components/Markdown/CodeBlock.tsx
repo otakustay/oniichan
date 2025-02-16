@@ -90,6 +90,23 @@ export default function CodeBlock({children, node}: Props) {
     const matches = /language-(\w+)?/.exec(className ?? '');
     const language = matches?.at(1);
 
+    // Some model tends to put tool call XML in a code block, it looks like:
+    //
+    // ```
+    // I need to read `src/main.ts`.
+    //
+    // ```xml
+    // <read_file>
+    //   <path>src/main.ts</path>
+    // </read_file>
+    // ```
+    // ```
+    //
+    // This will results 2 empty code blocks, we are omiiting them from message content.
+    if (!code.trim()) {
+        return null;
+    }
+
     return (
         <Layout>
             <Header>
