@@ -12,20 +12,29 @@ abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
             return false;
         }
 
-        const content = await this.readFileContent(edit.file);
-        // We allow to apply an edit in some cases even if the file is not modified:
-        //
-        // 1. To create a file, it already exists but its content is empty
-        // 2. To write a file with full content, the original file has been deleted
-        // 3. To modify a file, the file content has different heading and trailing whitespace
-        // 4. To delete a file, but it has been modified, this means all delete actions are appliable
-        switch (edit.type) {
-            case 'create':
-                return !content;
-            case 'edit':
-                return content === null || content.trim() === edit.oldContent.trim();
-            default:
+        try {
+            const content = await this.readFileContent(edit.file);
+            // We allow to apply an edit in some cases even if the file is not modified:
+            //
+            // 1. To create a file, it already exists but its content is empty
+            // 2. To write a file with full content, the original file has been deleted
+            // 3. To modify a file, the file content has different heading and trailing whitespace
+            // 4. To delete a file, but it has been modified, this means all delete actions are appliable
+            switch (edit.type) {
+                case 'create':
+                    return !content;
+                case 'edit':
+                    return content === null || content.trim() === edit.oldContent.trim();
+                default:
+                    return true;
+            }
+        }
+        catch (ex) {
+            if (edit.type === 'create') {
                 return true;
+            }
+
+            throw ex;
         }
     }
 

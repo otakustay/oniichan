@@ -229,17 +229,13 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         if (isEditToolName(toolCall.toolName)) {
             const action: VirtualEditFileAction = toolCall.toolName === 'write_file'
                 ? 'write'
-                : (
-                    toolCall.toolName === 'patch_file'
-                        ? 'patch'
-                        : 'delete'
-                );
+                : (toolCall.toolName === 'patch_file' ? 'patch' : 'delete');
             const workspace = editorHost.getWorkspace();
             try {
                 const edit = await workspace.virtualEditFile(
                     toolCall.arguments.path ?? '',
                     action,
-                    toolCall.arguments.patch ?? ''
+                    toolCall.arguments.content ?? ''
                 );
                 toolCall.fileEdit = edit;
             }
