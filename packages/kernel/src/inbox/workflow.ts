@@ -1,14 +1,15 @@
 import {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {AssistantTextMessage, deserializeMessage, Message, ToolCallMessage} from './message';
+import {MessageRoundrip} from './interface';
 
 export type WorkflowOriginMessage = ToolCallMessage;
 
 export class Workflow {
-    static from(data: WorkflowData): Workflow {
-        const workflow = new Workflow(ToolCallMessage.from(data.origin));
+    static from(data: WorkflowData, roundtrip: MessageRoundrip): Workflow {
+        const workflow = new Workflow(ToolCallMessage.from(data.origin, roundtrip), roundtrip);
         workflow.markStatus(data.status);
         for (const reaction of data.reactions) {
-            workflow.addReaction(deserializeMessage(reaction), false);
+            workflow.addReaction(deserializeMessage(reaction, roundtrip), false);
         }
         for (const uuid of data.exposed) {
             workflow.exposeMessage(uuid);
@@ -22,12 +23,15 @@ export class Workflow {
 
     private readonly origin: WorkflowOriginMessage;
 
+    private readonly roundtrip: MessageRoundrip;
+
     private readonly reactions: Message[] = [];
 
     private readonly exposed: string[] = [];
 
-    constructor(origin: WorkflowOriginMessage) {
+    constructor(origin: WorkflowOriginMessage, roundtrip: MessageRoundrip) {
         this.origin = origin;
+        this.roundtrip = roundtrip;
     }
 
     shouldContinueRoundtrip() {
@@ -39,7 +43,7 @@ export class Workflow {
     }
 
     startReaction(uuid: string) {
-        const message = new AssistantTextMessage(uuid);
+        const message = new AssistantTextMessage(uuid, this.roundtrip);
         this.reactions.push(message);
         return message;
     }

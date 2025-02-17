@@ -4,7 +4,7 @@ import {ToolCallMessage, ToolUseMessage} from '../../inbox';
 import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
 import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
-import {fixToolCall, parseToolMessage, ToolCallFixOptions} from './fix';
+import {ToolCallFixer, ToolCallFixerInit, ToolCallMessageParser} from './fix';
 import {isToolInputError, RequireFix} from './utils';
 
 const RETRY_LIMIT = 3;
@@ -55,15 +55,15 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
 
         if (isToolInputError(result)) {
             this.logger.trace('FixToolError', {error: result});
-            const fixOptions: ToolCallFixOptions = {
-                input: this.message.getToolCallInput(),
-                response: this.message.getTextContent(),
+            const fixerInit: ToolCallFixerInit = {
+                message: this.message,
                 error: result,
                 editorHost: this.editorHost,
                 model: this.model,
                 telemetry: this.telemetry,
             };
-            const newToolCall = await fixToolCall(fixOptions);
+            const fixer = new ToolCallFixer(fixerInit);
+            const newToolCall = await fixer.fixToolCall();
             await this.origin.replaceToolCallInput(newToolCall, this.editorHost);
             this.updateThread();
             return this.retry();
@@ -72,7 +72,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.origin.completeToolCall();
         this.logger.trace('ToolCallFinish', {result: result.type});
 
-        const responseMessage = new ToolUseMessage(newUuid(), result.output);
+        const responseMessage = new ToolUseMessage(newUuid(), this.message.getRoundtrip(), result.output);
         this.workflow.addReaction(responseMessage, true);
         this.updateThread();
         return {finished: result.type === 'success' && result.finished};
@@ -94,7 +94,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         const messages = [
             ...(input.includesBase ? this.base : []),
             this.origin,
-            new ToolUseMessage(newUuid(), input.prompt),
+            new ToolUseMessage(newUuid(), this.message.getRoundtrip(), input.prompt),
         ];
         const options: ModelChatOptions = {
             messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
@@ -102,7 +102,8 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             systemPrompt: this.systemPrompt,
         };
         const response = await this.model.chat(options);
-        const toolCall = await parseToolMessage(response.content, this.editorHost);
+        const parser = new ToolCallMessageParser({message: this.message, editorHost: this.editorHost});
+        const toolCall = await parser.parseToolMessage(response.content);
         await this.origin.replaceToolCallInput(toolCall, this.editorHost);
     }
 }

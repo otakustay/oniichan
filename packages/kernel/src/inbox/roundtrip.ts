@@ -32,34 +32,35 @@ type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | 
  */
 export class Roundtrip {
     static from(data: RoundtripData): Roundtrip {
-        const request = UserRequestMessage.from(data.request);
-        const roundtrip = new Roundtrip(request);
+        const roundtrip = new Roundtrip();
+        const request = UserRequestMessage.from(data.request, roundtrip);
+        roundtrip.setRequest(request);
         roundtrip.markStatus(data.status);
         for (const response of data.responses) {
             if (response.type === 'message') {
-                const message = AssistantTextMessage.from(response.message);
+                const message = AssistantTextMessage.from(response.message, roundtrip);
                 roundtrip.addTextResponse(message);
             }
             else if (response.type === 'workflow') {
-                const workflow = Workflow.from(response.workflow);
+                const workflow = Workflow.from(response.workflow, roundtrip);
                 roundtrip.addWorkflowResponse(workflow);
             }
         }
         return roundtrip;
     }
 
-    private readonly request: UserRequestMessage;
+    private request: UserRequestMessage | null = null;
 
     private readonly responses: RoundtripResponse[] = [];
 
     private status: RoundtripStatus = 'running';
 
-    constructor(request: UserRequestMessage) {
+    setRequest(request: UserRequestMessage) {
         this.request = request;
     }
 
     getRequestText() {
-        return this.request.content;
+        return this.getRequest().content;
     }
 
     getStatus() {
@@ -78,7 +79,7 @@ export class Roundtrip {
     startTextResponse(messageUuid: string) {
         const response: RoundtripMessageResponse = {
             type: 'message',
-            message: new AssistantTextMessage(messageUuid),
+            message: new AssistantTextMessage(messageUuid, this),
         };
         this.responses.push(response);
         return response.message;
@@ -87,7 +88,7 @@ export class Roundtrip {
     addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: DebugContentChunk) {
         const response: RoundtripDebugResponse = {
             type: 'debug',
-            message: new DebugMessage(messageUuid, level, title, content),
+            message: new DebugMessage(messageUuid, this, {level, title, content}),
         };
         this.responses.push(response);
     }
@@ -99,14 +100,14 @@ export class Roundtrip {
 
         const workflowResponse: RoundtripWorkflowResponse = {
             type: 'workflow',
-            workflow: new Workflow(origin),
+            workflow: new Workflow(origin, this),
         };
         this.responses[responseIndex] = workflowResponse;
         return workflowResponse.workflow;
     }
 
     hasMessage(messageUuid: string) {
-        if (this.request.uuid === messageUuid) {
+        if (this.getRequest().uuid === messageUuid) {
             return true;
         }
         for (const response of this.responses) {
@@ -121,8 +122,9 @@ export class Roundtrip {
     }
 
     findMessageByUuid(messageUuid: string) {
-        if (this.request.uuid === messageUuid) {
-            return this.request;
+        const request = this.getRequest();
+        if (request.uuid === messageUuid) {
+            return request;
         }
 
         for (const response of this.responses) {
@@ -151,11 +153,11 @@ export class Roundtrip {
     }
 
     addWarning(message: string) {
-        this.request.setError(message);
+        this.getRequest().setError(message);
     }
 
     toMessages(includingDebug = false) {
-        const messages: Message[] = [this.request];
+        const messages: Message[] = [this.getRequest()];
         for (const response of this.responses) {
             if (response.type === 'debug') {
                 if (includingDebug) {
@@ -196,9 +198,28 @@ export class Roundtrip {
         };
         return {
             status: this.status,
-            request: this.request.toMessageData(),
+            request: this.getRequest().toMessageData(),
             responses: this.responses.map(serializeResponse),
         };
+    }
+
+    getEditStackForFile(file: string) {
+        const responses = this.responses;
+        return responses
+            .filter(v => v.type === 'workflow')
+            .flatMap(v => v.workflow.toMessages())
+            .filter(v => v.type === 'toolCall')
+            .flatMap(v => v.getFileEdit() ?? [])
+            .filter(v => v.type !== 'error')
+            .filter(v => v.file === file);
+    }
+
+    private getRequest() {
+        if (!this.request) {
+            throw new Error('Roundtrip is not initialized with a request');
+        }
+
+        return this.request;
     }
 
     private addTextResponse(message: AssistantTextMessage) {

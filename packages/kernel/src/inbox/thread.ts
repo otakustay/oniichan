@@ -1,5 +1,4 @@
 import {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from '@oniichan/shared/inbox';
-import {UserRequestMessage} from './message';
 import {Roundtrip} from './roundtrip';
 
 /**
@@ -22,13 +21,7 @@ export class MessageThread {
         this.uuid = uuid;
     }
 
-    startRoundtrip(request: UserRequestMessage) {
-        const roundtrip = new Roundtrip(request);
-        this.roundtrips.push(roundtrip);
-        return roundtrip;
-    }
-
-    private addRoundtrip(roundtrip: Roundtrip) {
+    addRoundtrip(roundtrip: Roundtrip) {
         this.roundtrips.push(roundtrip);
     }
 

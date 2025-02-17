@@ -38,7 +38,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
     private thread: MessageThread = new MessageThread(newUuid());
 
-    private roundtrip: Roundtrip = new Roundtrip(new UserRequestMessage(newUuid(), ''));
+    private roundtrip: Roundtrip = new Roundtrip();
 
     private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost);
 
@@ -50,7 +50,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
-        this.roundtrip = this.thread.startRoundtrip(new UserRequestMessage(payload.uuid, payload.body.content));
+        this.roundtrip.setRequest(new UserRequestMessage(payload.uuid, this.roundtrip, payload.body.content));
+        this.thread.addRoundtrip(this.roundtrip);
         store.moveThreadToTop(this.thread.uuid);
 
         try {

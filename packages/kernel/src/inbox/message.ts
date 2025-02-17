@@ -23,21 +23,29 @@ import {
     normalizeArguments,
     MessageInputChunk,
 } from '@oniichan/shared/inbox';
-import {EditorHost} from '../editor';
 import {VirtualEditFileAction} from '@oniichan/editor-host/protocol';
+import {EditorHost} from '../editor';
+import {MessageRoundrip} from './interface';
 
 abstract class MessageBase<T extends MessageType> {
     readonly uuid: string;
 
     readonly type: T;
 
+    protected readonly roundtrip: MessageRoundrip;
+
     private createdAt = now();
 
     private error: string | undefined = undefined;
 
-    constructor(uuid: string, type: T) {
+    constructor(uuid: string, type: T, roundtrip: MessageRoundrip) {
         this.uuid = uuid;
         this.type = type;
+        this.roundtrip = roundtrip;
+    }
+
+    getRoundtrip() {
+        return this.roundtrip;
     }
 
     setError(reason: string) {
@@ -62,6 +70,12 @@ abstract class MessageBase<T extends MessageType> {
     }
 }
 
+interface DebugInit {
+    level: DebugMessageLevel;
+    title: string;
+    content: DebugContentChunk;
+}
+
 export class DebugMessage extends MessageBase<'debug'> {
     private readonly level: DebugMessageLevel;
 
@@ -69,11 +83,11 @@ export class DebugMessage extends MessageBase<'debug'> {
 
     private readonly content: DebugContentChunk;
 
-    constructor(uuid: string, level: DebugMessageLevel, title: string, content: DebugContentChunk) {
-        super(uuid, 'debug');
-        this.level = level;
-        this.title = title;
-        this.content = content;
+    constructor(uuid: string, roundtrip: MessageRoundrip, init: DebugInit) {
+        super(uuid, 'debug', roundtrip);
+        this.level = init.level;
+        this.title = init.title;
+        this.content = init.content;
     }
 
     toMessageData(): DebugMessageData {
@@ -93,16 +107,16 @@ export class DebugMessage extends MessageBase<'debug'> {
 }
 
 export class UserRequestMessage extends MessageBase<'userRequest'> {
-    static from(data: UserRequestMessageData) {
-        const message = new UserRequestMessage(data.uuid, data.content);
+    static from(data: UserRequestMessageData, roundtrip: MessageRoundrip) {
+        const message = new UserRequestMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
         return message;
     }
 
     readonly content: string;
 
-    constructor(uuid: string, content: string) {
-        super(uuid, 'userRequest');
+    constructor(uuid: string, roundtrip: MessageRoundrip, content: string) {
+        super(uuid, 'userRequest', roundtrip);
         this.content = content;
     }
 
@@ -126,8 +140,8 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     protected readonly chunks: MessageContentChunk[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-    constructor(uuid: string, type: T) {
-        super(uuid, type);
+    constructor(uuid: string, type: T, roundtrip: MessageRoundrip) {
+        super(uuid, type, roundtrip);
     }
 
     getTextContent() {
@@ -160,13 +174,13 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
 }
 
 export class ToolCallMessage extends AssistantMessage<'toolCall'> {
-    static from(data: ToolCallMessageData) {
-        const message = new ToolCallMessage(data);
+    static from(data: ToolCallMessageData, roundtrip: MessageRoundrip) {
+        const message = new ToolCallMessage(roundtrip, data);
         return message;
     }
 
-    constructor(source: AssistantTextMessageData | ToolCallMessageData) {
-        super(source.uuid, 'toolCall');
+    constructor(roundtrip: MessageRoundrip, source: AssistantTextMessageData | ToolCallMessageData) {
+        super(source.uuid, 'toolCall', roundtrip);
         this.restore(source);
     }
 
@@ -219,6 +233,12 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         };
     }
 
+    getFileEdit() {
+        const toolCall = this.findToolCallChunkStrict();
+
+        return isEditToolName(toolCall.toolName) ? toolCall.fileEdit : null;
+    }
+
     async takeFileEditSnapshot(editorHost: EditorHost) {
         const toolCall = this.findToolCallChunkStrict();
 
@@ -233,7 +253,7 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
             const workspace = editorHost.getWorkspace();
             try {
                 const edit = await workspace.virtualEditFile(
-                    toolCall.arguments.file ?? '',
+                    toolCall.arguments.path ?? '',
                     action,
                     // `patch` for `patch_file`, `content` for `write_file`
                     toolCall.arguments.patch ?? toolCall.arguments.content ?? ''
@@ -261,14 +281,14 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
 }
 
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
-    static from(data: AssistantTextMessageData) {
-        const message = new AssistantTextMessage(data.uuid);
+    static from(data: AssistantTextMessageData, roundtrip: MessageRoundrip) {
+        const message = new AssistantTextMessage(data.uuid, roundtrip);
         message.restore(data);
         return message;
     }
 
-    constructor(uuid: string) {
-        super(uuid, 'assistantText');
+    constructor(uuid: string, roundtrip: MessageRoundrip) {
+        super(uuid, 'assistantText', roundtrip);
     }
 
     addChunk(chunk: MessageInputChunk) {
@@ -353,7 +373,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
 
     async toToolCallMessage(editorHost: EditorHost): Promise<ToolCallMessage | null> {
         if (this.chunks.some(isReactiveToolCallChunk)) {
-            const message = new ToolCallMessage(this.toMessageData());
+            const message = new ToolCallMessage(this.roundtrip, this.toMessageData());
             await message.takeFileEditSnapshot(editorHost);
             return message;
         }
@@ -363,16 +383,16 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
 }
 
 export class ToolUseMessage extends MessageBase<'toolUse'> {
-    static from(data: ToolUseMessageData) {
-        const message = new ToolUseMessage(data.uuid, data.content);
+    static from(data: ToolUseMessageData, roundtrip: MessageRoundrip) {
+        const message = new ToolUseMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
         return message;
     }
 
     readonly content: string;
 
-    constructor(uuid: string, content: string) {
-        super(uuid, 'toolUse');
+    constructor(uuid: string, roundtrip: MessageRoundrip, content: string) {
+        super(uuid, 'toolUse', roundtrip);
 
         this.content = content;
     }
@@ -395,16 +415,16 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
 
 export type Message = DebugMessage | UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
 
-export function deserializeMessage(data: MessageData): Message {
+export function deserializeMessage(data: MessageData, roundtrip: MessageRoundrip): Message {
     switch (data.type) {
         case 'userRequest':
-            return UserRequestMessage.from(data);
+            return UserRequestMessage.from(data, roundtrip);
         case 'assistantText':
-            return AssistantTextMessage.from(data);
+            return AssistantTextMessage.from(data, roundtrip);
         case 'toolCall':
-            return ToolCallMessage.from(data);
+            return ToolCallMessage.from(data, roundtrip);
         case 'toolUse':
-            return ToolUseMessage.from(data);
+            return ToolUseMessage.from(data, roundtrip);
         case 'debug':
             throw new Error('Unexpected debug message on deserialization');
         default:

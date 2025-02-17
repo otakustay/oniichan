@@ -1,28 +1,13 @@
-import {builtinTools, ModelToolCallInput, StreamingToolParser} from '@oniichan/shared/tool';
+import {builtinTools, StreamingToolParser} from '@oniichan/shared/tool';
 import {FixToolCallView, renderFixToolCallPrompt} from '@oniichan/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
-import {AssistantTextMessage} from '../../inbox';
+import {AssistantTextMessage, ToolCallMessage} from '../../inbox';
 import {ToolInputError} from './utils';
 import {newUuid} from '@oniichan/shared/id';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;
-}
-
-export async function parseToolMessage(content: string, editorHost: EditorHost) {
-    const parser = new StreamingToolParser();
-    const message = new AssistantTextMessage(newUuid());
-    for await (const chunk of parser.parse(iterable(content))) {
-        message.addChunk(chunk);
-    }
-    const toolCall = await message.toToolCallMessage(editorHost);
-
-    if (!toolCall) {
-        throw new Error('No tool call found in response');
-    }
-
-    return toolCall.getToolCallInputWithSource() ?? null;
 }
 
 function formatErrorMessage(error: ToolInputError) {
@@ -36,50 +21,96 @@ function formatErrorMessage(error: ToolInputError) {
     }
 }
 
-interface FixOptions {
+export interface ToolCallMessageParserInit {
+    editorHost: EditorHost;
+    message: ToolCallMessage;
+}
+
+export class ToolCallMessageParser {
+    private readonly editorHost: EditorHost;
+
+    private readonly message: ToolCallMessage;
+
+    constructor(init: ToolCallMessageParserInit) {
+        this.editorHost = init.editorHost;
+        this.message = init.message;
+    }
+
+    async parseToolMessage(content: string) {
+        const parser = new StreamingToolParser();
+        const message = new AssistantTextMessage(newUuid(), this.message.getRoundtrip());
+        for await (const chunk of parser.parse(iterable(content))) {
+            message.addChunk(chunk);
+        }
+        const toolCall = await message.toToolCallMessage(this.editorHost);
+
+        if (!toolCall) {
+            throw new Error('No tool call found in response');
+        }
+
+        return toolCall.getToolCallInputWithSource() ?? null;
+    }
+}
+
+export interface ToolCallFixerInit {
     editorHost: EditorHost;
     model: ModelAccessHost;
     telemetry: FunctionUsageTelemetry;
-}
-
-async function fix(view: FixToolCallView, options: FixOptions) {
-    const {model, telemetry} = options;
-    const prompt = renderFixToolCallPrompt(view);
-    const chatOptions: ModelChatOptions = {
-        messages: [
-            {role: 'user', content: prompt},
-        ],
-        telemetry: telemetry.createModelTelemetry(),
-    };
-    const result = await model.chat(chatOptions);
-    const toolCall = await parseToolMessage(result.content, options.editorHost);
-    return toolCall;
-}
-
-export interface ToolCallFixOptions extends FixOptions {
-    input: ModelToolCallInput;
-    response: string;
+    message: ToolCallMessage;
     error: ToolInputError;
 }
 
-export async function fixToolCall(options: ToolCallFixOptions) {
-    const {input, response, error, model, telemetry, editorHost} = options;
-    const tool = builtinTools.find(v => v.name === input.name);
+export class ToolCallFixer {
+    private readonly model: ModelAccessHost;
 
-    if (!tool) {
-        throw new Error('Cannot fix tool call without a determined tool name');
+    private readonly telemetry: FunctionUsageTelemetry;
+
+    private readonly message: ToolCallMessage;
+
+    private readonly error: ToolInputError;
+
+    private readonly parser: ToolCallMessageParser;
+
+    constructor(init: ToolCallFixerInit) {
+        this.model = init.model;
+        this.telemetry = init.telemetry;
+        this.message = init.message;
+        this.error = init.error;
+        this.parser = new ToolCallMessageParser({editorHost: init.editorHost, message: init.message});
     }
 
-    const view: FixToolCallView = {
-        tool,
-        errorContent: response,
-        errorMessage: formatErrorMessage(error),
-    };
-    const {default: pRetry} = await import('p-retry');
-    const result = await pRetry(
-        () => fix(view, {model, telemetry, editorHost}),
-        {retries: 3}
-    );
+    async fixToolCall() {
+        const input = this.message.getToolCallInput();
+        const tool = builtinTools.find(v => v.name === input.name);
 
-    return result;
+        if (!tool) {
+            throw new Error('Cannot fix tool call without a determined tool name');
+        }
+
+        const view: FixToolCallView = {
+            tool,
+            errorContent: this.message.getTextContent(),
+            errorMessage: formatErrorMessage(this.error),
+        };
+        const {default: pRetry} = await import('p-retry');
+        const result = await pRetry(
+            () => this.fix(view),
+            {retries: 3}
+        );
+
+        return result;
+    }
+
+    private async fix(view: FixToolCallView) {
+        const prompt = renderFixToolCallPrompt(view);
+        const chatOptions: ModelChatOptions = {
+            messages: [
+                {role: 'user', content: prompt},
+            ],
+            telemetry: this.telemetry.createModelTelemetry(),
+        };
+        const result = await this.model.chat(chatOptions);
+        const toolCall = await this.parser.parseToolMessage(result.content);
+        return toolCall;
+    }
 }
