@@ -63,10 +63,10 @@ export async function establishIpc(container: DependencyContainer<Dependency>) {
     const kernelClient = container.get('KernelClient');
     const kernelServer = new BridgeServer(kernelClient, {namespace: KernelClient.namespace});
     await kernelServer.connect(port);
-    kernelClient.addWebPort(port);
+    const disposable = kernelClient.addWebPort(port);
 
     const editorHostServer = new EditorHostServer(container);
     await editorHostServer.connect(port);
-    // const editorHostClient = new EditorHostClient(port);
-    // const editorHostServer = new BridgeServer(editorHostClient, {namespace: EditorHostClient.namespace});
+
+    return disposable;
 }

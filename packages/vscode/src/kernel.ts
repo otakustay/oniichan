@@ -1,5 +1,6 @@
 import path from 'node:path';
 import {Worker} from 'node:worker_threads';
+import {Disposable} from 'vscode';
 import {ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
 import {EditorHostServer, EditorHostDependency} from '@oniichan/editor-host/server';
@@ -8,7 +9,6 @@ import {LogEntry, Logger} from '@oniichan/shared/logger';
 import {WebHostClient} from '@oniichan/web-host/client';
 import {MessageThreadData} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
-import {Disposable} from 'vscode';
 
 class WorkerPort implements Port, Disposable {
     private readonly worker: Worker;
@@ -69,9 +69,10 @@ export class KernelClient extends BaseKernelClient implements Disposable {
         this.ownPort = port;
     }
 
-    addWebPort(port: Port) {
+    addWebPort(port: Port): Disposable {
         const client = new WebHostClient(port);
         this.webClients.set(port, client);
+        return new Disposable(() => this.removeWebPort(port));
     }
 
     removeWebPort(port: Port) {

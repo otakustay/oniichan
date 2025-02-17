@@ -84,7 +84,8 @@ export class WebAppServer extends EventEmitter<ServerEventMap> {
             {websocket: true},
             async socket => {
                 const container = this.container.bind('Port', () => new WebSocketPort(socket), {singleton: true});
-                await establishIpc(container);
+                const disposable = await establishIpc(container);
+                socket.on('close', () => void disposable.dispose());
             }
         );
         if (process.env.NODE_ENV === 'development') {
