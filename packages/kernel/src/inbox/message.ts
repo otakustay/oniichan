@@ -233,9 +233,10 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
             const workspace = editorHost.getWorkspace();
             try {
                 const edit = await workspace.virtualEditFile(
-                    toolCall.arguments.path ?? '',
+                    toolCall.arguments.file ?? '',
                     action,
-                    toolCall.arguments.content ?? ''
+                    // `patch` for `patch_file`, `content` for `write_file`
+                    toolCall.arguments.patch ?? toolCall.arguments.content ?? ''
                 );
                 toolCall.fileEdit = edit;
             }
