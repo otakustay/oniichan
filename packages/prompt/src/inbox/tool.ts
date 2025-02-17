@@ -82,10 +82,6 @@ export function renderToolSection(view: InboxPromptView) {
     if (view.rootEntries.length) {
         excludsTools.push('browser_preview');
     }
-    if (process.platform !== 'darwin') {
-        // TODO: Enable this tool when shipped with `ripgrep`
-        excludsTools.push('find_files_by_regex');
-    }
     const tools = view.tools.filter(v => !excludsTools.includes(v.name));
     const parts = [
         prefix,

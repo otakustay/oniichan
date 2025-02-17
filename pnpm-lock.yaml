@@ -99,10 +99,16 @@ importers:
       p-retry:
         specifier: ^6.2.1
         version: 6.2.1
+      unixify:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/node':
         specifier: 20.x
         version: 20.17.12
+      '@types/unixify':
+        specifier: ^1.0.2
+        version: 1.0.2
 
   packages/prompt:
     dependencies:
@@ -1796,6 +1802,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/unixify@1.0.2':
+    resolution: {integrity: sha512-N2N0V5iOmxAWdVyiTWLBvLDYTPXSMzIXjxybr9sKwwr4ybFZ+JYc33yoAxnA1RvOVolNG3Fce0WXwiMcDaPh+w==}
 
   '@types/vscode-webview@1.57.5':
     resolution: {integrity: sha512-iBAUYNYkz+uk1kdsq05fEcoh8gJmwT3lqqFPN7MGyjQ3HVloViMdo7ZJ8DFIP8WOK74PjOEilosqAyxV2iUFUw==}
@@ -4023,6 +4032,10 @@ packages:
     resolution: {integrity: sha512-V6gygoYb/5EmNI+MEGrWkC+e6+Rr7mTmfHrxDbLzxQogBkgzo76rkok0Am6thgSF7Mv2nLOajAJj5vDJZEFn7g==}
     engines: {node: ^16.14.0 || >=18.0.0}
 
+  normalize-path@2.1.1:
+    resolution: {integrity: sha512-3pKJwH184Xo/lnH6oyP1q2pMd7HcypqqmRs91/6/i2CGtWwIKGCkOOMTm/zXbgTEWHw1uNpNi/igc3ePOYHb6w==}
+    engines: {node: '>=0.10.0'}
+
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
@@ -4553,6 +4566,9 @@ packages:
 
   remark-rehype@11.1.1:
     resolution: {integrity: sha512-g/osARvjkBXb6Wo0XvAeXQohVta8i84ACbenPpoSsxTOQH/Ae0/RGP4WZgnMH5pMLpsj4FG7OHmcIcXxpza8eQ==}
+
+  remove-trailing-separator@1.1.0:
+    resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -5166,6 +5182,10 @@ packages:
   universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
+
+  unixify@1.0.0:
+    resolution: {integrity: sha512-6bc58dPYhCMHHuwxldQxO3RRNZ4eCogZ/st++0+fcC1nr0jiGUtAdBJ2qzmLQWSxbtz42pWt4QQMiZ9HvZf5cg==}
+    engines: {node: '>=0.10.0'}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -7126,6 +7146,8 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/unixify@1.0.2': {}
 
   '@types/vscode-webview@1.57.5': {}
 
@@ -9709,6 +9731,10 @@ snapshots:
       semver: 7.6.3
       validate-npm-package-license: 3.0.4
 
+  normalize-path@2.1.1:
+    dependencies:
+      remove-trailing-separator: 1.1.0
+
   normalize-path@3.0.0: {}
 
   npm-bundled@3.0.1:
@@ -10326,6 +10352,8 @@ snapshots:
       unified: 11.0.5
       vfile: 6.0.3
 
+  remove-trailing-separator@1.1.0: {}
+
   require-directory@2.1.1: {}
 
   require-from-string@2.0.2: {}
@@ -10940,6 +10968,10 @@ snapshots:
   universal-user-agent@6.0.1: {}
 
   universalify@2.0.1: {}
+
+  unixify@1.0.0:
+    dependencies:
+      normalize-path: 2.1.1
 
   unpipe@1.0.0: {}
 

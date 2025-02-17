@@ -1,8 +1,6 @@
 import {ModelToolCallInput} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
-import {Logger} from '@oniichan/shared/logger';
-import {EditorHost} from '../../editor';
-import {ToolImplementBase, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 import {ReadFileToolImplement} from './readFile';
 import {ReadDirectoryToolImplement} from './readDirectory';
 import {GlobFilesToolImplement} from './globFiles';
@@ -32,16 +30,16 @@ export class ToolImplement {
 
     private readonly browserPreview: ToolImplementBase;
 
-    constructor(editorHost: EditorHost, logger: Logger) {
-        this.readFile = new ReadFileToolImplement(editorHost);
-        this.readDirectory = new ReadDirectoryToolImplement(editorHost);
-        this.globFiles = new GlobFilesToolImplement(editorHost);
-        this.grepFiles = new GrepFilesToolImplement(editorHost, logger);
-        this.writeFile = new WriteFileToolImplement(editorHost);
-        this.patchFile = new PatchFilesToolImplement(editorHost);
-        this.deleteFile = new DeleteFileToolImplement(editorHost);
-        this.runCommand = new RunCommandToolImplement(editorHost, logger);
-        this.browserPreview = new BrowserPreviewToolImplement(editorHost);
+    constructor(init: ToolImplementInit) {
+        this.readFile = new ReadFileToolImplement(init);
+        this.readDirectory = new ReadDirectoryToolImplement(init);
+        this.globFiles = new GlobFilesToolImplement(init);
+        this.grepFiles = new GrepFilesToolImplement(init);
+        this.writeFile = new WriteFileToolImplement(init);
+        this.patchFile = new PatchFilesToolImplement(init);
+        this.deleteFile = new DeleteFileToolImplement(init);
+        this.runCommand = new RunCommandToolImplement(init);
+        this.browserPreview = new BrowserPreviewToolImplement(init);
     }
 
     async callTool(input: ModelToolCallInput): Promise<ToolRunResult> {

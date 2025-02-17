@@ -4,6 +4,7 @@
   "version": "2.3.0",
   "description": "Contains core logic for all capabilities with VSCode API decoupled",
   "exports": {
+    ".": "./dist/index.js",
     "./protocol": "./dist/protocol.js",
     "./server": "./dist/server.js",
     "./client": "./dist/client.js"
@@ -26,9 +27,11 @@
     "ajv": "^8.17.1",
     "dedent": "^1.5.3",
     "execa": "^9.5.2",
-    "p-retry": "^6.2.1"
+    "p-retry": "^6.2.1",
+    "unixify": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "20.x"
+    "@types/node": "20.x",
+    "@types/unixify": "^1.0.2"
   }
 }

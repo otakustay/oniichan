@@ -1,15 +1,10 @@
 import {runCommandParameters, RunCommandParameter} from '@oniichan/shared/tool';
-import {Logger} from '@oniichan/shared/logger';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
-    private readonly logger: Logger;
-
-    constructor(editorHost: EditorHost, logger: Logger) {
-        super(editorHost, runCommandParameters);
-        this.logger = logger.with({source: 'RunCommandToolImplement'});
+    constructor(init: ToolImplementInit) {
+        super('RunCommandToolImplement', init, runCommandParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

@@ -130,6 +130,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             systemPrompt: this.systemPrompt,
             roundtrip: this.roundtrip,
             editorHost: this.context.editorHost,
+            commandExecutor: this.context.commandExecutor,
             telemetry: this.telemetry,
             logger,
             onUpdateThread: () => this.updateInboxThreadList(store.dump()),

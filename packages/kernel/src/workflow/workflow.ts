@@ -2,6 +2,7 @@ import {stringifyError} from '@oniichan/shared/error';
 import {Logger} from '@oniichan/shared/logger';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {Message, Workflow, WorkflowOriginMessage} from '../inbox';
+import {CommandExecutor} from '../core/command';
 
 export interface WorkflowRunnerInit {
     threadUuid: string;
@@ -9,6 +10,7 @@ export interface WorkflowRunnerInit {
     base: Message[];
     origin: WorkflowOriginMessage;
     workflow: Workflow;
+    commandExecutor: CommandExecutor;
     telemetry: FunctionUsageTelemetry;
     logger: Logger;
     onUpdateThrad: () => void;

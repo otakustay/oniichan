@@ -1,6 +1,7 @@
 import path from 'node:path';
+import {existsSync} from 'node:fs';
 import {Worker} from 'node:worker_threads';
-import {Disposable} from 'vscode';
+import {Disposable, env} from 'vscode';
 import {ExecutionMessage, ExecutionNotice, isExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
 import {EditorHostServer, EditorHostDependency} from '@oniichan/editor-host/server';
@@ -47,6 +48,22 @@ function isDisposable(target: any): target is Disposable {
     return !!target && typeof target.dispose === 'function';
 }
 
+function getBinaryDirectory() {
+    const tries = [
+        path.join(env.appRoot, 'node_modules', '@vscode', 'ripgrep', 'bin'),
+        path.join(env.appRoot, 'node_modules', 'vscode-ripgrep', 'bin'),
+        path.join(env.appRoot, 'node_modules.asar.unpacked', '@vscode', 'ripgrep', 'bin'),
+        path.join(env.appRoot, 'node_modules.asar.unpacked', 'vscode-ripgrep', 'bin'),
+    ];
+    for (const directory of tries) {
+        if (existsSync(directory)) {
+            return directory;
+        }
+    }
+
+    return null;
+}
+
 interface Dependency {
     [Logger.containerKey]: Logger;
 }
@@ -75,7 +92,7 @@ export class KernelClient extends BaseKernelClient implements Disposable {
         return new Disposable(() => this.removeWebPort(port));
     }
 
-    removeWebPort(port: Port) {
+    private removeWebPort(port: Port) {
         this.webClients.delete(port);
     }
 
@@ -160,7 +177,12 @@ export class KernelClient extends BaseKernelClient implements Disposable {
 export async function createKernelClient(container: DependencyContainer<EditorHostDependency>): Promise<KernelClient> {
     const logger = container.get(Logger).with({source: 'Kernel'});
     logger.trace('ActivateKernelStart');
-    const worker = new Worker(path.join(__dirname, 'kernelEntry.js'));
+    const binaryDirectory = getBinaryDirectory() ?? '';
+    logger.trace('ResolveBinaryDirectory', {directory: binaryDirectory});
+    const worker = new Worker(
+        path.join(__dirname, 'kernelEntry.js'),
+        {workerData: {privateBinaryDirectory: binaryDirectory}}
+    );
     const port = new WorkerPort(worker);
     const hostServer = new EditorHostServer(container);
     await hostServer.connect(port);

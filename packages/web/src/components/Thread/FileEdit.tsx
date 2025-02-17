@@ -95,7 +95,6 @@ export default function FileEdit({file, edit, patch}: Props) {
 
         try {
             const appliable = await ipc.editor.call(crypto.randomUUID(), action, edit);
-            console.log(appliable);
             setCheck(appliable);
             switch (appliable) {
                 case 'applied':

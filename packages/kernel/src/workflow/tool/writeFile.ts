@@ -1,10 +1,9 @@
 import {writeFileParameters, WriteFileParameter} from '@oniichan/shared/tool';
-import {EditorHost} from '../../editor';
-import {ToolImplementBase, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, writeFileParameters);
+    constructor(init: ToolImplementInit) {
+        super('WriteFileToolImplement', init, writeFileParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

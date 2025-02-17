@@ -1,9 +1,11 @@
-import {MessagePort, parentPort} from 'node:worker_threads';
+import {MessagePort, parentPort, workerData} from 'node:worker_threads';
 import {ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';
 import {EditorHostClient} from '@oniichan/editor-host/client';
+import {CommandExecutor} from '@oniichan/kernel';
 import {stringifyError} from '@oniichan/shared/error';
-import {ConsoleLogger} from '@oniichan/shared/logger';
+import {Logger, ConsoleLogger} from '@oniichan/shared/logger';
+import {DependencyContainer} from '@oniichan/shared/container';
 
 class WorkerPort implements Port {
     private readonly port: MessagePort;
@@ -38,11 +40,21 @@ class WorkerPort implements Port {
 }
 
 async function main() {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const binaryDirectory: string = workerData.privateBinaryDirectory;
+
+    if (!binaryDirectory) {
+        console.error(`Binary directory is not specified`);
+        process.exit(400);
+    }
+
     try {
         const port = new WorkerPort();
-        const editorHostClient = new EditorHostClient(port);
-        const logger = new ConsoleLogger('Kernel');
-        const server = new KernelServer(editorHostClient, logger);
+        const container = new DependencyContainer()
+            .bind(EditorHostClient, () => new EditorHostClient(port), {singleton: true})
+            .bind(Logger, () => new ConsoleLogger('Kernel'), {singleton: true})
+            .bind(CommandExecutor, () => new CommandExecutor(binaryDirectory), {singleton: true});
+        const server = new KernelServer(container);
         await server.connect(port);
     }
     catch (ex) {

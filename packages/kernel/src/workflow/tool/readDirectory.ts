@@ -2,12 +2,11 @@ import path from 'node:path';
 import {readDirectoryParameters, ReadDirectoryParameter} from '@oniichan/shared/tool';
 import {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, readDirectoryParameters);
+    constructor(init: ToolImplementInit) {
+        super('ReadDirectoryToolImplement', init, readDirectoryParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

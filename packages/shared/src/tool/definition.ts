@@ -89,11 +89,11 @@ export const findFilesByRegExpParameters = {
             type: 'string',
             description: 'A regular expression to match file content',
         },
-        // TODO: Native `grep` doesn't support glob
-        // glob: {
-        //     type: 'string',
-        //     description: 'Glob pattern to match files, search for all text files when this parameter is not provided',
-        // },
+        glob: {
+            type: 'string',
+            description:
+                'Glob pattern to match searched files, search for all text files when this parameter is not provided',
+        },
     },
     required: ['path', 'regex'],
 } as const satisfies ParameterInfo;
@@ -101,8 +101,7 @@ export const findFilesByRegExpParameters = {
 export interface FindFilesByRegExpParameter {
     path: string;
     regex: string;
-    // TODO: Native `grep` doesn't support glob
-    // glob?: string;
+    glob?: string;
 }
 
 export const writeFileParameters = {
@@ -276,7 +275,6 @@ export const builtinTools: ToolDescription[] = [
         `,
     },
     {
-        // TODO: Native `grep` doesn't support glob
         name: 'find_files_by_regex',
         description: 'Find files matching a regular expression',
         parameters: findFilesByRegExpParameters,

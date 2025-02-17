@@ -1,10 +1,9 @@
 import {deleteFileParameters, DeleteFileParameter} from '@oniichan/shared/tool';
-import {EditorHost} from '../../editor';
-import {ToolImplementBase, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, deleteFileParameters);
+    constructor(init: ToolImplementInit) {
+        super('DeleteFileToolImplement', init, deleteFileParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

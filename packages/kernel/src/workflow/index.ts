@@ -2,6 +2,7 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {Logger} from '@oniichan/shared/logger';
 import {Roundtrip} from '../inbox';
 import {EditorHost} from '../editor';
+import {CommandExecutor} from '../core/command';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
 
@@ -12,6 +13,7 @@ export interface WorkflowDetectorInit {
     roundtrip: Roundtrip;
     editorHost: EditorHost;
     telemetry: FunctionUsageTelemetry;
+    commandExecutor: CommandExecutor;
     logger: Logger;
     onUpdateThread: () => void;
 }
@@ -31,6 +33,8 @@ export class WorkflowDetector {
 
     private readonly logger: Logger;
 
+    private readonly commandExecutor: CommandExecutor;
+
     private readonly onUpdateThread: () => void;
 
     constructor(init: WorkflowDetectorInit) {
@@ -40,6 +44,7 @@ export class WorkflowDetector {
         this.roundtrip = init.roundtrip;
         this.editorHost = init.editorHost;
         this.telemetry = init.telemetry;
+        this.commandExecutor = init.commandExecutor;
         this.logger = init.logger.with({source: 'WorkflowDetector', taskId: init.taskId});
         this.onUpdateThread = init.onUpdateThread;
     }
@@ -60,6 +65,7 @@ export class WorkflowDetector {
             origin: toolCallMessage,
             telemetry: this.telemetry,
             logger: this.logger,
+            commandExecutor: this.commandExecutor,
             onUpdateThrad: this.onUpdateThread,
         };
         const workflow = this.roundtrip.startWorkflowResponse(toolCallMessage);

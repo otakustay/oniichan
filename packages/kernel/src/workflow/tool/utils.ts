@@ -1,5 +1,7 @@
 import Ajv, {Schema, ValidateFunction} from 'ajv';
+import {Logger} from '@oniichan/shared/logger';
 import {EditorHost} from '../../editor';
+import {CommandExecutor} from '../../core/command';
 
 const ajv = new Ajv();
 
@@ -120,13 +122,25 @@ export function isToolInputError(result: ToolRunResult): result is ToolInputErro
     return result.type === 'parameterMissing' || result.type === 'parameterType' || result.type === 'validationError';
 }
 
+export interface ToolImplementInit {
+    editorHost: EditorHost;
+    logger: Logger;
+    commandExecutor: CommandExecutor;
+}
+
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
     protected readonly editorHost: EditorHost;
 
+    protected readonly logger: Logger;
+
+    protected readonly commandExecutor: CommandExecutor;
+
     private readonly schema: Schema;
 
-    constructor(editorHost: EditorHost, schema: Schema) {
-        this.editorHost = editorHost;
+    constructor(className: string, init: ToolImplementInit, schema: Schema) {
+        this.editorHost = init.editorHost;
+        this.logger = init.logger.with({source: className});
+        this.commandExecutor = init.commandExecutor;
         this.schema = schema;
     }
 

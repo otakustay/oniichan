@@ -1,87 +1,68 @@
+import unixify from 'unixify';
 import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
-import {joinToMaxLength} from '@oniichan/shared/string';
-import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
-interface GrepState {
-    currentGroupLines: string[];
-    isCurrentGroupAvailable: boolean;
-    isFiltered: boolean;
+// For each match, its a `begin - context - match - context - end` sequence,
+// so a maximum of 1000 lines contains 200 search results
+const MAX_LINES = 1000;
+
+interface Text {
+    text: string;
 }
 
-interface GrepGroupedOutput {
-    content: string;
-    isTruncated: boolean;
-    originalCount: number;
-    truncatedCount: number;
+interface RipGrepOutputPathData {
+    path: Text;
 }
 
-function groupGrepOutput(output: string): GrepGroupedOutput {
-    if (!output.trim()) {
-        return {
-            content: '',
-            isTruncated: false,
-            originalCount: 0,
-            truncatedCount: 0,
-        };
-    }
+interface RipGrepCommandOutputLineData {
+    path: Text;
+    lines: Text;
+}
 
-    const lines = output.split('\n');
-    const groups: string[] = [];
-    const state: GrepState = {
-        currentGroupLines: [],
-        isCurrentGroupAvailable: true,
-        isFiltered: false,
-    };
-    for (const line of lines) {
-        if (line === '--') {
-            if (state.isCurrentGroupAvailable) {
-                groups.push(state.currentGroupLines.join('\n'));
-                state.currentGroupLines = [];
-                state.isCurrentGroupAvailable = true;
-            }
-            continue;
-        }
+interface RipGrepOutputItemOf<T, D> {
+    type: T;
+    data: D;
+}
 
-        if (line.length > 500) {
-            state.isCurrentGroupAvailable = false;
-            state.isFiltered = true;
-        }
+type RipGrepOutputItem =
+    | RipGrepOutputItemOf<'begin', RipGrepOutputPathData>
+    | RipGrepOutputItemOf<'context', RipGrepCommandOutputLineData>
+    | RipGrepOutputItemOf<'match', RipGrepCommandOutputLineData>
+    | RipGrepOutputItemOf<'end', RipGrepOutputPathData>
+    | RipGrepOutputItemOf<'summary', unknown>;
 
-        if (state.isCurrentGroupAvailable) {
-            state.currentGroupLines.push(line);
-        }
-    }
+interface GrepResult {
+    file: string;
+    contextBefore: string[];
+    matches: string[];
+    contextAfter: string[];
+}
 
-    const joined = joinToMaxLength(groups, '\n--\n', 4000);
-    return {
-        content: joined.value,
-        isTruncated: state.isFiltered || joined.includedItems < groups.length,
-        originalCount: groups.length,
-        truncatedCount: joined.includedItems,
-    };
+interface ConsumeState {
+    current: GrepResult | null;
 }
 
 export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpParameter> {
-    private readonly logger: Logger;
+    private linesCount = 0;
 
-    constructor(editorHost: EditorHost, logger: Logger) {
-        super(editorHost, findFilesByRegExpParameters);
-        this.logger = logger.with({source: 'GrepFilesToolImplement'});
+    private readonly results: GrepResult[] = [];
+
+    constructor(init: ToolImplementInit) {
+        super('GrepFilesToolImplement', init, findFilesByRegExpParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {
         return {
             regex: args.regex,
             path: args.path,
+            glob: args.glob,
         };
     }
 
     protected async execute(args: FindFilesByRegExpParameter): Promise<ToolRunResult> {
         const workspace = this.editorHost.getWorkspace();
-        const {execa, ExecaError} = await import('execa');
+
         try {
             const root = await workspace.getRoot();
 
@@ -93,54 +74,54 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 };
             }
 
-            // TODO: Use `ripgrep`, this is now macOS style `grep`
+            const binaryName = process.platform.startsWith('win') ? 'rg.exe' : 'rg';
+
+            if (!this.commandExecutor.has(binaryName)) {
+                return {
+                    type: 'executeError',
+                    output:
+                        'User\'s operating system does not have grep installed, it\'s impossible to search files by regexp, please try other methods to locate files, and do not use this tool again.',
+                };
+            }
+
+            // `rg` automatically respects `.gitignore` so we don't need any special handling of file exclusion
             const commandLineArgs = [
-                '-i',
-                '-E',
+                '-e',
                 args.regex,
-                '--context=1',
-                '--exclude-dir',
-                '.git,.nx,.husky,node_modules,.webpack,dist',
-                '-r',
+                '--context',
+                '1',
+                '--json',
                 args.path,
             ];
+            if (args.glob) {
+                commandLineArgs.push('--glob', args.glob);
+            }
             this.logger.trace('ExecuteGrepStart', {args: commandLineArgs});
-            const grep = await execa('grep', commandLineArgs, {cwd: root});
-            const output = groupGrepOutput(grep.stdout);
+            const stream = this.commandExecutor.executeStream(
+                binaryName,
+                commandLineArgs,
+                {cwd: root, maxLines: 1000, includeErrorOutput: false}
+            );
+            await this.consumeRipGrepOutput(stream);
 
             this.logger.trace(
                 'ExecuteGrepFinish',
                 {
                     regex: args.regex,
-                    original: output.originalCount,
-                    truncated: output.truncatedCount,
+                    path: args.path,
+                    count: this.results.length,
+                    truncated: this.linesCount >= MAX_LINES,
                 }
             );
 
             return {
                 type: 'success',
                 finished: false,
-                output: this.constructResponseText(output),
+                output: this.constructResponseText(),
             };
         }
         catch (ex) {
             this.logger.error('ExecuteGrepFail', {reason: stringifyError(ex)});
-
-            if (ex instanceof ExecaError) {
-                if (ex.exitCode === 1) {
-                    return {
-                        type: 'success',
-                        finished: false,
-                        output: 'There is not files matching this regex.',
-                    };
-                }
-                if (ex.stderr) {
-                    return {
-                        type: 'executeError',
-                        output: resultMarkdown(`Execute grep failed, here is stderr:`, ex.stderr),
-                    };
-                }
-            }
             return {
                 type: 'executeError',
                 output: `Unable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
@@ -148,14 +129,87 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
         }
     }
 
-    private constructResponseText(output: GrepGroupedOutput): string {
-        if (!output.content) {
+    private async consumeRipGrepOutput(stream: AsyncIterable<string>) {
+        const state: ConsumeState = {current: null};
+
+        for await (const line of stream) {
+            this.linesCount++;
+            const item: RipGrepOutputItem = JSON.parse(line);
+            if (item.type === 'begin') {
+                state.current = {
+                    file: item.data.path.text,
+                    contextBefore: [],
+                    matches: [],
+                    contextAfter: [],
+                };
+                continue;
+            }
+
+            if (!state.current) {
+                continue;
+            }
+
+            if (item.type === 'match') {
+                state.current.matches.push(item.data.lines.text);
+            }
+            else if (item.type === 'context') {
+                const container = state.current.matches.length
+                    ? state.current.contextAfter
+                    : state.current.contextBefore;
+                container.push(item.data.lines.text);
+            }
+            else if (item.type === 'end') {
+                this.results.push(state.current);
+            }
+        }
+    }
+
+    private constructResponseText(): string {
+        if (!this.results.length) {
             return 'There are no files matching this regex';
         }
 
-        const title = output.isTruncated
+        const title = this.linesCount >= MAX_LINES
             ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
             : 'This is stdout of grep command:';
-        return resultMarkdown(title, output.content);
+        // This constructs output into native `grep` style, here is an example:
+        //
+        // ```
+        // packages/shared/src/tool/index.ts-    readFileParameters,
+        // packages/shared/src/tool/index.ts-    readDirectoryParameters,
+        // packages/shared/src/tool/index.ts:    findFilesByGlobParameters,
+        // packages/shared/src/tool/index.ts:    findFilesByRegExpParameters,
+        // packages/shared/src/tool/index.ts-    writeFileParameters,
+        // packages/shared/src/tool/index.ts-    patchFileParameters,
+        // --
+        // packages/kernel/src/inbox/workflow.ts-    }
+        // packages/kernel/src/inbox/workflow.ts-
+        // packages/kernel/src/inbox/workflow.ts:    private findMessageStrict(messageUuid: string) {
+        // packages/kernel/src/inbox/workflow.ts:        const message = this.findMessage(messageUuid);
+        // packages/kernel/src/inbox/workflow.ts-
+        // packages/kernel/src/inbox/workflow.ts-        if (!message) {
+        // --
+        // packages/shared/src/tool/definition.ts-}
+        // packages/shared/src/tool/definition.ts-
+        // packages/shared/src/tool/definition.ts:export const findFilesByRegExpParameters = {
+        // packages/shared/src/tool/definition.ts-    type: 'object',
+        // packages/shared/src/tool/definition.ts-    properties: {
+        // ```
+        const format = (result: GrepResult) => {
+            const lines: string[] = [];
+            const file = unixify(result.file);
+            // all `line`s are ended with `\n` so we need to trim it
+            for (const line of result.contextBefore) {
+                lines.push(`${file}-${line.trimEnd()}`);
+            }
+            for (const line of result.matches) {
+                lines.push(`${file}:${line.trimEnd()}`);
+            }
+            for (const line of result.contextAfter) {
+                lines.push(`${file}-${line.trimEnd()}`);
+            }
+            return lines.join('\n');
+        };
+        return resultMarkdown(title, this.results.map(format).join('\n--\n'));
     }
 }

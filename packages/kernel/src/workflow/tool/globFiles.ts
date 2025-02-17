@@ -1,12 +1,11 @@
 import path from 'node:path';
 import {findFilesByGlobParameters, FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, findFilesByGlobParameters);
+    constructor(init: ToolImplementInit) {
+        super('GlobFilesToolImplement', init, findFilesByGlobParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

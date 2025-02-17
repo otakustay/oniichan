@@ -1,10 +1,9 @@
 import {browserPreviewParameters, BrowserPreviewParameter} from '@oniichan/shared/tool';
-import {EditorHost} from '../../editor';
-import {ToolImplementBase, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, browserPreviewParameters);
+    constructor(init: ToolImplementInit) {
+        super('BrowserPreviewToolImplement', init, browserPreviewParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

@@ -1,12 +1,11 @@
 import path from 'node:path';
 import {readFileParameters, ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, readFileParameters);
+    constructor(init: ToolImplementInit) {
+        super('ReadFileToolImplement', init, readFileParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {

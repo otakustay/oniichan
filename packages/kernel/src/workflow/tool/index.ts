@@ -36,7 +36,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.systemPrompt = init.systemPrompt;
         this.editorHost = init.editorHost;
         this.model = init.editorHost.getModelAccess(init.taskId);
-        this.implment = new ToolImplement(init.editorHost, init.logger);
+        this.implment = new ToolImplement(init);
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 

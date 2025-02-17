@@ -2,6 +2,7 @@ import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@ota
 import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
 import {MessageThreadData} from '@oniichan/shared/inbox';
 import {EditorHost} from '../editor';
+import {CommandExecutor} from '../core/command';
 
 type SendNotice = (action: string, payload?: any) => void;
 
@@ -29,6 +30,7 @@ class HandlerLogger extends Logger {
 
 export interface Context {
     editorHost: EditorHost;
+    commandExecutor: CommandExecutor;
     logger: Logger;
 }
 
@@ -42,6 +44,7 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
             request,
             {
                 editorHost: context.editorHost,
+                commandExecutor: context.commandExecutor,
                 logger: new HandlerLogger(
                     sendNotice,
                     new.target.name,

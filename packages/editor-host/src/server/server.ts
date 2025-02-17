@@ -38,6 +38,8 @@ export interface EditorHostDependency {
 }
 
 export class EditorHostServer extends Server<EditorHostProtocol, Context> {
+    static readonly containerKey = 'EditorHostServer';
+
     static readonly namespace = '-> host';
 
     private readonly container: DependencyContainer<EditorHostDependency>;

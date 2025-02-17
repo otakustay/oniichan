@@ -2,12 +2,11 @@ import dedent from 'dedent';
 import {patchFileParameters, PatchFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import {patchContent, PatchParseError} from '@oniichan/shared/patch';
-import {EditorHost} from '../../editor';
-import {resultMarkdown, ToolImplementBase, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
-    constructor(editorHost: EditorHost) {
-        super(editorHost, patchFileParameters);
+    constructor(init: ToolImplementInit) {
+        super('PatchFilesToolImplement', init, patchFileParameters);
     }
 
     protected parseArgs(args: Record<string, string | undefined>) {
