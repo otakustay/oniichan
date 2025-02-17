@@ -9,7 +9,7 @@ import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {WebApp} from './capabilities/web';
-import {createKernelClient} from './kernel';
+import {startKernel} from './kernel';
 import {migrate} from './migration';
 
 export async function activate(context: ExtensionContext) {
@@ -24,9 +24,8 @@ export async function activate(context: ExtensionContext) {
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
-    const kernel = await createKernelClient(serverHostContainer);
-    const globalContainer = serverHostContainer
-        .bind('KernelClient', () => kernel, {singleton: true});
+    const kernel = await startKernel(serverHostContainer);
+    const globalContainer = serverHostContainer.bind('KernelClient', () => kernel.getClient());
 
     context.subscriptions.push(
         kernel,

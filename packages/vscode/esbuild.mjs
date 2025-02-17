@@ -31,7 +31,7 @@ try {
     const buidlContext = {
         entryPoints: [
             'src/extension.ts',
-            'src/kernelEntry.ts',
+            'src/kernel/entry.ts',
         ],
         bundle: true,
         format: 'cjs',
