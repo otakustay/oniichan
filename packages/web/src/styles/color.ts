@@ -26,7 +26,7 @@ injectGlobal`
         --color-warn: var(--vscode-notificationsWarningIcon, #ddb100);
         --color-error: var(--vscode-notificationsErrorIcon, #b01011);
         --color-success: var(--vscode-notebookStatusSuccessIcon, #2da042);
-        --color-notification-foreground: var(--vscode-foreground, #fff);
+        --color-notification-foreground: var(--vscode-button-foreground, #fff);
         --color-addition: var(--vscode-diffEditorGutter-insertedLineBackground, #2da042);
         --color-deletion: var(--vscode-diffEditorGutter-removedLineBackground, #e51600);
     }
@@ -56,7 +56,7 @@ injectGlobal`
             --color-warn: var(--vscode-notificationsWarningIcon, #ffcc01);
             --color-error: var(--vscode-notificationsErrorIcon, #f88070);
             --color-success: var(--vscode-notebookStatusSuccessIcon, #2da042);
-            --color-notification-foreground: var(--vscode-foreground, #1f1f1f);
+            --color-notification-foreground: var(--vscode-button-foreground, #1f1f1f);
             --color-addition: var(--vscode-diffEditorGutter-insertedLineBackground, #2da042);
             --color-deletion: var(--vscode-diffEditorGutter-removedLineBackground, #8f1e1a);
         }
