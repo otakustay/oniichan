@@ -1,0 +1,4 @@
+**
+!dist/**/*[^.map]
+!assets
+!LICENSE
