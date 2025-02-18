@@ -3,6 +3,7 @@ import {EditorDocumentHost} from './document';
 import {ModelAccessHost} from './model';
 import {WorkspaceHost} from './workspace';
 import {TerminalHost} from './terminal';
+import {FileEditHost} from './edit';
 
 export {ModelAccessHost, ModelChatOptions} from './model';
 export {ReadDirectoryOptions, WorkspaceHost} from './workspace';
@@ -32,5 +33,9 @@ export class EditorHost {
 
     getTerminal(taskId?: string) {
         return new TerminalHost(taskId, this.client);
+    }
+
+    getFileEdit(taskId?: string) {
+        return new FileEditHost(taskId, this.client);
     }
 }

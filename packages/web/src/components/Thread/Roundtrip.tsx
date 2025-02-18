@@ -94,9 +94,10 @@ function buildMessageDataSource(roundtrip: RoundtripMessageData, debug: boolean)
 interface Props {
     threadUuid: string;
     roundtrip: RoundtripMessageData;
+    isEditInteractive: boolean;
 }
 
-export default function Roundtrip({threadUuid, roundtrip}: Props) {
+export default function Roundtrip({threadUuid, roundtrip, isEditInteractive}: Props) {
     const viewMode = useViewModeValue();
     const messages = buildMessageDataSource(roundtrip, viewMode.debug);
     const renderMessageView = (view: MessageView) => (
@@ -111,7 +112,7 @@ export default function Roundtrip({threadUuid, roundtrip}: Props) {
     );
 
     return (
-        <FileEditContextProvider roundtrip={roundtrip}>
+        <FileEditContextProvider isEditInteractive={isEditInteractive} roundtrip={roundtrip}>
             {messages.map(renderMessageView)}
         </FileEditContextProvider>
     );

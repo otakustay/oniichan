@@ -1,4 +1,4 @@
-import {RoundtripStatus} from '@oniichan/shared/inbox';
+import {extractFileEdits, RoundtripStatus} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {RequestHandler} from '../handler';
 import {store} from './store';
@@ -25,6 +25,38 @@ export class InboxMarkRoundtripStatusHandler extends RequestHandler<InboxMarkRou
         logger.trace('PushStoreUpdate');
         this.updateInboxThreadList(store.dump());
         telemetry.end();
+        logger.info('Finish');
+    }
+}
+
+export interface CheckEditRequest {
+    threadUuid: string;
+    requestMessageUuid: string;
+}
+
+export interface CheckEditResponse {
+    totalEditCount: number;
+    appliedEditCount: number;
+}
+
+export class InboxCheckEditHandler extends RequestHandler<CheckEditRequest, CheckEditResponse> {
+    static readonly action = 'inboxCheckEdit';
+
+    async *handleRequest(payload: CheckEditRequest): AsyncIterable<CheckEditResponse> {
+        const {logger, editorHost} = this.context;
+        logger.info('Start');
+
+        const thread = store.findThreadByUuidStrict(payload.threadUuid);
+        const roundtrip = thread.findRoundtripByMessageUuidStrict(payload.requestMessageUuid);
+        const messages = roundtrip.toMessages().map(v => v.toMessageData());
+        const edits = Object.values(extractFileEdits(messages)).filter(v => !!v);
+        const fileEditHost = editorHost.getFileEdit();
+        const appliableStates = await Promise.all(edits.map(v => fileEditHost.checkAppliable(v)));
+        yield {
+            totalEditCount: edits.length,
+            appliedEditCount: appliableStates.filter(v => v === 'applied').length,
+        };
+
         logger.info('Finish');
     }
 }

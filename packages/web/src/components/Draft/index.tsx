@@ -1,13 +1,23 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
 import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
-import {useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
+import {useMessageThreadValueByUuid, useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
 import Modal from '@/components/Modal';
 import Avatar from '@/components/Avatar';
-import {useIsWideScreen} from '@/components/AppProvider';
+import {useIpc, useIsWideScreen} from '@/components/AppProvider';
+import {Alert} from '@/components/Alert';
 import {mediaWideScreen} from '@/styles';
 import MessageEditor from './Editor';
 import SendTrigger from './SendTrigger';
+import {useEffect, useState} from 'react';
+
+function warning(count: number) {
+    return `${count} ${count > 1 ? 'files' : 'file'} pending review, replying will discard edits`;
+}
+
+const Warning = styled(Alert)`
+    margin: .5em 0;
+`;
 
 const Layout = styled(motion.div)`
     padding: 1em;
@@ -52,8 +62,35 @@ const Editor = styled(MessageEditor)`
 function Content({threadUuid, mode}: EditingValue) {
     const isWideScreen = useIsWideScreen();
     const content = useDraftContentValue();
+    const [discardingEditCount, setDiscardingEditCount] = useState(0);
     const setEditing = useSetEditing();
     const sendMessage = useSendMessageToThread(threadUuid);
+    const thread = useMessageThreadValueByUuid(threadUuid);
+    const requestMessageUuid = thread?.roundtrips.at(-1)?.messages.at(0)?.uuid;
+    const ipc = useIpc();
+    useEffect(
+        () => {
+            if (mode === 'new' || !threadUuid || !requestMessageUuid) {
+                return;
+            }
+
+            void (async () => {
+                try {
+                    const applyState = await ipc.kernel.call(
+                        crypto.randomUUID(),
+                        'inboxCheckEdit',
+                        {threadUuid, requestMessageUuid}
+                    );
+                    setDiscardingEditCount(applyState.totalEditCount - applyState.appliedEditCount);
+                }
+                catch (ex) {
+                    console.error(ex);
+                    setDiscardingEditCount(0);
+                }
+            })();
+        },
+        [ipc, threadUuid, requestMessageUuid, mode]
+    );
     const send = async () => {
         await sendMessage(crypto.randomUUID(), content);
     };
@@ -66,6 +103,7 @@ function Content({threadUuid, mode}: EditingValue) {
             <Receiver>
                 To: <Avatar.Assistant size="1em" />Oniichan
             </Receiver>
+            {!!discardingEditCount && <Warning type="warn" message={warning(discardingEditCount)} />}
             <Editor onSend={send} />
         </>
     );

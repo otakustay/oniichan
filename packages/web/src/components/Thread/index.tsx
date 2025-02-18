@@ -41,13 +41,20 @@ export default function Thread({uuid}: Props) {
         return <div>Not Found</div>;
     }
 
-    const renderRoundtrip = (roundtrip: RoundtripMessageData) => {
-        const key = roundtrip.messages.at(0)?.uuid ?? crypto.randomUUID();
-        return <Roundtrip key={key} threadUuid={thread.uuid} roundtrip={roundtrip} />;
-    };
-
+    const lastRoundtrip = thread.roundtrips.at(-1);
     // As a mail inbox, the latest roundtrip is on top
     const roundtrips = viewMode.debug ? thread.roundtrips : [...thread.roundtrips].reverse();
+    const renderRoundtrip = (roundtrip: RoundtripMessageData) => {
+        const key = roundtrip.messages.at(0)?.uuid ?? crypto.randomUUID();
+        return (
+            <Roundtrip
+                key={key}
+                threadUuid={thread.uuid}
+                roundtrip={roundtrip}
+                isEditInteractive={roundtrip === lastRoundtrip}
+            />
+        );
+    };
 
     return (
         <Layout>

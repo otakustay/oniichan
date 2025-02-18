@@ -6,9 +6,13 @@ const EditArea = styled.textarea`
     width: 100%;
     height: 100%;
     resize: none;
-    outline: none;
     border: none;
     padding: .5em;
+    background-color: transparent;
+
+    &:focus {
+        outline: none;
+    }
 `;
 
 interface Props {
@@ -22,15 +26,16 @@ export default function Editor({onSend}: Props) {
         setDraftContent(e.target.value);
     };
     const edit = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        const element = e.target as HTMLTextAreaElement;
+
         if (e.code === 'Tab') {
             e.preventDefault();
-            const element = e.target as HTMLTextAreaElement;
             const {selectionStart, selectionEnd} = element;
             const newValue = element.value.slice(0, selectionStart) + '  ' + element.value.slice(selectionEnd);
             element.value = newValue;
             setDraftContent(newValue);
         }
-        else if (e.code === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        else if (e.code === 'Enter' && (e.ctrlKey || e.metaKey) && element.value.trim()) {
             e.preventDefault();
             onSend();
             setDraftContent('');

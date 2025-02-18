@@ -1,5 +1,6 @@
 import {assertNever} from '../error';
-import {MessageContentChunk, ToolCallMessageChunk, MessageType, ThinkingMessageChunk} from './message';
+import {FileEditData} from '../patch';
+import {MessageContentChunk, ToolCallMessageChunk, MessageType, ThinkingMessageChunk, MessageData} from './message';
 
 export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
     return chunk.type === 'toolCall';
@@ -72,4 +73,24 @@ export function normalizeArguments(input: Record<string, string | undefined>) {
         }
     }
     return output;
+}
+
+function getFileEditFromMessage(message: MessageData): FileEditData[] {
+    if (message.type !== 'toolCall') {
+        return [];
+    }
+
+    const toolCall = message.chunks.find(v => v.type == 'toolCall');
+    return toolCall?.fileEdit ? [toolCall.fileEdit] : [];
+}
+
+export function extractFileEdits(messages: MessageData[]): Record<string, FileEditData[] | undefined> {
+    const edits: Record<string, FileEditData[] | undefined> = {};
+    const allEdits = messages.flatMap(getFileEditFromMessage);
+    for (const edit of allEdits) {
+        const fileEdits = edits[edit.file] ?? [];
+        fileEdits.push(edit);
+        edits[edit.file] = fileEdits;
+    }
+    return edits;
 }

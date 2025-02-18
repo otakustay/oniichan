@@ -26,6 +26,7 @@ export {
     assertToolCallChunk,
     chunkToString,
     normalizeArguments,
+    extractFileEdits,
 } from './utils';
 export {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
 export {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';

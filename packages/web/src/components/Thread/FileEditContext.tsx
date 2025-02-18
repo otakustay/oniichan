@@ -1,38 +1,34 @@
 import {createContext, ReactNode, useContext} from 'react';
 import {useOriginalDeepCopy} from 'huse';
-import {MessageData, RoundtripMessageData} from '@oniichan/shared/inbox';
+import {RoundtripMessageData, extractFileEdits} from '@oniichan/shared/inbox';
 import {FileEditData} from '@oniichan/shared/patch';
 
-function getFileEditFromMessage(message: MessageData): FileEditData[] {
-    if (message.type !== 'toolCall') {
-        return [];
-    }
-
-    const toolCall = message.chunks.find(v => v.type == 'toolCall');
-    return toolCall?.fileEdit ? [toolCall.fileEdit] : [];
+interface ContextValue {
+    edits: Record<string, FileEditData[] | undefined>;
+    isEditInteractive: boolean;
 }
 
-const Context = createContext<Record<string, FileEditData[] | undefined>>({});
+const Context = createContext<ContextValue>({edits: {}, isEditInteractive: false});
 Context.displayName = 'FileEditContext';
 
 interface Props {
     roundtrip: RoundtripMessageData;
+    isEditInteractive: boolean;
     children: ReactNode;
 }
 
-export default function FileEditContextProvider({roundtrip, children}: Props) {
-    const edits: Record<string, FileEditData[] | undefined> = {};
-    const allEdits = roundtrip.messages.flatMap(getFileEditFromMessage);
-    for (const edit of allEdits) {
-        const fileEdits = edits[edit.file] ?? [];
-        fileEdits.push(edit);
-        edits[edit.file] = fileEdits;
-    }
+export default function FileEditContextProvider({roundtrip, isEditInteractive, children}: Props) {
+    const edits = extractFileEdits(roundtrip.messages);
 
-    return <Context value={edits}>{children}</Context>;
+    return <Context value={{isEditInteractive, edits}}>{children}</Context>;
 }
 
 export function useFileEditStack(file: string) {
-    const edits = useContext(Context);
+    const {edits} = useContext(Context);
     return useOriginalDeepCopy(edits[file] ?? []);
+}
+
+export function useIsEditInteractive() {
+    const {isEditInteractive} = useContext(Context);
+    return isEditInteractive;
 }

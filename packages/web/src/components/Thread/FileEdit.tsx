@@ -11,7 +11,7 @@ import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
-import {useFileEditStack} from './FileEditContext';
+import {useFileEditStack, useIsEditInteractive} from './FileEditContext';
 import {useOriginalCopy} from 'huse';
 
 const {ActionButton} = ActBar;
@@ -71,6 +71,7 @@ export default function FileEdit({file, edit, patch}: Props) {
     const ipc = useIpc();
     const editForCheck = useOriginalCopy(edit);
     const editStack = useFileEditStack(file);
+    const isEditInteractive = useIsEditInteractive();
     useEffect(
         () => {
             if (!editForCheck || !editStack.length) {
@@ -132,6 +133,8 @@ export default function FileEdit({file, edit, patch}: Props) {
     const isLoading = !edit || check === 'reading';
     const codeEdit = (!edit || edit.type === 'error' || edit.type === 'patchError') ? null : edit;
     const hasError = check === 'conflict' || check === 'error';
+    const showButton = isEditInteractive && check === 'appliable';
+    const showApplied = isEditInteractive && check === 'applied';
 
     return (
         <ActBar
@@ -148,9 +151,9 @@ export default function FileEdit({file, edit, patch}: Props) {
             actions={
                 <>
                     {isLoading && <ActBar.Loading />}
-                    {check === 'appliable' && <ActionButton onClick={openDiffView}>Review</ActionButton>}
-                    {check === 'appliable' && <ActionButton onClick={accept}>Accept</ActionButton>}
-                    {check === 'applied' && <AppliedSign title="Already applied" />}
+                    {showButton && <ActionButton onClick={openDiffView}>Review</ActionButton>}
+                    {showButton && <ActionButton onClick={accept}>Accept</ActionButton>}
+                    {showApplied && <AppliedSign title="Already applied" />}
                     {hasError && <ErrorSign title="Expand to get detail" />}
                 </>
             }
