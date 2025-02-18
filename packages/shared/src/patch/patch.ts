@@ -1,6 +1,8 @@
 import {applyPatch} from './apply';
 import {parsePatchString} from './parse';
 
+export type PatchAction = 'write' | 'patch' | 'delete';
+
 export interface PatchResult {
     newContent: string;
     deletedCount: number;

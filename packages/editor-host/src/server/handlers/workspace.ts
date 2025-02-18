@@ -42,8 +42,8 @@ export class ReadWorkspaceFileHandler extends RequestHandler<string, string | nu
             try {
                 const content = await workspace.fs.readFile(Uri.file(absolute));
                 yield Buffer.from(content).toString('utf-8');
-
                 logger.info('Finish');
+                return;
             }
             catch {
                 // Go next workspace folder

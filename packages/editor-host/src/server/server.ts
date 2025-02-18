@@ -19,12 +19,7 @@ import {
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
-import {
-    CheckEditAppliableHandler,
-    AcceptFileEditHandler,
-    RenderDiffViewHandler,
-    VirtualEditFile,
-} from './handlers/diff';
+import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
 import {ResourceManager} from '../utils/resource';
 import {TerminalManager} from '../utils/terminal';
 import {ExecuteTerminalHandler} from './handlers/terminal';
@@ -79,7 +74,6 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(AcceptFileEditHandler);
         this.registerHandler(ExecuteTerminalHandler);
         this.registerHandler(OpenUrlHandler);
-        this.registerHandler(VirtualEditFile);
     }
 
     protected async createContext() {

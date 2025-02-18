@@ -17,10 +17,6 @@ export {
     DebugMessageLevel,
     DebugMessageData,
     MessageType,
-    FileEditAction,
-    FileEditResult,
-    FileEditError,
-    FileEditData,
 } from './message';
 export {
     isToolCallChunk,

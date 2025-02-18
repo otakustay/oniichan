@@ -1,7 +1,6 @@
 import url from 'node:url';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {newUuid} from '@oniichan/shared/id';
-import {VirtualEditFileAction} from '@oniichan/editor-host/protocol';
 
 export interface ReadDirectoryOptions {
     depth?: number;
@@ -36,9 +35,5 @@ export class WorkspaceHost {
 
     async findFiles(glob: string, limit?: number) {
         return this.client.call(newUuid(this.taskId), 'findFiles', {glob, limit});
-    }
-
-    async virtualEditFile(file: string, action: VirtualEditFileAction, patch: string) {
-        return this.client.call(newUuid(this.taskId), 'virtualEditFile', {file, action, patch});
     }
 }

@@ -2,6 +2,7 @@ import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {Logger} from '@oniichan/shared/logger';
 import {EditorHost} from '../../editor';
 import {CommandExecutor} from '../../core/command';
+import {ToolCallMessage} from '../../inbox';
 
 const ajv = new Ajv();
 
@@ -123,12 +124,15 @@ export function isToolInputError(result: ToolRunResult): result is ToolInputErro
 }
 
 export interface ToolImplementInit {
+    origin: ToolCallMessage;
     editorHost: EditorHost;
     logger: Logger;
     commandExecutor: CommandExecutor;
 }
 
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
+    protected readonly origin: ToolCallMessage;
+
     protected readonly editorHost: EditorHost;
 
     protected readonly logger: Logger;
@@ -138,6 +142,7 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
     private readonly schema: Schema;
 
     constructor(className: string, init: ToolImplementInit, schema: Schema) {
+        this.origin = init.origin;
         this.editorHost = init.editorHost;
         this.logger = init.logger.with({source: className});
         this.commandExecutor = init.commandExecutor;

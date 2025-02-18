@@ -23,9 +23,9 @@ import {
     normalizeArguments,
     MessageInputChunk,
 } from '@oniichan/shared/inbox';
-import {VirtualEditFileAction} from '@oniichan/editor-host/protocol';
 import {EditorHost} from '../editor';
 import {MessageRoundrip} from './interface';
+import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 
 abstract class MessageBase<T extends MessageType> {
     readonly uuid: string;
@@ -247,24 +247,41 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         }
 
         if (isEditToolName(toolCall.toolName)) {
-            const action: VirtualEditFileAction = toolCall.toolName === 'write_file'
+            const file = toolCall.arguments.path ?? '';
+
+            if (!file) {
+                toolCall.fileEdit = {
+                    file,
+                    type: 'error',
+                    message: 'Missing path argument',
+                };
+                return;
+            }
+
+            const editStack = this.roundtrip.getEditStackForFile(toolCall.arguments.path ?? '');
+            const previousEdit = editStack.at(-1);
+            const patchAction = toolCall.toolName === 'write_file'
                 ? 'write'
                 : (toolCall.toolName === 'patch_file' ? 'patch' : 'delete');
-            const workspace = editorHost.getWorkspace();
-            try {
-                const edit = await workspace.virtualEditFile(
-                    toolCall.arguments.path ?? '',
-                    action,
-                    // `patch` for `patch_file`, `content` for `write_file`
-                    toolCall.arguments.patch ?? toolCall.arguments.content ?? ''
-                );
-                toolCall.fileEdit = edit;
+            // `patch` for `patch_file`, `content` for `write_file`
+            const patch = toolCall.arguments.patch ?? toolCall.arguments.content ?? '';
+
+            if (previousEdit) {
+                toolCall.fileEdit = stackFileEdit(previousEdit, patchAction, patch);
             }
-            catch (ex) {
-                toolCall.fileEdit = {
-                    type: 'error',
-                    message: stringifyError(ex),
-                };
+            else {
+                const workspace = editorHost.getWorkspace();
+                try {
+                    const content = await workspace.readWorkspaceFile(file);
+                    toolCall.fileEdit = createFileEdit(file, content, patchAction, patch);
+                }
+                catch (ex) {
+                    toolCall.fileEdit = {
+                        file,
+                        type: 'error',
+                        message: stringifyError(ex),
+                    };
+                }
             }
         }
     }

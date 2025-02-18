@@ -1,5 +1,5 @@
-import {FileEditResult} from '@oniichan/shared/inbox';
+import {FileEditData} from '@oniichan/shared/patch';
 
 export interface MessageRoundrip {
-    getEditStackForFile(file: string): FileEditResult[];
+    getEditStackForFile(file: string): FileEditData[];
 }

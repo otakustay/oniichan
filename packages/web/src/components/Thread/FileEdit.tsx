@@ -6,7 +6,7 @@ import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {stringifyError} from '@oniichan/shared/error';
 import {AppliableState} from '@oniichan/editor-host/protocol';
-import {FileEditData} from '@oniichan/shared/inbox';
+import {FileEditData} from '@oniichan/shared/patch';
 import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
@@ -64,6 +64,7 @@ interface Props {
     edit: FileEditData | null;
 }
 
+// TODO: Use all edit history to merge a final edit
 export default function FileEdit({file, edit, patch}: Props) {
     const viewMode = useViewModeValue();
     const editForCheck = useOriginalCopy(edit);
@@ -89,7 +90,7 @@ export default function FileEdit({file, edit, patch}: Props) {
     );
     const extension = file.split('.').pop();
     const invokeDiffAction = async (action: 'renderDiffView' | 'acceptFileEdit') => {
-        if (!edit || edit.type === 'error') {
+        if (!edit || edit.type === 'error' || edit.type === 'patchError') {
             return;
         }
 
@@ -132,6 +133,7 @@ export default function FileEdit({file, edit, patch}: Props) {
         return null;
     };
     const isLoading = !edit || check === 'reading';
+    const codeEdit = (!edit || edit.type === 'error' || edit.type === 'patchError') ? null : edit;
     const hasError = check === 'conflict' || check === 'error';
 
     return (
@@ -141,9 +143,9 @@ export default function FileEdit({file, edit, patch}: Props) {
             content={
                 <>
                     <FileNameLabel title={file}>{trimPathString(file)}</FileNameLabel>
-                    {edit && edit.type !== 'error' && <CountLabel type="addition" count={edit.insertedCount} />}
-                    {edit && edit.type !== 'error' && <CountLabel type="deletion" count={edit.deletedCount} />}
-                    {edit && edit.type === 'delete' && <DeletedMark>D</DeletedMark>}
+                    {codeEdit && <CountLabel type="addition" count={codeEdit.insertedCount} />}
+                    {codeEdit && <CountLabel type="deletion" count={codeEdit.deletedCount} />}
+                    {codeEdit?.type === 'delete' && <DeletedMark>D</DeletedMark>}
                 </>
             }
             actions={

@@ -1,3 +1,4 @@
+import {FileEditData} from '../patch';
 import {ToolName, ToolParsedChunk} from '../tool';
 
 export interface ReasoningMessageChunk {
@@ -86,21 +87,3 @@ export type MessageData =
     | ToolUseMessageData;
 
 export type MessageType = MessageData['type'];
-
-export type FileEditAction = 'create' | 'delete' | 'edit';
-
-export interface FileEditResult {
-    type: FileEditAction;
-    file: string;
-    oldContent: string;
-    newContent: string;
-    deletedCount: number;
-    insertedCount: number;
-}
-
-export interface FileEditError {
-    type: 'error';
-    message: string;
-}
-
-export type FileEditData = FileEditResult | FileEditError;

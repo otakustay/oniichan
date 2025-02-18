@@ -44,9 +44,6 @@ importers:
       '@otakustay/text-pin':
         specifier: ^1.0.0
         version: 1.0.0
-      diff:
-        specifier: ^7.0.0
-        version: 7.0.0
       nanoid:
         specifier: ^5.0.9
         version: 5.0.9
@@ -57,9 +54,6 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0
     devDependencies:
-      '@types/diff':
-        specifier: ^7.0.1
-        version: 7.0.1
       '@types/node':
         specifier: 20.x
         version: 20.17.12
@@ -140,7 +134,13 @@ importers:
       dedent:
         specifier: ^1.5.3
         version: 1.5.3(babel-plugin-macros@3.1.0)
+      diff:
+        specifier: ^7.0.0
+        version: 7.0.0
     devDependencies:
+      '@types/diff':
+        specifier: ^7.0.1
+        version: 7.0.1
       '@types/node':
         specifier: 20.x
         version: 20.17.12

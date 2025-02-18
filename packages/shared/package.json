@@ -32,9 +32,11 @@
     "@otakustay/async-iterator": "^1.1.1",
     "@types/json-schema": "^7.0.15",
     "ai": "^4.1.41",
-    "dedent": "^1.5.3"
+    "dedent": "^1.5.3",
+    "diff": "^7.0.0"
   },
   "devDependencies": {
+    "@types/diff": "^7.0.1",
     "@types/node": "20.x",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"

@@ -1,16 +1,14 @@
 import {commands, Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
-import {diffLines} from 'diff';
 import {tmpDirectory} from '@oniichan/shared/dir';
-import {assertNever, stringifyError} from '@oniichan/shared/error';
-import {FileEditData, FileEditResult} from '@oniichan/shared/inbox';
-import {patchContent} from '@oniichan/shared/patch';
+import {stringifyError} from '@oniichan/shared/error';
+import {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
 export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';
 
 abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
     protected async checkEditAppliable(edit: FileEditData): Promise<AppliableState> {
-        if (edit.type === 'error') {
+        if (edit.type === 'error' || edit.type === 'patchError') {
             return 'error';
         }
 
@@ -175,107 +173,5 @@ export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, Ap
         const document = await workspace.openTextDocument(uri);
         await document.save();
         await window.showTextDocument(document);
-    }
-}
-
-export type VirtualEditFileAction = 'write' | 'patch' | 'delete';
-
-export interface VirtualEditFileRequest {
-    action: VirtualEditFileAction;
-    file: string;
-    patch: string;
-}
-
-export class VirtualEditFile extends RequestHandler<VirtualEditFileRequest, FileEditData> {
-    static readonly action = 'virtualEditFile';
-
-    async *handleRequest(payload: VirtualEditFileRequest): AsyncIterable<FileEditData> {
-        const {logger} = this.context;
-        logger.info('Start', payload);
-
-        try {
-            switch (payload.action) {
-                case 'write':
-                    yield await this.write(payload);
-                    break;
-                case 'delete':
-                    yield await this.delete(payload);
-                    break;
-                case 'patch':
-                    yield await this.patch(payload);
-                    break;
-                default:
-                    assertNever<string>(payload.action, v => `Unknown file edit action ${v}`);
-            }
-        }
-        catch (ex) {
-            logger.error('Fail', {reason: stringifyError(ex)});
-            throw ex;
-        }
-
-        logger.info('Finish');
-    }
-
-    async write(payload: VirtualEditFileRequest): Promise<FileEditData> {
-        try {
-            const fileContent = await this.readFileContent(payload.file);
-            const diff = diffLines(fileContent, payload.patch);
-            const {deletedCount, insertedCount} = diff.reduce(
-                (output, change) => {
-                    if (change.added && change.count) {
-                        output.insertedCount += change.count;
-                    }
-                    if (change.removed && change.count) {
-                        output.deletedCount += change.count;
-                    }
-                    return output;
-                },
-                {deletedCount: 0, insertedCount: 0}
-            );
-            return {
-                type: 'edit',
-                file: payload.file,
-                oldContent: fileContent,
-                newContent: payload.patch,
-                deletedCount,
-                insertedCount,
-            };
-        }
-        catch {
-            // File access error means creating a file
-            return {
-                type: 'create',
-                file: payload.file,
-                oldContent: '',
-                newContent: payload.patch,
-                deletedCount: 0,
-                insertedCount: payload.patch.split('\n').length,
-            };
-        }
-    }
-
-    async delete(payload: VirtualEditFileRequest): Promise<FileEditData> {
-        const fileContent = await this.readFileContent(payload.file);
-        return {
-            type: 'delete',
-            file: payload.file,
-            oldContent: fileContent,
-            newContent: '',
-            deletedCount: fileContent.split('\n').length,
-            insertedCount: 0,
-        };
-    }
-
-    async patch(payload: VirtualEditFileRequest): Promise<FileEditData> {
-        const fileContent = await this.readFileContent(payload.file);
-        const patchResult = patchContent(fileContent, payload.patch);
-        return {
-            type: 'edit',
-            file: payload.file,
-            oldContent: fileContent,
-            newContent: patchResult.newContent,
-            deletedCount: patchResult.deletedCount,
-            insertedCount: patchResult.insertedCount,
-        };
     }
 }

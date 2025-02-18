@@ -8,6 +8,8 @@ import {
 } from '@oniichan/shared/inbox';
 import {AssistantTextMessage, UserRequestMessage, Message, DebugMessage} from './message';
 import {Workflow, WorkflowOriginMessage} from './workflow';
+import {MessageRoundrip} from './interface';
+import {FileEditData} from '@oniichan/shared/patch';
 
 interface RoundtripMessageResponse {
     type: 'message';
@@ -30,7 +32,7 @@ type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | 
  * A roundtrip is a part of a thread that starts from a user submitted request,
  * then a bunch of messages are involed to handle this request, like tool calls and LLM text responses.
  */
-export class Roundtrip {
+export class Roundtrip implements MessageRoundrip {
     static from(data: RoundtripData): Roundtrip {
         const roundtrip = new Roundtrip();
         const request = UserRequestMessage.from(data.request, roundtrip);
@@ -203,14 +205,13 @@ export class Roundtrip {
         };
     }
 
-    getEditStackForFile(file: string) {
+    getEditStackForFile(file: string): FileEditData[] {
         const responses = this.responses;
         return responses
             .filter(v => v.type === 'workflow')
             .flatMap(v => v.workflow.toMessages())
             .filter(v => v.type === 'toolCall')
             .flatMap(v => v.getFileEdit() ?? [])
-            .filter(v => v.type !== 'error')
             .filter(v => v.file === file);
     }
 

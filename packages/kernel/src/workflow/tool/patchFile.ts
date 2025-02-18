@@ -1,7 +1,5 @@
 import dedent from 'dedent';
 import {patchFileParameters, PatchFileParameter} from '@oniichan/shared/tool';
-import {stringifyError} from '@oniichan/shared/error';
-import {patchContent, PatchParseError} from '@oniichan/shared/patch';
 import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
@@ -17,55 +15,53 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
     }
 
     protected async execute(args: PatchFileParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
-        try {
-            const content = await workspace.readWorkspaceFile(args.path);
+        const edit = this.origin.getFileEdit();
 
-            if (!content) {
-                return {
-                    type: 'executeError',
-                    output:
-                        `There is no original ${args.path}, please carefully check the existence and content of file, use \`write_file\` tool if you are creating a new file`,
-                };
-            }
-            const patched = patchContent(content, args.patch);
-
+        if (!edit) {
             return {
                 type: 'success',
                 finished: false,
-                output: resultMarkdown(
-                    `Patch is written to ${args.path}, here is the new content of this file:`,
-                    patched.newContent
-                ),
+                output:
+                    `Patch is written to ${args.path}, however the new content is not retrieved at this moment, you can trust the patch and continue`,
             };
         }
-        catch (ex) {
-            if (ex instanceof PatchParseError) {
-                return {
-                    type: 'requireFix',
-                    includesBase: true,
-                    prompt: dedent`
-                        Parse <patch> parameter error: ${stringifyError(ex)}.
 
-                        A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
-
-                        \`\`\`
-                        <<<<<<< SEARCH
-                        [Exact content to search]
-                        =======
-                        [New content to replace with]
-                        >>>>>>> REPLACE
-                        \`\`\`
-
-                        Please regenerate the <patch_file> tool call with correct patch content.
-                    `,
-                };
-            }
-
+        if (edit.type === 'error') {
             return {
                 type: 'executeError',
-                output: `Patch file ${args.path} failed: ${stringifyError(ex)}`,
+                output: `Patch file ${args.path} failed for this reason: ${edit.message}`,
             };
         }
+
+        if (edit.type === 'patchError') {
+            return {
+                type: 'requireFix',
+                includesBase: true,
+                prompt: dedent`
+                    Parse <patch> parameter error: ${edit.message}}.
+
+                    A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
+
+                    \`\`\`
+                    <<<<<<< SEARCH
+                    [Exact content to search]
+                    =======
+                    [New content to replace with]
+                    >>>>>>> REPLACE
+                    \`\`\`
+
+                    Please regenerate the <patch_file> tool call with correct patch content.
+                `,
+            };
+        }
+
+        return {
+            type: 'success',
+            finished: false,
+            output: resultMarkdown(
+                `Patch is written to ${args.path}, here is the new content of this file:`,
+                edit.newContent
+            ),
+        };
     }
 }
