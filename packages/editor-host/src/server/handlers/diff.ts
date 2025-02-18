@@ -1,41 +1,54 @@
 import {commands, Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {FileEditData, FileEditResult} from '@oniichan/shared/patch';
+import {FileEditAction, FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
 export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';
 
+interface MeaningfulEditStack {
+    edits: FileEditResult[];
+    first: FileEditResult;
+    last: FileEditResult;
+}
+
 abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
-    protected async checkEditAppliable(edit: FileEditData): Promise<AppliableState> {
-        if (edit.type === 'error' || edit.type === 'patchError') {
-            return 'error';
+    protected ensureMeaningfulEditStack(edits: FileEditData[]): MeaningfulEditStack {
+        const meaningfulEdits = edits.filter(v => v.type !== 'error' && v.type !== 'patchError');
+        const first = meaningfulEdits.at(0);
+        const last = meaningfulEdits.at(-1);
+
+        if (meaningfulEdits.length < edits.length || !first || !last) {
+            throw new Error('Edit stack contains errored edit');
         }
 
+        return {
+            edits: meaningfulEdits,
+            first,
+            last,
+        };
+    }
+
+    protected async checkEditStckAppliable(stack: MeaningfulEditStack): Promise<AppliableState> {
         try {
-            const content = await this.readFileContent(edit.file);
-            // We allow to apply an edit in some cases even if the file is not modified:
-            //
-            // 1. To create a file, it already exists but its content is empty
-            // 2. To write a file with full content, the original file has been deleted
-            // 3. To modify a file, the file content has different heading and trailing whitespace
-            // 4. To delete a file, but it has been modified, this means all delete actions are appliable
-            switch (edit.type) {
-                case 'create':
-                    return content ? 'conflict' : 'appliable';
-                case 'edit':
-                    return content.trim() === edit.newContent.trim()
-                        ? 'applied'
-                        : (content.trim() === edit.oldContent.trim() ? 'appliable' : 'conflict');
-                default:
-                    return 'appliable';
-            }
+            const content = await this.readFileContent(stack.last.file);
+            const [appliable] = stack.edits.reduce<[AppliableState, string]>(
+                ([appliable, oldContent], edit) => [
+                    appliable !== 'appliable' && appliable !== 'applied'
+                        ? appliable
+                        : this.checkSingleEditAppliable(oldContent, edit),
+                    edit.newContent,
+                ],
+                ['appliable', content]
+            );
+            return appliable;
         }
         catch (ex) {
-            if (edit.type === 'create') {
+            // Incase the file is not found, we can apply create or delete action to file
+            if (stack.last.type === 'create') {
                 return 'appliable';
             }
-            if (edit.type === 'delete') {
+            if (stack.last.type === 'delete') {
                 return 'applied';
             }
 
@@ -43,37 +56,52 @@ abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
         }
     }
 
-    protected async ensureEditAppliable(edit: FileEditData) {
-        const appliable = await this.checkEditAppliable(edit);
-
-        if (appliable === 'applied') {
-            throw new Error('Patch is already applied to file');
-        }
-
-        if (appliable !== 'appliable') {
-            throw new Error('Patch is not appliable to file');
+    private checkSingleEditAppliable(content: string, edit: FileEditResult): AppliableState {
+        // We allow to apply an edit in some cases even if the file is not modified:
+        //
+        // 1. To create a file, it already exists but its content is empty
+        // 2. To write a file with full content, the original file has been deleted
+        // 3. To modify a file, the file content has different heading and trailing whitespace
+        // 4. To delete a file, but it has been modified, this means all delete actions are appliable
+        switch (edit.type) {
+            case 'create':
+                return content ? 'conflict' : 'appliable';
+            case 'edit':
+                return content.trim() === edit.newContent.trim()
+                    ? 'applied'
+                    : (content.trim() === edit.oldContent.trim() ? 'appliable' : 'conflict');
+            default:
+                return 'appliable';
         }
     }
 }
 
-export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData, AppliableState> {
+export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData[], AppliableState> {
     static readonly action = 'checkEditAppliable';
 
-    async *handleRequest(payload: FileEditData) {
-        const appliable = await this.checkEditAppliable(payload);
-        yield appliable;
+    async *handleRequest(payload: FileEditData[]) {
+        try {
+            const stack = this.ensureMeaningfulEditStack(payload);
+            const appliable = await this.checkEditStckAppliable(stack);
+            yield appliable;
+        }
+        catch {
+            return 'error';
+        }
     }
 }
 
-export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, AppliableState> {
+export class RenderDiffViewHandler extends DiffRequestHandler<FileEditData[], AppliableState> {
     static readonly action = 'renderDiffView';
 
-    async *handleRequest(payload: FileEditResult): AsyncIterable<AppliableState> {
+    async *handleRequest(payload: FileEditData[]): AsyncIterable<AppliableState> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
+        const stack = this.ensureMeaningfulEditStack(payload);
+
         try {
-            const appliable = await this.checkEditAppliable(payload);
+            const appliable = await this.checkEditStckAppliable(stack);
 
             if (appliable !== 'appliable') {
                 yield appliable;
@@ -88,7 +116,12 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, Ap
             }
 
             logger.trace('OpenDiffView');
-            await diffViewManager.open(payload);
+            const options = {
+                file: stack.last.file,
+                oldContent: stack.first.oldContent,
+                newContent: stack.last.newContent,
+            };
+            await diffViewManager.open(options);
 
             yield appliable;
             logger.info('Finish');
@@ -100,31 +133,40 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, Ap
     }
 }
 
-export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, AppliableState> {
+interface EditApplyInput {
+    type: FileEditAction;
+    oldContent: string;
+    newContent: string;
+}
+
+export class AcceptFileEditHandler extends DiffRequestHandler<FileEditData[], AppliableState> {
     static readonly action = 'acceptFileEdit';
 
-    async *handleRequest(payload: FileEditResult): AsyncIterable<AppliableState> {
+    async *handleRequest(payload: FileEditData[]): AsyncIterable<AppliableState> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
+        const stack = this.ensureMeaningfulEditStack(payload);
+
         try {
-            const appliable = await this.checkEditAppliable(payload);
+            const appliable = await this.checkEditStckAppliable(stack);
 
             if (appliable !== 'appliable') {
                 yield appliable;
                 return;
             }
 
-            const fileUri = this.resolveFileUri(payload.file);
+            const fileUri = this.resolveFileUri(stack.last.file);
             const edit = new WorkspaceEdit();
+            const merged = this.mergeEditStack(stack);
 
             logger.trace('ApplyEdit');
-            await this.applyEdit(payload, edit, fileUri);
+            await this.applyEdit(merged, edit, fileUri);
 
             logger.trace('CloseDiffEditor');
-            await diffViewManager.close(payload.file);
+            await diffViewManager.close(stack.last.file);
 
-            if (payload.type !== 'delete') {
+            if (merged.type !== 'delete') {
                 logger.trace('OpenDocument');
                 await commands.executeCommand('vscode.open', fileUri);
             }
@@ -138,7 +180,23 @@ export class AcceptFileEditHandler extends DiffRequestHandler<FileEditResult, Ap
         }
     }
 
-    private async applyEdit(payload: FileEditResult, edit: WorkspaceEdit, uri: Uri) {
+    private mergeEditStack(stack: MeaningfulEditStack): EditApplyInput {
+        if (stack.first.type === 'create') {
+            return {
+                type: 'create',
+                oldContent: '',
+                newContent: stack.last.newContent,
+            };
+        }
+
+        return {
+            type: stack.last.type,
+            oldContent: stack.first.oldContent,
+            newContent: stack.last.newContent,
+        };
+    }
+
+    private async applyEdit(payload: EditApplyInput, edit: WorkspaceEdit, uri: Uri) {
         const {logger} = this.context;
 
         if (payload.type === 'delete') {

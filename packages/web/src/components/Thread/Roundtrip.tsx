@@ -7,6 +7,7 @@ import {
 } from '@oniichan/shared/inbox';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import Message from './Message';
+import FileEditContextProvider from './FileEditContext';
 
 interface MessageView {
     message: MessageData;
@@ -110,8 +111,8 @@ export default function Roundtrip({threadUuid, roundtrip}: Props) {
     );
 
     return (
-        <>
+        <FileEditContextProvider roundtrip={roundtrip}>
             {messages.map(renderMessageView)}
-        </>
+        </FileEditContextProvider>
     );
 }

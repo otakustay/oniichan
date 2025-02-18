@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {useOriginalCopy} from 'huse';
 import {IoAlertCircleOutline, IoCheckmarkCircleOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
@@ -12,6 +11,8 @@ import ActBar from '@/components/ActBar';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
+import {useFileEditStack} from './FileEditContext';
+import {useOriginalCopy} from 'huse';
 
 const {ActionButton} = ActBar;
 
@@ -64,21 +65,21 @@ interface Props {
     edit: FileEditData | null;
 }
 
-// TODO: Use all edit history to merge a final edit
 export default function FileEdit({file, edit, patch}: Props) {
     const viewMode = useViewModeValue();
-    const editForCheck = useOriginalCopy(edit);
     const [check, setCheck] = useState<AppliableState | 'reading'>('reading');
     const ipc = useIpc();
+    const editForCheck = useOriginalCopy(edit);
+    const editStack = useFileEditStack(file);
     useEffect(
         () => {
-            if (!editForCheck) {
+            if (!editForCheck || !editStack.length) {
                 return;
             }
 
             void (async () => {
                 try {
-                    const appliable = await ipc.editor.call(crypto.randomUUID(), 'checkEditAppliable', editForCheck);
+                    const appliable = await ipc.editor.call(crypto.randomUUID(), 'checkEditAppliable', editStack);
                     setCheck(appliable);
                 }
                 catch {
@@ -86,16 +87,12 @@ export default function FileEdit({file, edit, patch}: Props) {
                 }
             })();
         },
-        [ipc, editForCheck]
+        [ipc, editForCheck, editStack]
     );
     const extension = file.split('.').pop();
     const invokeDiffAction = async (action: 'renderDiffView' | 'acceptFileEdit') => {
-        if (!edit || edit.type === 'error' || edit.type === 'patchError') {
-            return;
-        }
-
         try {
-            const appliable = await ipc.editor.call(crypto.randomUUID(), action, edit);
+            const appliable = await ipc.editor.call(crypto.randomUUID(), action, editStack);
             setCheck(appliable);
             switch (appliable) {
                 case 'applied':
