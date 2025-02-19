@@ -51,9 +51,8 @@ export default function Editor({onSend}: Props) {
                 return;
             }
 
+            const element = ref.current;
             const edit = (e: KeyboardEvent) => {
-                const element = e.target as HTMLTextAreaElement;
-
                 if (e.code === 'Tab') {
                     e.preventDefault();
                     const {selectionStart, selectionEnd} = element;
@@ -67,12 +66,12 @@ export default function Editor({onSend}: Props) {
                     setDraftContent('');
                 }
             };
-            ref.current.addEventListener('keydown', edit, false);
+            element.addEventListener('keydown', edit, false);
             return () => {
-                ref.current?.removeEventListener('keydown', edit);
+                element.removeEventListener('keydown', edit);
             };
         },
-        []
+        [setDraftContent, onSend]
     );
     const updateContent = (e: MentionChangeEvent) => {
         setDraftContent(e.target.value);

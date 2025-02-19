@@ -13,6 +13,16 @@ export function useDraftContentValue() {
     return useAtomValue(draftContentAtom);
 }
 
+/**
+ * Get draft content that is immediately submitable
+ *
+ * @returns Draft content with mention placeholders removed
+ */
+export function useSubmitableDraftContent() {
+    const content = useAtomValue(draftContentAtom);
+    return content.replaceAll(/#\[.+\]\(([^)]+)\)/g, '`$1`');
+}
+
 export function useSetDraftContent() {
     const setContent = useSetAtom(draftContentAtom);
     return setContent;
