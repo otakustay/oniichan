@@ -37,8 +37,7 @@ export default function Editor({onSend}: Props) {
     const fuzzySearch = async (pattern: string, callback: (items: SuggestionDataItem[]) => void) => {
         try {
             const results = await searchWorkspaceFiles(pattern);
-            const items: SuggestionDataItem[] = results.map(v => ({id: v}));
-            callback(items);
+            callback(results);
         }
         catch {
             callback([]);

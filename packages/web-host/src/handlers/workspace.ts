@@ -1,17 +1,13 @@
 import {getDefaultStore} from 'jotai';
-import {workspaceFilesAtom} from '../atoms/workspace';
+import {workspaceFilesAtom, WorkspaceState} from '../atoms/workspace';
 import {RequestHandler} from '@otakustay/ipc';
 
-export interface UpdateWorkspaceStateRequest {
-    files: string[];
-}
-
-export class UpdateWorkspaceStateRequestHandler extends RequestHandler<UpdateWorkspaceStateRequest, void> {
+export class UpdateWorkspaceStateRequestHandler extends RequestHandler<Partial<WorkspaceState>, void> {
     static readonly action = 'updateWorkspaceState';
 
     // eslint-disable-next-line require-yield
-    async *handleRequest(payload: UpdateWorkspaceStateRequest): AsyncIterable<void> {
+    async *handleRequest(payload: Partial<WorkspaceState>): AsyncIterable<void> {
         const store = getDefaultStore();
-        store.set(workspaceFilesAtom, payload.files);
+        store.set(workspaceFilesAtom, current => ({...current, ...payload}));
     }
 }

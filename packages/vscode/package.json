@@ -156,6 +156,7 @@
     "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
     "@types/ignore-by-default": "^0.0.0",
+    "@types/is-absolute": "^1.0.2",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
     "@types/ws": "^8.5.13",
@@ -166,6 +167,7 @@
   },
   "dependencies": {
     "globby": "^14.1.0",
-    "ignore-by-default": "^2.1.0"
+    "ignore-by-default": "^2.1.0",
+    "is-absolute": "^1.0.0"
   }
 }
