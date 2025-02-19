@@ -1,8 +1,8 @@
 import {Server} from '@otakustay/ipc';
-import {ComposeNewMessageRequestHandler} from './handlers/compose';
+import {ComposeNewMessageHandler} from './handlers/compose';
 import {UpdateThreadListHandler} from './handlers/thread';
 import {WebHostProtocol} from './protocol';
-import {UpdateWorkspaceStateRequestHandler} from './handlers/workspace';
+import {UpdateWorkspaceStateHandler} from './handlers/workspace';
 
 export class WebHostServer extends Server<WebHostProtocol> {
     static readonly namespace = '-> web';
@@ -11,9 +11,9 @@ export class WebHostServer extends Server<WebHostProtocol> {
         super({namespace: WebHostServer.namespace});
     }
     protected initializeHandlers() {
-        this.registerHandler(ComposeNewMessageRequestHandler);
+        this.registerHandler(ComposeNewMessageHandler);
         this.registerHandler(UpdateThreadListHandler);
-        this.registerHandler(UpdateWorkspaceStateRequestHandler);
+        this.registerHandler(UpdateWorkspaceStateHandler);
     }
 
     protected async createContext() {

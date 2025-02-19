@@ -9,9 +9,10 @@ import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
+    OpenDocumentHandler,
 } from './handlers/document';
 import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
+import {CheckFileExistsHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 import {EditorHostProtocol} from './protocol';
 import {
     FindFilesHandler,
@@ -61,10 +62,12 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(GetDocumentTextHandler);
         this.registerHandler(GetDocumentLanguageIdHandler);
         this.registerHandler(GetDocumentDiagnosticAtLineHandler);
+        this.registerHandler(OpenDocumentHandler);
         this.registerHandler(GetModelConfigHandler);
         this.registerHandler(RequestModelConfigureHandler);
         this.registerHandler(ReadFileHandler);
         this.registerHandler(ReadDirectoryHandler);
+        this.registerHandler(CheckFileExistsHandler);
         this.registerHandler(GetWorkspaceRootHandler);
         this.registerHandler(FindFilesHandler);
         this.registerHandler(ReadWorkspaceFileHandler);

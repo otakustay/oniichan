@@ -2,7 +2,7 @@ import {getDefaultStore} from 'jotai';
 import {workspaceFilesAtom, WorkspaceState} from '../atoms/workspace';
 import {RequestHandler} from '@otakustay/ipc';
 
-export class UpdateWorkspaceStateRequestHandler extends RequestHandler<Partial<WorkspaceState>, void> {
+export class UpdateWorkspaceStateHandler extends RequestHandler<Partial<WorkspaceState>, void> {
     static readonly action = 'updateWorkspaceState';
 
     // eslint-disable-next-line require-yield

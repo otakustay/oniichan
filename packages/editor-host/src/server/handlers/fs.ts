@@ -2,6 +2,8 @@ import {FileType, Uri, workspace} from 'vscode';
 import {isWellKnownExcludingDirectory} from '@oniichan/shared/dir';
 import {RequestHandler} from './handler';
 
+// TODO: Make sure all `uri` parameters are actually file path string
+
 export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';
 
@@ -72,5 +74,20 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
         };
         const entries = await Promise.all(tuples.map(toEntry));
         return entries.flat();
+    }
+}
+
+export class CheckFileExistsHandler extends RequestHandler<string, boolean> {
+    static readonly action = 'checkFileExists';
+
+    async *handleRequest(file: string): AsyncIterable<boolean> {
+        try {
+            const uri = this.resolveFileUri(file);
+            const stat = await workspace.fs.stat(uri);
+            yield !!(stat.type & FileType.File);
+        }
+        catch {
+            yield false;
+        }
     }
 }

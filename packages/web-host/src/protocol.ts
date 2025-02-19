@@ -1,10 +1,10 @@
 import type {ProtocolOf} from '@otakustay/ipc';
-import type {ComposeNewMessageRequestHandler} from './handlers/compose';
+import type {ComposeNewMessageHandler} from './handlers/compose';
 import type {UpdateThreadListHandler} from './handlers/thread';
-import type {UpdateWorkspaceStateRequestHandler} from './handlers/workspace';
+import type {UpdateWorkspaceStateHandler} from './handlers/workspace';
 
 export type WebHostProtocol = ProtocolOf<
-    | typeof ComposeNewMessageRequestHandler
+    | typeof ComposeNewMessageHandler
     | typeof UpdateThreadListHandler
-    | typeof UpdateWorkspaceStateRequestHandler
+    | typeof UpdateWorkspaceStateHandler
 >;

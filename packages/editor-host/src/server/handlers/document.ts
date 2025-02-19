@@ -90,3 +90,18 @@ export class GetDocumentDiagnosticAtLineHandler extends RequestHandler<DocumentL
         logger.info('Finish');
     }
 }
+
+export class OpenDocumentHandler extends RequestHandler<string, void> {
+    static readonly action = 'openDocument';
+
+    // eslint-disable-next-line require-yield
+    async *handleRequest(file: string): AsyncIterable<void> {
+        const {logger} = this.context;
+        logger.info('Start', {file});
+
+        const uri = this.resolveFileUri(file);
+        await window.showTextDocument(uri);
+
+        logger.info('Finish');
+    }
+}

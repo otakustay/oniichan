@@ -3,9 +3,10 @@ import type {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
+    OpenDocumentHandler,
 } from './handlers/document';
 import type {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import type {ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
+import type {ReadDirectoryHandler, ReadFileHandler, CheckFileExistsHandler} from './handlers/fs';
 import type {
     GetWorkspaceRootHandler,
     FindFilesHandler,
@@ -26,10 +27,12 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler
     | typeof GetDocumentLanguageIdHandler
     | typeof GetDocumentDiagnosticAtLineHandler
+    | typeof OpenDocumentHandler
     | typeof GetModelConfigHandler
     | typeof RequestModelConfigureHandler
     | typeof ReadFileHandler
     | typeof ReadDirectoryHandler
+    | typeof CheckFileExistsHandler
     | typeof GetWorkspaceRootHandler
     | typeof FindFilesHandler
     | typeof ReadWorkspaceFileHandler
