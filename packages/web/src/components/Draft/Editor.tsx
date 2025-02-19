@@ -8,13 +8,16 @@ import mentionStyle from './mentionStyle';
 const EditArea = styled(MentionsInput)`
     width: 100%;
     height: 100%;
-    resize: none;
-    border: none;
     padding: .5em;
-    background-color: transparent;
 
-    &:focus {
-        outline: none;
+    textarea {
+        resize: none;
+        border: none;
+        background-color: transparent;
+
+        &:focus {
+            outline: none;
+        }
     }
 `;
 

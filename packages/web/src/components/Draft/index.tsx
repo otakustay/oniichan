@@ -1,6 +1,11 @@
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {EditingValue, useDraftContentValue, useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
+import {
+    EditingValue,
+    useEditingValue,
+    useSetEditing,
+    useSubmitableDraftContent,
+} from '@oniichan/web-host/atoms/draft';
 import {useMessageThreadValueByUuid, useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
 import Modal from '@/components/Modal';
 import Avatar from '@/components/Avatar';
@@ -61,7 +66,7 @@ const Editor = styled(MessageEditor)`
 
 function Content({threadUuid, mode}: EditingValue) {
     const isWideScreen = useIsWideScreen();
-    const content = useDraftContentValue();
+    const content = useSubmitableDraftContent();
     const [discardingEditCount, setDiscardingEditCount] = useState(0);
     const setEditing = useSetEditing();
     const sendMessage = useSendMessageToThread(threadUuid);
