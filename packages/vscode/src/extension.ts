@@ -8,7 +8,8 @@ import {ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
-import {WebApp} from './capabilities/web';
+import {WebApp, WebConnection} from './capabilities/web';
+import {WorkspaceTracker} from './capabilities/tracker';
 import {startKernel} from './kernel';
 import {migrate} from './migration';
 
@@ -21,6 +22,7 @@ export async function activate(context: ExtensionContext) {
     const loggerContainer = baseContainer
         .bind(Logger, () => new OutputLogger(baseContainer, 'Extension'), {singleton: true});
     const serverHostContainer = loggerContainer
+        .bind(WebConnection, () => new WebConnection(loggerContainer), {singleton: true})
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
@@ -29,6 +31,7 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(
         kernel,
+        new WorkspaceTracker(globalContainer),
         new SemanticRewriteCommand(globalContainer),
         new OpenDataFolderCommand(),
         new WebApp(globalContainer),

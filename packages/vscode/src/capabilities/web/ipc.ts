@@ -6,6 +6,7 @@ import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {Logger} from '@oniichan/shared/logger';
 import {ExtensionContext} from 'vscode';
+import {WebConnection} from './connection';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
     private readonly upstream: Client<any>;
@@ -53,6 +54,7 @@ interface Dependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
+    [WebConnection.containerKey]: WebConnection;
     ExtensionContext: ExtensionContext;
     Port: Port;
 }
@@ -63,7 +65,8 @@ export async function establishIpc(container: DependencyContainer<Dependency>) {
     const kernelClient = container.get('KernelClient');
     const kernelServer = new BridgeServer(kernelClient, {namespace: KernelClient.namespace});
     await kernelServer.connect(port);
-    const disposable = kernelClient.addWebPort(port);
+    const webConnection = container.get('WebConnection');
+    const disposable = webConnection.addWebPort(port);
 
     const editorHostServer = new EditorHostServer(container);
     await editorHostServer.connect(port);

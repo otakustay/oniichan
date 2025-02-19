@@ -14,6 +14,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {KernelClient} from '../../kernel';
 import {establishIpc} from './ipc';
+import {WebConnection} from './connection';
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;
@@ -58,6 +59,7 @@ interface Dependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
+    [WebConnection.containerKey]: WebConnection;
     ExtensionContext: ExtensionContext;
 }
 

@@ -23,6 +23,9 @@ import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {KernelClient} from '../../kernel';
 import {WebAppServer} from './server';
 import {establishIpc} from './ipc';
+import {WebConnection} from './connection';
+
+export {WebConnection};
 
 class WebviewPort implements Port, Disposable {
     private readonly webview: Webview;
@@ -61,6 +64,7 @@ interface Dependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
+    [WebConnection.containerKey]: WebConnection;
     ExtensionContext: ExtensionContext;
 }
 

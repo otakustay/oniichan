@@ -7,9 +7,9 @@ import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
 import {EditorHostServer, EditorHostDependency} from '@oniichan/editor-host/server';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LogEntry, Logger} from '@oniichan/shared/logger';
-import {WebHostClient} from '@oniichan/web-host/client';
 import {MessageThreadData} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
+import {WebConnection} from '../capabilities/web';
 
 class WorkerPort implements Port, Disposable {
     private readonly worker: Worker;
@@ -66,6 +66,7 @@ function getBinaryDirectory() {
 
 interface Dependency {
     [Logger.containerKey]: Logger;
+    [WebConnection.containerKey]: WebConnection;
 }
 
 export class KernelClient extends BaseKernelClient implements Disposable {
@@ -73,39 +74,18 @@ export class KernelClient extends BaseKernelClient implements Disposable {
 
     static readonly namespace = BaseKernelClient.namespace;
 
+    private readonly webConnection: WebConnection;
+
     // TODO: We need `Client` to expose `port` property directly
     private readonly ownPort: Port;
 
     private readonly logger: Logger;
 
-    private readonly webClients = new Map<Port, WebHostClient>();
-
     constructor(port: Port, container: DependencyContainer<Dependency>) {
         super(port);
         this.logger = container.get(Logger).with({source: 'KernelClient'});
+        this.webConnection = container.get(WebConnection);
         this.ownPort = port;
-    }
-
-    addWebPort(port: Port): Disposable {
-        const client = new WebHostClient(port);
-        this.webClients.set(port, client);
-        return new Disposable(() => this.removeWebPort(port));
-    }
-
-    private removeWebPort(port: Port) {
-        this.webClients.delete(port);
-    }
-
-    private broadcast(fn: (client: WebHostClient) => Promise<void>) {
-        const clients = [...this.webClients.values()];
-        void (async () => {
-            try {
-                await Promise.all(clients.map(v => fn(v)));
-            }
-            catch (ex) {
-                this.logger.error('BroadcastWebFail', {reason: stringifyError(ex)});
-            }
-        })();
     }
 
     protected handleNotice(notice: ExecutionNotice): void {
@@ -115,7 +95,7 @@ export class KernelClient extends BaseKernelClient implements Disposable {
         }
         else if (notice.action === 'updateInboxThreadList') {
             const list: MessageThreadData[] = notice.payload;
-            this.broadcast(v => v.call(notice.taskId, 'updateThreadList', list));
+            this.webConnection.broadcast(v => v.call(notice.taskId, 'updateThreadList', list));
         }
     }
 
@@ -178,12 +158,16 @@ interface Container {
     client: KernelClient | null;
 }
 
+interface StartDependency extends EditorHostDependency {
+    [WebConnection.containerKey]: WebConnection;
+}
+
 const exitTimestamps: number[] = [];
 const maxRetries = 5;
 const allowedRestartWindow = 60 * 1000;
 const kernelContainer: Container = {client: null};
 
-export async function startKernel(container: DependencyContainer<EditorHostDependency>) {
+export async function startKernel(container: DependencyContainer<StartDependency>) {
     const logger = container.get(Logger).with({source: 'Kernel'});
     logger.trace('ActivateStart');
 

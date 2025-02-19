@@ -72,6 +72,7 @@ export default function FileEdit({file, edit, patch}: Props) {
     const editForCheck = useOriginalCopy(edit);
     const editStack = useFileEditStack(file);
     const isEditInteractive = useIsEditInteractive();
+    // TODO: Possibly infinite effect, need check
     useEffect(
         () => {
             if (!editForCheck || !editStack.length) {
