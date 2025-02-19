@@ -10,7 +10,8 @@
     "./atoms/view": "./dist/atoms/view.js",
     "./atoms/ipc": "./dist/atoms/ipc/index.js",
     "./atoms/draft": "./dist/atoms/draft.js",
-    "./atoms/inbox": "./dist/atoms/inbox.js"
+    "./atoms/inbox": "./dist/atoms/inbox.js",
+    "./atoms/workspace": "./dist/atoms/workspace.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -24,7 +25,8 @@
     "@oniichan/editor-host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.3.1"
+    "@otakustay/ipc": "^2.3.1",
+    "fuse.js": "^7.1.0"
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.5",

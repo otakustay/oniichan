@@ -5,6 +5,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
 import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';
+import {WebHostClient} from '@oniichan/web-host/client';
 import {WebConnection} from '../web';
 
 class FileSet {
@@ -112,7 +113,8 @@ export class WorkspaceTracker implements Disposable {
         this.webConnection = container.get(WebConnection.containerKey);
         this.disposables.push(
             workspace.onDidCreateFiles(e => this.change(e.files, [])),
-            workspace.onDidDeleteFiles(e => this.change([], e.files))
+            workspace.onDidDeleteFiles(e => this.change([], e.files)),
+            this.webConnection.onDidConnect(client => this.pushWorkspaceState(client))
         );
 
         if (root) {
@@ -157,9 +159,13 @@ export class WorkspaceTracker implements Disposable {
         this.logger.info('InitialListFinish', {root, count: state.count});
     }
 
-    private broadcast() {
+    private async pushWorkspaceState(client: WebHostClient) {
         const files = this.files.toArray();
-        this.webConnection.broadcast(v => v.call(newUuid(), 'updateWorkspaceState', {files}));
+        await client.call(newUuid(), 'updateWorkspaceState', {files});
+    }
+
+    private broadcast() {
+        this.webConnection.broadcast(v => this.pushWorkspaceState(v));
     }
 
     private broadcastInitialChunk(files: string[]) {
