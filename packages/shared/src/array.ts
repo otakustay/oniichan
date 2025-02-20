@@ -20,3 +20,8 @@ export function updateItemInArray<T, I extends T>(array: T[], options: UpdateArr
         ? [updated, ...array.slice(0, index), ...array.slice(index + 1)]
         : [...array.slice(0, index), updated, ...array.slice(index + 1)];
 }
+
+export function sortedInsert<T>(array: T[], item: T, compare: (x: T, y: T) => number): void {
+    const index = array.findIndex(i => compare(item, i) < 0);
+    array.splice(index < 0 ? array.length : index, 0, item);
+}

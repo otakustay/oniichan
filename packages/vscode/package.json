@@ -155,14 +155,12 @@
     "@oniichan/web-host": "workspace:*",
     "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
-    "@types/is-absolute": "^1.0.2",
     "@types/node": "20.x",
     "@types/vscode": "1.95.x",
     "@types/ws": "^8.5.14",
     "detect-port": "^2.1.0",
     "esbuild": "^0.25.0",
     "fastify": "^5.2.1",
-    "is-absolute": "^1.0.0",
     "open": "^10.1.0"
   }
 }

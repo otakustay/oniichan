@@ -27,7 +27,6 @@ function FileLink({file}: FileLinkProps) {
         () => {
             void (async () => {
                 const exists = await ipc.editor.call(crypto.randomUUID(), 'checkFileExists', file);
-                console.log(exists);
                 setIsLink(exists);
             })();
         },

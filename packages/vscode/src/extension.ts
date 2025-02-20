@@ -1,6 +1,7 @@
 import {ExtensionContext} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
+import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
@@ -22,6 +23,7 @@ export async function activate(context: ExtensionContext) {
     const loggerContainer = baseContainer
         .bind(Logger, () => new OutputLogger(baseContainer, 'Extension'), {singleton: true});
     const serverHostContainer = loggerContainer
+        .bind(WorkspaceFileStructure, () => new WorkspaceFileStructure(), {singleton: true})
         .bind(WebConnection, () => new WebConnection(loggerContainer), {singleton: true})
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
