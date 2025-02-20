@@ -15,9 +15,8 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
     }
 
     protected async execute(args: FindFilesByGlobParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
         try {
-            const root = await workspace.getRoot();
+            const root = await this.editorHost.call('getWorkspaceRoot');
 
             if (!root) {
                 return {
@@ -27,7 +26,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 };
             }
 
-            const files = await workspace.findFiles(args.glob, 200);
+            const files = await this.editorHost.call('findFiles', {glob: args.glob, limit: 200});
 
             if (files.length) {
                 return {

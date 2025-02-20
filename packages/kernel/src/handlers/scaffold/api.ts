@@ -1,7 +1,7 @@
 import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
-import {EditorHost} from '../../editor';
+import {ModelAccessHost} from '../../core/model';
 
 export interface ScaffoldSnippet {
     path: string;
@@ -19,24 +19,20 @@ interface ScaffoldResult {
 }
 
 export class ScaffoldApi {
-    private readonly taskId: string;
+    private readonly modelAccess: ModelAccessHost;
 
-    private readonly editorHost: EditorHost;
-
-    constructor(taskId: string, editorHost: EditorHost) {
-        this.taskId = taskId;
-        this.editorHost = editorHost;
+    constructor(modelAccess: ModelAccessHost) {
+        this.modelAccess = modelAccess;
     }
 
     async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ScaffoldResult> {
         const {file, snippets} = paylod;
-        const model = this.editorHost.getModelAccess(this.taskId);
         const prompt = renderScaffoldPrompt({file, snippets});
         const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        for await (const chunk of model.codeStreaming({messages, telemetry: modelTelemetry})) {
+        for await (const chunk of this.modelAccess.codeStreaming({messages, telemetry: modelTelemetry})) {
             if (chunk.tag === 'import') {
                 yield {
                     section: 'import',

@@ -60,7 +60,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
 
     constructor(port: Port, request: ExecutionRequest, context: Context) {
         super(port, request, context);
-        this.api = new SemanticRewriteApi(this.getTaskId(), context.editorHost);
+        this.api = new SemanticRewriteApi(context.modelAccess);
     }
 
     async *handleRequest(request: SemanticRewriteRequest): AsyncIterable<SemanticRewriteResponse> {
@@ -127,9 +127,13 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
     }
 
     private async getDocumentContext(documentUri: string): Promise<GetContextOk | GetContextFail> {
+        const {editorHost} = this.context;
         try {
-            const document = this.context.editorHost.getDocument(documentUri, this.getTaskId());
-            const [text, languageId] = await Promise.all([document.getText(), document.getLanguageId()]);
+            const tasks = [
+                editorHost.call('getDocumentText', documentUri),
+                editorHost.call('getDocumentLanguageId', documentUri),
+            ] as const;
+            const [text, languageId] = await Promise.all(tasks);
 
             return {
                 type: 'ok',
@@ -143,14 +147,17 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
     }
 
     private async retrieveEnhancedContext(input: EnhanceContextInput): Promise<EnhancedContextSnippet[]> {
+        const {editorHost} = this.context;
         try {
-            const document = this.context.editorHost.getDocument(input.documentUri, this.getTaskId());
             const language = getLanguageConfig(input.languageId);
             if (language.endsWithIdentifier(input.hint)) {
                 return [];
             }
 
-            const diagnostics = await document.getDiagnosticsAtLine(input.line);
+            const diagnostics = await editorHost.call(
+                'getDocumentDiagnosticAtLine',
+                {uri: input.documentUri, line: input.line}
+            );
             return [
                 {
                     label: 'dianostics',

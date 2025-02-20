@@ -1,6 +1,6 @@
 import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {Logger} from '@oniichan/shared/logger';
-import {EditorHost} from '../../editor';
+import {EditorHost} from '../../core/editor';
 import {CommandExecutor} from '../../core/command';
 import {ToolCallMessage} from '../../inbox';
 

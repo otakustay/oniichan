@@ -2,6 +2,8 @@ import {runCommandParameters, RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
+const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
+
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
     constructor(init: ToolImplementInit) {
         super('RunCommandToolImplement', init, runCommandParameters);
@@ -14,10 +16,8 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
     }
 
     protected async execute(args: RunCommandParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
-
         try {
-            const root = await workspace.getRoot();
+            const root = await this.editorHost.call('getWorkspaceRoot');
 
             if (!root) {
                 return {
@@ -27,8 +27,10 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                 };
             }
 
-            const terminal = this.editorHost.getTerminal();
-            const result = await terminal.runCommand({command: args.command, cwd: root});
+            const result = await this.editorHost.call(
+                'executeTerminal',
+                {command: args.command, cwd: root, timeout: DEFAULT_COMMAND_TIMEOUT}
+            );
 
             switch (result.status) {
                 case 'exit':

@@ -50,8 +50,7 @@ export class InboxCheckEditHandler extends RequestHandler<CheckEditRequest, Chec
         const roundtrip = thread.findRoundtripByMessageUuidStrict(payload.requestMessageUuid);
         const messages = roundtrip.toMessages().map(v => v.toMessageData());
         const edits = Object.values(extractFileEdits(messages)).filter(v => !!v);
-        const fileEditHost = editorHost.getFileEdit();
-        const appliableStates = await Promise.all(edits.map(v => fileEditHost.checkAppliable(v)));
+        const appliableStates = await Promise.all(edits.map(v => editorHost.call('checkEditAppliable', v)));
         yield {
             totalEditCount: edits.length,
             appliedEditCount: appliableStates.filter(v => v === 'applied').length,

@@ -23,7 +23,7 @@ import {
     normalizeArguments,
     MessageInputChunk,
 } from '@oniichan/shared/inbox';
-import {EditorHost} from '../editor';
+import {EditorHost} from '../core/editor';
 import {MessageRoundrip} from './interface';
 import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 
@@ -270,9 +270,8 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
                 toolCall.fileEdit = stackFileEdit(previousEdit, patchAction, patch);
             }
             else {
-                const workspace = editorHost.getWorkspace();
                 try {
-                    const content = await workspace.readWorkspaceFile(file);
+                    const content = await editorHost.call('readWorkspaceFile', file);
                     toolCall.fileEdit = createFileEdit(file, content, patchAction, patch);
                 }
                 catch (ex) {

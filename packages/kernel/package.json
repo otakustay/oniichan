@@ -23,7 +23,7 @@
     "@oniichan/shared": "workspace:*",
     "@oniichan/storage": "workspace:*",
     "@otakustay/async-iterator": "^1.1.1",
-    "@otakustay/ipc": "^2.3.1",
+    "@otakustay/ipc": "^2.5.0",
     "ajv": "^8.17.1",
     "dedent": "^1.5.3",
     "execa": "^9.5.2",

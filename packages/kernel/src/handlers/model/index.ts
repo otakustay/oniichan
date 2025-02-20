@@ -7,9 +7,8 @@ export class ModelChatHandler extends RequestHandler<ChatInputPayload[], ModelRe
     static readonly action = 'modelChat';
 
     async *handleRequest(messages: ChatInputPayload[]): AsyncIterable<ModelResponse> {
-        const {editorHost} = this.context;
-        const model = editorHost.getModelAccess(this.getTaskId());
+        const {modelAccess} = this.context;
         const telemetry = new ModelUsageTelemetry(this.getTaskId(), newUuid());
-        yield* model.chatStreaming({messages, telemetry});
+        yield* modelAccess.chatStreaming({messages, telemetry});
     }
 }

@@ -1,9 +1,8 @@
-import {Server} from '@otakustay/ipc';
+import {ExecutionRequest, Server} from '@otakustay/ipc';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {Logger} from '@oniichan/shared/logger';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Context} from './handlers/handler';
-import {EditorHost} from './editor';
 import {KernelProtocol} from './protocol';
 import {CommandExecutor} from './core/command';
 import {EchoHandler} from './handlers/echo';
@@ -18,6 +17,7 @@ import {ScaffoldHandler} from './handlers/scaffold';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
 import {ExportInboxHandler} from './handlers/debug';
+import {ModelAccessHost} from './core/model';
 
 interface Dependency {
     [CommandExecutor.containerKey]: CommandExecutor;
@@ -35,9 +35,11 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.container = container;
     }
 
-    protected async createContext(): Promise<Context> {
+    protected async createContext(request: ExecutionRequest): Promise<Context> {
+        const editorHostClient = this.container.get(EditorHostClient).forTask(request.taskId);
         return {
-            editorHost: new EditorHost(this.container.get(EditorHostClient)),
+            modelAccess: new ModelAccessHost(editorHostClient),
+            editorHost: editorHostClient,
             logger: this.container.get(Logger),
             commandExecutor: this.container.get(CommandExecutor),
         };

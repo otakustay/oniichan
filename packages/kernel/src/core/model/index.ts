@@ -1,5 +1,3 @@
-import {EditorHostClient} from '@oniichan/editor-host/client';
-import {newUuid} from '@oniichan/shared/id';
 import {
     createModelClient,
     ModelClient,
@@ -9,6 +7,7 @@ import {
 } from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {CodeResult, streamingExtractCode} from './extract';
+import {EditorHost} from '../editor';
 
 export interface ModelChatOptions {
     messages: ChatInputPayload[];
@@ -17,12 +16,9 @@ export interface ModelChatOptions {
 }
 
 export class ModelAccessHost {
-    private readonly taskId: string | undefined;
+    private readonly client: EditorHost;
 
-    private readonly client: EditorHostClient;
-
-    constructor(taskId: string | undefined, client: EditorHostClient) {
-        this.taskId = taskId;
+    constructor(client: EditorHost) {
         this.client = client;
     }
 
@@ -81,7 +77,7 @@ export class ModelAccessHost {
         }
 
         if (triggerUserConfigure) {
-            await this.client.call(newUuid(this.taskId), 'requestModelConfigure');
+            await this.client.call('requestModelConfigure');
             return this.createModelClient(false);
         }
 
@@ -90,7 +86,7 @@ export class ModelAccessHost {
     }
 
     private async getModelConfiguration() {
-        const config = await this.client.call(newUuid(this.taskId), 'getModelConfig');
+        const config = await this.client.call('getModelConfig');
         return config;
     }
 }

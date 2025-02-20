@@ -43,7 +43,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
     static readonly action = 'scaffold';
 
     async *handleRequest(request: ScaffoldRequest): AsyncIterable<ScaffoldResponse> {
-        const {logger} = this.context;
+        const {logger, modelAccess} = this.context;
 
         const documentStatus = await this.testDocumentStatus(request.documentUri);
         if (!documentStatus.ok) {
@@ -82,7 +82,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         }
 
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'Scaffold');
-        const api = new ScaffoldApi(this.getTaskId(), this.context.editorHost);
+        const api = new ScaffoldApi(modelAccess);
         logger.trace('RequestModelStart');
         const output = {
             importSection: '',
@@ -119,7 +119,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
     private async testDocumentStatus(documentUri: string) {
         const {editorHost} = this.context;
         try {
-            const text = await editorHost.getDocument(documentUri, this.getTaskId()).getText();
+            const text = await editorHost.call('getDocumentText', documentUri);
             if (text) {
                 return {
                     ok: false,
@@ -173,11 +173,10 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         const {editorHost, logger} = this.context;
         const directory = path.dirname(relativePath);
         const fsDirectory = path.join(workspaceRoot, directory);
-        const workspace = editorHost.getWorkspace(this.getTaskId());
         const parentDirectory = path.join(fsDirectory, '..');
         const extension = path.extname(relativePath);
         logger.trace('ReadParentDirectoryStart', {directory: parentDirectory});
-        const entries = await workspace.readDirectory(parentDirectory, {depth: 2});
+        const entries = await editorHost.call('readDirectory', {path: parentDirectory, depth: 2});
         logger.trace('ReadParentDirectoryFinish', {directory: parentDirectory, entries});
 
         const files: string[] = [];
@@ -206,7 +205,6 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
 
     private async retrieveContext(workspaceRoot: string, relativePath: string): Promise<ScaffoldSnippet[]> {
         const {editorHost, logger} = this.context;
-        const workspace = editorHost.getWorkspace(this.getTaskId());
         const directory = path.dirname(relativePath);
 
         if (!directory && !workspaceRoot) {
@@ -216,7 +214,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
 
         const fsDirectory = path.join(workspaceRoot, directory);
         logger.trace('ReadDirectoryStart', {directory: fsDirectory});
-        const entries = await workspace.readDirectory(fsDirectory, {depth: 1});
+        const entries = await editorHost.call('readDirectory', {path: fsDirectory, depth: 1});
         logger.trace('ReadDirectoryFinish', {directory: fsDirectory, entries});
 
         const siblingFileSnippets = await this.retrieveSiblingFiles(workspaceRoot, relativePath, entries);
@@ -240,8 +238,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         const toSnippet = async (file: string): Promise<ScaffoldSnippet> => {
             const target = path.join(directory, file);
             logger.trace('ReadFileStart', {file: target});
-            const workspace = editorHost.getWorkspace(this.getTaskId());
-            const content = await workspace.readFile(target);
+            const content = await editorHost.call('readFile', target);
             logger.trace('ReadFileFinish', {file: target});
             return {path: path.relative(workspaceRoot, target), content: content.trim()};
         };

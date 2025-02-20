@@ -13,8 +13,7 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
     }
 
     protected async execute(args: DeleteFileParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
-        const content = await workspace.readWorkspaceFile(args.path);
+        const content = await this.editorHost.call('readWorkspaceFile', args.path);
 
         if (content) {
             // TODO: We are not writing to file directly, only back to LLM pretending the write is successful

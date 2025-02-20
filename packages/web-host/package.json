@@ -26,7 +26,7 @@
     "@oniichan/editor-host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.3.1"
+    "@otakustay/ipc": "^2.5.0"
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.5",

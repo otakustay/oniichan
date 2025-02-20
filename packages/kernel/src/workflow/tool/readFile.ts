@@ -15,9 +15,8 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
     }
 
     protected async execute(args: ReadFileParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
         try {
-            const content = await workspace.readWorkspaceFile(args.path);
+            const content = await this.editorHost.call('readWorkspaceFile', args.path);
 
             if (content === null) {
                 return {

@@ -17,9 +17,8 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
     }
 
     protected async execute(args: ReadDirectoryParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
         try {
-            const root = await workspace.getRoot();
+            const root = await this.editorHost.call('getWorkspaceRoot');
 
             if (!root) {
                 return {
@@ -29,9 +28,12 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 };
             }
 
-            const entries = await workspace.readDirectory(
-                path.join(root, args.path),
-                {depth: args.recursive ? Number.MAX_SAFE_INTEGER : 0}
+            const entries = await this.editorHost.call(
+                'readDirectory',
+                {
+                    path: path.join(root, args.path),
+                    depth: args.recursive ? Number.MAX_SAFE_INTEGER : 0,
+                }
             );
 
             if (!entries.length) {

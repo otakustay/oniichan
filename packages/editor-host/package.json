@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.3.1",
+    "@otakustay/ipc": "^2.5.0",
     "@otakustay/text-pin": "^1.0.0",
     "nanoid": "^5.1.0",
     "open": "^10.1.0",

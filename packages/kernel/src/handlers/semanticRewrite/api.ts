@@ -1,7 +1,7 @@
 import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {EditorHost} from '../../editor';
 import {renderSemanticRewritePrompt, SemanticRewriteView} from '@oniichan/prompt';
+import {ModelAccessHost} from '../../core/model';
 
 export interface EnhancedContextSnippet {
     label: string;
@@ -18,18 +18,14 @@ export interface SemanticRewritePayload {
 }
 
 export class SemanticRewriteApi {
-    private readonly taskId: string;
+    private readonly modelAccess: ModelAccessHost;
 
-    private readonly editorHost: EditorHost;
-
-    constructor(taskId: string, editorHost: EditorHost) {
-        this.taskId = taskId;
-        this.editorHost = editorHost;
+    constructor(modelAccess: ModelAccessHost) {
+        this.modelAccess = modelAccess;
     }
 
     async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
         const {file, codeBefore, codeAfter, hint, snippets} = paylod;
-        const model = this.editorHost.getModelAccess(this.taskId);
         const view: SemanticRewriteView = {
             file,
             codeBefore,
@@ -42,7 +38,7 @@ export class SemanticRewriteApi {
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        const response = await model.chat({messages, telemetry: modelTelemetry});
+        const response = await this.modelAccess.chat({messages, telemetry: modelTelemetry});
 
         if (response.type === 'text') {
             const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;

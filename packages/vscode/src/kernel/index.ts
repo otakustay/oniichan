@@ -76,16 +76,12 @@ export class KernelClient extends BaseKernelClient implements Disposable {
 
     private readonly webConnection: WebConnection;
 
-    // TODO: We need `Client` to expose `port` property directly
-    private readonly ownPort: Port;
-
     private readonly logger: Logger;
 
     constructor(port: Port, container: DependencyContainer<Dependency>) {
         super(port);
         this.logger = container.get(Logger).with({source: 'KernelClient'});
         this.webConnection = container.get(WebConnection);
-        this.ownPort = port;
     }
 
     protected handleNotice(notice: ExecutionNotice): void {
@@ -100,8 +96,8 @@ export class KernelClient extends BaseKernelClient implements Disposable {
     }
 
     dispose() {
-        if (isDisposable(this.ownPort)) {
-            this.ownPort.dispose();
+        if (isDisposable(this.port)) {
+            this.port.dispose();
         }
     }
 }

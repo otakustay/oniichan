@@ -7,7 +7,7 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
-import {ModelChatOptions} from '../../editor';
+import {ModelChatOptions} from '../../core/model';
 import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {store} from './store';
@@ -82,7 +82,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
-        const {logger, editorHost} = this.context;
+        const {logger, modelAccess, editorHost, commandExecutor} = this.context;
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 
@@ -90,14 +90,13 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         this.updateInboxThreadList(store.dump());
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
-        const model = editorHost.getModelAccess(this.getTaskId());
         const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
             messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
             telemetry: modelTelemetry,
             systemPrompt: this.systemPrompt,
         };
-        const chatStream = model.chatStreaming(options);
+        const chatStream = modelAccess.chatStreaming(options);
 
         try {
             for await (const chunk of this.consumeChatStream(chatStream)) {
@@ -130,9 +129,10 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             taskId: this.getTaskId(),
             systemPrompt: this.systemPrompt,
             roundtrip: this.roundtrip,
-            editorHost: this.context.editorHost,
-            commandExecutor: this.context.commandExecutor,
             telemetry: this.telemetry,
+            modelAccess,
+            editorHost,
+            commandExecutor,
             logger,
             onUpdateThread: () => this.updateInboxThreadList(store.dump()),
         };
@@ -165,10 +165,10 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async prepareSystemPrompt() {
-        const {logger, editorHost} = this.context;
+        const {logger, modelAccess} = this.context;
         logger.trace('PrepareSystemPromptStart');
 
-        const modelFeature = await editorHost.getModelAccess().getModelFeature();
+        const modelFeature = await modelAccess.getModelFeature();
         this.systemPromptGenerator.setModelFeature(modelFeature);
         for await (const item of this.systemPromptGenerator.renderSystemPrompt()) {
             switch (item.type) {

@@ -61,10 +61,8 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
     }
 
     protected async execute(args: FindFilesByRegExpParameter): Promise<ToolRunResult> {
-        const workspace = this.editorHost.getWorkspace();
-
         try {
-            const root = await workspace.getRoot();
+            const root = await this.editorHost.call('getWorkspaceRoot');
 
             if (!root) {
                 return {

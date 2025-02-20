@@ -2,8 +2,8 @@ import {builtinTools} from '@oniichan/shared/tool';
 import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {DebugContentChunk, DebugMessageLevel} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
-import {EditorHost} from '../../editor';
 import {ModelFeature} from '@oniichan/shared/model';
+import {EditorHost} from '../../core/editor';
 
 interface DebugResult {
     type: 'debug';
@@ -72,10 +72,10 @@ export class SystemPromptGenerator {
     }
 
     private async createRootEntriesView(): Promise<Partial<InboxPromptView>> {
-        const root = await this.editorHost.getWorkspace().getRoot();
+        const root = await this.editorHost.call('getWorkspaceRoot');
 
         if (root) {
-            const structure = await this.editorHost.getWorkspace().getStructure();
+            const structure = await this.editorHost.call('getWorkspaceStructure');
             return {
                 projectStructure: structure.tree,
                 projectStructureTruncated: structure.truncated,

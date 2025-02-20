@@ -1,10 +1,11 @@
 import {builtinTools, StreamingToolParser} from '@oniichan/shared/tool';
 import {FixToolCallView, renderFixToolCallPrompt} from '@oniichan/prompt';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
-import {AssistantTextMessage, ToolCallMessage} from '../../inbox';
-import {ToolInputError} from './utils';
 import {newUuid} from '@oniichan/shared/id';
+import {ModelAccessHost, ModelChatOptions} from '../../core/model';
+import {AssistantTextMessage, ToolCallMessage} from '../../inbox';
+import {EditorHost} from '../../core/editor';
+import {ToolInputError} from './utils';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;
@@ -54,14 +55,14 @@ export class ToolCallMessageParser {
 
 export interface ToolCallFixerInit {
     editorHost: EditorHost;
-    model: ModelAccessHost;
+    modelAccess: ModelAccessHost;
     telemetry: FunctionUsageTelemetry;
     message: ToolCallMessage;
     error: ToolInputError;
 }
 
 export class ToolCallFixer {
-    private readonly model: ModelAccessHost;
+    private readonly modelAccess: ModelAccessHost;
 
     private readonly telemetry: FunctionUsageTelemetry;
 
@@ -72,7 +73,7 @@ export class ToolCallFixer {
     private readonly parser: ToolCallMessageParser;
 
     constructor(init: ToolCallFixerInit) {
-        this.model = init.model;
+        this.modelAccess = init.modelAccess;
         this.telemetry = init.telemetry;
         this.message = init.message;
         this.error = init.error;
@@ -109,7 +110,7 @@ export class ToolCallFixer {
             ],
             telemetry: this.telemetry.createModelTelemetry(),
         };
-        const result = await this.model.chat(chatOptions);
+        const result = await this.modelAccess.chat(chatOptions);
         const toolCall = await this.parser.parseToolMessage(result.content);
         return toolCall;
     }

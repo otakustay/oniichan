@@ -153,7 +153,7 @@
     "@oniichan/storage": "workspace:*",
     "@oniichan/web": "workspace:*",
     "@oniichan/web-host": "workspace:*",
-    "@otakustay/ipc": "^2.3.1",
+    "@otakustay/ipc": "^2.5.0",
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "1.95.x",

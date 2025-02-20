@@ -1,7 +1,8 @@
 import {newUuid} from '@oniichan/shared/id';
 import {Logger} from '@oniichan/shared/logger';
 import {ToolCallMessage, ToolUseMessage} from '../../inbox';
-import {EditorHost, ModelAccessHost, ModelChatOptions} from '../../editor';
+import {EditorHost} from '../../core/editor';
+import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
 import {ToolCallFixer, ToolCallFixerInit, ToolCallMessageParser} from './fix';
@@ -13,12 +14,13 @@ export interface ToolCallWorkflowRunnerInit extends WorkflowRunnerInit {
     systemPrompt: string;
     origin: ToolCallMessage;
     editorHost: EditorHost;
+    modelAccess: ModelAccessHost;
 }
 
 export class ToolCallWorkflowRunner extends WorkflowRunner {
     private readonly implment: ToolImplement;
 
-    private readonly model: ModelAccessHost;
+    private readonly modelAccess: ModelAccessHost;
 
     private readonly systemPrompt: string;
 
@@ -35,7 +37,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.message = init.origin;
         this.systemPrompt = init.systemPrompt;
         this.editorHost = init.editorHost;
-        this.model = init.editorHost.getModelAccess(init.taskId);
+        this.modelAccess = init.modelAccess;
         this.implment = new ToolImplement(init);
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
@@ -59,7 +61,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
                 message: this.message,
                 error: result,
                 editorHost: this.editorHost,
-                model: this.model,
+                modelAccess: this.modelAccess,
                 telemetry: this.telemetry,
             };
             const fixer = new ToolCallFixer(fixerInit);
@@ -101,7 +103,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             telemetry: this.telemetry.createModelTelemetry(),
             systemPrompt: this.systemPrompt,
         };
-        const response = await this.model.chat(options);
+        const response = await this.modelAccess.chat(options);
         const parser = new ToolCallMessageParser({message: this.message, editorHost: this.editorHost});
         const toolCall = await parser.parseToolMessage(response.content);
         await this.origin.replaceToolCallInput(toolCall, this.editorHost);
