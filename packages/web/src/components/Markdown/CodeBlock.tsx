@@ -5,16 +5,6 @@ import LanguageIcon from '@/components/LanguageIcon';
 import {useMarkdownContent} from './ContentProvider';
 import {CopyCode} from './CopyCode';
 
-interface CodeInPreProps {
-    className?: string;
-    children?: string;
-}
-
-interface CodeInPreElement {
-    type: 'code';
-    props: CodeInPreProps;
-}
-
 interface Position {
     line: number;
     column: number;
@@ -26,19 +16,59 @@ interface NodePosition {
     end: Position;
 }
 
-interface MarkdownNode {
-    type: 'element';
+interface MarkdownTextNode {
+    type: 'text';
+    value: string;
     position: NodePosition;
 }
+
+interface PropertyMap {
+    className?: string[];
+}
+
+interface MarkdownElementNode {
+    type: 'element';
+    tagName: string;
+    position: NodePosition;
+    properties?: PropertyMap;
+    children?: MarkdownNode[];
+}
+
+type MarkdownNode = MarkdownTextNode | MarkdownElementNode;
 
 interface Props {
     children: ReactElement;
     node: MarkdownNode;
 }
 
-function isCodeElement(element: any): element is CodeInPreElement {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return element?.type === 'code';
+function onlyChild(node: MarkdownNode): MarkdownNode | null {
+    if (node.type !== 'element' || node.children?.length !== 1) {
+        return null;
+    }
+
+    return node.children[0];
+}
+
+interface SourceCodeData {
+    code: string;
+    language: string;
+}
+
+function findSourceCode(node: MarkdownNode): SourceCodeData | null {
+    const child = onlyChild(node);
+
+    if (!child || child.type !== 'element') {
+        return null;
+    }
+
+    const text = onlyChild(child);
+
+    return text?.type === 'text'
+        ? {
+            code: text.value,
+            language: /language-(\w+)?/.exec(child.properties?.className?.at(0) ?? '')?.at(1) ?? '',
+        }
+        : null;
 }
 
 const Header = styled.div`
@@ -80,15 +110,14 @@ const Layout = styled.div`
 `;
 
 export default function CodeBlock({children, node}: Props) {
-    if (!isCodeElement(children)) {
+    const source = findSourceCode(node);
+
+    if (source === null) {
         return children;
     }
 
     const markdownText = useMarkdownContent();
     const closed = markdownText.slice(node.position.end.offset - 3, node.position.end.offset) === '```';
-    const {className, children: code = ''} = children.props;
-    const matches = /language-(\w+)?/.exec(className ?? '');
-    const language = matches?.at(1);
 
     // Some model tends to put tool call XML in a code block, it looks like:
     //
@@ -103,20 +132,20 @@ export default function CodeBlock({children, node}: Props) {
     // ```
     //
     // This will results 2 empty code blocks, we are omiiting them from message content.
-    if (!code.trim()) {
+    if (!source.code.trim()) {
         return null;
     }
 
     return (
         <Layout>
             <Header>
-                <LanguageIcon mode="language" value={language} />
-                <LanguageLabel>{language}</LanguageLabel>
-                {closed && <CopyCode text={code + '\n'} />}
+                <LanguageIcon mode="language" value={source.language} />
+                <LanguageLabel>{source.language}</LanguageLabel>
+                {closed && <CopyCode text={source.code + '\n'} />}
             </Header>
             <SourceCodeLayout>
-                <Suspense fallback={<SourceCode.NoHighlight code={code} language={language} />}>
-                    <SourceCode code={code} language={language} />
+                <Suspense fallback={<SourceCode.NoHighlight code={source.code} language={source.language} />}>
+                    <SourceCode code={source.code} language={source.language} />
                 </Suspense>
             </SourceCodeLayout>
         </Layout>
