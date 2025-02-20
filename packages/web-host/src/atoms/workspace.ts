@@ -1,4 +1,7 @@
 import {atom, useAtomValue} from 'jotai';
+import {Fuzzy} from '@nexucis/fuzzy';
+
+const fuzzy = new Fuzzy({shouldSort: true, shouldRender: false});
 
 export interface WorkspaceState {
     current: string | null;
@@ -19,8 +22,6 @@ export function useSearchWorkspaceFiles() {
             return current ? [{id: current, display: `[Current] ${current}`}] : [];
         }
 
-        const {default: Fuse} = await import('fuse.js');
-        const fuse = new Fuse(files);
-        return fuse.search(pattern, {limit: 10}).map(v => ({id: v.item, display: v.item}));
+        return fuzzy.filter(pattern, files).slice(0, 10).map(v => ({id: v.original, display: v.original}));
     };
 }

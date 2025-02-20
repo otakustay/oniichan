@@ -22,11 +22,11 @@
     "dist"
   ],
   "dependencies": {
+    "@nexucis/fuzzy": "^0.5.1",
     "@oniichan/editor-host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
-    "@otakustay/ipc": "^2.3.1",
-    "fuse.js": "^7.1.0"
+    "@otakustay/ipc": "^2.3.1"
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.5",

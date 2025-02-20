@@ -28,12 +28,13 @@ export async function activate(context: ExtensionContext) {
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
+    const workspaceTracker = new WorkspaceTracker(serverHostContainer);
     const kernel = await startKernel(serverHostContainer);
     const globalContainer = serverHostContainer.bind('KernelClient', () => kernel.getClient());
 
     context.subscriptions.push(
         kernel,
-        new WorkspaceTracker(globalContainer),
+        workspaceTracker,
         new SemanticRewriteCommand(globalContainer),
         new OpenDataFolderCommand(),
         new WebApp(globalContainer),

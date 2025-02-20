@@ -9,8 +9,6 @@ interface Dependency {
     [Logger.containerKey]: Logger;
 }
 
-// TODO Sidebar webview is not connected
-
 /**
  * Manages all ports connected to web applications, including sidebar webview and standalone pages in browser.
  */
