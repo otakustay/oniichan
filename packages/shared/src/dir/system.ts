@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import os from 'node:os';
+import {directories as defaultIgnoreDirectories} from 'ignore-by-default';
 
 const APP_DIR = 'oniichan-coding-assitant';
 
@@ -92,7 +93,22 @@ export async function globalConfigDirectory(...children: string[]) {
     return base && ensure(base, ...children);
 }
 
-export function isWellKnownExcludingDirectory(directory: string) {
-    return directory.includes('node_modules')
-        || /^\/?\..+/.test(directory); // `.xxx` or `/.xxx`
+export async function createGitIgnoreFilter(cwd: string) {
+    const {isGitIgnored} = await import('globby');
+    const filter = await isGitIgnored({cwd});
+    return (file: string) => filter(file);
+}
+
+interface ExcludeDirectoryOptions {
+    filterGitIgnore: (file: string) => boolean;
+}
+
+export function shouldDirectoryExcludedFromSearch(directory: string, options?: ExcludeDirectoryOptions) {
+    if (defaultIgnoreDirectories().some(v => directory.includes(v))) {
+        return true;
+    }
+    if (options) {
+        return options.filterGitIgnore(directory);
+    }
+    return false;
 }

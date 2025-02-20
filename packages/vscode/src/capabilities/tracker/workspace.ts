@@ -1,6 +1,5 @@
 import path from 'node:path';
 import {Disposable, FileType, Uri, workspace} from 'vscode';
-import {directories as defaultIgnoreDirectories} from 'ignore-by-default';
 import isAbsolute from 'is-absolute';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
@@ -10,6 +9,7 @@ import {WebHostClient} from '@oniichan/web-host/client';
 import {WebConnection} from '../web';
 import {WorkspaceState} from '@oniichan/web-host/atoms/workspace';
 import {window} from 'vscode';
+import {streamingListEntries} from '@oniichan/shared/dir';
 
 class FileSet {
     private readonly root: string;
@@ -160,14 +160,6 @@ export class WorkspaceTracker implements Disposable {
 
     private async initializeWorkspaceState() {
         const state: InitialLiseState = {count: 0, files: []};
-        const options = {
-            cwd: this.root,
-            gitignore: true,
-            ignore: defaultIgnoreDirectories().map(v => `**/${v}`),
-            markDirectories: true,
-            onlyFiles: false,
-            dot: true,
-        };
         const broadcast = () => {
             if (state.files.length) {
                 this.files.addPrepared(state.files);
@@ -180,10 +172,9 @@ export class WorkspaceTracker implements Disposable {
         };
         this.logger.info('InitialListStart', {root: this.root});
         try {
-            const {globbyStream} = await import('globby');
-            for await (const file of globbyStream('**', options)) {
+            for await (const file of streamingListEntries(this.root)) {
                 state.count++;
-                state.files.push(file.toString());
+                state.files.push(file);
 
                 // To allow user mention files early, push files to web chunk by chunk
                 if (state.files.length >= 200) {

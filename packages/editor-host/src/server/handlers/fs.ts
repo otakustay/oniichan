@@ -1,5 +1,5 @@
 import {FileType, Uri, workspace} from 'vscode';
-import {isWellKnownExcludingDirectory} from '@oniichan/shared/dir';
+import {createGitIgnoreFilter, shouldDirectoryExcludedFromSearch} from '@oniichan/shared/dir';
 import {RequestHandler} from './handler';
 
 // TODO: Make sure all `uri` parameters are actually file path string
@@ -58,10 +58,11 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
     }
 
     private async read(uri: Uri, depth?: number): Promise<FileEntry[]> {
-        // TODO: Should we use `.gitignore` here?
         const tuples = await workspace.fs.readDirectory(uri);
+        const workspaceRoot = workspace.workspaceFolders?.at(0)?.uri.fsPath;
+        const filterGitIgnore = workspaceRoot ? await createGitIgnoreFilter(workspaceRoot) : () => false;
         const toEntry = async ([name, type]: [string, FileType]): Promise<FileEntry | FileEntry[]> => {
-            if (isWellKnownExcludingDirectory(name)) {
+            if (shouldDirectoryExcludedFromSearch(name, {filterGitIgnore})) {
                 return [];
             }
 

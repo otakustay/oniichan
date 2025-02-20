@@ -140,10 +140,19 @@ importers:
       diff:
         specifier: ^7.0.0
         version: 7.0.0
+      globby:
+        specifier: ^14.1.0
+        version: 14.1.0
+      ignore-by-default:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@types/diff':
         specifier: ^7.0.1
         version: 7.0.1
+      '@types/ignore-by-default':
+        specifier: ^0.0.0
+        version: 0.0.0
       '@types/node':
         specifier: 20.x
         version: 20.17.12
@@ -165,16 +174,6 @@ importers:
         version: 20.17.12
 
   packages/vscode:
-    dependencies:
-      globby:
-        specifier: ^14.1.0
-        version: 14.1.0
-      ignore-by-default:
-        specifier: ^2.1.0
-        version: 2.1.0
-      is-absolute:
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       '@fastify/http-proxy':
         specifier: ^11.0.0
@@ -209,9 +208,6 @@ importers:
       '@otakustay/text-pin':
         specifier: ^1.0.0
         version: 1.0.0
-      '@types/ignore-by-default':
-        specifier: ^0.0.0
-        version: 0.0.0
       '@types/is-absolute':
         specifier: ^1.0.2
         version: 1.0.2
@@ -233,6 +229,9 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
+      is-absolute:
+        specifier: ^1.0.0
+        version: 1.0.0
       open:
         specifier: ^10.1.0
         version: 10.1.0

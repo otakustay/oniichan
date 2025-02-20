@@ -6,7 +6,7 @@
   "exports": {
     "./array": "./dist/array.js",
     "./container": "./dist/container.js",
-    "./dir": "./dist/dir.js",
+    "./dir": "./dist/dir/index.js",
     "./id": "./dist/id.js",
     "./inbox": "./dist/inbox/index.js",
     "./language": "./dist/language.js",
@@ -33,10 +33,13 @@
     "@types/json-schema": "^7.0.15",
     "ai": "^4.1.41",
     "dedent": "^1.5.3",
-    "diff": "^7.0.0"
+    "diff": "^7.0.0",
+    "globby": "^14.1.0",
+    "ignore-by-default": "^2.1.0"
   },
   "devDependencies": {
     "@types/diff": "^7.0.1",
+    "@types/ignore-by-default": "^0.0.0",
     "@types/node": "20.x",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"

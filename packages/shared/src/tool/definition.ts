@@ -33,7 +33,7 @@ export const readFileParameters = {
     properties: {
         path: {
             type: 'string',
-            description: 'The path to the directory you want to read, must be a relative path',
+            description: 'The path to the file you want to read, must be a relative path',
         },
     },
     required: ['path'],
