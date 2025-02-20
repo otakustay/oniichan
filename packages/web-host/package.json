@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.5",
-    "jotai": "^2.11.0"
+    "jotai": "^2.12.1"
   },
   "peerDependencies": {
     "jotai": "^2.10.4"

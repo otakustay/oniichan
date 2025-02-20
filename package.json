@@ -37,15 +37,15 @@
     "url": "https://github.com/otakustay/oniichan"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.6.1",
-    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
     "@eslint/js": "^9.20.0",
-    "eslint": "^9.17.0",
+    "eslint": "^9.20.1",
     "husky": "^9.1.7",
-    "lerna": "^8.1.9",
-    "nx": "^20.3.1",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.19.1"
+    "lerna": "^8.2.0",
+    "nx": "^20.4.5",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1"
   },
   "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b"
 }

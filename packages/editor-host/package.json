@@ -20,13 +20,13 @@
   ],
   "devDependencies": {
     "@types/node": "20.x",
-    "@types/vscode": "^1.95.0"
+    "@types/vscode": "1.95.x"
   },
   "dependencies": {
     "@oniichan/shared": "workspace:*",
     "@otakustay/ipc": "^2.3.1",
     "@otakustay/text-pin": "^1.0.0",
-    "nanoid": "^5.0.9",
+    "nanoid": "^5.1.0",
     "open": "^10.1.0",
     "strip-ansi": "^7.1.0"
   }
