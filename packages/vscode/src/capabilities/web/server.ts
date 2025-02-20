@@ -12,6 +12,7 @@ import {DependencyContainer} from '@oniichan/shared/container';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
+import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {KernelClient} from '../../kernel';
 import {establishIpc} from './ipc';
 import {WebConnection} from './connection';
@@ -60,6 +61,7 @@ interface Dependency {
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
     [WebConnection.containerKey]: WebConnection;
+    [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
     ExtensionContext: ExtensionContext;
 }
 

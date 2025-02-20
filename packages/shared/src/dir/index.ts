@@ -7,4 +7,4 @@ export {
     tmpDirectory,
 } from './system';
 export {streamingListEntries} from './list';
-export {WorkspaceFileStructure} from './tree';
+export {WorkspaceFileStructure, TreeifyResult} from './tree';

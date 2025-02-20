@@ -12,6 +12,7 @@ import type {
     FindFilesHandler,
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
+    GetWorkspaceStructureHandler,
 } from './handlers/workspace';
 import type {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
 import type {ExecuteTerminalHandler} from './handlers/terminal';
@@ -35,6 +36,7 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof CheckFileExistsHandler
     | typeof GetWorkspaceRootHandler
     | typeof FindFilesHandler
+    | typeof GetWorkspaceStructureHandler
     | typeof ReadWorkspaceFileHandler
     | typeof WriteWorkspaceFileHandler
     | typeof CheckEditAppliableHandler

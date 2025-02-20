@@ -11,8 +11,6 @@ export {EditorDocumentHost} from './document';
 export {TerminalHost, RunCommandOptions} from './terminal';
 
 export class EditorHost {
-    static readonly containerKey = 'EditorHost';
-
     private readonly client: EditorHostClient;
 
     constructor(client: EditorHostClient) {

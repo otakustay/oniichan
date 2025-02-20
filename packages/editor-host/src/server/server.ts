@@ -2,6 +2,7 @@ import {ExtensionContext} from 'vscode';
 import {Server} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
+import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {LoadingManager} from '../ui/loading';
 import {DiffViewManager} from '../ui/diff';
 import {Context} from './interface';
@@ -17,6 +18,7 @@ import {EditorHostProtocol} from './protocol';
 import {
     FindFilesHandler,
     GetWorkspaceRootHandler,
+    GetWorkspaceStructureHandler,
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
@@ -30,6 +32,7 @@ export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
+    [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
     ExtensionContext: ExtensionContext;
 }
 
@@ -70,6 +73,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(CheckFileExistsHandler);
         this.registerHandler(GetWorkspaceRootHandler);
         this.registerHandler(FindFilesHandler);
+        this.registerHandler(GetWorkspaceStructureHandler);
         this.registerHandler(ReadWorkspaceFileHandler);
         this.registerHandler(WriteWorkspaceFileHandler);
         this.registerHandler(CheckEditAppliableHandler);
@@ -84,6 +88,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
             loadingManager: this.container.get(LoadingManager),
             extensionHost: this.container.get('ExtensionContext'),
             diffViewManager: this.container.get(DiffViewManager),
+            workspaceStructure: this.container.get(WorkspaceFileStructure),
             logger: this.logger,
             resourceManager: this.resourceManager,
             terminalManager: this.terminalManager,

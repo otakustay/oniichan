@@ -79,7 +79,7 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const excludsTools: ToolName[] = [];
-    if (view.rootEntries.length) {
+    if (view.projectStructure) {
         excludsTools.push('browser_preview');
     }
     const tools = view.tools.filter(v => !excludsTools.includes(v.name));

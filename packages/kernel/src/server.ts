@@ -28,21 +28,19 @@ interface Dependency {
 export class KernelServer extends Server<KernelProtocol, Context> {
     static readonly namespace = '-> kernel';
 
-    private readonly editorHost: EditorHost;
-
-    private readonly commandExecutor: CommandExecutor;
-
-    private readonly logger: Logger;
+    private readonly container: DependencyContainer<Dependency>;
 
     constructor(container: DependencyContainer<Dependency>) {
         super({namespace: KernelServer.namespace});
-        this.editorHost = new EditorHost(container.get(EditorHostClient));
-        this.commandExecutor = container.get(CommandExecutor);
-        this.logger = container.get(Logger);
+        this.container = container;
     }
 
     protected async createContext(): Promise<Context> {
-        return {editorHost: this.editorHost, logger: this.logger, commandExecutor: this.commandExecutor};
+        return {
+            editorHost: new EditorHost(this.container.get(EditorHostClient)),
+            logger: this.container.get(Logger),
+            commandExecutor: this.container.get(CommandExecutor),
+        };
     }
 
     protected initializeHandlers(): void {

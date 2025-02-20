@@ -36,4 +36,8 @@ export class WorkspaceHost {
     async findFiles(glob: string, limit?: number) {
         return this.client.call(newUuid(this.taskId), 'findFiles', {glob, limit});
     }
+
+    async getStructure() {
+        return this.client.call(newUuid(this.taskId), 'getWorkspaceStructure');
+    }
 }

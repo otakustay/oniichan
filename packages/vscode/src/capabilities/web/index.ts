@@ -20,6 +20,7 @@ import {WebHostClient} from '@oniichan/web-host/client';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
+import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {KernelClient} from '../../kernel';
 import {WebAppServer} from './server';
 import {establishIpc} from './ipc';
@@ -65,6 +66,7 @@ interface Dependency {
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
     [WebConnection.containerKey]: WebConnection;
+    [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
     ExtensionContext: ExtensionContext;
 }
 

@@ -74,7 +74,7 @@ interface TreeifyOptions {
     maxLines: number;
 }
 
-interface TreeifyResult {
+export interface TreeifyResult {
     tree: string;
     truncated: boolean;
 }

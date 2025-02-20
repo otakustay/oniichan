@@ -1,6 +1,7 @@
 import path from 'node:path';
 import {Uri, workspace} from 'vscode';
 import {stringifyError} from '@oniichan/shared/error';
+import {TreeifyResult} from '@oniichan/shared/dir';
 import {RequestHandler} from './handler';
 
 export interface FindFilesRequest {
@@ -77,5 +78,18 @@ export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFile
             logger.error('Fail', {reason: stringifyError(ex)});
             throw ex;
         }
+    }
+}
+
+export class GetWorkspaceStructureHandler extends RequestHandler<void, TreeifyResult> {
+    static readonly action = 'getWorkspaceStructure';
+
+    async *handleRequest(): AsyncIterable<TreeifyResult> {
+        const {logger, workspaceStructure} = this.context;
+        logger.info('Start');
+
+        yield workspaceStructure.toOverviewStructure();
+
+        logger.info('Finish');
     }
 }

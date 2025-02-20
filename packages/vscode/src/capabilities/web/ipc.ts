@@ -1,3 +1,4 @@
+import {ExtensionContext} from 'vscode';
 import {Client, ExecutionRequest, Port, RequestHandler, Server, ServerInit} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {KernelClient} from '../../kernel';
@@ -5,7 +6,7 @@ import {EditorHostServer} from '@oniichan/editor-host/server';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {Logger} from '@oniichan/shared/logger';
-import {ExtensionContext} from 'vscode';
+import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {WebConnection} from './connection';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
@@ -55,6 +56,7 @@ interface Dependency {
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
     [WebConnection.containerKey]: WebConnection;
+    [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
     ExtensionContext: ExtensionContext;
     Port: Port;
 }

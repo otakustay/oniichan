@@ -39,7 +39,8 @@ export class SystemPromptGenerator {
     async *renderSystemPrompt(): AsyncIterable<SystemPromptYieldResult> {
         const view: InboxPromptView = {
             tools: [],
-            rootEntries: [],
+            projectStructure: '',
+            projectStructureTruncated: false,
             modelFeature: this.modelFeature,
         };
 
@@ -74,12 +75,13 @@ export class SystemPromptGenerator {
         const root = await this.editorHost.getWorkspace().getRoot();
 
         if (root) {
-            const entries = await this.editorHost.getWorkspace().readDirectory(root);
-            // Entries like `.git` or `.gitignore` are meaningless for code generating
-            const meaningfulEntries = entries.filter(v => !v.name.startsWith('.git'));
-            return {rootEntries: meaningfulEntries.map(v => v.name + (v.type === 'directory' ? '/' : ''))};
+            const structure = await this.editorHost.getWorkspace().getStructure();
+            return {
+                projectStructure: structure.tree,
+                projectStructureTruncated: structure.truncated,
+            };
         }
 
-        return {rootEntries: []};
+        return {projectStructure: '', projectStructureTruncated: false};
     }
 }
