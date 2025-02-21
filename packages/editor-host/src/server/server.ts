@@ -16,6 +16,7 @@ import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/co
 import {CheckFileExistsHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 import {EditorHostProtocol} from './protocol';
 import {
+    DeleteWorkspaceFileHandler,
     FindFilesHandler,
     GetWorkspaceRootHandler,
     GetWorkspaceStructureHandler,
@@ -76,6 +77,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(GetWorkspaceStructureHandler);
         this.registerHandler(ReadWorkspaceFileHandler);
         this.registerHandler(WriteWorkspaceFileHandler);
+        this.registerHandler(DeleteWorkspaceFileHandler);
         this.registerHandler(CheckEditAppliableHandler);
         this.registerHandler(RenderDiffViewHandler);
         this.registerHandler(AcceptFileEditHandler);

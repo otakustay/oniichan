@@ -81,6 +81,21 @@ export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFile
     }
 }
 
+export class DeleteWorkspaceFileHandler extends RequestHandler<string, boolean> {
+    static readonly action = 'deleteWorkspaceFile';
+
+    async *handleRequest(file: string): AsyncIterable<boolean> {
+        try {
+            const uri = this.resolveFileUri(file);
+            await workspace.fs.delete(uri);
+            yield true;
+        }
+        catch {
+            yield false;
+        }
+    }
+}
+
 export class GetWorkspaceStructureHandler extends RequestHandler<void, TreeifyResult> {
     static readonly action = 'getWorkspaceStructure';
 

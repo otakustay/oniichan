@@ -1,5 +1,6 @@
 import dedent from 'dedent';
 import {patchFileParameters, PatchFileParameter} from '@oniichan/shared/tool';
+import {stringifyError} from '@oniichan/shared/error';
 import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
 
 export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
@@ -18,11 +19,12 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         const edit = this.origin.getFileEdit();
 
         if (!edit) {
+            this.logger.error('NoFileEdit');
+            // It should never happen
             return {
-                type: 'success',
-                finished: false,
+                type: 'executeError',
                 output:
-                    `Patch is written to ${args.path}, however the new content is not retrieved at this moment, you can trust the patch and continue`,
+                    `There is a fatal error patching ${args.path}, you should continue your work but remembering not to touch this file again.`,
             };
         }
 
@@ -32,20 +34,20 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
                     type: 'requireFix',
                     includesBase: true,
                     prompt: dedent`
-                    Parse <patch> parameter error: ${edit.message}}.
+                        Parse <patch> parameter error: ${edit.message}}.
 
-                    A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
+                        A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
 
-                    \`\`\`
-                    <<<<<<< SEARCH
-                    [Exact content to search]
-                    =======
-                    [New content to replace with]
-                    >>>>>>> REPLACE
-                    \`\`\`
+                        \`\`\`
+                        <<<<<<< SEARCH
+                        [Exact content to search]
+                        =======
+                        [New content to replace with]
+                        >>>>>>> REPLACE
+                        \`\`\`
 
-                    Please regenerate the <patch_file> tool call with correct patch content.
-                `,
+                        Please regenerate the <patch_file> tool call with correct patch content.
+                    `,
                 }
                 : {
                     type: 'executeError',
@@ -53,13 +55,22 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
                 };
         }
 
-        return {
-            type: 'success',
-            finished: false,
-            output: resultMarkdown(
-                `Patch is written to ${args.path}, here is the new content of this file:`,
-                edit.newContent
-            ),
-        };
+        try {
+            await this.editorHost.call('writeWorkspaceFile', {file: edit.file, content: edit.newContent});
+            return {
+                type: 'success',
+                finished: false,
+                output: resultMarkdown(
+                    `Patch is written to ${args.path}, here is the new content of this file:`,
+                    edit.newContent
+                ),
+            };
+        }
+        catch (ex) {
+            return {
+                type: 'executeError',
+                output: `Patch file ${args.path} failed for this reason: ${stringifyError(ex)}`,
+            };
+        }
     }
 }
