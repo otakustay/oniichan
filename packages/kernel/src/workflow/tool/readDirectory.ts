@@ -64,7 +64,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 type: 'success',
                 finished: false,
                 output: resultMarkdown(
-                    `Files in directory ${args.path}, directories are followed by \`/\`:`,
+                    `Files in directory ${args.path}, directories are followed by \`/\`, once you need to read a child file or directory, do remember to prefix the path with current parent \`${args.path}\`:`,
                     tree.join('\n')
                 ),
             };
