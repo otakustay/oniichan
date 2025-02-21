@@ -4,7 +4,7 @@
   "displayName": "Oniichan Coding Assistant",
   "publisher": "otakustay",
   "description": "谁不爱写代码的时候有个可靠的欧尼酱陪着你呢",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "engines": {
     "vscode": "^1.95.0"
   },

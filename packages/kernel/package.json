@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/kernel",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Contains core logic for all capabilities with VSCode API decoupled",
   "exports": {
     ".": "./dist/index.js",
