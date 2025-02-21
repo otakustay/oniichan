@@ -54,7 +54,7 @@ interface Props {
     chunk: MessageViewChunk | null;
 }
 
-export function Indicator({chunk}: Props) {
+export default function Indicator({chunk}: Props) {
     return (
         <Layout>
             {resolveTextFromChunk(chunk)}

@@ -10,7 +10,7 @@
     "prepare": "husky",
     "lint": "nx affected -t lint",
     "build": "nx run-many -t build",
-    "build-clean": "rm -r packages/*/dist && npm run build",
+    "build-clean": "rm -r packages/*/dist .nx && npm run build",
     "preversion": "npm run ci",
     "release": "sh scripts/release.sh",
     "ci": "pnpm install --frozen-lockfile && nx run-many -t build lint",

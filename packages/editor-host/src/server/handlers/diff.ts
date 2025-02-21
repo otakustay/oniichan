@@ -1,7 +1,7 @@
-import {commands, Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
+import {Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {FileEditAction, FileEditData, FileEditResult} from '@oniichan/shared/patch';
+import {FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
 export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';
@@ -91,23 +91,15 @@ export class CheckEditAppliableHandler extends DiffRequestHandler<FileEditData[]
     }
 }
 
-export class RenderDiffViewHandler extends DiffRequestHandler<FileEditData[], AppliableState> {
+export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, void> {
     static readonly action = 'renderDiffView';
 
-    async *handleRequest(payload: FileEditData[]): AsyncIterable<AppliableState> {
+    // eslint-disable-next-line require-yield
+    async *handleRequest(payload: FileEditResult): AsyncIterable<void> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
-        const stack = this.ensureMeaningfulEditStack(payload);
-
         try {
-            const appliable = await this.checkEditStckAppliable(stack);
-
-            if (appliable !== 'appliable') {
-                yield appliable;
-                return;
-            }
-
             const directory = await tmpDirectory('inbox-diff');
 
             if (!directory) {
@@ -117,13 +109,12 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditData[], Ap
 
             logger.trace('OpenDiffView');
             const options = {
-                file: stack.last.file,
-                oldContent: stack.first.oldContent,
-                newContent: stack.last.newContent,
+                file: payload.file,
+                oldContent: payload.oldContent,
+                newContent: payload.newContent,
             };
             await diffViewManager.open(options);
 
-            yield appliable;
             logger.info('Finish');
         }
         catch (ex) {
@@ -133,45 +124,29 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditData[], Ap
     }
 }
 
-interface EditApplyInput {
-    type: FileEditAction;
-    oldContent: string;
-    newContent: string;
+export interface AcceptFileEditRequest {
+    edit: FileEditResult;
+    revert: boolean;
 }
 
-export class AcceptFileEditHandler extends DiffRequestHandler<FileEditData[], AppliableState> {
+export class AcceptFileEditHandler extends DiffRequestHandler<AcceptFileEditRequest, void> {
     static readonly action = 'acceptFileEdit';
 
-    async *handleRequest(payload: FileEditData[]): AsyncIterable<AppliableState> {
+    // eslint-disable-next-line require-yield
+    async *handleRequest(payload: AcceptFileEditRequest): AsyncIterable<void> {
         const {logger, diffViewManager} = this.context;
         logger.info('Start', payload);
 
-        const stack = this.ensureMeaningfulEditStack(payload);
-
         try {
-            const appliable = await this.checkEditStckAppliable(stack);
-
-            if (appliable !== 'appliable') {
-                yield appliable;
-                return;
-            }
-
-            const fileUri = this.resolveFileUri(stack.last.file);
-            const edit = new WorkspaceEdit();
-            const merged = this.mergeEditStack(stack);
+            const edit = payload.revert ? revertFileEdit(payload.edit) : payload.edit;
+            const fileUri = this.resolveFileUri(edit.file);
 
             logger.trace('ApplyEdit');
-            await this.applyEdit(merged, edit, fileUri);
+            await this.applyEdit(edit, fileUri);
 
             logger.trace('CloseDiffEditor');
-            await diffViewManager.close(stack.last.file);
+            await diffViewManager.close(edit.file);
 
-            if (merged.type !== 'delete') {
-                logger.trace('OpenDocument');
-                await commands.executeCommand('vscode.open', fileUri);
-            }
-
-            yield 'applied';
             logger.info('Finish');
         }
         catch (ex) {
@@ -180,51 +155,36 @@ export class AcceptFileEditHandler extends DiffRequestHandler<FileEditData[], Ap
         }
     }
 
-    private mergeEditStack(stack: MeaningfulEditStack): EditApplyInput {
-        if (stack.first.type === 'create') {
-            return {
-                type: 'create',
-                oldContent: '',
-                newContent: stack.last.newContent,
-            };
-        }
-
-        return {
-            type: stack.last.type,
-            oldContent: stack.first.oldContent,
-            newContent: stack.last.newContent,
-        };
-    }
-
-    private async applyEdit(payload: EditApplyInput, edit: WorkspaceEdit, uri: Uri) {
+    private async applyEdit(edit: FileEditResult, uri: Uri) {
+        const workspaceEdit = new WorkspaceEdit();
         const {logger} = this.context;
 
-        if (payload.type === 'delete') {
+        if (edit.type === 'delete') {
             logger.trace('DeleteFile');
-            edit.deleteFile(uri);
+            workspaceEdit.deleteFile(uri);
         }
-        else if (payload.type === 'create') {
+        else if (edit.type === 'create') {
             logger.trace('CreateFile');
-            edit.createFile(
+            workspaceEdit.createFile(
                 uri,
                 {
                     overwrite: true,
-                    contents: Buffer.from(payload.newContent, 'utf-8'),
+                    contents: Buffer.from(edit.newContent, 'utf-8'),
                 }
             );
         }
         else {
             logger.trace('ReplaceFile');
-            edit.replace(
+            workspaceEdit.replace(
                 uri,
                 new Range(new Position(0, 0), new Position(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)),
-                payload.newContent
+                edit.newContent
             );
         }
 
-        await workspace.applyEdit(edit);
+        await workspace.applyEdit(workspaceEdit);
 
-        if (payload.type === 'delete') {
+        if (edit.type === 'delete') {
             return;
         }
 

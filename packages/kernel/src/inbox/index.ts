@@ -14,12 +14,12 @@ export {Roundtrip} from './roundtrip';
 export {MessageThread} from './thread';
 export {Workflow, WorkflowOriginMessage} from './workflow';
 
-const debugMessageThreadFixtures: MessageThreadPersistData[] = [];
-
 export class ThreadStore {
-    private threads: MessageThread[] = process.env.NODE_ENV === 'development'
-        ? debugMessageThreadFixtures.map(v => MessageThread.from(v))
-        : [];
+    private threads: MessageThread[];
+
+    constructor(initialThreads: MessageThreadPersistData[] = []) {
+        this.threads = initialThreads.map(v => MessageThread.from(v));
+    }
 
     ensureThread(threadUuid: string) {
         const thread = this.threads.find(v => v.uuid === threadUuid);

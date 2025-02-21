@@ -272,6 +272,9 @@ importers:
       '@rspack/plugin-react-refresh':
         specifier: ^1.0.1
         version: 1.0.1(react-refresh@0.16.0)
+      '@swc/plugin-emotion':
+        specifier: ^8.7.2
+        version: 8.7.2
       '@types/mustache':
         specifier: ^4.2.5
         version: 4.2.5
@@ -1718,6 +1721,12 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@swc/counter@0.1.3':
+    resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
+
+  '@swc/plugin-emotion@8.7.2':
+    resolution: {integrity: sha512-SiTGkwOOTaUaF/u00TxWZT9fyxAJ6p9SAgaweKAVYi9E9Zyy5PPLEXHy7WtQFj61Cp4QA/h4j6VTb+Ek3zSWMA==}
 
   '@tufjs/canonical-json@2.0.0':
     resolution: {integrity: sha512-yVtV8zsdo8qFHe+/3kw81dSLyF7D576A5cCFCi4X7B39tWT7SekaEFUnvnWJHz+9qO7qJTah1JbrDjWKqFtdWA==}
@@ -7080,6 +7089,12 @@ snapshots:
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@swc/counter@0.1.3': {}
+
+  '@swc/plugin-emotion@8.7.2':
+    dependencies:
+      '@swc/counter': 0.1.3
 
   '@tufjs/canonical-json@2.0.0': {}
 

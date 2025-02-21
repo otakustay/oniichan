@@ -8,6 +8,7 @@ import {
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
+import {EditSummary} from './EditSummary';
 
 interface MessageView {
     message: MessageData;
@@ -113,6 +114,7 @@ export default function Roundtrip({threadUuid, roundtrip, isEditInteractive}: Pr
 
     return (
         <FileEditContextProvider isEditInteractive={isEditInteractive} roundtrip={roundtrip}>
+            {isEditInteractive && <EditSummary />}
             {messages.map(renderMessageView)}
         </FileEditContextProvider>
     );

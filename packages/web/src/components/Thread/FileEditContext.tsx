@@ -1,7 +1,6 @@
 import {createContext, ReactNode, useContext} from 'react';
-import {useOriginalDeepCopy} from 'huse';
 import {RoundtripMessageData, extractFileEdits} from '@oniichan/shared/inbox';
-import {FileEditData} from '@oniichan/shared/patch';
+import {FileEditData, mergeFileEdits} from '@oniichan/shared/patch';
 
 interface ContextValue {
     edits: Record<string, FileEditData[] | undefined>;
@@ -23,9 +22,14 @@ export default function FileEditContextProvider({roundtrip, isEditInteractive, c
     return <Context value={{isEditInteractive, edits}}>{children}</Context>;
 }
 
-export function useFileEditStack(file: string) {
+export function useMergedFileEdit(file: string): FileEditData | null {
     const {edits} = useContext(Context);
-    return useOriginalDeepCopy(edits[file] ?? []);
+    return edits[file] ? mergeFileEdits(edits[file]) : null;
+}
+
+export function useAllMergedFileEdits(): FileEditData[] {
+    const {edits} = useContext(Context);
+    return Object.values(edits).filter(v => !!v).map(mergeFileEdits);
 }
 
 export function useIsEditInteractive() {

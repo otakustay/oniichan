@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {ReactElement, ReactNode, RefObject, useEffect, useRef, useState} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
 import {BiErrorAlt} from 'react-icons/bi';
@@ -11,7 +11,7 @@ import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
 import InteractiveLabel from '../InteractiveLabel';
-import {Indicator} from './Indicator';
+import Indicator from './Indicator';
 
 function resolveSenderName(message: MessageData) {
     switch (message.type) {
@@ -64,10 +64,14 @@ function resolveMessageContent(message: MessageData): MessageViewChunk[] {
     }
 }
 
-const Layout = styled.div`
+interface LayoutProps {
+    compact: boolean | undefined;
+}
+
+const Layout = styled.div<LayoutProps>`
     display: flex;
     flex-direction: column;
-    padding: 1em;
+    padding: ${props => props.compact ? '.5em' : '1em'};
     border-radius: var(--item-border-radius, 0);
     background-color: var(--color-default-background);
 
@@ -78,9 +82,9 @@ const Content = styled(MessageContent)<{collapsed: boolean}>`
     overflow-y: hidden;
 `;
 
-const Header = styled.div`
+const Header = styled.div<LayoutProps>`
     display: flex;
-    padding-bottom: 1em;
+    padding: ${props => props.compact ? '.5em 1em' : '1em'};
     border-bottom: 1px solid var(--color-default-bottom);
     align-items: center;
     gap: .4em;
@@ -145,6 +149,29 @@ function Toggle({collapsed, onToggle}: ToggleProps) {
     );
 }
 
+interface MessageLayoutProps {
+    className?: string;
+    ref?: RefObject<HTMLDivElement | null>;
+    compact?: boolean;
+    avatar: ReactElement;
+    authorName: string;
+    headerAddition?: ReactNode;
+    body: ReactNode;
+}
+
+function MessageLayout({className, ref, compact, avatar, authorName, headerAddition, body}: MessageLayoutProps) {
+    return (
+        <Layout className={className} ref={ref} compact={compact}>
+            <Header compact={compact}>
+                {avatar}
+                <Sender>{authorName}</Sender>
+                {headerAddition}
+            </Header>
+            {body}
+        </Layout>
+    );
+}
+
 interface Props {
     threadUuid: string;
     roundtripStatus: RoundtripStatus;
@@ -153,7 +180,7 @@ interface Props {
     reasoning: boolean;
 }
 
-export default function Message({threadUuid, roundtripStatus, message, showIndicator, reasoning}: Props) {
+function Message({threadUuid, roundtripStatus, message, showIndicator, reasoning}: Props) {
     const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
@@ -170,17 +197,26 @@ export default function Message({threadUuid, roundtripStatus, message, showIndic
     const chunks = resolveMessageContent(message);
 
     return (
-        <Layout ref={ref}>
-            <Header>
-                {renderAvatar(message)}
-                <Sender>{resolveSenderName(message)}</Sender>
-                <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
-                <Time time={message.createdAt} />
-            </Header>
-            <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
-            {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
-            {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
-            <Error reason={message.error} />
-        </Layout>
+        <MessageLayout
+            ref={ref}
+            avatar={renderAvatar(message)}
+            authorName={resolveSenderName(message)}
+            headerAddition={
+                <>
+                    <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
+                    <Time time={message.createdAt} />
+                </>
+            }
+            body={
+                <>
+                    <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
+                    {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
+                    {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
+                    <Error reason={message.error} />
+                </>
+            }
+        />
     );
 }
+
+export default Object.assign(Message, {Layout: MessageLayout});

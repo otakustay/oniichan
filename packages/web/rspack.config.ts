@@ -61,6 +61,11 @@ const config: Configuration = {
                                 syntax: 'typescript',
                                 tsx: true,
                             },
+                            experimental: {
+                                plugins: [
+                                    ['@swc/plugin-emotion', {}],
+                                ],
+                            },
                         },
                     },
                 },
