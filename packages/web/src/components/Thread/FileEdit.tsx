@@ -10,7 +10,7 @@ import InteractiveLabel from '@/components/InteractiveLabel';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
-import {useIsEditInteractive, useMergedFileEdit} from './FileEditContext';
+import {useIsEditInteractive} from './FileEditContext';
 import CountLabel from './CountLabel';
 
 const ErrorLabel = styled.div`
@@ -47,24 +47,24 @@ interface Props {
 export default function FileEdit({file, patch, edit}: Props) {
     const viewMode = useViewModeValue();
     const ipc = useIpc();
-    const mergedEdit = useMergedFileEdit(file);
     const isEditInteractive = useIsEditInteractive();
     const extension = file.split('.').pop();
+    const codeEdit = (!edit || edit.type === 'error') ? null : edit;
     const openDiffView = async () => {
-        if (!mergedEdit || mergedEdit.type === 'error') {
+        if (!codeEdit) {
             showToast('error', 'This patch is errored', {timeout: 3000});
             return;
         }
 
         try {
-            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', mergedEdit);
+            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', codeEdit);
         }
         catch (ex) {
             showToast('error', stringifyError(ex), {timeout: 3000});
         }
     };
     const renderDetail = () => {
-        const error = mergedEdit?.type === 'error' ? mergedEdit.message : '';
+        const error = edit?.type === 'error' ? edit.message : '';
         const content = patch.trim();
 
         if (error || (viewMode.debug && content)) {
@@ -78,10 +78,7 @@ export default function FileEdit({file, patch, edit}: Props) {
 
         return null;
     };
-    // Count labels represents for current single edit, not merged
-    const codeEdit = (!edit || edit.type === 'error') ? null : edit;
-    // Review always open a diff with merged edit
-    const showAction = isEditInteractive && mergedEdit?.type !== 'error';
+    const showAction = isEditInteractive && codeEdit;
 
     return (
         <ActBar
@@ -99,7 +96,7 @@ export default function FileEdit({file, patch, edit}: Props) {
                 <>
                     {!edit && <ActBar.Loading />}
                     {showAction && <InteractiveLabel onClick={openDiffView}>Review</InteractiveLabel>}
-                    {mergedEdit?.type === 'error' && <ErrorSign title="Expand to get detail" />}
+                    {edit?.type === 'error' && <ErrorSign title="Expand to get detail" />}
                 </>
             }
             richContent={renderDetail()}

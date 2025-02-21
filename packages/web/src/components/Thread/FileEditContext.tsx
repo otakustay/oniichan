@@ -22,11 +22,6 @@ export default function FileEditContextProvider({roundtrip, isEditInteractive, c
     return <Context value={{isEditInteractive, edits}}>{children}</Context>;
 }
 
-export function useMergedFileEdit(file: string): FileEditData | null {
-    const {edits} = useContext(Context);
-    return edits[file] ? mergeFileEdits(edits[file]) : null;
-}
-
 export function useAllMergedFileEdits(): FileEditData[] {
     const {edits} = useContext(Context);
     return Object.values(edits).filter(v => !!v).map(mergeFileEdits);
