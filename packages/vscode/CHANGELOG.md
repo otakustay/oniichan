@@ -1,6 +1,6 @@
 # Change Log
 
-## [UNRELEASE]
+## [3.0.0] - 2024-02-21
 
 ### Breaking
 
