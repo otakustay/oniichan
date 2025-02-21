@@ -18,11 +18,13 @@ import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
 import {ExportInboxHandler} from './handlers/debug';
 import {ModelAccessHost} from './core/model';
+import {ThreadStore} from './inbox';
 
 interface Dependency {
     [CommandExecutor.containerKey]: CommandExecutor;
     [EditorHostClient.containerKey]: EditorHostClient;
     [Logger.containerKey]: Logger;
+    [ThreadStore.containerKey]: ThreadStore;
 }
 
 export class KernelServer extends Server<KernelProtocol, Context> {
@@ -41,6 +43,7 @@ export class KernelServer extends Server<KernelProtocol, Context> {
             modelAccess: new ModelAccessHost(editorHostClient),
             editorHost: editorHostClient,
             logger: this.container.get(Logger),
+            store: this.container.get(ThreadStore),
             commandExecutor: this.container.get(CommandExecutor),
         };
     }

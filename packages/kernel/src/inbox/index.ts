@@ -15,6 +15,8 @@ export {MessageThread} from './thread';
 export {Workflow, WorkflowOriginMessage} from './workflow';
 
 export class ThreadStore {
+    static readonly containerKey = 'ThreadStore';
+
     private threads: MessageThread[];
 
     constructor(initialThreads: MessageThreadPersistData[] = []) {

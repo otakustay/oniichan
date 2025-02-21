@@ -1,9 +1,10 @@
 import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port, TaskIdBoundClient} from '@otakustay/ipc';
 import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
 import {MessageThreadData} from '@oniichan/shared/inbox';
+import {EditorHostProtocol} from '@oniichan/editor-host/protocol';
 import {CommandExecutor} from '../core/command';
 import {ModelAccessHost} from '../core/model';
-import {EditorHostProtocol} from '@oniichan/editor-host/protocol';
+import {ThreadStore} from '../inbox';
 
 type SendNotice = (action: string, payload?: any) => void;
 
@@ -35,6 +36,7 @@ export interface Context {
     modelAccess: ModelAccessHost;
     editorHost: EditorHost;
     commandExecutor: CommandExecutor;
+    store: ThreadStore;
     logger: Logger;
 }
 
@@ -50,6 +52,7 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
                 modelAccess: context.modelAccess,
                 editorHost: context.editorHost,
                 commandExecutor: context.commandExecutor,
+                store: context.store,
                 logger: new HandlerLogger(
                     sendNotice,
                     new.target.name,

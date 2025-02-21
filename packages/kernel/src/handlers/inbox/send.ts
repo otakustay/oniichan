@@ -10,7 +10,6 @@ import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
 import {ModelChatOptions} from '../../core/model';
 import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';
-import {store} from './store';
 import {SystemPromptGenerator} from './prompt';
 
 interface TextMessageBody {
@@ -45,7 +44,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     private systemPrompt = '';
 
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
-        const {logger} = this.context;
+        const {logger, store} = this.context;
         logger.info('Start', payload);
 
         logger.trace('EnsureRoundtrip');
@@ -82,7 +81,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
-        const {logger, modelAccess, editorHost, commandExecutor} = this.context;
+        const {logger, modelAccess, editorHost, commandExecutor, store} = this.context;
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 
@@ -195,6 +194,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private addDebugMessage(level: DebugMessageLevel, title: string, content: DebugContentChunk) {
+        const {store} = this.context;
         this.roundtrip.addDebugMessage(newUuid(), level, title, content);
         this.updateInboxThreadList(store.dump());
     }

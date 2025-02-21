@@ -2,10 +2,17 @@ import {MessagePort, parentPort, workerData} from 'node:worker_threads';
 import {ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';
 import {EditorHostClient} from '@oniichan/editor-host/client';
-import {CommandExecutor} from '@oniichan/kernel';
+import {ThreadStore, CommandExecutor} from '@oniichan/kernel';
 import {stringifyError} from '@oniichan/shared/error';
 import {Logger, ConsoleLogger} from '@oniichan/shared/logger';
 import {DependencyContainer} from '@oniichan/shared/container';
+import {MessageThreadPersistData} from '@oniichan/shared/inbox';
+
+const initialMessageThreads: MessageThreadPersistData[] = [];
+
+if (process.env.NODE_ENV === 'development') {
+    initialMessageThreads.push();
+}
 
 class WorkerPort implements Port {
     private readonly port: MessagePort;
@@ -51,6 +58,7 @@ async function main() {
     try {
         const port = new WorkerPort();
         const container = new DependencyContainer()
+            .bind(ThreadStore, () => new ThreadStore(initialMessageThreads), {singleton: true})
             .bind(EditorHostClient, () => new EditorHostClient(port), {singleton: true})
             .bind(Logger, () => new ConsoleLogger('Kernel'), {singleton: true})
             .bind(CommandExecutor, () => new CommandExecutor(binaryDirectory), {singleton: true});
