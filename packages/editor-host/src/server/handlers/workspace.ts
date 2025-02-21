@@ -27,7 +27,7 @@ export class GetWorkspaceRootHandler extends RequestHandler<void, string | null>
     static readonly action = 'getWorkspaceRoot';
 
     async *handleRequest(): AsyncIterable<string | null> {
-        yield workspace.workspaceFolders?.at(0)?.uri.toString() ?? null;
+        yield workspace.workspaceFolders?.at(0)?.uri.fsPath ?? null;
     }
 }
 

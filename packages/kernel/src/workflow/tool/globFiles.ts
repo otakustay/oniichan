@@ -26,7 +26,6 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 };
             }
 
-            // TODO: glob `src/**/chunk.{ts,tsx}` gets "relative-absolute" paths
             const files = await this.editorHost.call('findFiles', {glob: args.glob, limit: 200});
 
             if (files.length) {
