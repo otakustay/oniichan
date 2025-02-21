@@ -119,7 +119,7 @@ export default function FileEdit({file, edit, patch}: Props) {
             : (check === 'conflict' ? 'This patch is not appliable' : '');
         const content = patch.trim();
 
-        if (viewMode.debug || error || content) {
+        if (error || (viewMode.debug && content)) {
             return (
                 <>
                     {error && <ErrorLabel>{error}</ErrorLabel>}
@@ -131,7 +131,7 @@ export default function FileEdit({file, edit, patch}: Props) {
         return null;
     };
     const isLoading = !edit || check === 'reading';
-    const codeEdit = (!edit || edit.type === 'error' || edit.type === 'patchError') ? null : edit;
+    const codeEdit = (!edit || edit.type === 'error') ? null : edit;
     const hasError = check === 'conflict' || check === 'error';
     const showButton = isEditInteractive && check === 'appliable';
     const showApplied = isEditInteractive && check === 'applied';

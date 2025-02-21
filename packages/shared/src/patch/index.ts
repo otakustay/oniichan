@@ -4,7 +4,6 @@ export {
     FileEditAction,
     FileEditData,
     FileEditError,
-    FileEditPatchError,
     FileEditResult,
     stackFileEdit,
     createFileEdit,

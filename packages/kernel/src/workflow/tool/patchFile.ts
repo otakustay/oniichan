@@ -27,17 +27,11 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         }
 
         if (edit.type === 'error') {
-            return {
-                type: 'executeError',
-                output: `Patch file ${args.path} failed for this reason: ${edit.message}`,
-            };
-        }
-
-        if (edit.type === 'patchError') {
-            return {
-                type: 'requireFix',
-                includesBase: true,
-                prompt: dedent`
+            return edit.errorType === 'patchError'
+                ? {
+                    type: 'requireFix',
+                    includesBase: true,
+                    prompt: dedent`
                     Parse <patch> parameter error: ${edit.message}}.
 
                     A patch block always consists a \`SEARCH\` and a \`REPLACE\` part, in format like this:
@@ -52,7 +46,11 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
 
                     Please regenerate the <patch_file> tool call with correct patch content.
                 `,
-            };
+                }
+                : {
+                    type: 'executeError',
+                    output: `Patch file ${args.path} failed for this reason: ${edit.message}`,
+                };
         }
 
         return {

@@ -242,45 +242,45 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
     async takeFileEditSnapshot(editorHost: EditorHost) {
         const toolCall = this.findToolCallChunkStrict();
 
-        if (toolCall.fileEdit || toolCall.status === 'generating') {
+        if (toolCall.fileEdit || toolCall.status === 'generating' || !isEditToolName(toolCall.toolName)) {
             return;
         }
 
-        if (isEditToolName(toolCall.toolName)) {
-            const file = toolCall.arguments.path ?? '';
+        const file = toolCall.arguments.path ?? '';
 
-            if (!file) {
+        if (!file) {
+            toolCall.fileEdit = {
+                file,
+                type: 'error',
+                errorType: 'parameterError',
+                message: 'Missing path argument',
+            };
+            return;
+        }
+
+        const editStack = this.roundtrip.getEditStackForFile(toolCall.arguments.path ?? '');
+        const previousEdit = editStack.at(-1);
+        const patchAction = toolCall.toolName === 'write_file'
+            ? 'write'
+            : (toolCall.toolName === 'patch_file' ? 'patch' : 'delete');
+        // `patch` for `patch_file`, `content` for `write_file`
+        const patch = toolCall.arguments.patch ?? toolCall.arguments.content ?? '';
+
+        if (previousEdit) {
+            toolCall.fileEdit = stackFileEdit(previousEdit, patchAction, patch);
+        }
+        else {
+            try {
+                const content = await editorHost.call('readWorkspaceFile', file);
+                toolCall.fileEdit = createFileEdit(file, content, patchAction, patch);
+            }
+            catch (ex) {
                 toolCall.fileEdit = {
                     file,
                     type: 'error',
-                    message: 'Missing path argument',
+                    errorType: 'unknown',
+                    message: stringifyError(ex),
                 };
-                return;
-            }
-
-            const editStack = this.roundtrip.getEditStackForFile(toolCall.arguments.path ?? '');
-            const previousEdit = editStack.at(-1);
-            const patchAction = toolCall.toolName === 'write_file'
-                ? 'write'
-                : (toolCall.toolName === 'patch_file' ? 'patch' : 'delete');
-            // `patch` for `patch_file`, `content` for `write_file`
-            const patch = toolCall.arguments.patch ?? toolCall.arguments.content ?? '';
-
-            if (previousEdit) {
-                toolCall.fileEdit = stackFileEdit(previousEdit, patchAction, patch);
-            }
-            else {
-                try {
-                    const content = await editorHost.call('readWorkspaceFile', file);
-                    toolCall.fileEdit = createFileEdit(file, content, patchAction, patch);
-                }
-                catch (ex) {
-                    toolCall.fileEdit = {
-                        file,
-                        type: 'error',
-                        message: stringifyError(ex),
-                    };
-                }
             }
         }
     }

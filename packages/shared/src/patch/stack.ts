@@ -16,17 +16,12 @@ export interface FileEditResult {
 
 export interface FileEditError {
     type: 'error';
+    errorType: 'patchError' | 'conflict' | 'parameterError' | 'unknown';
     file: string;
     message: string;
 }
 
-export interface FileEditPatchError {
-    type: 'patchError';
-    file: string;
-    message: string;
-}
-
-export type FileEditData = FileEditResult | FileEditError | FileEditPatchError;
+export type FileEditData = FileEditResult | FileEditError;
 
 function diffCount(oldContent: string, newContent: string) {
     const diff = diffLines(oldContent, newContent);
@@ -74,22 +69,16 @@ export function stackFileEdit(previous: FileEditData, action: PatchAction, patch
     if (previous.type === 'error') {
         return {
             type: 'error',
+            errorType: 'unknown',
             file: previous.file,
-            message: 'Previous edit to this file failed',
-        };
-    }
-
-    if (previous.type === 'patchError') {
-        return {
-            type: 'error',
-            file: previous.file,
-            message: 'Previous patch is invalid',
+            message: previous.errorType === 'patchError' ? 'Previous patch is invalid' : 'Previous patch is invalid',
         };
     }
 
     if (previous.type === 'delete' && action === 'patch') {
         return {
             type: 'error',
+            errorType: 'conflict',
             file: previous.file,
             message: `Cannot patch deleted file`,
         };
@@ -105,7 +94,8 @@ export function stackFileEdit(previous: FileEditData, action: PatchAction, patch
     }
     catch (ex) {
         return {
-            type: ex instanceof PatchParseError ? 'patchError' : 'error',
+            type: 'error',
+            errorType: ex instanceof PatchParseError ? 'patchError' : 'unknown',
             file: previous.file,
             message: stringifyError(ex),
         };

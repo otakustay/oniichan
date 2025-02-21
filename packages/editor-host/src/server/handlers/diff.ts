@@ -14,7 +14,7 @@ interface MeaningfulEditStack {
 
 abstract class DiffRequestHandler<I, O> extends RequestHandler<I, O> {
     protected ensureMeaningfulEditStack(edits: FileEditData[]): MeaningfulEditStack {
-        const meaningfulEdits = edits.filter(v => v.type !== 'error' && v.type !== 'patchError');
+        const meaningfulEdits = edits.filter(v => v.type !== 'error');
         const first = meaningfulEdits.at(0);
         const last = meaningfulEdits.at(-1);
 
