@@ -11,6 +11,16 @@ import {useColorScheme} from '@/components/AppProvider';
 
 const Layout = styled.div`
     overflow-x: auto;
+
+    pre {
+        margin: 0;
+        /* Override shiki's inline style */
+        background-color: transparent !important;
+    }
+
+    code {
+        background: transparent;
+    }
 `;
 
 interface Props {
@@ -38,7 +48,10 @@ function SourceCode({code, language}: Props) {
             void (async () => {
                 const options: BundledHighlighterOptions<BundledLanguage, BundledTheme> = {
                     langs: [language],
-                    themes: ['github-light-default', 'github-dark-default'],
+                    themes: [
+                        'github-light-default',
+                        'github-dark-default',
+                    ],
                 };
                 const highlighter = await getSingletonHighlighter(options).catch(() => null);
                 setHighlighter(highlighter);
@@ -56,6 +69,7 @@ function SourceCode({code, language}: Props) {
         {
             lang: language,
             theme: colorScheme === 'light' ? 'github-light-default' : 'github-dark-default',
+            defaultColor: false,
         }
     );
 
