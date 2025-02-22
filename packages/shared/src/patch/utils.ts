@@ -50,7 +50,6 @@ export function createFileEdit(file: string, content: string | null, action: Pat
     return stackFileEdit(mockEdit, action, patch);
 }
 
-// TODO: Continuous delete edits is merged into a new edit with insert lines
 export function mergeFileEdits(edits: FileEditData[]): FileEditData {
     const merge = (x: FileEditData, y: FileEditData): FileEditData => {
         if (y.type === 'error' || y.type === 'delete' || y.type === 'create') {

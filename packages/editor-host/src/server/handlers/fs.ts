@@ -2,16 +2,15 @@ import {FileType, Uri, workspace} from 'vscode';
 import {createGitIgnoreFilter, shouldDirectoryExcludedFromSearch} from '@oniichan/shared/dir';
 import {RequestHandler} from './handler';
 
-// TODO: Make sure all `uri` parameters are actually file path string
-
 export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';
 
-    async *handleRequest(uri: string): AsyncIterable<string> {
+    async *handleRequest(file: string): AsyncIterable<string> {
         const {logger} = this.context;
-        logger.info('Start', {uri});
+        logger.info('Start', {file});
 
-        const content = await workspace.fs.readFile(Uri.parse(uri));
+        const uri = this.resolveFileUri(file);
+        const content = await workspace.fs.readFile(uri);
         yield Buffer.from(content).toString('utf-8');
 
         logger.info('Finish');
@@ -51,7 +50,8 @@ export class ReadDirectoryHandler extends RequestHandler<ReadDirectoryRequest, F
         const {logger} = this.context;
         logger.info('Start', payload);
 
-        const entries = await this.read(Uri.parse(payload.path), payload.depth);
+        const uri = this.resolveFileUri(payload.path);
+        const entries = await this.read(uri, payload.depth);
         yield entries;
 
         logger.info('Finish');

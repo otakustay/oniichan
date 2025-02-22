@@ -30,7 +30,7 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
     }
     protected resolveFileUri(file: string): Uri {
         const root = this.getWorkspaceRootStrict();
-        const absolute = path.join(root, file);
+        const absolute = path.resolve(root, file);
         return Uri.file(absolute);
     }
 

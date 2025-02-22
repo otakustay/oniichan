@@ -111,18 +111,16 @@ export class ScaffoldExecutor {
     }
 
     private toRelative(documentUri: Uri) {
-        for (const folder of workspace.workspaceFolders ?? []) {
-            if (documentUri.fsPath.startsWith(folder.uri.fsPath)) {
-                return {
-                    root: folder.uri.fsPath,
-                    path: workspace.asRelativePath(documentUri, false),
-                };
+        const root = workspace.workspaceFolders?.at(0)?.uri.fsPath;
+        return root && documentUri.fsPath.startsWith(root)
+            ? {
+                root,
+                path: workspace.asRelativePath(documentUri, false),
             }
-        }
-        return {
-            root: '',
-            path: documentUri.fsPath,
-        };
+            : {
+                root: '',
+                path: documentUri.fsPath,
+            };
     }
 
     private async showLoading(editorReference: TextEditorReference) {
