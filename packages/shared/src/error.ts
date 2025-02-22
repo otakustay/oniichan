@@ -6,3 +6,7 @@ export function assertNever<T = unknown>(value: never, stringify: (value: T) => 
 export function stringifyError(error: unknown) {
     return error instanceof Error ? error.message : `${error}`;
 }
+
+export function isAbortError(error: unknown): error is DOMException {
+    return error instanceof DOMException && error.name === 'AbortError';
+}

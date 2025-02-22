@@ -95,6 +95,7 @@ export class OpenRouterModelClient implements ModelClient {
             messages,
             model: this.provider,
             temperature: feature.temperature,
+            abortSignal: options.abortSignal,
         };
     }
 

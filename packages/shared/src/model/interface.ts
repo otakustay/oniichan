@@ -45,6 +45,7 @@ export interface ModelUsage {
 export interface ModelChatOptions {
     messages: ChatInputPayload[];
     systemPrompt?: string | undefined;
+    abortSignal?: AbortSignal | undefined;
 }
 
 export interface ModelClient {
