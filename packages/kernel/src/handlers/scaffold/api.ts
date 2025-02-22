@@ -2,6 +2,8 @@ import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
 import {ModelAccessHost} from '../../core/model';
+import {consumeModelResponse, ParsedChunk} from './parse';
+import {over} from '@otakustay/async-iterator';
 
 export interface ScaffoldSnippet {
     path: string;
@@ -13,11 +15,6 @@ interface ScaffoldPayload {
     snippets: ScaffoldSnippet[];
 }
 
-interface ScaffoldResult {
-    section: 'import' | 'definition';
-    code: string;
-}
-
 export class ScaffoldApi {
     private readonly modelAccess: ModelAccessHost;
 
@@ -25,26 +22,15 @@ export class ScaffoldApi {
         this.modelAccess = modelAccess;
     }
 
-    async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ScaffoldResult> {
+    async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ParsedChunk> {
         const {file, snippets} = paylod;
         const prompt = renderScaffoldPrompt({file, snippets});
         const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},
         ];
         const modelTelemetry = telemetry.createModelTelemetry();
-        for await (const chunk of this.modelAccess.codeStreaming({messages, telemetry: modelTelemetry})) {
-            if (chunk.tag === 'import') {
-                yield {
-                    section: 'import',
-                    code: chunk.content,
-                };
-            }
-            else if (chunk.tag === 'definition') {
-                yield {
-                    section: 'definition',
-                    code: chunk.content,
-                };
-            }
-        }
+        const stream = this.modelAccess.chatStreaming({messages, telemetry: modelTelemetry});
+        const textStream = over(stream).filter(v => v.type === 'text').map(v => v.content);
+        yield* consumeModelResponse(textStream);
     }
 }

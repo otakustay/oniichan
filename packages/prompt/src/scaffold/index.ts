@@ -31,34 +31,30 @@ export function renderScaffoldPrompt(view: ScaffoldView) {
         - It should not implement any concrete business logic inside functions and methods, leave them empty
         - It should contains code that are very very neccessary and important for this file, keep the code minimum
 
-        You are asked to generate the code in 2 different parts:
+        You are asked to generate the code in 2 different xml tags:
 
-        - An import section, which starts with "\`\`\`import" markdown syntax, keep all import statements inside it
-        - A definition section, which starts with "\`\`\`definition" markdown syntax, keep code other than import statments here
+        - A <import> tag, keep all import statements inside it
+        - A <definition> tag, keep code other than import statments here
 
-        The content between \`<example>\` and \`</example>\` below illustrates how you should respond, keep your response format exactly the same and fill code into code blocks
+        The code block below is an example illustrates how you should respond, keep your response format exactly the same and fill code into XML tags
 
-        <example>
-        Here are things to import:
+        \`\`\`
+        <import>
+        all import statements here
+        </import>
 
-        \`\`\`import
-        ...
+        <definition>
+        definition scaffold code here
+        </definition>
         \`\`\`
 
-        Here are definitions in scaffold code:
-
-        \`\`\`definition
-        ...
-        \`\`\`
-        </example>
-
-        If you are not confident enough, you can make both import and definition section empty, but you are required to output markdown code block even in this case, just keep the content inside code block empty.
+        If you are not confident enough, you can make one or both import and definition tag empty, but the XML tag itself is still required, just keep the content inside XML tag empty.
 
         File ${view.file} is empty, generate the scaffold code now, do not generate any text out of example's guideline.
     `;
     const extension = path.extname(view.file);
     const sections = [
-        `You are an experienced programmer in writing ${extension} files, you have created a file at {{file}}, here are several existing files for you to gather information:`,
+        `You are an experienced programmer in writing ${extension} files, you have created a file at ${view.file}, here are several existing files for you to gather information:`,
         ...view.snippets.map(renderSnippetItem),
         description,
     ];

@@ -1,5 +1,11 @@
 # Change Log
 
+[UNRELEASED]
+
+### Fixed
+
+- 坏掉的脚手架功能已经修复了。
+
 ## [3.0.1] - 2024-02-21
 
 ### Fixed

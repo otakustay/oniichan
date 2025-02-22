@@ -90,13 +90,7 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         };
         for await (const chunk of api.generate({file: relativePath, snippets}, telemetry)) {
             yield {type: 'code', section: chunk.section, code: chunk.code};
-
-            if (chunk.section === 'import') {
-                output.importSection += chunk.code;
-            }
-            else {
-                output.definitionSection += chunk.code;
-            }
+            output[`${chunk.section}Section`] += chunk.code;
         }
         yield {
             type: 'telemetryData',

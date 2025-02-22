@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {existsSync} from 'node:fs';
 import {over} from '@otakustay/async-iterator';
-import {toLines} from '@oniichan/shared/iterable';
+import {toLines} from '@oniichan/shared/string';
 
 interface ExecuteCommandOptions {
     cwd: string;

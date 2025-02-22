@@ -8,8 +8,10 @@ import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {stringifyError} from '@oniichan/shared/error';
 import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {KernelClient} from '../../kernel';
+import {ScaffoldCodeWriter} from './writer';
 
-const LOADING_TEXT = 'Oniichan正在为你生成脚手架，请不要操作或关闭文件，删除本行可以中止任务';
+const LOADING_TEXT =
+    'Oniichan is generating the scaffold for you! Please don\'t touch or close the file... (｡>﹏<｡) Delete this line to stop the task desu~';
 
 interface Dependency {
     [Logger.containerKey]: Logger;
@@ -82,6 +84,8 @@ export class ScaffoldExecutor {
         const context = this.container.get(TaskContext);
         const telementry = this.container.get('Telemetry');
         const editorReference = new TextEditorReference(editor.document.uri.toString());
+        const logger = this.container.get(Logger);
+        const writer = new ScaffoldCodeWriter(editor, logger);
 
         for await (const entry of kernel.callStreaming(context.getTaskId(), 'scaffold', request)) {
             switch (entry.type) {
@@ -100,7 +104,7 @@ export class ScaffoldExecutor {
                         reason: entry.reason,
                     };
                 case 'code':
-                    await this.writeCode(editor, entry.section, entry.code);
+                    await writer.write(entry.section, entry.code);
                     break;
             }
         }
@@ -165,27 +169,5 @@ export class ScaffoldExecutor {
                 {undoStopAfter: true, undoStopBefore: false}
             );
         }
-    }
-
-    private async writeCode(editor: TextEditor, section: 'import' | 'definition', code: string) {
-        const logger = this.container.get(Logger);
-
-        if (this.abortSignal?.aborted) {
-            logger.trace('AbortWriteCode', {section, code});
-            return;
-        }
-
-        const changeStage = this.stage !== section;
-        const prefix = changeStage && section === 'definition' ? '\n\n' : '';
-        const undoStop = changeStage && this.stage !== 'loading';
-        logger.trace('WriteCode', {section, prefix, code, undoStop});
-        await editor.edit(
-            builder => builder.insert(new Position(Infinity, Infinity), prefix + code),
-            {
-                undoStopBefore: undoStop,
-                undoStopAfter: false,
-            }
-        );
-        this.stage = section;
     }
 }

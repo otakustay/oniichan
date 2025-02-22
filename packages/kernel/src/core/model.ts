@@ -6,8 +6,7 @@ import {
     ChatInputPayload,
 } from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
-import {CodeResult, streamingExtractCode} from './extract';
-import {EditorHost} from '../editor';
+import {EditorHost} from './editor';
 
 export interface ModelChatOptions {
     messages: ChatInputPayload[];
@@ -46,23 +45,6 @@ export class ModelAccessHost {
             telemetry.setResponseChunk(chunk);
             if (chunk.type !== 'meta') {
                 yield chunk;
-            }
-        }
-        void telemetry.record();
-    }
-
-    async *codeStreaming(options: ModelChatOptions): AsyncIterable<CodeResult> {
-        const {messages, telemetry} = options;
-        const client = await this.createModelClient();
-        telemetry.setRequest(messages);
-        for await (const chunk of streamingExtractCode(client.chatStreaming({messages}))) {
-            switch (chunk.type) {
-                case 'code':
-                    yield chunk.value;
-                    break;
-                case 'chunk':
-                    telemetry.setResponseChunk(chunk.value);
-                    break;
             }
         }
         void telemetry.record();
