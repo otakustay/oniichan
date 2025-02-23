@@ -27,23 +27,28 @@ export class MixtureModelAccess implements ModelAccess {
         const reasoning = {
             text: '',
         };
-        for await (const chunk of this.fetchReasoning(options)) {
-            switch (chunk.type) {
-                case 'reasoning':
-                    reasoning.text += chunk.content;
+
+        try {
+            for await (const chunk of this.fetchReasoning(options)) {
+                switch (chunk.type) {
+                    case 'reasoning':
+                        reasoning.text += chunk.content;
+                        yield chunk;
+                        break;
+                }
+            }
+
+            for await (const chunk of this.fetchTexting(options, reasoning.text)) {
+                telemetry.setResponseChunk(chunk);
+
+                if (chunk.type !== 'meta') {
                     yield chunk;
-                    break;
+                }
             }
         }
-
-        for await (const chunk of this.fetchTexting(options, reasoning.text)) {
-            telemetry.setResponseChunk(chunk);
-
-            if (chunk.type !== 'meta') {
-                yield chunk;
-            }
+        finally {
+            void telemetry.record();
         }
-        void telemetry.record();
     }
 
     private addReasoningTextToUserRequest(messages: ChatInputPayload[], reasoningText: string) {

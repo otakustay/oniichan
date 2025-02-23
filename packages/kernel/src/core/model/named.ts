@@ -15,23 +15,31 @@ export class NamedModelAccess implements ModelAccess {
     async chat(options: ModelChatOptions): Promise<ModelResponse> {
         const {messages, systemPrompt, telemetry, abortSignal} = options;
         telemetry.setRequest(messages);
-        const [response, meta] = await this.client.chat({messages, systemPrompt, abortSignal});
-        telemetry.setResponseChunk(response);
-        telemetry.setResponseChunk(meta);
-        void telemetry.record();
-        return response;
+        try {
+            const [response, meta] = await this.client.chat({messages, systemPrompt, abortSignal});
+            telemetry.setResponseChunk(response);
+            telemetry.setResponseChunk(meta);
+            return response;
+        }
+        finally {
+            void telemetry.record();
+        }
     }
 
     async *chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse> {
         const {messages, systemPrompt, telemetry, abortSignal} = options;
         telemetry.setRequest(messages);
-        for await (const chunk of this.client.chatStreaming({messages, systemPrompt, abortSignal})) {
-            telemetry.setResponseChunk(chunk);
+        try {
+            for await (const chunk of this.client.chatStreaming({messages, systemPrompt, abortSignal})) {
+                telemetry.setResponseChunk(chunk);
 
-            if (chunk.type !== 'meta') {
-                yield chunk;
+                if (chunk.type !== 'meta') {
+                    yield chunk;
+                }
             }
         }
-        void telemetry.record();
+        finally {
+            void telemetry.record();
+        }
     }
 }

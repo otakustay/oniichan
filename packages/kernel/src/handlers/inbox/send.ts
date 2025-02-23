@@ -4,7 +4,7 @@ import {duplicate, merge} from '@oniichan/shared/iterable';
 import {ModelResponse} from '@oniichan/shared/model';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {assertNever, isAbortError, stringifyError} from '@oniichan/shared/error';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
@@ -97,19 +97,21 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const modelTelemetry = this.telemetry.createModelTelemetry();
-        const abortController = new AbortController();
         const options: ModelChatOptions = {
             messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
             telemetry: modelTelemetry,
             systemPrompt: this.systemPrompt,
-            abortSignal: abortController.signal,
         };
         const chatStream = this.modelAccess.chatStreaming(options);
+        const state = {
+            toolCallOccured: false,
+        };
 
+        // NOTE: We are not using `AbortSignal` to abort stream after tool call because this loses usage data
         try {
             for await (const chunk of this.consumeChatStream(chatStream)) {
-                if (abortController.signal.aborted) {
-                    logger.trace('ChunkAfterAbort', {chunk});
+                if (state.toolCallOccured) {
+                    logger.trace('ChunkAfterToolCall', {chunk});
                     continue;
                 }
 
@@ -124,16 +126,8 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
                 // Force at most one tool is used per response
                 if (chunk.type === 'toolEnd') {
-                    abortController.abort();
+                    state.toolCallOccured = true;
                 }
-            }
-        }
-        catch (ex) {
-            // Abortion is expected when tool call is finished
-            if (!isAbortError(ex)) {
-                reply.setError(stringifyError(ex));
-                logger.error('RequestModelFail', {reason: stringifyError(ex)});
-                throw ex;
             }
         }
         finally {
