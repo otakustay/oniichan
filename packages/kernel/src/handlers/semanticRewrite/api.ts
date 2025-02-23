@@ -2,6 +2,7 @@ import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderSemanticRewritePrompt, SemanticRewriteView} from '@oniichan/prompt';
 import {ModelAccessHost} from '../../core/model';
+import {EditorHost} from '../../core/editor';
 
 export interface EnhancedContextSnippet {
     label: string;
@@ -20,8 +21,8 @@ export interface SemanticRewritePayload {
 export class SemanticRewriteApi {
     private readonly modelAccess: ModelAccessHost;
 
-    constructor(modelAccess: ModelAccessHost) {
-        this.modelAccess = modelAccess;
+    constructor(editorHost: EditorHost) {
+        this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: false});
     }
 
     async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {

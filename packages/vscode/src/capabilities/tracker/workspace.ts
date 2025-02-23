@@ -38,6 +38,7 @@ export class WorkspaceTracker implements Disposable {
         this.webConnection = container.get(WebConnection.containerKey);
         this.structure = container.get(WorkspaceFileStructure);
         this.disposables.push(
+            // TODO: arguments order incorrect
             workspace.onDidCreateFiles(e => this.change(e.files, [])),
             workspace.onDidDeleteFiles(e => this.change([], e.files)),
             window.onDidChangeActiveTextEditor(e => this.updateCurrentDocument(e?.document.uri)),

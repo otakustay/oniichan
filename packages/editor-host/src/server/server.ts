@@ -12,7 +12,7 @@ import {
     GetDocumentTextHandler,
     OpenDocumentHandler,
 } from './handlers/document';
-import {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
+import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {CheckFileExistsHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 import {EditorHostProtocol} from './protocol';
 import {
@@ -68,6 +68,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(GetDocumentDiagnosticAtLineHandler);
         this.registerHandler(OpenDocumentHandler);
         this.registerHandler(GetModelConfigHandler);
+        this.registerHandler(GetInboxConfigHandler);
         this.registerHandler(RequestModelConfigureHandler);
         this.registerHandler(ReadFileHandler);
         this.registerHandler(ReadDirectoryHandler);

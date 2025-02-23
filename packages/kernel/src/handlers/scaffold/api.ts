@@ -1,9 +1,10 @@
 import {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
-import {ModelAccessHost} from '../../core/model';
-import {consumeModelResponse, ParsedChunk} from './parse';
 import {over} from '@otakustay/async-iterator';
+import {ModelAccessHost} from '../../core/model';
+import {EditorHost} from '../../core/editor';
+import {consumeModelResponse, ParsedChunk} from './parse';
 
 export interface ScaffoldSnippet {
     path: string;
@@ -18,8 +19,8 @@ interface ScaffoldPayload {
 export class ScaffoldApi {
     private readonly modelAccess: ModelAccessHost;
 
-    constructor(modelAccess: ModelAccessHost) {
-        this.modelAccess = modelAccess;
+    constructor(editorHost: EditorHost) {
+        this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: false});
     }
 
     async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ParsedChunk> {

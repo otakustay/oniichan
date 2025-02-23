@@ -106,6 +106,17 @@
         }
       },
       {
+        "title": "Inbox",
+        "properties": {
+          "oniichan.inbox.enableDeepThink": {
+            "type": "boolean",
+            "default": false,
+            "description": "Involve a reasoning model (currently DeepSeek R1) to prepend a CoT before each message",
+            "tags": ["experimental"]
+          }
+        }
+      },
+      {
         "title": "Semantic Rewrite",
         "properties": {
           "oniichan.semanticRewrite.triggerType": {

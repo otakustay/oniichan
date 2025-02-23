@@ -3,6 +3,14 @@ import {ChatInputPayload, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
 import {createJsonlStore} from './jsonl';
 
+function add(x: number | null, y: number | null) {
+    if (x === null && y === null) {
+        return null;
+    }
+
+    return (x ?? 0) + (y ?? 0);
+}
+
 export interface ModelUsageRecord {
     uuid: string;
     parentUuid: string;
@@ -48,8 +56,8 @@ export class ModelUsageTelemetry {
                 break;
             case 'meta':
                 this.modelName = chunk.model;
-                this.inputTokens = chunk.usage.inputTokens ?? null;
-                this.outputTokens = chunk.usage.outputTokens ?? null;
+                this.inputTokens = add(this.inputTokens, chunk.usage.inputTokens);
+                this.outputTokens = add(chunk.usage.outputTokens, chunk.usage.outputTokens);
                 this.endTime = new Date();
                 break;
             default:

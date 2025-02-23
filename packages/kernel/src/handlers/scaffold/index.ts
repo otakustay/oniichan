@@ -42,8 +42,10 @@ interface ScaffoldSnippet {
 export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldResponse> {
     static readonly action = 'scaffold';
 
+    private readonly api = new ScaffoldApi(this.context.editorHost);
+
     async *handleRequest(request: ScaffoldRequest): AsyncIterable<ScaffoldResponse> {
-        const {logger, modelAccess} = this.context;
+        const {logger} = this.context;
 
         const documentStatus = await this.testDocumentStatus(request.documentUri);
         if (!documentStatus.ok) {
@@ -82,13 +84,12 @@ export class ScaffoldHandler extends RequestHandler<ScaffoldRequest, ScaffoldRes
         }
 
         const telemetry = new FunctionUsageTelemetry(this.getTaskId(), 'Scaffold');
-        const api = new ScaffoldApi(modelAccess);
         logger.trace('RequestModelStart');
         const output = {
             importSection: '',
             definitionSection: '',
         };
-        for await (const chunk of api.generate({file: relativePath, snippets}, telemetry)) {
+        for await (const chunk of this.api.generate({file: relativePath, snippets}, telemetry)) {
             yield {type: 'code', section: chunk.section, code: chunk.code};
             output[`${chunk.section}Section`] += chunk.code;
         }

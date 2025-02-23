@@ -5,7 +5,8 @@ function strictLineEqual(left: string, right: string) {
 }
 
 function looseLineEqual(left: string, right: string) {
-    return left === right || left.trim() === right.trim();
+    return left === right
+        || left.trim() === right.trim();
 }
 
 function isContentRich(changes: string[]) {

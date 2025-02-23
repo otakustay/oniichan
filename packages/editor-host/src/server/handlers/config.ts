@@ -33,6 +33,26 @@ export class GetModelConfigHandler extends RequestHandler<string, ModelConfigura
     }
 }
 
+export interface InboxConfig {
+    enableDeepThink: boolean;
+}
+
+export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
+    static readonly action = 'getInboxConfig';
+
+    async *handleRequest(): AsyncIterable<InboxConfig> {
+        const {logger} = this.context;
+        logger.info('Start');
+
+        const enableDeepThink = workspace.getConfiguration('oniichan.inbox').get<boolean>('enableDeepThink');
+        yield {
+            enableDeepThink: enableDeepThink ?? false,
+        };
+
+        logger.info('Finish');
+    }
+}
+
 export class RequestModelConfigureHandler extends RequestHandler<void, void> {
     static readonly action = 'requestModelConfigure';
 

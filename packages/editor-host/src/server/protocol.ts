@@ -5,7 +5,7 @@ import type {
     GetDocumentTextHandler,
     OpenDocumentHandler,
 } from './handlers/document';
-import type {GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
+import type {GetModelConfigHandler, GetInboxConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import type {ReadDirectoryHandler, ReadFileHandler, CheckFileExistsHandler} from './handlers/fs';
 import type {
     GetWorkspaceRootHandler,
@@ -23,6 +23,7 @@ export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
 export type {AppliableState} from './handlers/diff';
+export type {InboxConfig} from './handlers/config';
 export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
 
 export type EditorHostProtocol = ProtocolOf<
@@ -31,6 +32,7 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentDiagnosticAtLineHandler
     | typeof OpenDocumentHandler
     | typeof GetModelConfigHandler
+    | typeof GetInboxConfigHandler
     | typeof RequestModelConfigureHandler
     | typeof ReadFileHandler
     | typeof ReadDirectoryHandler

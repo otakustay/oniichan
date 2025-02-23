@@ -17,7 +17,6 @@ import {ScaffoldHandler} from './handlers/scaffold';
 import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
 import {ExportInboxHandler} from './handlers/debug';
-import {ModelAccessHost} from './core/model';
 import {ThreadStore} from './inbox';
 
 interface Dependency {
@@ -40,7 +39,6 @@ export class KernelServer extends Server<KernelProtocol, Context> {
     protected async createContext(request: ExecutionRequest): Promise<Context> {
         const editorHostClient = this.container.get(EditorHostClient).forTask(request.taskId);
         return {
-            modelAccess: new ModelAccessHost(editorHostClient),
             editorHost: editorHostClient,
             logger: this.container.get(Logger),
             store: this.container.get(ThreadStore),

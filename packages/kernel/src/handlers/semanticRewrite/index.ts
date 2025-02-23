@@ -1,7 +1,6 @@
-import {ExecutionRequest, Port} from '@otakustay/ipc';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {Context, RequestHandler} from '../handler';
+import {RequestHandler} from '../handler';
 import {EnhancedContextSnippet, SemanticRewriteApi} from './api';
 
 export interface SemanticRewriteRequest {
@@ -56,12 +55,7 @@ interface EnhanceContextInput {
 export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteRequest, SemanticRewriteResponse> {
     static readonly action = 'semanticRewrite';
 
-    private readonly api: SemanticRewriteApi;
-
-    constructor(port: Port, request: ExecutionRequest, context: Context) {
-        super(port, request, context);
-        this.api = new SemanticRewriteApi(context.modelAccess);
-    }
+    private readonly api = new SemanticRewriteApi(this.context.editorHost);
 
     async *handleRequest(request: SemanticRewriteRequest): AsyncIterable<SemanticRewriteResponse> {
         const {logger} = this.context;

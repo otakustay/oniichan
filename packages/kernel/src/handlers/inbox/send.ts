@@ -7,10 +7,11 @@ import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {assertNever, isAbortError, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
-import {ModelChatOptions} from '../../core/model';
+import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {WorkflowDetector, WorkflowDetectorInit} from '../../workflow';
 import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
+import {InboxConfig} from '@oniichan/editor-host/protocol';
 
 interface TextMessageBody {
     type: 'text';
@@ -33,19 +34,25 @@ export interface InboxSendMessageResponse {
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
     static readonly action = 'inboxSendMessage';
 
+    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost);
+
+    private inboxConfig: InboxConfig = {enableDeepThink: false};
+
+    private modelAccess = new ModelAccessHost(this.context.editorHost, {enableDeepThink: false});
+
     private telemetry: FunctionUsageTelemetry = new FunctionUsageTelemetry(this.getTaskId(), 'inboxSendMessage');
 
     private thread: MessageThread = new MessageThread(newUuid());
 
     private roundtrip: Roundtrip = new Roundtrip();
 
-    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost);
-
     private systemPrompt = '';
 
     async *handleRequest(payload: InboxSendMessageRequest): AsyncIterable<InboxSendMessageResponse> {
         const {logger, store} = this.context;
         logger.info('Start', payload);
+
+        await this.prepareEnvironment();
 
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
@@ -81,7 +88,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
     }
 
     private async *requestModel(): AsyncIterable<InboxSendMessageResponse> {
-        const {logger, modelAccess, editorHost, commandExecutor, store} = this.context;
+        const {logger, editorHost, commandExecutor, store} = this.context;
         const messages = this.thread.toMessages();
         const reply = this.roundtrip.startTextResponse(newUuid());
 
@@ -97,7 +104,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             systemPrompt: this.systemPrompt,
             abortSignal: abortController.signal,
         };
-        const chatStream = modelAccess.chatStreaming(options);
+        const chatStream = this.modelAccess.chatStreaming(options);
 
         try {
             for await (const chunk of this.consumeChatStream(chatStream)) {
@@ -144,7 +151,7 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
             systemPrompt: this.systemPrompt,
             roundtrip: this.roundtrip,
             telemetry: this.telemetry,
-            modelAccess,
+            modelAccess: this.modelAccess,
             editorHost,
             commandExecutor,
             logger,
@@ -178,11 +185,21 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
         }
     }
 
+    private async prepareEnvironment() {
+        const {editorHost, logger} = this.context;
+
+        logger.trace('PrepareInboxConfig');
+        this.inboxConfig = await editorHost.call('getInboxConfig');
+
+        logger.trace('PrepareModelAccess');
+        this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: this.inboxConfig.enableDeepThink});
+    }
+
     private async prepareSystemPrompt() {
-        const {logger, modelAccess} = this.context;
+        const {logger} = this.context;
         logger.trace('PrepareSystemPromptStart');
 
-        const modelFeature = await modelAccess.getModelFeature();
+        const modelFeature = await this.modelAccess.getModelFeature();
         this.systemPromptGenerator.setModelFeature(modelFeature);
         for await (const item of this.systemPromptGenerator.renderSystemPrompt()) {
             switch (item.type) {
