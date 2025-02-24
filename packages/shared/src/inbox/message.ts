@@ -11,12 +11,6 @@ export interface TextMessageChunk {
     content: string;
 }
 
-/** Text that should be render directly without formatting to markdown */
-export interface PlainTextMessageChunk {
-    type: 'plainText';
-    content: string;
-}
-
 export interface ToolCallMessageChunk {
     type: 'toolCall';
     toolName: ToolName;
@@ -40,23 +34,12 @@ export type MessageContentChunk =
     | ToolCallMessageChunk
     | ThinkingMessageChunk;
 
-export type DebugContentChunk = TextMessageChunk | PlainTextMessageChunk;
-
-export type MessageViewChunk = MessageContentChunk | DebugContentChunk;
+export type MessageViewChunk = MessageContentChunk;
 
 export interface MessageDataBase {
     uuid: string;
     createdAt: string;
     error?: string | undefined;
-}
-
-export type DebugMessageLevel = 'error' | 'warning' | 'info';
-
-export interface DebugMessageData extends MessageDataBase {
-    type: 'debug';
-    level: DebugMessageLevel;
-    title: string;
-    content: DebugContentChunk;
 }
 
 export interface UserRequestMessageData extends MessageDataBase {
@@ -79,11 +62,6 @@ export interface ToolUseMessageData extends MessageDataBase {
     content: string;
 }
 
-export type MessageData =
-    | DebugMessageData
-    | UserRequestMessageData
-    | AssistantTextMessageData
-    | ToolCallMessageData
-    | ToolUseMessageData;
+export type MessageData = UserRequestMessageData | AssistantTextMessageData | ToolCallMessageData | ToolUseMessageData;
 
 export type MessageType = MessageData['type'];

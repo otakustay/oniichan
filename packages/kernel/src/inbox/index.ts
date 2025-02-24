@@ -3,7 +3,6 @@ import {MessageThread} from './thread';
 
 export {
     AssistantTextMessage,
-    DebugMessage,
     ToolCallMessage,
     ToolUseMessage,
     UserRequestMessage,

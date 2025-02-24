@@ -5,9 +5,6 @@ import {isEditToolName, ModelToolCallInput, ModelToolCallInputWithSource} from '
 import {
     MessageType,
     MessageData,
-    DebugMessageLevel,
-    DebugContentChunk,
-    DebugMessageData,
     UserRequestMessageData,
     MessageContentChunk,
     AssistantTextMessageData,
@@ -67,42 +64,6 @@ abstract class MessageBase<T extends MessageType> {
             createdAt: this.createdAt,
             error: this.error,
         };
-    }
-}
-
-interface DebugInit {
-    level: DebugMessageLevel;
-    title: string;
-    content: DebugContentChunk;
-}
-
-export class DebugMessage extends MessageBase<'debug'> {
-    private readonly level: DebugMessageLevel;
-
-    private readonly title: string;
-
-    private readonly content: DebugContentChunk;
-
-    constructor(uuid: string, roundtrip: MessageRoundrip, init: DebugInit) {
-        super(uuid, 'debug', roundtrip);
-        this.level = init.level;
-        this.title = init.title;
-        this.content = init.content;
-    }
-
-    toMessageData(): DebugMessageData {
-        return {
-            ...this.toMessageDataBase(),
-            type: this.type,
-            level: this.level,
-            title: this.title,
-            content: this.content,
-        };
-    }
-
-    // Debug message do not participate in chat
-    toChatInputPayload(): ChatInputPayload | null {
-        return null;
     }
 }
 
@@ -429,7 +390,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
     }
 }
 
-export type Message = DebugMessage | UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
+export type Message = UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
 
 export function deserializeMessage(data: MessageData, roundtrip: MessageRoundrip): Message {
     switch (data.type) {
@@ -441,8 +402,6 @@ export function deserializeMessage(data: MessageData, roundtrip: MessageRoundrip
             return ToolCallMessage.from(data, roundtrip);
         case 'toolUse':
             return ToolUseMessage.from(data, roundtrip);
-        case 'debug':
-            throw new Error('Unexpected debug message on deserialization');
         default:
             assertNever<{type: string}>(data, v => `Unknown message type ${v.type}`);
     }

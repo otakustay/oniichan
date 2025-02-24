@@ -5,7 +5,6 @@ import {
     RoundtripMessageData,
     ToolCallMessageData,
 } from '@oniichan/shared/inbox';
-import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
 import {EditSummary} from './EditSummary';
@@ -22,22 +21,8 @@ function isProductionMessage(message: MessageData): message is ProductionMessage
     return message.type === 'assistantText' || message.type === 'toolCall';
 }
 
-function buildMessageDataSource(roundtrip: RoundtripMessageData, debug: boolean): MessageView[] {
+function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] {
     const messages: MessageView[] = [];
-
-    if (debug) {
-        for (const [index, message] of roundtrip.messages.entries()) {
-            if (isProductionMessage(message)) {
-                const isActive = index === roundtrip.messages.length - 1;
-                const isReasoning = isActive && message.chunks.every(v => v.type === 'reasoning');
-                messages.push({message, isActive, isReasoning});
-            }
-            else {
-                messages.push({message, isActive: false, isReasoning: false});
-            }
-        }
-        return messages;
-    }
 
     const request = roundtrip.messages.at(0);
     const responses = roundtrip.messages.slice(1).filter(isProductionMessage);
@@ -99,8 +84,7 @@ interface Props {
 }
 
 export default function Roundtrip({threadUuid, roundtrip, isEditInteractive}: Props) {
-    const viewMode = useViewModeValue();
-    const messages = buildMessageDataSource(roundtrip, viewMode.debug);
+    const messages = buildMessageDataSource(roundtrip);
     const renderMessageView = (view: MessageView) => (
         <Message
             key={view.message.uuid}

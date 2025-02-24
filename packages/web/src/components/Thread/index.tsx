@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import {RoundtripMessageData} from '@oniichan/shared/inbox';
 import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
-import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {mediaWideScreen} from '@/styles';
 import {useKeyboardShortcut} from '@/hooks/keyboard';
 import Draft from '../Draft';
@@ -24,7 +23,6 @@ interface Props {
 }
 
 export default function Thread({uuid}: Props) {
-    const viewMode = useViewModeValue();
     const thread = useMessageThreadValueByUuid(uuid);
     const editing = useEditingValue();
     const setEditing = useSetEditing();
@@ -43,7 +41,7 @@ export default function Thread({uuid}: Props) {
 
     const lastRoundtrip = thread.roundtrips.at(-1);
     // As a mail inbox, the latest roundtrip is on top
-    const roundtrips = viewMode.debug ? thread.roundtrips : [...thread.roundtrips].reverse();
+    const roundtrips = [...thread.roundtrips].reverse();
     const renderRoundtrip = (roundtrip: RoundtripMessageData) => {
         const key = roundtrip.messages.at(0)?.uuid ?? crypto.randomUUID();
         return (

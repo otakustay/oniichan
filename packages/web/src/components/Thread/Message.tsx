@@ -22,15 +22,13 @@ function resolveSenderName(message: MessageData) {
             return 'Super Tool';
         case 'userRequest':
             return 'Me';
-        case 'debug':
-            return message.title;
         default:
             assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
     }
 }
 
 function isCollapsable(message: MessageData) {
-    return message.type === 'debug' || message.type === 'toolUse';
+    return message.type === 'toolUse';
 }
 
 function renderAvatar(message: MessageData) {
@@ -40,8 +38,6 @@ function renderAvatar(message: MessageData) {
             return <Avatar.Assistant size="1.5em" />;
         case 'toolUse':
             return <Avatar.Tool size="1.5em" />;
-        case 'debug':
-            return <Avatar.Debug size="1.5em" />;
         case 'userRequest':
             return <Avatar.User size="1.5em" />;
         default:
@@ -54,8 +50,6 @@ function resolveMessageContent(message: MessageData): MessageViewChunk[] {
         case 'userRequest':
         case 'toolUse':
             return [{type: 'text', content: message.content}];
-        case 'debug':
-            return [message.content];
         case 'assistantText':
         case 'toolCall':
             return message.chunks;

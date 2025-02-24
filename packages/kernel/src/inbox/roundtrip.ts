@@ -1,12 +1,6 @@
 import {assertNever} from '@oniichan/shared/error';
-import {
-    DebugMessageLevel,
-    DebugContentChunk,
-    RoundtripData,
-    RoundtripResponseData,
-    RoundtripStatus,
-} from '@oniichan/shared/inbox';
-import {AssistantTextMessage, UserRequestMessage, Message, DebugMessage} from './message';
+import {RoundtripData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
+import {AssistantTextMessage, UserRequestMessage, Message} from './message';
 import {Workflow, WorkflowOriginMessage} from './workflow';
 import {MessageRoundrip} from './interface';
 import {FileEditData} from '@oniichan/shared/patch';
@@ -21,12 +15,7 @@ interface RoundtripWorkflowResponse {
     workflow: Workflow;
 }
 
-interface RoundtripDebugResponse {
-    type: 'debug';
-    message: DebugMessage;
-}
-
-type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse | RoundtripDebugResponse;
+type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse;
 
 /**
  * A roundtrip is a part of a thread that starts from a user submitted request,
@@ -85,14 +74,6 @@ export class Roundtrip implements MessageRoundrip {
         };
         this.responses.push(response);
         return response.message;
-    }
-
-    addDebugMessage(messageUuid: string, level: DebugMessageLevel, title: string, content: DebugContentChunk) {
-        const response: RoundtripDebugResponse = {
-            type: 'debug',
-            message: new DebugMessage(messageUuid, this, {level, title, content}),
-        };
-        this.responses.push(response);
     }
 
     startWorkflowResponse(origin: WorkflowOriginMessage) {
@@ -158,15 +139,10 @@ export class Roundtrip implements MessageRoundrip {
         this.getRequest().setError(message);
     }
 
-    toMessages(includingDebug = false) {
+    toMessages() {
         const messages: Message[] = [this.getRequest()];
         for (const response of this.responses) {
-            if (response.type === 'debug') {
-                if (includingDebug) {
-                    messages.push(response.message);
-                }
-            }
-            else if (response.type === 'message') {
+            if (response.type === 'message') {
                 messages.push(response.message);
             }
             else if (response.type === 'workflow') {
@@ -179,11 +155,6 @@ export class Roundtrip implements MessageRoundrip {
     toRoundtripData(): RoundtripData {
         const serializeResponse = (response: RoundtripResponse): RoundtripResponseData => {
             switch (response.type) {
-                case 'debug':
-                    return {
-                        type: response.type,
-                        message: response.message.toMessageData(),
-                    };
                 case 'message':
                     return {
                         type: response.type,

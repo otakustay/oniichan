@@ -58,7 +58,7 @@ export class MessageThread {
         const roundtripToData = (roundtrip: Roundtrip): RoundtripMessageData => {
             return {
                 status: roundtrip.getStatus(),
-                messages: roundtrip.toMessages(true).map(v => v.toMessageData()),
+                messages: roundtrip.toMessages().map(v => v.toMessageData()),
             };
         };
         return {

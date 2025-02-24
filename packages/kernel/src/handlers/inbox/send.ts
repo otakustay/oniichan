@@ -1,10 +1,10 @@
 import {over} from '@otakustay/async-iterator';
-import {DebugMessageLevel, DebugContentChunk, ReasoningMessageChunk, MessageInputChunk} from '@oniichan/shared/inbox';
+import {ReasoningMessageChunk, MessageInputChunk} from '@oniichan/shared/inbox';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {ModelResponse} from '@oniichan/shared/model';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {assertNever, stringifyError} from '@oniichan/shared/error';
+import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {MessageThread, Roundtrip, UserRequestMessage} from '../../inbox';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
@@ -34,7 +34,7 @@ export interface InboxSendMessageResponse {
 export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequest, InboxSendMessageResponse> {
     static readonly action = 'inboxSendMessage';
 
-    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost);
+    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost, this.context.logger);
 
     private inboxConfig: InboxConfig = {enableDeepThink: false};
 
@@ -195,33 +195,13 @@ export class InboxSendMessageHandler extends RequestHandler<InboxSendMessageRequ
 
         const modelFeature = await this.modelAccess.getModelFeature();
         this.systemPromptGenerator.setModelFeature(modelFeature);
-        for await (const item of this.systemPromptGenerator.renderSystemPrompt()) {
-            switch (item.type) {
-                case 'debug':
-                    this.addDebugMessage(item.level, item.title, item.message);
-                    break;
-                case 'result':
-                    this.systemPrompt = item.prompt;
-                    break;
-                default:
-                    assertNever<{type: string}>(item, v => `Unknown system prompt yield type ${v.type}`);
-            }
-        }
+        this.systemPrompt = await this.systemPromptGenerator.renderSystemPrompt();
 
         logger.trace('PrepareSystemPromptFinish', {systemPrompt: this.systemPrompt});
     }
 
     private async *chat() {
         await this.prepareSystemPrompt();
-
-        this.addDebugMessage('info', 'System Prompt', {type: 'plainText', content: this.systemPrompt});
-
         yield* over(this.requestModel()).map(v => ({type: 'value', value: v} as const));
-    }
-
-    private addDebugMessage(level: DebugMessageLevel, title: string, content: DebugContentChunk) {
-        const {store} = this.context;
-        this.roundtrip.addDebugMessage(newUuid(), level, title, content);
-        this.updateInboxThreadList(store.dump());
     }
 }

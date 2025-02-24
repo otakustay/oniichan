@@ -298,10 +298,6 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: Message
                     throw new Error('User message should only receive text chunk');
                 }
 
-                if (message.type === 'debug') {
-                    throw new Error('Debug message should not receive any dynamic chunk');
-                }
-
                 return {
                     ...message,
                     content: message.content + chunk.content,

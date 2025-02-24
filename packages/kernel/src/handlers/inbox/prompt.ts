@@ -1,25 +1,13 @@
 import {builtinTools} from '@oniichan/shared/tool';
 import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
-import {DebugContentChunk, DebugMessageLevel} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import {ModelFeature} from '@oniichan/shared/model';
 import {EditorHost} from '../../core/editor';
-
-interface DebugResult {
-    type: 'debug';
-    level: DebugMessageLevel;
-    title: string;
-    message: DebugContentChunk;
-}
-
-interface PromptResult {
-    type: 'result';
-    prompt: string;
-}
-
-export type SystemPromptYieldResult = DebugResult | PromptResult;
+import {Logger} from '@oniichan/shared/logger';
 
 export class SystemPromptGenerator {
+    private readonly logger: Logger;
+
     private readonly editorHost: EditorHost;
 
     private modelFeature: ModelFeature = {
@@ -28,15 +16,16 @@ export class SystemPromptGenerator {
         shouldAvoidSystemPrompt: false,
     };
 
-    constructor(editorHost: EditorHost) {
+    constructor(editorHost: EditorHost, logger: Logger) {
         this.editorHost = editorHost;
+        this.logger = logger.with({source: 'SystemPromptGenerator'});
     }
 
     setModelFeature(feature: ModelFeature) {
         this.modelFeature = feature;
     }
 
-    async *renderSystemPrompt(): AsyncIterable<SystemPromptYieldResult> {
+    async renderSystemPrompt(): Promise<string> {
         const view: InboxPromptView = {
             tools: [],
             projectStructure: '',
@@ -48,30 +37,22 @@ export class SystemPromptGenerator {
         Object.assign(view, toolsView);
 
         try {
-            const rootEntriesView = await this.createRootEntriesView();
+            const rootEntriesView = await this.createProjectStructureView();
             Object.assign(view, rootEntriesView);
         }
         catch (ex) {
-            yield {
-                type: 'debug',
-                level: 'error',
-                title: 'Read Root Error',
-                message: {
-                    type: 'plainText',
-                    content: stringifyError(ex),
-                },
-            };
+            this.logger.warn('ProjectStructureViewFail', {reason: stringifyError(ex)});
         }
 
         const systemPrompt = await renderInboxSystemPrompt(view);
-        yield {type: 'result', prompt: systemPrompt};
+        return systemPrompt;
     }
 
     private createToolsView() {
         return {tools: builtinTools};
     }
 
-    private async createRootEntriesView(): Promise<Partial<InboxPromptView>> {
+    private async createProjectStructureView(): Promise<Partial<InboxPromptView>> {
         const root = await this.editorHost.call('getWorkspaceRoot');
 
         if (root) {

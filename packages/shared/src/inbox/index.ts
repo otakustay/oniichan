@@ -2,11 +2,9 @@ export {
     ReasoningMessageChunk,
     TextMessageChunk,
     ToolCallMessageChunk,
-    PlainTextMessageChunk,
     ThinkingMessageChunk,
     MessageInputChunk,
     MessageContentChunk,
-    DebugContentChunk,
     MessageViewChunk,
     MessageDataBase,
     MessageData,
@@ -14,8 +12,6 @@ export {
     ToolCallMessageData,
     UserRequestMessageData,
     AssistantTextMessageData,
-    DebugMessageLevel,
-    DebugMessageData,
     MessageType,
 } from './message';
 export {
