@@ -21,7 +21,7 @@ const config: Configuration = {
     },
     output: {
         clean: true,
-        path: path.resolve(__dirname, '..', 'vscode', 'dist', 'web'),
+        path: path.resolve(__dirname, '..', 'vscode', 'dist', isDev ? 'web-dev' : 'web'),
         filename: 'main.js',
     },
     resolve: {

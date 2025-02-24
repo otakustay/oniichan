@@ -1,4 +1,4 @@
-**
-!dist/**/*[^.map]
-!assets
-!LICENSE
+src
+dist/web-dev
+dist/**/*.map
+*.*

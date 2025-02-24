@@ -75,7 +75,8 @@ export class WebApp implements Disposable, WebviewViewProvider {
 
     private sidebarClient: WebHostClient | null = null;
 
-    // File is `dist/extension.ts`, reference to `dist/web`
+    private readonly assetUri: Uri;
+
     private readonly webAppServer;
 
     private readonly statusBarItem: StatusBarItem = window.createStatusBarItem(StatusBarAlignment.Right);
@@ -86,7 +87,15 @@ export class WebApp implements Disposable, WebviewViewProvider {
         const logger = container.get(Logger);
         this.container = container
             .bind(Logger, () => logger.with({source: 'WebApp'}), {singleton: true});
+        // File is `dist/extension.ts`, reference to `dist/web`, this always works in production mode
         this.webAppServer = new WebAppServer(this.container, {staticDirectory: path.join(__dirname, 'web')});
+        const context = this.container.get('ExtensionContext');
+        this.assetUri = Uri.joinPath(
+            context.extensionUri,
+            'dist',
+            process.env.NODE_ENV === 'development' ? 'web-dev' : 'web'
+        );
+
         this.initializeStatusBar();
         this.initializeSidebar();
         this.initializeWebAppServer();
@@ -109,9 +118,8 @@ export class WebApp implements Disposable, WebviewViewProvider {
         const container = this.container.bind('Port', () => port, {singleton: true});
         await establishIpc(container);
 
-        const context = this.container.get('ExtensionContext');
-        const htmlUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'index.html');
-        const entryScriptUri = Uri.joinPath(context.extensionUri, 'dist', 'web', 'main.js');
+        const htmlUri = Uri.joinPath(this.assetUri, 'index.html');
+        const entryScriptUri = Uri.joinPath(this.assetUri, 'main.js');
         const htmlContent = await fs.readFile(htmlUri.fsPath, 'utf-8');
         const html = htmlContent.replace('main.js', webview.asWebviewUri(entryScriptUri).toString());
         webview.options = {
@@ -149,7 +157,6 @@ export class WebApp implements Disposable, WebviewViewProvider {
     }
 
     private initializeOpenWebviewCommand() {
-        const context = this.container.get('ExtensionContext');
         const openWebviewCommand = commands.registerCommand(
             'oniichan.openWebview',
             async () => {
@@ -159,7 +166,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
                     ViewColumn.One,
                     {
                         enableScripts: true,
-                        localResourceRoots: [Uri.joinPath(context.extensionUri, 'dist', 'web')],
+                        localResourceRoots: [this.assetUri],
                     }
                 );
                 const port = await this.setupWebview(panel.webview);
