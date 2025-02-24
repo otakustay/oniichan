@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import styled from '@emotion/styled';
 import {VscDiscard} from 'react-icons/vsc';
 import {countNounSimple} from '@oniichan/shared/string';
@@ -44,10 +44,11 @@ interface Props {
 
 export default function Rollback({threadUuid, messageUuid}: Props) {
     const [checkResult, setCheckResult] = useState<InboxCheckRollbackResponse | null>(null);
+    const taskId = useRef(crypto.randomUUID());
     const ipc = useIpc();
     const commitRollbackMessage = async (affectedCount: number, roundtripCount: number) => {
         try {
-            await ipc.kernel.call(crypto.randomUUID(), 'inboxRollback', {threadUuid, messageUuid});
+            await ipc.kernel.call(taskId.current, 'inboxRollback', {threadUuid, messageUuid});
             showToast(
                 'information',
                 renderToastMessage(affectedCount, roundtripCount),
@@ -74,7 +75,7 @@ export default function Rollback({threadUuid, messageUuid}: Props) {
                 return;
             }
 
-            await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', {edit: item.edit, revert: false});
+            await ipc.editor.call(taskId.current, 'acceptFileEdit', {edit: item.edit, revert: false});
         };
 
         const results = await Promise.allSettled(affected.map(rollbackSingle));
@@ -82,7 +83,7 @@ export default function Rollback({threadUuid, messageUuid}: Props) {
         await commitRollbackMessage(reverted, roundtripCount);
     };
     const checkRollback = async () => {
-        const result = await ipc.kernel.call(crypto.randomUUID(), 'inboxCheckRollback', {threadUuid, messageUuid});
+        const result = await ipc.kernel.call(taskId.current, 'inboxCheckRollback', {threadUuid, messageUuid});
 
         if (result.affected.length) {
             setCheckResult(result);

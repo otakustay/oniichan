@@ -2,6 +2,7 @@ import {isAssistantMessage} from '@oniichan/shared/inbox';
 import {diffCount, FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
 import {Message} from '../../inbox';
 import {RequestHandler} from '../handler';
+import {stringifyError} from '@oniichan/shared/error';
 
 export interface InboxCheckRollbackRequest {
     threadUuid: string;
@@ -37,21 +38,32 @@ export class InboxCheckRollbackHandler extends RequestHandler<InboxCheckRollback
     static readonly action = 'inboxCheckRollback';
 
     async *handleRequest(payload: InboxCheckRollbackRequest): AsyncIterable<InboxCheckRollbackResponse> {
-        const {store} = this.context;
+        const {store, logger} = this.context;
+        logger.info('Start');
+
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
         const affected = thread.sliceRoundtripAfter(payload.messageUuid);
         const reverting = affected.flatMap(v => v.toMessages()).reverse().filter(v => isAssistantMessage(v.type));
 
         if (!reverting.length) {
+            logger.error('RollbackToLatest');
             throw new Error('Unable to rollback to latest assistant message');
         }
 
-        const fileEdits = this.computeRollbackFileEdits(reverting);
-        const items = await Promise.all(fileEdits.map(v => this.toCheckItem(v)));
-        yield {
-            roundtripCount: affected.length,
-            affected: items.filter(v => !!v),
-        };
+        try {
+            const fileEdits = this.computeRollbackFileEdits(reverting);
+            const items = await Promise.all(fileEdits.map(v => this.toCheckItem(v)));
+            yield {
+                roundtripCount: affected.length,
+                affected: items.filter(v => !!v),
+            };
+
+            logger.info('Finish');
+        }
+        catch (ex) {
+            logger.error('Fail', {reason: stringifyError(ex)});
+            throw ex;
+        }
     }
 
     private computeRollbackFileEdits(messages: Message[]) {
@@ -67,6 +79,7 @@ export class InboxCheckRollbackHandler extends RequestHandler<InboxCheckRollback
 
     private async createFileEdit(targetEdit: FileEditResult): Promise<FileEditResult | null> {
         const {editorHost} = this.context;
+
         const currentContent = await editorHost.call('readWorkspaceFile', targetEdit.file);
         const targetContent = targetEdit.type === 'delete' ? null : targetEdit.newContent;
 
@@ -164,9 +177,15 @@ export class InboxRollbackHandler extends RequestHandler<InboxRollbackRequest, v
 
     // eslint-disable-next-line require-yield
     async *handleRequest(payload: InboxRollbackRequest): AsyncIterable<void> {
-        const {store} = this.context;
+        const {store, logger} = this.context;
+        logger.info('Start');
+
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
         thread.rollbackRoundtripTo(payload.messageUuid);
+        logger.trace('PushStoreUpdate');
+        store.moveThreadToTop(payload.threadUuid);
         this.updateInboxThreadList(store.dump());
+
+        logger.info('Finish');
     }
 }
