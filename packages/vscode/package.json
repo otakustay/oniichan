@@ -51,6 +51,11 @@
         "category": "Oniichan"
       },
       {
+        "command": "oniichan.initializeProjectConfig",
+        "title": "Initialize Project Config",
+        "category": "Oniichan"
+      },
+      {
         "command": "oniichan.ejectInternals",
         "title": "[Debug] Eject Internals",
         "category": "Oniichan"

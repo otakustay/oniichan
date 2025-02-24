@@ -20,6 +20,7 @@ import {SemanticRewriteHandler} from './handlers/semanticRewrite';
 import {ModelTelemetryHandler} from './handlers/telemetry';
 import {ExportInboxHandler} from './handlers/debug';
 import {ThreadStore} from './inbox';
+import {InitializeProjectConfigHandler} from './handlers/config';
 
 interface Dependency {
     [CommandExecutor.containerKey]: CommandExecutor;
@@ -61,5 +62,6 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.registerHandler(InboxCheckRollbackHandler);
         this.registerHandler(InboxRollbackHandler);
         this.registerHandler(ExportInboxHandler);
+        this.registerHandler(InitializeProjectConfigHandler);
     }
 }

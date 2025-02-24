@@ -2,6 +2,10 @@
 
 [UNRELEASED]
 
+### Added
+
+- 增加一个“Initialize Project Config`命令快速在项目下初始化Oniichan的配置文件。
+
 ### Fixed
 
 - 修复提取项目文件结构时丢失部分目录的问题。

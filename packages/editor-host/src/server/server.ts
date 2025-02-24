@@ -13,7 +13,7 @@ import {
     OpenDocumentHandler,
 } from './handlers/document';
 import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {CheckFileExistsHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
+import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
 import {EditorHostProtocol} from './protocol';
 import {
     DeleteWorkspaceFileHandler,
@@ -73,6 +73,7 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
         this.registerHandler(ReadFileHandler);
         this.registerHandler(ReadDirectoryHandler);
         this.registerHandler(CheckFileExistsHandler);
+        this.registerHandler(CreateDirectoryHandler);
         this.registerHandler(GetWorkspaceRootHandler);
         this.registerHandler(FindFilesHandler);
         this.registerHandler(GetWorkspaceStructureHandler);

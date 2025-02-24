@@ -11,6 +11,7 @@ import {ScaffoldCommand} from './capabilities/scaffold';
 import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
 import {WebApp, WebConnection} from './capabilities/web';
 import {WorkspaceTracker} from './capabilities/tracker';
+import {InitializeProjectConfigCommand} from './capabilities/config';
 import {startKernel} from './kernel';
 import {migrate} from './migration';
 
@@ -39,7 +40,8 @@ export async function activate(context: ExtensionContext) {
         new OpenDataFolderCommand(),
         new WebApp(globalContainer),
         new ScaffoldCommand(globalContainer),
-        new ExportInboxCommand(globalContainer)
+        new ExportInboxCommand(globalContainer),
+        new InitializeProjectConfigCommand(globalContainer)
     );
     const logger = globalContainer.get(Logger);
     logger.trace('ExtensionActivated');

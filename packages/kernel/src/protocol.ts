@@ -13,6 +13,7 @@ import type {
     InboxRollbackHandler,
 } from './handlers/inbox';
 import type {ExportInboxHandler} from './handlers/debug';
+import type {InitializeProjectConfigHandler} from './handlers/config';
 
 export type {
     InboxSendMessageRequest,
@@ -39,4 +40,5 @@ export type KernelProtocol = ProtocolOf<
     | typeof InboxCheckRollbackHandler
     | typeof InboxRollbackHandler
     | typeof ExportInboxHandler
+    | typeof InitializeProjectConfigHandler
 >;

@@ -92,3 +92,18 @@ export class CheckFileExistsHandler extends RequestHandler<string, boolean> {
         }
     }
 }
+
+export class CreateDirectoryHandler extends RequestHandler<string, void> {
+    static readonly action = 'createDirectory';
+
+    // eslint-disable-next-line require-yield
+    async *handleRequest(directory: string): AsyncIterable<void> {
+        const {logger} = this.context;
+        logger.info('Start', {path: directory});
+
+        const uri = this.resolveFileUri(directory);
+        await workspace.fs.createDirectory(uri);
+
+        logger.info('Finish');
+    }
+}

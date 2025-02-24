@@ -6,7 +6,12 @@ import type {
     OpenDocumentHandler,
 } from './handlers/document';
 import type {GetModelConfigHandler, GetInboxConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import type {ReadDirectoryHandler, ReadFileHandler, CheckFileExistsHandler} from './handlers/fs';
+import type {
+    ReadDirectoryHandler,
+    ReadFileHandler,
+    CheckFileExistsHandler,
+    CreateDirectoryHandler,
+} from './handlers/fs';
 import type {
     GetWorkspaceRootHandler,
     FindFilesHandler,
@@ -37,6 +42,7 @@ export type EditorHostProtocol = ProtocolOf<
     | typeof ReadFileHandler
     | typeof ReadDirectoryHandler
     | typeof CheckFileExistsHandler
+    | typeof CreateDirectoryHandler
     | typeof GetWorkspaceRootHandler
     | typeof FindFilesHandler
     | typeof GetWorkspaceStructureHandler
