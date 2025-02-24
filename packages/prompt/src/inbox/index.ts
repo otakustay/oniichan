@@ -1,4 +1,4 @@
-import {renderScratchStartRuleSection, renderRuleSection} from './rule';
+import {renderRuleSection} from './rule';
 import {renderFormatSection} from './format';
 import {renderToolSection} from './tool';
 import {renderStructureSection} from './structure';
@@ -9,7 +9,7 @@ export {InboxPromptView};
 
 export async function renderInboxSystemPrompt(view: InboxPromptView) {
     const parts = [
-        view.projectStructure ? renderRuleSection() : renderScratchStartRuleSection(),
+        renderRuleSection(view),
         renderFormatSection(),
         renderToolSection(view),
         '# Context',

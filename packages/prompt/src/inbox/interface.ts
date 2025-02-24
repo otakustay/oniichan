@@ -6,4 +6,5 @@ export interface InboxPromptView {
     projectStructure: string;
     projectStructureTruncated: boolean;
     modelFeature: ModelFeature;
+    customRules: string;
 }

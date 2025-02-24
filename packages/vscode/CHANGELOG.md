@@ -5,6 +5,7 @@
 ### Added
 
 - 增加一个“Initialize Project Config`命令快速在项目下初始化Oniichan的配置文件。
+- 现在你可以使用Rules来控制邮件系统的回复效果了，修改`.oniichan/rules/default.md`即可。
 
 ### Fixed
 

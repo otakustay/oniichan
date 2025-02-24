@@ -4,6 +4,7 @@ import {stringifyError} from '@oniichan/shared/error';
 import {ModelFeature} from '@oniichan/shared/model';
 import {EditorHost} from '../../core/editor';
 import {Logger} from '@oniichan/shared/logger';
+import {projectRules} from '@oniichan/shared/dir';
 
 export class SystemPromptGenerator {
     private readonly logger: Logger;
@@ -31,6 +32,7 @@ export class SystemPromptGenerator {
             projectStructure: '',
             projectStructureTruncated: false,
             modelFeature: this.modelFeature,
+            customRules: '',
         };
 
         const toolsView = this.createToolsView();
@@ -44,11 +46,19 @@ export class SystemPromptGenerator {
             this.logger.warn('ProjectStructureViewFail', {reason: stringifyError(ex)});
         }
 
+        try {
+            const rulesView = await this.createRulesView();
+            Object.assign(view, rulesView);
+        }
+        catch (ex) {
+            this.logger.warn('CustomRulesViewFail', {reason: stringifyError(ex)});
+        }
+
         const systemPrompt = await renderInboxSystemPrompt(view);
         return systemPrompt;
     }
 
-    private createToolsView() {
+    private createToolsView(): Partial<InboxPromptView> {
         return {tools: builtinTools};
     }
 
@@ -64,5 +74,17 @@ export class SystemPromptGenerator {
         }
 
         return {projectStructure: '', projectStructureTruncated: false};
+    }
+
+    private async createRulesView(): Promise<Partial<InboxPromptView>> {
+        const content = await this.editorHost.call('readWorkspaceFile', projectRules('default'));
+        const guidelineStart = '<!-- Rules Guideline Start -->';
+        const guidelineEnd = '<!-- Rules Guideline End -->';
+
+        if (!content || content.includes(guidelineStart) || content.includes(guidelineEnd)) {
+            return {customRules: ''};
+        }
+
+        return {customRules: content};
     }
 }

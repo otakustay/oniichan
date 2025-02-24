@@ -1,11 +1,15 @@
 import dedent from 'dedent';
+import {InboxPromptView} from './interface';
+
+const DEFAULT_RULE =
+    'You are an intelligent programmer. You are happy to help answer any questions that the user has (usually they will be about coding)';
 
 /**
  * A special rule works when no files resides in current project to generate scaffold from scratch
  *
  * @returns A part of prompt
  */
-export function renderScratchStartRuleSection() {
+function renderScratchStartRuleSection() {
     return dedent`
         # Rule
 
@@ -21,10 +25,16 @@ export function renderScratchStartRuleSection() {
     `;
 }
 
-export function renderRuleSection() {
-    return dedent`
-        # Rule
+export function renderRuleSection(view: InboxPromptView) {
+    if (!view.projectStructure) {
+        return renderScratchStartRuleSection();
+    }
 
-        You are an intelligent programmer. You are happy to help answer any questions that the user has (usually they will be about coding).
-    `;
+    const customRules = view.customRules.trim();
+    const lines = [
+        '# Rule',
+        '',
+        customRules || DEFAULT_RULE,
+    ];
+    return lines.join('\n');
 }
