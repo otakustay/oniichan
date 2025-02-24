@@ -9,10 +9,20 @@ import type {
     InboxMarkRoundtripStatusHandler,
     InboxGetThreadListHandler,
     InboxCheckEditHandler,
+    InboxCheckRollbackHandler,
+    InboxRollbackHandler,
 } from './handlers/inbox';
 import type {ExportInboxHandler} from './handlers/debug';
 
-export type {InboxSendMessageRequest, InboxMarkRoundtripStatusRequest} from './handlers/inbox';
+export type {
+    InboxSendMessageRequest,
+    InboxMarkRoundtripStatusRequest,
+    CheckEditRequest,
+    InboxCheckRollbackRequest,
+    CheckEditResponse,
+    InboxRollbackCheckItem,
+    InboxRollbackRequest,
+} from './handlers/inbox';
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
 export type {ScaffoldRequest, ScaffoldResponse} from './handlers/scaffold';
 
@@ -26,5 +36,7 @@ export type KernelProtocol = ProtocolOf<
     | typeof InboxMarkRoundtripStatusHandler
     | typeof InboxCheckEditHandler
     | typeof InboxGetThreadListHandler
+    | typeof InboxCheckRollbackHandler
+    | typeof InboxRollbackHandler
     | typeof ExportInboxHandler
 >;

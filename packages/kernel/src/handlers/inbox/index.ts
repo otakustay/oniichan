@@ -7,3 +7,11 @@ export {
     CheckEditResponse,
 } from './status';
 export {InboxGetThreadListHandler} from './get';
+export {
+    InboxCheckRollbackHandler,
+    InboxCheckRollbackRequest,
+    InboxCheckRollbackResponse,
+    InboxRollbackCheckItem,
+    InboxRollbackRequest,
+    InboxRollbackHandler,
+} from './rollback';

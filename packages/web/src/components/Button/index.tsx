@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 
 export interface Props {
     style?: CSSProperties;
+    type?: 'button' | 'submit';
     className?: string;
     disabled?: boolean;
     children: ReactNode;
@@ -36,9 +37,9 @@ const Layout = styled.button`
     }
 `;
 
-export default function Button({style, className, disabled, children, onClick}: Props) {
+export default function Button({style, type = 'button', className, disabled, children, onClick}: Props) {
     return (
-        <Layout disabled={disabled} onClick={onClick} style={style} className={className}>
+        <Layout type={type} disabled={disabled} onClick={onClick} style={style} className={className}>
             {children}
         </Layout>
     );

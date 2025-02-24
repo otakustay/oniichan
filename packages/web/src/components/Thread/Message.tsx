@@ -12,6 +12,7 @@ import MessageStatusIcon from '@/components/MessageStatusIcon';
 import MessageContent from './MessageContent';
 import InteractiveLabel from '../InteractiveLabel';
 import Indicator from './Indicator';
+import Rollback from './Rollback';
 
 function resolveSenderName(message: MessageData) {
     switch (message.type) {
@@ -86,6 +87,12 @@ const Header = styled.div<LayoutProps>`
 
 const Time = styled(TimeAgo)`
     color: var(--color-secondary-foreground);
+`;
+
+const HeaderEnd = styled.div`
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
     margin-left: auto;
 `;
 
@@ -171,10 +178,11 @@ interface Props {
     roundtripStatus: RoundtripStatus;
     message: MessageData;
     showIndicator: boolean;
+    showRollback: boolean;
     reasoning: boolean;
 }
 
-function Message({threadUuid, roundtripStatus, message, showIndicator, reasoning}: Props) {
+function Message({threadUuid, roundtripStatus, message, showIndicator, showRollback, reasoning}: Props) {
     const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
@@ -198,7 +206,10 @@ function Message({threadUuid, roundtripStatus, message, showIndicator, reasoning
             headerAddition={
                 <>
                     <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
-                    <Time time={message.createdAt} />
+                    <HeaderEnd>
+                        {showRollback && <Rollback threadUuid={threadUuid} messageUuid={message.uuid} />}
+                        <Time time={message.createdAt} />
+                    </HeaderEnd>
                 </>
             }
             body={

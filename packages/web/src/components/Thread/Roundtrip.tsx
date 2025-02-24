@@ -1,5 +1,6 @@
 import {
     AssistantTextMessageData,
+    isAssistantMessage,
     MessageData,
     ReasoningMessageChunk,
     RoundtripMessageData,
@@ -92,6 +93,7 @@ export default function Roundtrip({threadUuid, roundtrip, isEditInteractive}: Pr
             roundtripStatus={roundtrip.status}
             message={view.message}
             showIndicator={roundtrip.status === 'running' && view.isActive}
+            showRollback={isAssistantMessage(view.message.type) && !isEditInteractive}
             reasoning={view.isReasoning}
         />
     );

@@ -1,5 +1,5 @@
 export {trimPathString, joinToMaxLength, JoinToMaxLengthResult} from './trim';
-export {now} from './time';
+export {now, countNounSimple} from './format';
 export {
     XmlParseTagEndChunk,
     XmlParseTagStartChunk,

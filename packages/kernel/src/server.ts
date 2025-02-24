@@ -11,6 +11,8 @@ import {
     InboxMarkRoundtripStatusHandler,
     InboxGetThreadListHandler,
     InboxCheckEditHandler,
+    InboxCheckRollbackHandler,
+    InboxRollbackHandler,
 } from './handlers/inbox';
 import {ModelChatHandler} from './handlers/model';
 import {ScaffoldHandler} from './handlers/scaffold';
@@ -56,6 +58,8 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.registerHandler(InboxMarkRoundtripStatusHandler);
         this.registerHandler(InboxCheckEditHandler);
         this.registerHandler(InboxGetThreadListHandler);
+        this.registerHandler(InboxCheckRollbackHandler);
+        this.registerHandler(InboxRollbackHandler);
         this.registerHandler(ExportInboxHandler);
     }
 }

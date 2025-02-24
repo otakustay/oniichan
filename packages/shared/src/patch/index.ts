@@ -9,4 +9,5 @@ export {
     createFileEdit,
     mergeFileEdits,
     revertFileEdit,
+    diffCount,
 } from './utils';

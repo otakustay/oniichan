@@ -50,6 +50,16 @@ export class MessageThread {
         return roundtrip;
     }
 
+    sliceRoundtripAfter(messageUuid: string) {
+        const index = this.roundtrips.findIndex(v => v.hasMessage(messageUuid));
+        return this.roundtrips.slice(index + 1);
+    }
+
+    rollbackRoundtripTo(messageUuid: string) {
+        const index = this.roundtrips.findIndex(v => v.hasMessage(messageUuid));
+        this.roundtrips.splice(index + 1);
+    }
+
     toMessages() {
         return this.roundtrips.flatMap(v => v.toMessages());
     }
