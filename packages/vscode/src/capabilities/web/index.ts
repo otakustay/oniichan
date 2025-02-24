@@ -16,6 +16,7 @@ import {
 import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
+import {waitCondition} from '@oniichan/shared/promise';
 import {WebHostClient} from '@oniichan/web-host/client';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
@@ -150,6 +151,7 @@ export class WebApp implements Disposable, WebviewViewProvider {
             'oniichan.composeNewMessage',
             async () => {
                 await commands.executeCommand('oniichan-sidebar.focus');
+                await waitCondition(() => !!this.sidebarClient, {interval: 50, timeout: 2000});
                 await this.sidebarClient?.call(newUuid(), 'composeNewMessage');
             }
         );
