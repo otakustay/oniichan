@@ -55,7 +55,8 @@
     "targets": {
       "build": {
         "outputs": [
-          "{projectRoot}/../vscode/dist/web"
+          "{projectRoot}/../vscode/dist/web",
+          "{projectRoot}/../vscode/dist/web-dev"
         ]
       }
     }
