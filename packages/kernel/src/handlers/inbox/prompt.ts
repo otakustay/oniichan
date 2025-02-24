@@ -1,5 +1,5 @@
 import {builtinTools} from '@oniichan/shared/tool';
-import {InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
+import {InboxPromptReference, InboxPromptView, renderInboxSystemPrompt} from '@oniichan/prompt';
 import {stringifyError} from '@oniichan/shared/error';
 import {ModelFeature} from '@oniichan/shared/model';
 import {EditorHost} from '../../core/editor';
@@ -33,6 +33,7 @@ export class SystemPromptGenerator {
             projectStructureTruncated: false,
             modelFeature: this.modelFeature,
             customRules: '',
+            references: [],
         };
 
         const toolsView = this.createToolsView();
@@ -85,6 +86,20 @@ export class SystemPromptGenerator {
             return {customRules: ''};
         }
 
-        return {customRules: content};
+        const files = [...content.matchAll(/#[^\s]+/g)].map(v => v.at(0)?.slice(1) ?? '').filter(v => !!v);
+        const references = await Promise.all(files.map(v => this.readReference(v)));
+
+        return {customRules: content, references: references.filter(v => !!v)};
+    }
+
+    private async readReference(file: string): Promise<InboxPromptReference | null> {
+        try {
+            const content = await this.editorHost.call('readWorkspaceFile', file);
+            return content ? {type: 'file', file, content} : null;
+        }
+        catch (ex) {
+            this.logger.warn('ReadReferenceFail', {reason: stringifyError(ex), file});
+            return null;
+        }
     }
 }
