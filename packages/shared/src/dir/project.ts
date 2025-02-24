@@ -14,5 +14,5 @@ export function projectRulesDirectory() {
 
 export function projectRules(name: string) {
     const directory = projectRulesDirectory();
-    return path.join(directory, `${name}.md`);
+    return path.join(directory, `${name}.omd`);
 }

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import dedent from 'dedent';
-import {projectConfig, projectRulesDirectory} from '@oniichan/shared/dir';
+import {projectConfig, projectRules} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
 import {RequestHandler} from '../handler';
 
@@ -15,7 +15,9 @@ const DEFAULT_RULES = dedent`
 
     Rules allows you to inject custom prompt communicating with LLM, this is actually done by replacing a **Rule** section in Oniichan's system prompt.
 
-    The default rule file is always \`.oniichan/rules/default.md\` in your workspace, this path is case sensitive so files like \`DEFAULT.md\` or \`Default.md\` will not work.
+    Rules files are markdown files with an special extension \`.omd\` (Oniichan Markdown), there is no additional syntax other than markdown.
+
+    The default rule file is always \`.oniichan/rules/default.omd\` in your workspace, this path is case sensitive so files like \`DEFAULT.omd\` or \`Default.omd\` will not work.
 
     To write a rule file, we recommend you to obey these resitrictions:
 
@@ -41,7 +43,6 @@ export class InitializeProjectConfigHandler extends RequestHandler<void, void> {
         }
 
         const configDirectory = projectConfig();
-        const rulesDirectory = projectRulesDirectory();
 
         try {
             const gitIgnoreFile = path.join(configDirectory, '.gitignore');
@@ -51,7 +52,7 @@ export class InitializeProjectConfigHandler extends RequestHandler<void, void> {
                 await editorHost.call('writeWorkspaceFile', {file: gitIgnoreFile, content: GIT_IGNORE});
             }
 
-            const defaultRuleFile = path.join(rulesDirectory, 'default.md');
+            const defaultRuleFile = projectRules('default');
             const existsDefaultRule = await editorHost.call('checkFileExists', defaultRuleFile);
             if (!existsDefaultRule) {
                 logger.trace('WriteDefaultRule');

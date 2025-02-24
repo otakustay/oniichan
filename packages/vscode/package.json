@@ -141,6 +141,12 @@
           }
         }
       }
+    ],
+    "languages": [
+      {
+        "id": "markdown",
+        "extensions": [".omd"]
+      }
     ]
   },
   "scripts": {
