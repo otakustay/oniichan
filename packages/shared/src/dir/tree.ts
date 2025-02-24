@@ -1,5 +1,17 @@
 import {sortedInsert} from '../array';
 
+const INDIRECT_INDENT_STRING = '│   ';
+
+const DIRECT_INDENT_STRING = '├── ';
+
+function sortEntry(x: Entry, y: Entry) {
+    if (x.type !== y.type) {
+        return x.type === 'directory' ? -1 : 1;
+    }
+
+    return x.name.localeCompare(y.name);
+}
+
 interface Entry {
     name: string;
     type: 'file' | 'directory';
@@ -16,7 +28,7 @@ function insertNode(entries: Entry[], from: Node): boolean {
         const exists = from.children.find(v => v.name === current.name);
         if (!exists) {
             const newNode = {...current, children: []};
-            sortedInsert(from.children, newNode, (x, y) => x.name.localeCompare(y.name));
+            sortedInsert(from.children, newNode, sortEntry);
         }
         return !exists;
     }
@@ -28,7 +40,7 @@ function insertNode(entries: Entry[], from: Node): boolean {
     }
     else {
         const newNode = {...current, children: []};
-        sortedInsert(from.children, newNode, (x, y) => x.name.localeCompare(y.name));
+        sortedInsert(from.children, newNode, sortEntry);
         insertNode(children, newNode);
         return true;
     }
@@ -80,10 +92,10 @@ export interface TreeifyResult {
 }
 
 function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
-    const output = new Set<string>();
-    const stripableLines: string[] = [];
+    const output: string[] = ['.'];
+    const stripableLineIndex = new Set<number>();
     const intoOutput = (node: Node, indent: number, prefix: string, stripable: boolean) => {
-        const indentString = ' '.repeat(indent * 2);
+        const indentString = indent ? INDIRECT_INDENT_STRING.repeat(indent - 1) + DIRECT_INDENT_STRING : '';
         const display = node.type === 'directory' ? node.name + '/' : node.name;
 
         if (node.children.length === 1 && node.children[0].type === 'directory') {
@@ -92,9 +104,10 @@ function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
         }
 
         const line = indentString + prefix + display;
-        output.add(line);
+        output.push(line);
         if (stripable) {
-            stripableLines.push(line);
+            // `output` always has a leading item, use `output.length` exactly meets the index
+            stripableLineIndex.add(output.length);
         }
 
         const requiredChildrenIndex = new Set(options.filterChildren(node.children));
@@ -103,22 +116,18 @@ function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
         }
     };
     for (const child of nodes) {
-        intoOutput(child, 0, '', false);
+        intoOutput(child, 1, '', false);
     }
 
-    if (output.size <= options.maxLines) {
+    if (output.length <= options.maxLines) {
         return {
-            tree: [...output].join('\n'),
+            tree: output.join('\n'),
             truncated: false,
         };
     }
 
-    for (const line of stripableLines) {
-        output.delete(line);
-    }
-
     return {
-        tree: [...output].slice(0, options.maxLines).join('\n'),
+        tree: output.filter((v, i) => !stripableLineIndex.has(i)).join('\n'),
         truncated: true,
     };
 }
@@ -126,7 +135,7 @@ function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
 export class WorkspaceFileStructure {
     static readonly containerKey = 'workspaceFileStructure';
 
-    private readonly root: Node = {name: '', type: 'directory', children: []};
+    private readonly root: Node = {name: '.', type: 'directory', children: []};
 
     add(file: string) {
         const entries = splitToEntries(file);

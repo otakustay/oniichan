@@ -1,7 +1,7 @@
 import {InboxPromptView} from './interface';
 
 const displayDescription =
-    'nested directories can be merged into a single line containing `/`  directories end with `/`.';
+    'The structure is organized like shell\'s `tree` command, the first line is always `.` indicating current project root, nested directories can be merged into a single line containing `/`  directories end with `/`.';
 
 const fullDescription =
     `This is a full structure of the project, you can inform these to narrow search scopes or read exact file from root directory. ${displayDescription}}`;
