@@ -79,7 +79,7 @@ const Content = styled(MessageContent)<{collapsed: boolean}>`
 
 const Header = styled.div<LayoutProps>`
     display: flex;
-    padding: ${props => props.compact ? '.5em 1em' : '1em'};
+    padding-bottom: ${props => props.compact ? '.5em' : '1em'};
     border-bottom: 1px solid var(--color-default-bottom);
     align-items: center;
     gap: .4em;

@@ -16,6 +16,10 @@ injectGlobal`
         color: var(--color-root-foreground);
         font-size: 14px;
     }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    }
 `;
 
 export const mediaWideScreen = 'min-width: 800px';
