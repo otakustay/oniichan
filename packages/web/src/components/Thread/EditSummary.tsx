@@ -68,7 +68,7 @@ const ItemLayout = styled.div`
     align-items: center;
     gap: .5em;
     height: 2em;
-    padding: 0 1em;
+    padding: 0 .5em;
     line-height: 1;
     border-radius: .5em;
     cursor: default;

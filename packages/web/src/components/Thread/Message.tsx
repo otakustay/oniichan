@@ -63,10 +63,10 @@ interface LayoutProps {
     compact: boolean | undefined;
 }
 
-const Layout = styled.div<LayoutProps>`
+const Layout = styled.div`
     display: flex;
     flex-direction: column;
-    padding: ${props => props.compact ? '.5em' : '1em'};
+    padding: 1em;
     border-radius: var(--item-border-radius, 0);
     background-color: var(--color-default-background);
 
@@ -162,7 +162,7 @@ interface MessageLayoutProps {
 
 function MessageLayout({className, ref, compact, avatar, authorName, headerAddition, body}: MessageLayoutProps) {
     return (
-        <Layout className={className} ref={ref} compact={compact}>
+        <Layout className={className} ref={ref}>
             <Header compact={compact}>
                 {avatar}
                 <Sender>{authorName}</Sender>
