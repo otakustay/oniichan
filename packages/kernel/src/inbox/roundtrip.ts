@@ -129,10 +129,20 @@ export class Roundtrip implements InboxRoundtrip {
         const lastResponse = this.responses.at(-1);
 
         if (lastResponse?.type !== 'message') {
-            throw new Error('Roundtrip does not have a latest message of type text');
+            throw new Error('Roundtrip does not have a latest response of type text');
         }
 
         return lastResponse.message;
+    }
+
+    getLatestWorkflowStrict(): Workflow {
+        const lastResponse = this.responses.at(-1);
+
+        if (lastResponse?.type !== 'workflow') {
+            throw new Error('Roundtrip does not have a latest response of type workflow');
+        }
+
+        return lastResponse.workflow;
     }
 
     addWarning(message: string) {

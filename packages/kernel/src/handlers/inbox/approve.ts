@@ -1,6 +1,7 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import {InboxRequestHandler, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
+import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from '../../workflow';
 
 export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripIdentity, InboxMessageResponse> {
     static readonly action = 'inboxApproveTool';
@@ -28,7 +29,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripI
     }
 
     private async *continueWorkflow(payload: InboxRoundtripIdentity) {
-        const {store, logger} = this.context;
+        const {store, logger, editorHost, commandExecutor} = this.context;
         await this.prepareEnvironment();
 
         logger.trace('EnsureRoundtrip');
@@ -36,14 +37,34 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripI
 
         logger.trace('PrepareOriginMessage');
         this.roundtrip = this.thread.findRoundtripByMessageUuidStrict(payload.requestMessageUuid);
+        const latestWorkflow = this.roundtrip.getLatestWorkflowStrict();
+        const origin = latestWorkflow.getOriginMessage();
 
-        await this.prepareSystemPrompt();
-        const workflowRunner = await this.detectWorkflowRunner();
-
-        if (!workflowRunner) {
-            throw new Error('Approved message does not contain a workflow');
+        if (origin.getToolCallStatus() !== 'waitingApprove') {
+            throw new Error('Workflow is not in a waiting approve state');
         }
 
-        yield* over(this.runWorkflow(workflowRunner)).map(v => ({type: 'value', value: v} as const));
+        // TODO: Add reject
+        origin.markToolCallStatus('userApproved');
+        const toolCallMessage = latestWorkflow.getOriginMessage();
+        const messages = this.roundtrip.toMessages();
+
+        await this.prepareSystemPrompt();
+        const init: ToolCallWorkflowRunnerInit = {
+            threadUuid: this.thread.uuid,
+            taskId: this.getTaskId(),
+            base: messages.filter(v => v !== toolCallMessage),
+            origin: toolCallMessage,
+            workflow: latestWorkflow,
+            telemetry: this.telemetry,
+            systemPrompt: this.systemPrompt,
+            modelAccess: this.modelAccess,
+            editorHost,
+            commandExecutor,
+            logger,
+            onUpdateThread: () => this.pushStoreUpdate(),
+        };
+        const runner = new ToolCallWorkflowRunner(init);
+        yield* over(this.runWorkflow(runner)).map(v => ({type: 'value', value: v} as const));
     }
 }

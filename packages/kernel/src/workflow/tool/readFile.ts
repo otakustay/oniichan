@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {readFileParameters, ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> {
     constructor(init: ToolImplementInit) {
@@ -14,7 +14,8 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
         };
     }
 
-    protected async execute(args: ReadFileParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         try {
             const content = await this.editorHost.call('readWorkspaceFile', args.path);
 

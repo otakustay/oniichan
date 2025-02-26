@@ -1,4 +1,4 @@
-import {createContext, ReactNode, useContext} from 'react';
+import {createContext, ReactNode, use} from 'react';
 import {RoundtripMessageData, extractFileEdits} from '@oniichan/shared/inbox';
 import {FileEditData, mergeFileEdits} from '@oniichan/shared/patch';
 
@@ -23,11 +23,11 @@ export default function FileEditContextProvider({roundtrip, isEditInteractive, c
 }
 
 export function useAllMergedFileEdits(): FileEditData[] {
-    const {edits} = useContext(Context);
+    const {edits} = use(Context);
     return Object.values(edits).filter(v => !!v).map(mergeFileEdits);
 }
 
 export function useIsEditInteractive() {
-    const {isEditInteractive} = useContext(Context);
+    const {isEditInteractive} = use(Context);
     return isEditInteractive;
 }

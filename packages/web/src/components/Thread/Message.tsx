@@ -9,6 +9,7 @@ import {MessageViewChunk, MessageData, RoundtripStatus, isAssistantMessage} from
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
+import {MessageContextProvider} from './MessageContext';
 import MessageContent from './MessageContent';
 import InteractiveLabel from '../InteractiveLabel';
 import Indicator from './Indicator';
@@ -199,28 +200,30 @@ function Message({threadUuid, roundtripStatus, message, showIndicator, showRollb
     const chunks = resolveMessageContent(message);
 
     return (
-        <MessageLayout
-            ref={ref}
-            avatar={renderAvatar(message)}
-            authorName={resolveSenderName(message)}
-            headerAddition={
-                <>
-                    <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
-                    <HeaderEnd>
-                        {showRollback && <Rollback threadUuid={threadUuid} messageUuid={message.uuid} />}
-                        <Time time={message.createdAt} />
-                    </HeaderEnd>
-                </>
-            }
-            body={
-                <>
-                    <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
-                    {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
-                    {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
-                    <Error reason={message.error} />
-                </>
-            }
-        />
+        <MessageContextProvider threadUuid={threadUuid} messageUuid={message.uuid}>
+            <MessageLayout
+                ref={ref}
+                avatar={renderAvatar(message)}
+                authorName={resolveSenderName(message)}
+                headerAddition={
+                    <>
+                        <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
+                        <HeaderEnd>
+                            {showRollback && <Rollback threadUuid={threadUuid} messageUuid={message.uuid} />}
+                            <Time time={message.createdAt} />
+                        </HeaderEnd>
+                    </>
+                }
+                body={
+                    <>
+                        <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
+                        {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
+                        {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
+                        <Error reason={message.error} />
+                    </>
+                }
+            />
+        </MessageContextProvider>
     );
 }
 

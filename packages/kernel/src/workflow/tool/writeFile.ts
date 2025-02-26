@@ -1,5 +1,5 @@
 import {writeFileParameters, WriteFileParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 import {stringifyError} from '@oniichan/shared/error';
 
 export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter> {
@@ -14,7 +14,8 @@ export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter
         };
     }
 
-    protected async execute(args: WriteFileParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         const edit = this.origin.getFileEdit();
 
         if (!edit) {

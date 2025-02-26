@@ -13,7 +13,7 @@ export interface WorkflowRunnerInit {
     commandExecutor: CommandExecutor;
     telemetry: FunctionUsageTelemetry;
     logger: Logger;
-    onUpdateThrad: () => void;
+    onUpdateThread: () => void;
 }
 
 export interface WorkflowRunResult {
@@ -43,7 +43,7 @@ export abstract class WorkflowRunner {
         this.taskId = init.taskId;
         this.workflow = init.workflow;
         this.telemetry = init.telemetry;
-        this.onUpdateThread = init.onUpdateThrad;
+        this.onUpdateThread = init.onUpdateThread;
     }
 
     getWorkflow() {
@@ -53,7 +53,6 @@ export abstract class WorkflowRunner {
     async run(): Promise<void> {
         try {
             const result = await this.execute();
-            this.workflow.markStatus('completed');
             this.workflow.setContinueRoundtrip(!result.finished);
         }
         catch (ex) {

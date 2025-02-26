@@ -1,6 +1,6 @@
-import {ModelToolCallInput} from '@oniichan/shared/tool';
+import {ModelToolCallInput, ToolName} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 import {ReadFileToolImplement} from './readFile';
 import {ReadDirectoryToolImplement} from './readDirectory';
 import {GlobFilesToolImplement} from './globFiles';
@@ -42,35 +42,47 @@ export class ToolImplement {
         this.browserPreview = new BrowserPreviewToolImplement(init);
     }
 
-    async callTool(input: ModelToolCallInput): Promise<ToolRunResult> {
-        switch (input.name) {
+    async *callTool(input: ModelToolCallInput): AsyncIterable<ToolRunStep> {
+        const implement = this.getImplement(input.name);
+
+        if (implement) {
+            yield* implement.run(input.arguments);
+        }
+        else {
+            // No implement means "skip and go", not something errored
+            yield {
+                type: 'success',
+                finished: true,
+                output: '',
+            };
+        }
+    }
+
+    private getImplement(name: ToolName) {
+        switch (name) {
             case 'read_directory':
-                return this.readDirectory.run(input.arguments);
+                return this.readDirectory;
             case 'read_file':
-                return this.readFile.run(input.arguments);
+                return this.readFile;
             case 'find_files_by_glob':
-                return this.globFiles.run(input.arguments);
+                return this.globFiles;
             case 'find_files_by_regex':
-                return this.grepFiles.run(input.arguments);
+                return this.grepFiles;
             case 'write_file':
-                return this.writeFile.run(input.arguments);
+                return this.writeFile;
             case 'patch_file':
-                return this.patchFile.run(input.arguments);
+                return this.patchFile;
             case 'delete_file':
-                return this.deleteFile.run(input.arguments);
+                return this.deleteFile;
             case 'run_command':
-                return this.runCommand.run(input.arguments);
+                return this.runCommand;
             case 'browser_preview':
-                return this.browserPreview.run(input.arguments);
+                return this.browserPreview;
             case 'attempt_completion':
             case 'ask_followup_question':
-                return {
-                    type: 'success',
-                    finished: true,
-                    output: '',
-                };
+                return null;
             default:
-                assertNever<string>(input.name, v => `Unknown tool ${v}`);
+                assertNever<string>(name, v => `Unknown tool ${v}`);
         }
     }
 }

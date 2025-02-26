@@ -7,7 +7,7 @@ import {ModelAccessHost} from '../core/model';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
 
-export {WorkflowRunner};
+export {WorkflowRunner, ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit};
 
 export interface WorkflowDetectorInit {
     threadUuid: string;
@@ -73,7 +73,7 @@ export class WorkflowDetector {
             telemetry: this.telemetry,
             logger: this.logger,
             commandExecutor: this.commandExecutor,
-            onUpdateThrad: this.onUpdateThread,
+            onUpdateThread: this.onUpdateThread,
         };
         const workflow = this.roundtrip.startWorkflowResponse(toolCallMessage);
         const init: ToolCallWorkflowRunnerInit = {

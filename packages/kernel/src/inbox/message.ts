@@ -19,6 +19,7 @@ import {
     chunkToString,
     normalizeArguments,
     MessageInputChunk,
+    ToolCallChunkStatus,
 } from '@oniichan/shared/inbox';
 import {EditorHost} from '../core/editor';
 import {InboxRoundtrip} from './interface';
@@ -182,9 +183,14 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
         await this.takeFileEditSnapshot(editorHost);
     }
 
-    completeToolCall() {
+    getToolCallStatus(): ToolCallChunkStatus {
         const chunk = this.findToolCallChunkStrict();
-        chunk.status = 'completed';
+        return chunk.status;
+    }
+
+    markToolCallStatus(status: ToolCallChunkStatus) {
+        const chunk = this.findToolCallChunkStrict();
+        chunk.status = status;
     }
 
     toMessageData(): ToolCallMessageData {
@@ -328,7 +334,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
         }
         else if (chunk.type === 'toolEnd') {
             assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
-            lastChunk.status = 'completed';
+            lastChunk.status = 'waitingValidate';
             lastChunk.source += chunk.source;
             return;
         }

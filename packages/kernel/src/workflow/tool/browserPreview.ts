@@ -1,5 +1,5 @@
 import {browserPreviewParameters, BrowserPreviewParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
     constructor(init: ToolImplementInit) {
@@ -12,7 +12,8 @@ export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPrevie
         };
     }
 
-    protected async execute(args: BrowserPreviewParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         const response = await fetch(args.url);
 
         if (response.ok) {

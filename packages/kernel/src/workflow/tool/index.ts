@@ -6,7 +6,8 @@ import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow';
 import {ToolImplement} from './implement';
 import {ToolCallFixer, ToolCallFixerInit, ToolCallMessageParser} from './fix';
-import {isToolInputError, RequireFix} from './utils';
+import {ExecuteError, RequireFix, Success, ToolInputError} from './utils';
+import {assertNever} from '@oniichan/shared/error';
 
 const RETRY_LIMIT = 3;
 
@@ -42,42 +43,66 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 
-    async execute(): Promise<WorkflowRunResult> {
+    protected async execute(): Promise<WorkflowRunResult> {
         const toolInput = this.message.getToolCallInput();
         this.logger.trace('ToolCallStart', {input: toolInput, retry: this.retries});
-        const result = await this.implment.callTool(toolInput);
-
-        if (result.type === 'requireFix') {
-            this.logger.trace('FixToolCallStart', {result: result.type});
-            await this.fix(result);
-            this.logger.trace('FixToolCallFinish', {result: result.type});
-            this.updateThread();
-            return this.retry();
+        for await (const step of this.implment.callTool(toolInput)) {
+            switch (step.type) {
+                case 'startToolRun':
+                    this.origin.markToolCallStatus('executing');
+                    break;
+                case 'requireApprove':
+                    this.origin.markToolCallStatus('waitingApprove');
+                    return {finished: true};
+                case 'executeError':
+                case 'success':
+                    return this.handleFinishStep(step);
+                case 'requireFix':
+                    return this.handleRequireFixStep(step);
+                case 'parameterMissing':
+                case 'parameterType':
+                case 'validationError':
+                    return this.handleInputErrorStep(step);
+                default:
+                    assertNever<{type: string}>(step, v => `Unknown step type ${v.type}`);
+            }
         }
+        throw new Error('Tool execute yields no expected result');
+    }
 
-        if (isToolInputError(result)) {
-            this.logger.trace('FixToolError', {error: result});
-            const fixerInit: ToolCallFixerInit = {
-                message: this.message,
-                error: result,
-                editorHost: this.editorHost,
-                modelAccess: this.modelAccess,
-                telemetry: this.telemetry,
-            };
-            const fixer = new ToolCallFixer(fixerInit);
-            const newToolCall = await fixer.fixToolCall();
-            await this.origin.replaceToolCallInput(newToolCall, this.editorHost);
-            this.updateThread();
-            return this.retry();
-        }
+    private async handleInputErrorStep(step: ToolInputError) {
+        this.logger.trace('FixToolError', {error: step});
+        const fixerInit: ToolCallFixerInit = {
+            message: this.message,
+            error: step,
+            editorHost: this.editorHost,
+            modelAccess: this.modelAccess,
+            telemetry: this.telemetry,
+        };
+        const fixer = new ToolCallFixer(fixerInit);
+        const newToolCall = await fixer.fixToolCall();
+        await this.origin.replaceToolCallInput(newToolCall, this.editorHost);
+        this.updateThread();
+        return this.retry();
+    }
 
-        this.origin.completeToolCall();
-        this.logger.trace('ToolCallFinish', {result: result.type});
+    private async handleRequireFixStep(step: RequireFix) {
+        this.logger.trace('FixToolCallStart', {result: step.type});
+        await this.fix(step);
+        this.logger.trace('FixToolCallFinish', {result: step.type});
+        this.updateThread();
+        return this.retry();
+    }
 
-        const responseMessage = new ToolUseMessage(newUuid(), this.message.getRoundtrip(), result.output);
+    private handleFinishStep(step: Success | ExecuteError) {
+        this.origin.markToolCallStatus(step.type === 'success' ? 'completed' : 'failed');
+        this.logger.trace('ToolCallFinish', {result: step.type});
+
+        const responseMessage = new ToolUseMessage(newUuid(), this.message.getRoundtrip(), step.output);
+        this.workflow.markStatus('completed');
         this.workflow.addReaction(responseMessage, true);
         this.updateThread();
-        return {finished: result.type === 'success' && result.finished};
+        return {finished: step.type === 'executeError' || step.finished};
     }
 
     private async retry() {

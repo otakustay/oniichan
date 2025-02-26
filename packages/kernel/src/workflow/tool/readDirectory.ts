@@ -2,7 +2,7 @@ import path from 'node:path';
 import {readDirectoryParameters, ReadDirectoryParameter} from '@oniichan/shared/tool';
 import {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
     constructor(init: ToolImplementInit) {
@@ -16,7 +16,8 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
         };
     }
 
-    protected async execute(args: ReadDirectoryParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 

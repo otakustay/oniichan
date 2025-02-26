@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {findFilesByGlobParameters, FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {
     constructor(init: ToolImplementInit) {
@@ -14,7 +14,8 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         };
     }
 
-    protected async execute(args: FindFilesByGlobParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 

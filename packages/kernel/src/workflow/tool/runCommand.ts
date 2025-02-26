@@ -1,6 +1,6 @@
 import {runCommandParameters, RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
 
@@ -15,7 +15,8 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
         };
     }
 
-    protected async execute(args: RunCommandParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -86,5 +87,9 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                 output: `Unable to execute command \`${args.command}\`: ${stringifyError(ex)}`,
             };
         }
+    }
+
+    protected requireUserApprove(): boolean {
+        return true;
     }
 }

@@ -11,11 +11,23 @@ export interface TextMessageChunk {
     content: string;
 }
 
+export type ToolCallChunkStatus =
+    | 'generating'
+    | 'waitingValidate'
+    | 'validateError'
+    | 'validated'
+    | 'waitingApprove'
+    | 'userApproved'
+    | 'userRejected'
+    | 'executing'
+    | 'completed'
+    | 'failed';
+
 export interface ToolCallMessageChunk {
     type: 'toolCall';
     toolName: ToolName;
     arguments: Record<string, string | undefined>;
-    status: 'generating' | 'executing' | 'completed';
+    status: ToolCallChunkStatus;
     fileEdit: FileEditData | null;
     source: string;
 }

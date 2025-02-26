@@ -1,7 +1,7 @@
 import unixify from 'unixify';
 import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 // For each match, its a `begin - context - match - context - end` sequence,
 // so a maximum of 1000 lines contains 200 search results
@@ -60,7 +60,8 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
         };
     }
 
-    protected async execute(args: FindFilesByRegExpParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 

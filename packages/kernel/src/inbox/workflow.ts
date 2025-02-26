@@ -34,12 +34,16 @@ export class Workflow {
         this.roundtrip = roundtrip;
     }
 
+    getStatus() {
+        return this.status;
+    }
+
     getOriginMessage() {
         return this.origin;
     }
 
     shouldContinueRoundtrip() {
-        return this.continueRoundtrip;
+        return this.status === 'completed' && this.continueRoundtrip;
     }
 
     setContinueRoundtrip(shouldContinue: boolean) {

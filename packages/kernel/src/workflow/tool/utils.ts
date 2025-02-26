@@ -1,8 +1,9 @@
 import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {Logger} from '@oniichan/shared/logger';
+import {assertNever} from '@oniichan/shared/error';
 import {EditorHost} from '../../core/editor';
 import {CommandExecutor} from '../../core/command';
-import {ToolCallMessage} from '../../inbox';
+import {ToolCallMessage, Workflow} from '../../inbox';
 
 const ajv = new Ajv();
 
@@ -82,6 +83,15 @@ function validateArguments<A>(schema: Schema, args: Partial<A>): ValidationResul
     };
 }
 
+export interface StartToolRun {
+    type: 'startToolRun';
+}
+
+export interface ValidateSuccess<A> {
+    type: 'validateSuccess';
+    args: A;
+}
+
 export interface ParameterMissingError {
     type: 'parameterMissing';
     parameter: string;
@@ -109,6 +119,10 @@ export interface RequireFix {
     includesBase: boolean;
 }
 
+export interface RequireApprove {
+    type: 'requireApprove';
+}
+
 export interface Success {
     type: 'success';
     finished: boolean;
@@ -117,14 +131,11 @@ export interface Success {
 
 export type ToolInputError = ParameterMissingError | ParameterTypeError | ValidationError;
 
-export type ToolRunResult = Success | ExecuteError | RequireFix | ToolInputError;
-
-export function isToolInputError(result: ToolRunResult): result is ToolInputError {
-    return result.type === 'parameterMissing' || result.type === 'parameterType' || result.type === 'validationError';
-}
+export type ToolRunStep = StartToolRun | RequireApprove | Success | ExecuteError | RequireFix | ToolInputError;
 
 export interface ToolImplementInit {
     origin: ToolCallMessage;
+    workflow: Workflow;
     editorHost: EditorHost;
     logger: Logger;
     commandExecutor: CommandExecutor;
@@ -141,6 +152,8 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     private readonly schema: Schema;
 
+    private arguments: A | null = null;
+
     constructor(className: string, init: ToolImplementInit, schema: Schema) {
         this.origin = init.origin;
         this.editorHost = init.editorHost;
@@ -149,31 +162,103 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         this.schema = schema;
     }
 
-    async run(generated: Record<string, string | undefined>): Promise<ToolRunResult> {
+    async *run(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
+        // This method can be invoked either on initial generated or on user approved,
+        // we have to parse and generated arguments on every run,
+        // but we are sure that the validation must be successful after the first time
+        if (!this.arguments) {
+            yield* this.validate(generated);
+        }
+
+        const status = this.origin.getToolCallStatus();
+        // It's actually a fragile self looping state machine :(
+        switch (status) {
+            case 'waitingValidate':
+                throw new Error('never');
+            case 'validateError':
+                // TODO: Maybe it's better to fix parameter error here
+                // This is handled outside
+                break;
+            // From now on we expect `this.arguments` to be truthy
+            case 'validated':
+                yield* this.waitUserApprove(generated);
+                break;
+            case 'userApproved':
+                yield {type: 'startToolRun'};
+                yield this.execute();
+                break;
+            case 'waitingApprove':
+            case 'generating':
+            case 'userRejected':
+            case 'executing':
+            case 'completed':
+            case 'failed':
+                this.logger.warn('ToolRunOnInvalidStatus', {messageUuid: this.origin.uuid, status});
+                return;
+            default:
+                assertNever<string>(status, v => `Unexpected tool call status ${v}`);
+        }
+    }
+
+    private async *validate(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
         const parsed = this.parseArgs(generated);
         const validateResult = validateArguments(this.schema, parsed);
 
         if (validateResult.type === 'valid') {
-            return this.execute(validateResult.args);
+            this.arguments = validateResult.args;
+            // This is called every time at any possible tool call status,
+            // but we should avoid reverting status to `validated` after the first validation
+            if (this.origin.getToolCallStatus() === 'waitingValidate') {
+                this.origin.markToolCallStatus('validated');
+            }
+            return;
         }
+
+        this.origin.markToolCallStatus('validateError');
 
         switch (validateResult.type) {
             case 'missing':
-                return {type: 'parameterMissing', parameter: validateResult.property};
+                yield {type: 'parameterMissing', parameter: validateResult.property};
+                break;
             case 'type':
-                return {
+                yield {
                     type: 'parameterType',
                     parameter: validateResult.property,
                     expectedType: validateResult.expectedType,
                 };
+                break;
             default:
-                return {type: 'validationError', message: validateResult.message};
+                yield {type: 'validationError', message: validateResult.message};
+                break;
         }
+    }
+
+    private async *waitUserApprove(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
+        if (this.requireUserApprove()) {
+            this.origin.markToolCallStatus('waitingApprove');
+            yield {type: 'requireApprove'};
+        }
+        else {
+            this.origin.markToolCallStatus('userApproved');
+            yield* this.run(generated);
+        }
+    }
+
+    protected getToolCallArguments() {
+        if (!this.arguments) {
+            throw new Error('Tool call has not been validated');
+        }
+
+        return this.arguments;
+    }
+
+    protected requireUserApprove(): boolean {
+        return false;
     }
 
     protected abstract parseArgs(args: Record<string, string | undefined>): Partial<A>;
 
-    protected abstract execute(args: A): Promise<ToolRunResult>;
+    protected abstract execute(): Promise<ToolRunStep>;
 }
 
 export function codeBlock(code: string, language = '') {

@@ -1,5 +1,5 @@
 import {deleteFileParameters, DeleteFileParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParameter> {
     constructor(init: ToolImplementInit) {
@@ -12,7 +12,8 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
         };
     }
 
-    protected async execute(args: DeleteFileParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         const deleted = await this.editorHost.call('deleteWorkspaceFile', args.path);
         return {
             type: 'success',

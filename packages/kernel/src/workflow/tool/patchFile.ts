@@ -1,7 +1,7 @@
 import dedent from 'dedent';
 import {patchFileParameters, PatchFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunResult} from './utils';
+import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
 
 export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
     constructor(init: ToolImplementInit) {
@@ -15,7 +15,8 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         };
     }
 
-    protected async execute(args: PatchFileParameter): Promise<ToolRunResult> {
+    protected async execute(): Promise<ToolRunStep> {
+        const args = this.getToolCallArguments();
         const edit = this.origin.getFileEdit();
 
         if (!edit) {
