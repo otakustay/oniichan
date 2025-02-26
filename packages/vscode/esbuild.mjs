@@ -37,6 +37,7 @@ try {
         format: 'cjs',
         minify: production,
         sourcemap: !production,
+        keepNames: true,
         sourcesContent: false,
         platform: 'node',
         outdir: 'dist',
