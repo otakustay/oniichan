@@ -1,17 +1,19 @@
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {Logger} from '@oniichan/shared/logger';
-import {Roundtrip} from '../inbox';
+import {InboxRoundtrip} from '../inbox';
 import {EditorHost} from '../core/editor';
 import {CommandExecutor} from '../core/command';
 import {ModelAccessHost} from '../core/model';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
 
+export {WorkflowRunner};
+
 export interface WorkflowDetectorInit {
     threadUuid: string;
     taskId: string;
     systemPrompt: string;
-    roundtrip: Roundtrip;
+    roundtrip: InboxRoundtrip;
     modelAccess: ModelAccessHost;
     editorHost: EditorHost;
     telemetry: FunctionUsageTelemetry;
@@ -27,7 +29,7 @@ export class WorkflowDetector {
 
     private readonly systemPrompt: string;
 
-    private readonly roundtrip: Roundtrip;
+    private readonly roundtrip: InboxRoundtrip;
 
     private readonly modelAccess: ModelAccessHost;
 

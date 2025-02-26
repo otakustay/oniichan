@@ -11,6 +11,7 @@ import type {
     InboxCheckEditHandler,
     InboxCheckRollbackHandler,
     InboxRollbackHandler,
+    InboxApproveToolHandler,
 } from './handlers/inbox';
 import type {ExportInboxHandler} from './handlers/debug';
 import type {InitializeProjectConfigHandler} from './handlers/config';
@@ -18,11 +19,8 @@ import type {InitializeProjectConfigHandler} from './handlers/config';
 export type {
     InboxSendMessageRequest,
     InboxMarkRoundtripStatusRequest,
-    CheckEditRequest,
-    InboxCheckRollbackRequest,
-    CheckEditResponse,
+    InboxCheckEditResponse,
     InboxRollbackCheckItem,
-    InboxRollbackRequest,
 } from './handlers/inbox';
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
 export type {ScaffoldRequest, ScaffoldResponse} from './handlers/scaffold';
@@ -39,6 +37,7 @@ export type KernelProtocol = ProtocolOf<
     | typeof InboxGetThreadListHandler
     | typeof InboxCheckRollbackHandler
     | typeof InboxRollbackHandler
+    | typeof InboxApproveToolHandler
     | typeof ExportInboxHandler
     | typeof InitializeProjectConfigHandler
 >;

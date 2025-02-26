@@ -13,6 +13,7 @@ import {
     InboxCheckEditHandler,
     InboxCheckRollbackHandler,
     InboxRollbackHandler,
+    InboxApproveToolHandler,
 } from './handlers/inbox';
 import {ModelChatHandler} from './handlers/model';
 import {ScaffoldHandler} from './handlers/scaffold';
@@ -61,6 +62,7 @@ export class KernelServer extends Server<KernelProtocol, Context> {
         this.registerHandler(InboxGetThreadListHandler);
         this.registerHandler(InboxCheckRollbackHandler);
         this.registerHandler(InboxRollbackHandler);
+        this.registerHandler(InboxApproveToolHandler);
         this.registerHandler(ExportInboxHandler);
         this.registerHandler(InitializeProjectConfigHandler);
     }

@@ -2,7 +2,7 @@ import {assertNever} from '@oniichan/shared/error';
 import {RoundtripData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
 import {AssistantTextMessage, UserRequestMessage, Message} from './message';
 import {Workflow, WorkflowOriginMessage} from './workflow';
-import {MessageRoundrip} from './interface';
+import {InboxRoundtrip} from './interface';
 import {FileEditData} from '@oniichan/shared/patch';
 
 interface RoundtripMessageResponse {
@@ -21,7 +21,7 @@ type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse;
  * A roundtrip is a part of a thread that starts from a user submitted request,
  * then a bunch of messages are involed to handle this request, like tool calls and LLM text responses.
  */
-export class Roundtrip implements MessageRoundrip {
+export class Roundtrip implements InboxRoundtrip {
     static from(data: RoundtripData): Roundtrip {
         const roundtrip = new Roundtrip();
         const request = UserRequestMessage.from(data.request, roundtrip);

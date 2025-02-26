@@ -1,4 +1,5 @@
 import {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from '@oniichan/shared/inbox';
+import {InboxRoundtrip} from './interface';
 import {Roundtrip} from './roundtrip';
 
 /**
@@ -15,13 +16,13 @@ export class MessageThread {
 
     public readonly uuid: string;
 
-    private readonly roundtrips: Roundtrip[] = [];
+    private readonly roundtrips: InboxRoundtrip[] = [];
 
     constructor(uuid: string) {
         this.uuid = uuid;
     }
 
-    addRoundtrip(roundtrip: Roundtrip) {
+    addRoundtrip(roundtrip: InboxRoundtrip) {
         this.roundtrips.push(roundtrip);
     }
 
@@ -65,7 +66,7 @@ export class MessageThread {
     }
 
     toThreadData(): MessageThreadData {
-        const roundtripToData = (roundtrip: Roundtrip): RoundtripMessageData => {
+        const roundtripToData = (roundtrip: InboxRoundtrip): RoundtripMessageData => {
             return {
                 status: roundtrip.getStatus(),
                 messages: roundtrip.toMessages().map(v => v.toMessageData()),

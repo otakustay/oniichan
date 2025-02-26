@@ -21,7 +21,7 @@ import {
     MessageInputChunk,
 } from '@oniichan/shared/inbox';
 import {EditorHost} from '../core/editor';
-import {MessageRoundrip} from './interface';
+import {InboxRoundtrip} from './interface';
 import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 
 abstract class MessageBase<T extends MessageType> {
@@ -29,13 +29,13 @@ abstract class MessageBase<T extends MessageType> {
 
     readonly type: T;
 
-    protected readonly roundtrip: MessageRoundrip;
+    protected readonly roundtrip: InboxRoundtrip;
 
     private createdAt = now();
 
     private error: string | undefined = undefined;
 
-    constructor(uuid: string, type: T, roundtrip: MessageRoundrip) {
+    constructor(uuid: string, type: T, roundtrip: InboxRoundtrip) {
         this.uuid = uuid;
         this.type = type;
         this.roundtrip = roundtrip;
@@ -68,7 +68,7 @@ abstract class MessageBase<T extends MessageType> {
 }
 
 export class UserRequestMessage extends MessageBase<'userRequest'> {
-    static from(data: UserRequestMessageData, roundtrip: MessageRoundrip) {
+    static from(data: UserRequestMessageData, roundtrip: InboxRoundtrip) {
         const message = new UserRequestMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
         return message;
@@ -76,7 +76,7 @@ export class UserRequestMessage extends MessageBase<'userRequest'> {
 
     readonly content: string;
 
-    constructor(uuid: string, roundtrip: MessageRoundrip, content: string) {
+    constructor(uuid: string, roundtrip: InboxRoundtrip, content: string) {
         super(uuid, 'userRequest', roundtrip);
         this.content = content;
     }
@@ -101,7 +101,7 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
     protected readonly chunks: MessageContentChunk[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-    constructor(uuid: string, type: T, roundtrip: MessageRoundrip) {
+    constructor(uuid: string, type: T, roundtrip: InboxRoundtrip) {
         super(uuid, type, roundtrip);
     }
 
@@ -135,12 +135,12 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
 }
 
 export class ToolCallMessage extends AssistantMessage<'toolCall'> {
-    static from(data: ToolCallMessageData, roundtrip: MessageRoundrip) {
+    static from(data: ToolCallMessageData, roundtrip: InboxRoundtrip) {
         const message = new ToolCallMessage(roundtrip, data);
         return message;
     }
 
-    constructor(roundtrip: MessageRoundrip, source: AssistantTextMessageData | ToolCallMessageData) {
+    constructor(roundtrip: InboxRoundtrip, source: AssistantTextMessageData | ToolCallMessageData) {
         super(source.uuid, 'toolCall', roundtrip);
         this.restore(source);
     }
@@ -258,13 +258,13 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
 }
 
 export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
-    static from(data: AssistantTextMessageData, roundtrip: MessageRoundrip) {
+    static from(data: AssistantTextMessageData, roundtrip: InboxRoundtrip) {
         const message = new AssistantTextMessage(data.uuid, roundtrip);
         message.restore(data);
         return message;
     }
 
-    constructor(uuid: string, roundtrip: MessageRoundrip) {
+    constructor(uuid: string, roundtrip: InboxRoundtrip) {
         super(uuid, 'assistantText', roundtrip);
     }
 
@@ -360,7 +360,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
 }
 
 export class ToolUseMessage extends MessageBase<'toolUse'> {
-    static from(data: ToolUseMessageData, roundtrip: MessageRoundrip) {
+    static from(data: ToolUseMessageData, roundtrip: InboxRoundtrip) {
         const message = new ToolUseMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
         return message;
@@ -368,7 +368,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
 
     readonly content: string;
 
-    constructor(uuid: string, roundtrip: MessageRoundrip, content: string) {
+    constructor(uuid: string, roundtrip: InboxRoundtrip, content: string) {
         super(uuid, 'toolUse', roundtrip);
 
         this.content = content;
@@ -392,7 +392,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
 
 export type Message = UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
 
-export function deserializeMessage(data: MessageData, roundtrip: MessageRoundrip): Message {
+export function deserializeMessage(data: MessageData, roundtrip: InboxRoundtrip): Message {
     switch (data.type) {
         case 'userRequest':
             return UserRequestMessage.from(data, roundtrip);

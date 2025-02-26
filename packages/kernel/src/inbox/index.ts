@@ -12,6 +12,7 @@ export {
 export {Roundtrip} from './roundtrip';
 export {MessageThread} from './thread';
 export {Workflow, WorkflowOriginMessage} from './workflow';
+export {InboxRoundtrip} from './interface';
 
 export class ThreadStore {
     static readonly containerKey = 'ThreadStore';

@@ -1,14 +1,32 @@
 import {InboxConfig} from '@oniichan/editor-host/protocol';
 import {InboxPromptReference} from '@oniichan/prompt';
-import {ModelAccessHost, ModelChatOptions} from '../../core/model';
-import {AssistantTextMessage, MessageThread} from '../../inbox';
-import {RequestHandler} from '../handler';
-import {SystemPromptGenerator} from './prompt';
 import {ModelResponse} from '@oniichan/shared/model';
 import {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
+import {stringifyError} from '@oniichan/shared/error';
+import {newUuid} from '@oniichan/shared/id';
+import {ModelAccessHost, ModelChatOptions} from '../../core/model';
+import {InboxRoundtrip, MessageThread, Roundtrip} from '../../inbox';
+import {WorkflowDetector, WorkflowDetectorInit, WorkflowRunner} from '../../workflow';
+import {RequestHandler} from '../handler';
+import {SystemPromptGenerator} from './prompt';
+
+export interface InboxMessageIdentity {
+    threadUuid: string;
+    messageUuid: string;
+}
+
+export interface InboxRoundtripIdentity {
+    threadUuid: string;
+    requestMessageUuid: string;
+}
+
+export interface InboxMessageResponse {
+    replyUuid: string;
+    value: MessageInputChunk;
+}
 
 export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost, this.context.logger);
@@ -16,6 +34,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private readonly references: InboxPromptReference[] = [];
 
     private inboxConfig: InboxConfig = {enableDeepThink: false};
+
+    protected thread: MessageThread = new MessageThread(newUuid());
+
+    protected roundtrip: InboxRoundtrip = new Roundtrip();
 
     protected modelAccess = new ModelAccessHost(this.context.editorHost, {enableDeepThink: false});
 
@@ -47,13 +69,14 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         logger.trace('PrepareSystemPromptFinish', {systemPrompt: this.systemPrompt});
     }
 
-    protected async *requestModelChat(thread: MessageThread, reply: AssistantTextMessage) {
-        const {logger, store} = this.context;
-        const messages = thread.toMessages();
+    protected async *requestModelChat(): AsyncIterable<InboxMessageResponse> {
+        const {logger} = this.context;
+        const reply = this.roundtrip.startTextResponse(newUuid());
+        const messages = this.thread.toMessages();
 
         this.pushStoreUpdate();
 
-        logger.trace('RequestModelStart', {threadUuid: thread.uuid, messages});
+        logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
             messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
@@ -79,7 +102,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
                 // Less frequently flush message to frontend
                 if (chunk.type !== 'text' && chunk.type !== 'reasoning') {
-                    this.updateInboxThreadList(store.dump());
+                    this.pushStoreUpdate();
                 }
 
                 // Force at most one tool is used per response
@@ -88,19 +111,76 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
                 }
             }
         }
+        catch (ex) {
+            reply.setError(stringifyError(ex));
+        }
         finally {
             // Broadcast update when one message is fully generated
-            this.pushStoreUpdate(thread.uuid);
+            this.pushStoreUpdate(this.thread.uuid);
         }
 
         logger.trace('RequestModelFinish');
+
+        // TODO: Check if a tool is auto approved
+        const workflowRunner = await this.detectWorkflowRunner();
+
+        if (workflowRunner) {
+            yield* this.runWorkflow(workflowRunner);
+        }
     }
 
-    protected pushStoreUpdate(moveMessageToTop?: string) {
+    protected async detectWorkflowRunner() {
+        const {logger, editorHost, commandExecutor} = this.context;
+        const detectorInit: WorkflowDetectorInit = {
+            threadUuid: this.thread.uuid,
+            taskId: this.getTaskId(),
+            systemPrompt: this.systemPrompt,
+            telemetry: this.telemetry,
+            modelAccess: this.modelAccess,
+            roundtrip: this.roundtrip,
+            editorHost,
+            commandExecutor,
+            logger,
+            onUpdateThread: () => this.pushStoreUpdate(),
+        };
+        const detector = new WorkflowDetector(detectorInit);
+        const workflowRunner = await detector.detectWorkflow();
+
+        if (workflowRunner) {
+            // Detecting workflow can change message content, such as move a text message to tool call message
+            this.pushStoreUpdate();
+        }
+
+        return workflowRunner;
+    }
+
+    protected async *runWorkflow(runner: WorkflowRunner): AsyncIterable<InboxMessageResponse> {
+        const {logger} = this.context;
+        const origin = runner.getWorkflow().getOriginMessage();
+        try {
+            logger.trace('RunWorkflow', {originUuid: origin.uuid});
+            await runner.run();
+            logger.trace('RunWorkflowFinish');
+        }
+        catch (ex) {
+            const reason = stringifyError(ex);
+            logger.error('RunWorkflowFail', {reason});
+            origin.setError(reason);
+        }
+        finally {
+            this.pushStoreUpdate(this.thread.uuid);
+        }
+
+        if (runner.getWorkflow().shouldContinueRoundtrip()) {
+            yield* this.requestModelChat();
+        }
+    }
+
+    protected pushStoreUpdate(moveThreadToTop?: string) {
         const {logger, store} = this.context;
         logger.trace('PushStoreUpdate');
-        if (moveMessageToTop) {
-            store.moveThreadToTop(moveMessageToTop);
+        if (moveThreadToTop) {
+            store.moveThreadToTop(moveThreadToTop);
         }
         this.updateInboxThreadList(store.dump());
     }

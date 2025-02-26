@@ -1,13 +1,8 @@
 import {isAssistantMessage} from '@oniichan/shared/inbox';
 import {diffCount, FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
-import {Message} from '../../inbox';
-import {RequestHandler} from '../handler';
 import {stringifyError} from '@oniichan/shared/error';
-
-export interface InboxCheckRollbackRequest {
-    threadUuid: string;
-    messageUuid: string;
-}
+import {Message} from '../../inbox';
+import {InboxMessageIdentity, InboxRequestHandler} from './handler';
 
 interface InboxRollbackAppliable {
     file: string;
@@ -34,10 +29,10 @@ export interface InboxCheckRollbackResponse {
     affected: InboxRollbackCheckItem[];
 }
 
-export class InboxCheckRollbackHandler extends RequestHandler<InboxCheckRollbackRequest, InboxCheckRollbackResponse> {
+export class InboxCheckRollbackHandler extends InboxRequestHandler<InboxMessageIdentity, InboxCheckRollbackResponse> {
     static readonly action = 'inboxCheckRollback';
 
-    async *handleRequest(payload: InboxCheckRollbackRequest): AsyncIterable<InboxCheckRollbackResponse> {
+    async *handleRequest(payload: InboxMessageIdentity): AsyncIterable<InboxCheckRollbackResponse> {
         const {store, logger} = this.context;
         logger.info('Start');
 
@@ -167,24 +162,17 @@ export class InboxCheckRollbackHandler extends RequestHandler<InboxCheckRollback
     }
 }
 
-export interface InboxRollbackRequest {
-    threadUuid: string;
-    messageUuid: string;
-}
-
-export class InboxRollbackHandler extends RequestHandler<InboxRollbackRequest, void> {
+export class InboxRollbackHandler extends InboxRequestHandler<InboxMessageIdentity, void> {
     static readonly action = 'inboxRollback';
 
     // eslint-disable-next-line require-yield
-    async *handleRequest(payload: InboxRollbackRequest): AsyncIterable<void> {
+    async *handleRequest(payload: InboxMessageIdentity): AsyncIterable<void> {
         const {store, logger} = this.context;
         logger.info('Start');
 
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
         thread.rollbackRoundtripTo(payload.messageUuid);
-        logger.trace('PushStoreUpdate');
-        store.moveThreadToTop(payload.threadUuid);
-        this.updateInboxThreadList(store.dump());
+        this.pushStoreUpdate(thread.uuid);
 
         logger.info('Finish');
     }

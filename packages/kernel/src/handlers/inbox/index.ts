@@ -3,15 +3,13 @@ export {
     InboxMarkRoundtripStatusHandler,
     InboxMarkRoundtripStatusRequest,
     InboxCheckEditHandler,
-    CheckEditRequest,
-    CheckEditResponse,
+    InboxCheckEditResponse,
 } from './status';
 export {InboxGetThreadListHandler} from './get';
 export {
     InboxCheckRollbackHandler,
-    InboxCheckRollbackRequest,
     InboxCheckRollbackResponse,
     InboxRollbackCheckItem,
-    InboxRollbackRequest,
     InboxRollbackHandler,
 } from './rollback';
+export {InboxApproveToolHandler} from './approve';

@@ -1,11 +1,11 @@
 import {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {AssistantTextMessage, deserializeMessage, Message, ToolCallMessage} from './message';
-import {MessageRoundrip} from './interface';
+import {InboxRoundtrip} from './interface';
 
 export type WorkflowOriginMessage = ToolCallMessage;
 
 export class Workflow {
-    static from(data: WorkflowData, roundtrip: MessageRoundrip): Workflow {
+    static from(data: WorkflowData, roundtrip: InboxRoundtrip): Workflow {
         const workflow = new Workflow(ToolCallMessage.from(data.origin, roundtrip), roundtrip);
         workflow.markStatus(data.status);
         for (const reaction of data.reactions) {
@@ -23,13 +23,13 @@ export class Workflow {
 
     private readonly origin: WorkflowOriginMessage;
 
-    private readonly roundtrip: MessageRoundrip;
+    private readonly roundtrip: InboxRoundtrip;
 
     private readonly reactions: Message[] = [];
 
     private readonly exposed: string[] = [];
 
-    constructor(origin: WorkflowOriginMessage, roundtrip: MessageRoundrip) {
+    constructor(origin: WorkflowOriginMessage, roundtrip: InboxRoundtrip) {
         this.origin = origin;
         this.roundtrip = roundtrip;
     }

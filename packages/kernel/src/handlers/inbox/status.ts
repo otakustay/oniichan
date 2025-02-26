@@ -1,14 +1,12 @@
 import {extractFileEdits, RoundtripStatus} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {RequestHandler} from '../handler';
+import {InboxMessageIdentity, InboxRequestHandler, InboxRoundtripIdentity} from './handler';
 
-export interface InboxMarkRoundtripStatusRequest {
-    threadUuid: string;
-    messageUuid: string;
+export interface InboxMarkRoundtripStatusRequest extends InboxMessageIdentity {
     status: RoundtripStatus;
 }
 
-export class InboxMarkRoundtripStatusHandler extends RequestHandler<InboxMarkRoundtripStatusRequest, void> {
+export class InboxMarkRoundtripStatusHandler extends InboxRequestHandler<InboxMarkRoundtripStatusRequest, void> {
     static readonly action = 'inboxMarkMessageStatus';
 
     // eslint-disable-next-line require-yield
@@ -22,28 +20,22 @@ export class InboxMarkRoundtripStatusHandler extends RequestHandler<InboxMarkRou
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
         const roudntrip = thread.findRoundtripByMessageUuidStrict(payload.messageUuid);
         roudntrip.markStatus(payload.status);
-        logger.trace('PushStoreUpdate');
-        this.updateInboxThreadList(store.dump());
+        this.pushStoreUpdate();
         telemetry.end();
 
         logger.info('Finish');
     }
 }
 
-export interface CheckEditRequest {
-    threadUuid: string;
-    requestMessageUuid: string;
-}
-
-export interface CheckEditResponse {
+export interface InboxCheckEditResponse {
     totalEditCount: number;
     appliedEditCount: number;
 }
 
-export class InboxCheckEditHandler extends RequestHandler<CheckEditRequest, CheckEditResponse> {
+export class InboxCheckEditHandler extends InboxRequestHandler<InboxRoundtripIdentity, InboxCheckEditResponse> {
     static readonly action = 'inboxCheckEdit';
 
-    async *handleRequest(payload: CheckEditRequest): AsyncIterable<CheckEditResponse> {
+    async *handleRequest(payload: InboxRoundtripIdentity): AsyncIterable<InboxCheckEditResponse> {
         const {logger, editorHost, store} = this.context;
         logger.info('Start');
 
