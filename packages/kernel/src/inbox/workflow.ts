@@ -34,6 +34,10 @@ export class Workflow {
         this.roundtrip = roundtrip;
     }
 
+    getOriginMessage() {
+        return this.origin;
+    }
+
     shouldContinueRoundtrip() {
         return this.continueRoundtrip;
     }

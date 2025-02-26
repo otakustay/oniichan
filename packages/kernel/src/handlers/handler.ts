@@ -1,6 +1,7 @@
 import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@otakustay/ipc';
 import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
 import {MessageThreadData} from '@oniichan/shared/inbox';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {CommandExecutor} from '../core/command';
 import {EditorHost} from '../core/editor';
 import {ThreadStore} from '../inbox';
@@ -39,8 +40,11 @@ export interface Context {
 export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Context> {
     static functionName?: string;
 
+    protected telemetry: FunctionUsageTelemetry;
+
     constructor(port: Port, request: ExecutionRequest, context: Context) {
         const sendNotice: SendNotice = (action: string, payload?: any) => this.notify(action, payload);
+        const functionName = new.target.functionName ?? new.target.name.replace(/Handler$/, '');
         super(
             port,
             request,
@@ -52,10 +56,11 @@ export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Cont
                     sendNotice,
                     new.target.name,
                     request.taskId,
-                    new.target.functionName ?? new.target.name.replace(/Handler$/, '')
+                    functionName
                 ),
             }
         );
+        this.telemetry = new FunctionUsageTelemetry(this.getTaskId(), functionName);
     }
 
     updateInboxThreadList(threads: MessageThreadData[]): void {
