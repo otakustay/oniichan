@@ -59,8 +59,8 @@ const Layout = styled.div<ModeProps>`
 interface Props extends ModeProps {
     icon: ReactElement;
     content: ReactNode;
-    actions?: ReactElement | null | undefined | false;
-    richContent?: ReactElement | null | undefined | false;
+    actions?: ReactNode;
+    richContent?: ReactNode;
 }
 
 function ActBar({icon, content, actions, richContent, mode}: Props) {
