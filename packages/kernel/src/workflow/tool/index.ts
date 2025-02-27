@@ -43,7 +43,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 
-    protected async execute(): Promise<WorkflowRunResult> {
+    protected async executeRun(): Promise<WorkflowRunResult> {
         const toolInput = this.message.getToolCallInput();
         this.logger.trace('ToolCallStart', {input: toolInput, retry: this.retries});
         for await (const step of this.implment.callTool(toolInput)) {
@@ -56,7 +56,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
                     return {finished: true};
                 case 'executeError':
                 case 'success':
-                    return this.handleFinishStep(step);
+                    return this.handleExecuteFinishStep(step);
                 case 'requireFix':
                     return this.handleRequireFixStep(step);
                 case 'parameterMissing':
@@ -68,6 +68,16 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             }
         }
         throw new Error('Tool execute yields no expected result');
+    }
+
+    protected async executeReject(): Promise<WorkflowRunResult> {
+        const toolInput = this.message.getToolCallInput();
+        this.logger.trace('ToolRejectStart', {input: toolInput, retry: this.retries});
+        const result = await this.implment.rejectTool(toolInput);
+        if (result.type === 'executeError' || result.type === 'success') {
+            return this.handleRejectFinishStep(result);
+        }
+        throw new Error('Tool reject yields no expected result');
     }
 
     private async handleInputErrorStep(step: ToolInputError) {
@@ -94,10 +104,18 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         return this.retry();
     }
 
-    private handleFinishStep(step: Success | ExecuteError) {
+    private handleExecuteFinishStep(step: Success | ExecuteError) {
         this.origin.markToolCallStatus(step.type === 'success' ? 'completed' : 'failed');
         this.logger.trace('ToolCallFinish', {result: step.type});
+        return this.finishAndContinue(step);
+    }
 
+    private handleRejectFinishStep(step: Success | ExecuteError) {
+        this.logger.trace('ToolRejectFinish', {result: step.type});
+        return this.finishAndContinue(step);
+    }
+
+    private finishAndContinue(step: Success | ExecuteError) {
         const responseMessage = new ToolUseMessage(newUuid(), this.message.getRoundtrip(), step.output);
         this.workflow.markStatus('completed');
         this.workflow.addReaction(responseMessage, true);
@@ -114,7 +132,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
             return {finished: true};
         }
 
-        return this.execute();
+        return this.executeRun();
     }
 
     private async fix(input: RequireFix) {

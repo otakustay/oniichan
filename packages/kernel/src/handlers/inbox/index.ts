@@ -12,5 +12,5 @@ export {
     InboxRollbackCheckItem,
     InboxRollbackHandler,
 } from './rollback';
-export {InboxApproveToolHandler} from './approve';
+export {InboxApproveToolHandler, InboxApproveToolRequest} from './approve';
 export {InboxMessageIdentity, InboxMessageResponse, InboxRoundtripIdentity} from './handler';

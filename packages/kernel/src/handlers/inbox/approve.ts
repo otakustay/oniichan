@@ -3,10 +3,14 @@ import {stringifyError} from '@oniichan/shared/error';
 import {InboxRequestHandler, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from '../../workflow';
 
-export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripIdentity, InboxMessageResponse> {
+export interface InboxApproveToolRequest extends InboxRoundtripIdentity {
+    approved: boolean;
+}
+
+export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToolRequest, InboxMessageResponse> {
     static readonly action = 'inboxApproveTool';
 
-    async *handleRequest(payload: InboxRoundtripIdentity): AsyncIterable<InboxMessageResponse> {
+    async *handleRequest(payload: InboxApproveToolRequest): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
         logger.info('Start', payload);
 
@@ -28,7 +32,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripI
         }
     }
 
-    private async *continueWorkflow(payload: InboxRoundtripIdentity) {
+    private async *continueWorkflow(payload: InboxApproveToolRequest) {
         const {store, logger, editorHost, commandExecutor} = this.context;
         await this.prepareEnvironment();
 
@@ -44,8 +48,10 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripI
             throw new Error('Workflow is not in a waiting approve state');
         }
 
-        // TODO: Add reject
-        origin.markToolCallStatus('userApproved');
+        const status = payload.approved ? 'userApproved' : 'userRejected';
+        origin.markToolCallStatus(status);
+        this.pushStoreUpdate();
+
         const toolCallMessage = latestWorkflow.getOriginMessage();
         const messages = this.roundtrip.toMessages();
 
@@ -65,6 +71,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxRoundtripI
             onUpdateThread: () => this.pushStoreUpdate(),
         };
         const runner = new ToolCallWorkflowRunner(init);
-        yield* over(this.runWorkflow(runner)).map(v => ({type: 'value', value: v} as const));
+        const mode = payload.approved ? 'run' : 'reject';
+        yield* over(this.runWorkflow(runner, mode)).map(v => ({type: 'value', value: v} as const));
     }
 }

@@ -92,4 +92,12 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
     protected requireUserApprove(): boolean {
         return true;
     }
+
+    protected async userReject(): Promise<ToolRunStep> {
+        return {
+            type: 'success',
+            finished: false,
+            output: 'User has rejected to run this command, you should continue without this command being executed',
+        };
+    }
 }

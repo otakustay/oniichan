@@ -124,7 +124,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const workflowRunner = await this.detectWorkflowRunner();
 
         if (workflowRunner) {
-            yield* this.runWorkflow(workflowRunner);
+            yield* this.runWorkflow(workflowRunner, 'run');
         }
     }
 
@@ -153,12 +153,12 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         return workflowRunner;
     }
 
-    protected async *runWorkflow(runner: WorkflowRunner): AsyncIterable<InboxMessageResponse> {
+    protected async *runWorkflow(runner: WorkflowRunner, mode: 'run' | 'reject'): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
         const origin = runner.getWorkflow().getOriginMessage();
         try {
             logger.trace('RunWorkflow', {originUuid: origin.uuid});
-            await runner.run();
+            await runner[mode]();
             logger.trace('RunWorkflowFinish');
         }
         catch (ex) {

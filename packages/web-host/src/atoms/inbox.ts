@@ -4,7 +4,7 @@ import {updateItemInArray} from '@oniichan/shared/array';
 import {
     InboxSendMessageRequest,
     InboxMarkRoundtripStatusRequest,
-    InboxRoundtripIdentity,
+    InboxApproveToolRequest,
 } from '@oniichan/kernel/protocol';
 import {
     MessageData,
@@ -336,10 +336,11 @@ export function useSendMessageToThread(threadUuid: string) {
 export function useApproveTool(threadUuid: string, messageUuid: string) {
     const ipc = useIpcValue();
     const setMessageThreadList = useSetMessagelThreadList();
-    return async (taskId: string) => {
-        const request: InboxRoundtripIdentity = {
+    return async (taskId: string, approved: boolean) => {
+        const request: InboxApproveToolRequest = {
             threadUuid,
             requestMessageUuid: messageUuid,
+            approved,
         };
         for await (const chunk of ipc.kernel.callStreaming(taskId, 'inboxApproveTool', request)) {
             setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));

@@ -58,6 +58,22 @@ export class ToolImplement {
         }
     }
 
+    async rejectTool(input: ModelToolCallInput): Promise<ToolRunStep> {
+        const implement = this.getImplement(input.name);
+
+        if (implement) {
+            return implement.reject();
+        }
+        else {
+            // No implement means "skip and go", not something errored
+            return {
+                type: 'success',
+                finished: true,
+                output: '',
+            };
+        }
+    }
+
     private getImplement(name: ToolName) {
         switch (name) {
             case 'read_directory':

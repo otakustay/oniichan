@@ -6,6 +6,7 @@ import {stringifyError} from '@oniichan/shared/error';
 import Button from '@/components/Button';
 import ActBar from '@/components/ActBar';
 import {showToast} from '@/components/Toast';
+import InteractiveLabel from '@/components/InteractiveLabel';
 import {useMessageIdentity} from './MessageContext';
 
 const Header = styled.div`
@@ -82,13 +83,24 @@ interface Props {
 export default function CommandRun({command, status}: Props) {
     const {threadUuid, messageUuid} = useMessageIdentity();
     const approveTool = useApproveTool(threadUuid, messageUuid);
-    const approve = async () => {
+    const approve = async (approved: boolean) => {
         try {
-            await approveTool(crypto.randomUUID());
+            await approveTool(crypto.randomUUID(), approved);
         }
         catch (ex) {
             showToast('error', stringifyError(ex), {timeout: 3000});
         }
+    };
+    const renderFooter = () => {
+        if (status === 'waitingApprove') {
+            return (
+                <Footer>
+                    <InteractiveLabel onClick={() => approve(false)}>Skip</InteractiveLabel>
+                    <ActionButton onClick={() => approve(true)}>Run</ActionButton>
+                </Footer>
+            );
+        }
+        return null;
     };
 
     return (
@@ -101,9 +113,7 @@ export default function CommandRun({command, status}: Props) {
             <Body>
                 <Code>{command}</Code>
             </Body>
-            <Footer>
-                {status === 'waitingApprove' && <ActionButton onClick={approve}>Run</ActionButton>}
-            </Footer>
+            {renderFooter()}
         </Layout>
     );
 }

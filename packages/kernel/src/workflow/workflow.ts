@@ -52,7 +52,7 @@ export abstract class WorkflowRunner {
 
     async run(): Promise<void> {
         try {
-            const result = await this.execute();
+            const result = await this.executeRun();
             this.workflow.setContinueRoundtrip(!result.finished);
         }
         catch (ex) {
@@ -62,7 +62,21 @@ export abstract class WorkflowRunner {
         }
     }
 
-    protected abstract execute(): Promise<WorkflowRunResult>;
+    async reject(): Promise<void> {
+        try {
+            const result = await this.executeReject();
+            this.workflow.setContinueRoundtrip(!result.finished);
+        }
+        catch (ex) {
+            this.workflow.markStatus('failed');
+            this.origin.setError(stringifyError(ex));
+            this.workflow.setContinueRoundtrip(false);
+        }
+    }
+
+    protected abstract executeRun(): Promise<WorkflowRunResult>;
+
+    protected abstract executeReject(): Promise<WorkflowRunResult>;
 
     protected updateThread() {
         this.onUpdateThread();

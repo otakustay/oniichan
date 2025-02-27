@@ -1,6 +1,6 @@
 import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {Logger} from '@oniichan/shared/logger';
-import {assertNever} from '@oniichan/shared/error';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {EditorHost} from '../../core/editor';
 import {CommandExecutor} from '../../core/command';
 import {ToolCallMessage, Workflow} from '../../inbox';
@@ -200,6 +200,19 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         }
     }
 
+    async reject(): Promise<ToolRunStep> {
+        try {
+            const result = await this.userReject();
+            return result;
+        }
+        catch (ex) {
+            return {
+                type: 'executeError',
+                output: stringifyError(ex),
+            };
+        }
+    }
+
     private async *validate(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
         const parsed = this.parseArgs(generated);
         const validateResult = validateArguments(this.schema, parsed);
@@ -254,6 +267,10 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     protected requireUserApprove(): boolean {
         return false;
+    }
+
+    protected async userReject(): Promise<ToolRunStep> {
+        throw new Error('This tool does not support reject');
     }
 
     protected abstract parseArgs(args: Record<string, string | undefined>): Partial<A>;
