@@ -1,6 +1,6 @@
 # Change Log
 
-[UNRELEASED]
+[3.3.0] - 2025-02-27
 
 ### Added
 
