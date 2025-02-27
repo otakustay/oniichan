@@ -154,7 +154,7 @@ export class SemanticRewriteHandler extends RequestHandler<SemanticRewriteReques
             );
             return [
                 {
-                    label: 'dianostics',
+                    label: 'diagnostics',
                     title: 'These are problems reported at cursor, you should also try to fix them.',
                     content: diagnostics.map(v => v.message).map(v => `- ${v}`).join('\n'),
                 },

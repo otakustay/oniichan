@@ -88,8 +88,7 @@ function Content({threadUuid, mode}: EditingValue) {
                     );
                     setDiscardingEditCount(applyState.totalEditCount - applyState.appliedEditCount);
                 }
-                catch (ex) {
-                    console.error(ex);
+                catch {
                     setDiscardingEditCount(0);
                 }
             })();

@@ -18,8 +18,8 @@ export class InboxMarkRoundtripStatusHandler extends InboxRequestHandler<InboxMa
         telemetry.setTelemetryData('threadUuid', payload.threadUuid);
         telemetry.setTelemetryData('messageUuid', payload.messageUuid);
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
-        const roudntrip = thread.findRoundtripByMessageUuidStrict(payload.messageUuid);
-        roudntrip.markStatus(payload.status);
+        const roundtrip = thread.findRoundtripByMessageUuidStrict(payload.messageUuid);
+        roundtrip.markStatus(payload.status);
         this.pushStoreUpdate();
         telemetry.end();
 

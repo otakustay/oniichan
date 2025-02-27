@@ -23,8 +23,8 @@ export class ScaffoldApi {
         this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: false});
     }
 
-    async *generate(paylod: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ParsedChunk> {
-        const {file, snippets} = paylod;
+    async *generate(payload: ScaffoldPayload, telemetry: FunctionUsageTelemetry): AsyncIterable<ParsedChunk> {
+        const {file, snippets} = payload;
         const prompt = renderScaffoldPrompt({file, snippets});
         const messages: ChatUserMessagePayload[] = [
             {role: 'user', content: prompt},

@@ -11,7 +11,7 @@ const GIT_IGNORE = dedent`
 // TODO: Add guideline to configure command allow and deny list in rules after it's implemented
 const DEFAULT_RULES = dedent`
     <!-- Rules Guideline Start -->
-    Please read this guideline before you start writing your rules, this file **will not take effect** until you delete all text from \`<!-- Rules Guideline Start -->\` to \`<!-- Rules Gudeline End -->\`.
+    Please read this guideline before you start writing your rules, this file **will not take effect** until you delete all text from \`<!-- Rules Guideline Start -->\` to \`<!-- Rules Guideline End -->\`.
 
     Rules allows you to inject custom prompt communicating with LLM, this is actually done by replacing a **Rule** section in Oniichan's system prompt.
 
@@ -24,7 +24,7 @@ const DEFAULT_RULES = dedent`
     1. Start with \`<h2>\` tag, which is \`## Something\` in markdown, **do not use \`<h1>\` tag**.
     2. Explain your project structure, reusable components, etc... in this file.
     3. Use \`#path/to/file\` to reference files in your project, note there is **no whitespace after \`#\`**.
-    <!-- Rules Gudeline End -->
+    <!-- Rules Guideline End -->
 `;
 
 export class InitializeProjectConfigHandler extends RequestHandler<void, void> {

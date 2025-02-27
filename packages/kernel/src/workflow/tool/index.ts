@@ -122,7 +122,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.workflow.markStatus('completed');
         this.workflow.addReaction(responseMessage, true);
         this.updateThread();
-        return {finished: step.type === 'executeError' || step.finished};
+        return {finished: step.type !== 'executeError' && step.finished};
     }
 
     private async retry() {

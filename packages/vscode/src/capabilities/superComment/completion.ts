@@ -85,8 +85,7 @@ export class SuperCommentCompletionProvider implements CompletionItemProvider {
                 };
                 return symbols.map(toCompletionItem);
             }
-            catch (ex) {
-                console.error(ex);
+            catch {
                 return [];
             }
         }

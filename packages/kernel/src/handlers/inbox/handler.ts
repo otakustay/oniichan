@@ -190,10 +190,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {
         const parser = new StreamingToolParser();
         const [reasoningFork, textFork] = duplicate(chatStream);
-        const reasonineStream = over(reasoningFork)
+        const reasoningStream = over(reasoningFork)
             .filter(v => v.type === 'reasoning')
             .map((v: ModelResponse): ReasoningMessageChunk => ({type: 'reasoning', content: v.content}));
         const textStream = over(textFork).filter(v => v.type === 'text').map(v => v.content);
-        return merge(reasonineStream, parser.parse(textStream));
+        return merge(reasoningStream, parser.parse(textStream));
     }
 }

@@ -25,8 +25,8 @@ export class SemanticRewriteApi {
         this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: false});
     }
 
-    async rewrite(paylod: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
-        const {file, codeBefore, codeAfter, hint, snippets} = paylod;
+    async rewrite(payload: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
+        const {file, codeBefore, codeAfter, hint, snippets} = payload;
         const view: SemanticRewriteView = {
             file,
             codeBefore,
