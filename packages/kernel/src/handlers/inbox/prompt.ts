@@ -79,7 +79,7 @@ export class SystemPromptGenerator {
             const structure = await this.editorHost.call('getWorkspaceStructure');
             return {
                 projectStructure: structure.tree,
-                projectStructureTruncated: structure.truncated,
+                projectStructureTruncated: !!structure.truncatedCount,
             };
         }
 

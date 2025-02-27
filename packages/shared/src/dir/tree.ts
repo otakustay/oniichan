@@ -1,5 +1,7 @@
-// TODO: Update to latest format
-import {sortedInsert} from '../array';
+function sortedInsert<T>(array: T[], item: T, compare: (x: T, y: T) => number): void {
+    const index = array.findIndex(i => compare(item, i) < 0);
+    array.splice(index < 0 ? array.length : index, 0, item);
+}
 
 const INDIRECT_INDENT_STRING = '│   ';
 
@@ -89,47 +91,93 @@ interface TreeifyOptions {
 
 export interface TreeifyResult {
     tree: string;
-    truncated: boolean;
+    totalCount: number;
+    truncatedCount: number;
+}
+
+interface TreeifyNode {
+    indent: number;
+    text: string;
+    strippable: boolean;
+    children: TreeifyNode[];
+}
+
+function indentString(indent: number) {
+    return indent ? INDIRECT_INDENT_STRING.repeat(indent - 1) + DIRECT_INDENT_STRING : '';
+}
+
+function treeToLines(root: TreeifyNode, strip: boolean) {
+    const output: string[] = [];
+    const intoOutput = (node: TreeifyNode) => {
+        output.push(indentString(node.indent) + node.text);
+
+        const children = strip ? node.children.filter(v => !v.strippable) : node.children;
+        for (const child of children) {
+            intoOutput(child);
+        }
+
+        const strippedCount = node.children.length - children.length;
+        if (strippedCount > 0) {
+            output.push(`${indentString(node.indent + 1)}(...${strippedCount} files not shown)`);
+        }
+    };
+    intoOutput(root);
+    return output;
 }
 
 function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
-    const output: string[] = ['.'];
-    const stripableLineIndex = new Set<number>();
-    const intoOutput = (node: Node, indent: number, prefix: string, stripable: boolean) => {
-        const indentString = indent ? INDIRECT_INDENT_STRING.repeat(indent - 1) + DIRECT_INDENT_STRING : '';
-        const display = node.type === 'directory' ? node.name + '/' : node.name;
+    const counter = {
+        totalCount: 1,
+        strippableCount: 0,
+    };
+    const output: TreeifyNode = {indent: 0, text: '.', strippable: false, children: []};
+    const intoOutput = (nodeIn: Node, parent: TreeifyNode, indent: number, prefix: string, strippable: boolean) => {
+        const display = nodeIn.type === 'directory' ? nodeIn.name + '/' : nodeIn.name;
 
-        if (node.children.length === 1 && node.children[0].type === 'directory') {
-            intoOutput(node.children[0], indent, prefix + display, false);
+        if (nodeIn.children.length === 1 && nodeIn.children[0].type === 'directory') {
+            intoOutput(nodeIn.children[0], parent, indent, prefix + display, false);
             return;
         }
 
-        const line = indentString + prefix + display;
-        output.push(line);
-        if (stripable) {
-            // `output` always has a leading item, use `output.length` exactly meets the index
-            stripableLineIndex.add(output.length);
-        }
+        const nodeOut: TreeifyNode = {indent, text: prefix + display, strippable, children: []};
+        parent.children.push(nodeOut);
+        counter.strippableCount += strippable ? 1 : 0;
+        counter.totalCount++;
 
-        const requiredChildrenIndex = new Set(options.filterChildren(node.children));
-        for (const [index, child] of node.children.entries()) {
-            intoOutput(child, indent + 1, '', !requiredChildrenIndex.has(index));
+        const requiredChildrenIndex = new Set(options.filterChildren(nodeIn.children));
+        for (const [index, child] of nodeIn.children.entries()) {
+            intoOutput(child, nodeOut, indent + 1, '', !requiredChildrenIndex.has(index));
         }
     };
     for (const child of nodes) {
-        intoOutput(child, 1, '', false);
+        intoOutput(child, output, 1, '', false);
     }
 
-    if (output.length <= options.maxLines) {
+    if (counter.totalCount <= options.maxLines) {
+        const lines = treeToLines(output, false);
         return {
-            tree: output.join('\n'),
-            truncated: false,
+            tree: lines.join('\n'),
+            totalCount: counter.totalCount,
+            truncatedCount: 0,
         };
     }
 
+    const lines = treeToLines(output, true);
+    if (lines.length <= options.maxLines) {
+        return {
+            tree: lines.join('\n'),
+            totalCount: counter.totalCount,
+            truncatedCount: counter.strippableCount,
+        };
+    }
+
+    // One line for tailing indication
+    const sliceEnd = options.maxLines - 1;
+    const slicedCount = lines.length - sliceEnd;
     return {
-        tree: output.filter((v, i) => !stripableLineIndex.has(i)).join('\n'),
-        truncated: true,
+        tree: lines.slice(0, sliceEnd).concat(`(...approximately ${slicedCount} lines not shown)`).join('\n'),
+        totalCount: counter.totalCount,
+        truncatedCount: counter.strippableCount + slicedCount,
     };
 }
 
