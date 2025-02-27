@@ -121,7 +121,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
         logger.trace('RequestModelFinish');
 
-        // TODO: Check if a tool is auto approved
         const workflowRunner = await this.detectWorkflowRunner();
 
         if (workflowRunner) {

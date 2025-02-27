@@ -1,7 +1,11 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {updateItemInArray} from '@oniichan/shared/array';
-import {InboxSendMessageRequest, InboxMarkRoundtripStatusRequest} from '@oniichan/kernel/protocol';
+import {
+    InboxSendMessageRequest,
+    InboxMarkRoundtripStatusRequest,
+    InboxRoundtripIdentity,
+} from '@oniichan/kernel/protocol';
 import {
     MessageData,
     RoundtripStatus,
@@ -324,6 +328,20 @@ export function useSendMessageToThread(threadUuid: string) {
             },
         };
         for await (const chunk of ipc.kernel.callStreaming(uuid, 'inboxSendMessage', request)) {
+            setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));
+        }
+    };
+}
+
+export function useApproveTool(threadUuid: string, messageUuid: string) {
+    const ipc = useIpcValue();
+    const setMessageThreadList = useSetMessagelThreadList();
+    return async (taskId: string) => {
+        const request: InboxRoundtripIdentity = {
+            threadUuid,
+            requestMessageUuid: messageUuid,
+        };
+        for await (const chunk of ipc.kernel.callStreaming(taskId, 'inboxApproveTool', request)) {
             setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));
         }
     };

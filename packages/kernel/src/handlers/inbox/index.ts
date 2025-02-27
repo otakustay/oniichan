@@ -13,3 +13,4 @@ export {
     InboxRollbackHandler,
 } from './rollback';
 export {InboxApproveToolHandler} from './approve';
+export {InboxMessageIdentity, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
