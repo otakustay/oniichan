@@ -1,5 +1,7 @@
 import {newUuid} from '@oniichan/shared/id';
 import {Logger} from '@oniichan/shared/logger';
+import {assertNever} from '@oniichan/shared/error';
+import {InboxConfig} from '@oniichan/editor-host/protocol';
 import {ToolCallMessage, ToolUseMessage} from '../../inbox';
 import {EditorHost} from '../../core/editor';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
@@ -7,7 +9,6 @@ import {WorkflowRunner, WorkflowRunnerInit, WorkflowRunResult} from '../workflow
 import {ToolImplement} from './implement';
 import {ToolCallFixer, ToolCallFixerInit, ToolCallMessageParser} from './fix';
 import {ExecuteError, RequireFix, Success, ToolInputError} from './utils';
-import {assertNever} from '@oniichan/shared/error';
 
 const RETRY_LIMIT = 3;
 
@@ -16,6 +17,7 @@ export interface ToolCallWorkflowRunnerInit extends WorkflowRunnerInit {
     origin: ToolCallMessage;
     editorHost: EditorHost;
     modelAccess: ModelAccessHost;
+    inboxConfig: InboxConfig;
 }
 
 export class ToolCallWorkflowRunner extends WorkflowRunner {
@@ -39,7 +41,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.systemPrompt = init.systemPrompt;
         this.editorHost = init.editorHost;
         this.modelAccess = init.modelAccess;
-        this.implement = new ToolImplement(init);
+        this.implement = new ToolImplement({...init, inboxConfig: init.inboxConfig});
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 

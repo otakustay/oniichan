@@ -65,6 +65,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToo
             telemetry: this.telemetry,
             systemPrompt: this.systemPrompt,
             modelAccess: this.modelAccess,
+            inboxConfig: this.inboxConfig,
             editorHost,
             commandExecutor,
             logger,

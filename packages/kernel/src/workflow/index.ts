@@ -6,6 +6,7 @@ import {CommandExecutor} from '../core/command';
 import {ModelAccessHost} from '../core/model';
 import {WorkflowRunner, WorkflowRunnerInit} from './workflow';
 import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from './tool';
+import {InboxConfig} from '@oniichan/editor-host/protocol';
 
 export {WorkflowRunner, ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit};
 
@@ -18,6 +19,7 @@ export interface WorkflowDetectorInit {
     editorHost: EditorHost;
     telemetry: FunctionUsageTelemetry;
     commandExecutor: CommandExecutor;
+    inboxConfig: InboxConfig;
     logger: Logger;
     onUpdateThread: () => void;
 }
@@ -37,6 +39,8 @@ export class WorkflowDetector {
 
     private readonly telemetry: FunctionUsageTelemetry;
 
+    private readonly inboxConfig: InboxConfig;
+
     private readonly logger: Logger;
 
     private readonly commandExecutor: CommandExecutor;
@@ -50,6 +54,7 @@ export class WorkflowDetector {
         this.roundtrip = init.roundtrip;
         this.modelAccess = init.modelAccess;
         this.editorHost = init.editorHost;
+        this.inboxConfig = init.inboxConfig;
         this.telemetry = init.telemetry;
         this.commandExecutor = init.commandExecutor;
         this.logger = init.logger.with({source: 'WorkflowDetector', taskId: init.taskId});
@@ -79,6 +84,7 @@ export class WorkflowDetector {
         const init: ToolCallWorkflowRunnerInit = {
             ...baseInit,
             workflow,
+            inboxConfig: this.inboxConfig,
             systemPrompt: this.systemPrompt,
             modelAccess: this.modelAccess,
             editorHost: this.editorHost,

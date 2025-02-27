@@ -1,6 +1,7 @@
 import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {Logger} from '@oniichan/shared/logger';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
+import {InboxConfig} from '@oniichan/editor-host/protocol';
 import {EditorHost} from '../../core/editor';
 import {CommandExecutor} from '../../core/command';
 import {ToolCallMessage, Workflow} from '../../inbox';
@@ -139,6 +140,7 @@ export interface ToolImplementInit {
     editorHost: EditorHost;
     logger: Logger;
     commandExecutor: CommandExecutor;
+    inboxConfig: InboxConfig;
 }
 
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
@@ -152,6 +154,8 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     private readonly schema: Schema;
 
+    protected readonly inboxConfig: InboxConfig;
+
     private arguments: A | null = null;
 
     constructor(className: string, init: ToolImplementInit, schema: Schema) {
@@ -159,6 +163,7 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         this.editorHost = init.editorHost;
         this.logger = init.logger.with({source: className});
         this.commandExecutor = init.commandExecutor;
+        this.inboxConfig = init.inboxConfig;
         this.schema = schema;
     }
 

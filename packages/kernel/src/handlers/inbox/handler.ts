@@ -33,7 +33,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     private readonly references: InboxPromptReference[] = [];
 
-    private inboxConfig: InboxConfig = {enableDeepThink: false};
+    protected inboxConfig: InboxConfig = {enableDeepThink: false, automaticRunCommand: false, exceptionCommandList: []};
 
     protected thread: MessageThread = new MessageThread(newUuid());
 
@@ -119,6 +119,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             this.pushStoreUpdate(this.thread.uuid);
         }
 
+        // TODO: Add a special error if message is empty after request complete
+
         logger.trace('RequestModelFinish');
 
         const workflowRunner = await this.detectWorkflowRunner();
@@ -137,6 +139,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             telemetry: this.telemetry,
             modelAccess: this.modelAccess,
             roundtrip: this.roundtrip,
+            inboxConfig: this.inboxConfig,
             editorHost,
             commandExecutor,
             logger,

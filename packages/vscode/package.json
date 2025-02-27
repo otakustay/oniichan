@@ -130,6 +130,18 @@
             "tags": [
               "experimental"
             ]
+          },
+          "oniichan.inbox.automaticRunCommand": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically run LLM suggested commands unless it is in exception list"
+          },
+          "oniichan.inbox.exceptionCommandList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exceptional commands which is allowed or denied to run automatically according to default mode"
           }
         }
       },

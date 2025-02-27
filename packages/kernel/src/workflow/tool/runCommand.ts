@@ -4,6 +4,16 @@ import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from 
 
 const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
 
+function findCommandNames(script: string): string[] {
+    // This is a very simple implement, using `bash-parser` introduce too many complexity
+    return script
+        .split('&&')
+        .flatMap(v => v.split('||'))
+        .map(v => v.split(/\s/).at(0))
+        .map(v => v?.trim())
+        .filter(v => typeof v === 'string');
+}
+
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
     constructor(init: ToolImplementInit) {
         super('RunCommandToolImplement', init, runCommandParameters);
@@ -90,7 +100,11 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
     }
 
     protected requireUserApprove(): boolean {
-        return true;
+        const args = this.getToolCallArguments();
+        const commands = findCommandNames(args.command);
+
+        const hasExceptionCommand = commands.some(v => this.inboxConfig.exceptionCommandList.includes(v));
+        return this.inboxConfig.automaticRunCommand ? hasExceptionCommand : !hasExceptionCommand;
     }
 
     protected async userReject(): Promise<ToolRunStep> {
