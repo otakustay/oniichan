@@ -19,7 +19,7 @@ export interface ToolCallWorkflowRunnerInit extends WorkflowRunnerInit {
 }
 
 export class ToolCallWorkflowRunner extends WorkflowRunner {
-    private readonly implment: ToolImplement;
+    private readonly implement: ToolImplement;
 
     private readonly modelAccess: ModelAccessHost;
 
@@ -39,14 +39,14 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
         this.systemPrompt = init.systemPrompt;
         this.editorHost = init.editorHost;
         this.modelAccess = init.modelAccess;
-        this.implment = new ToolImplement(init);
+        this.implement = new ToolImplement(init);
         this.logger = init.logger.with({source: 'ToolCallWorkflowRunner'});
     }
 
     protected async executeRun(): Promise<WorkflowRunResult> {
         const toolInput = this.message.getToolCallInput();
         this.logger.trace('ToolCallStart', {input: toolInput, retry: this.retries});
-        for await (const step of this.implment.callTool(toolInput)) {
+        for await (const step of this.implement.callTool(toolInput)) {
             switch (step.type) {
                 case 'startToolRun':
                     this.origin.markToolCallStatus('executing');
@@ -73,7 +73,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
     protected async executeReject(): Promise<WorkflowRunResult> {
         const toolInput = this.message.getToolCallInput();
         this.logger.trace('ToolRejectStart', {input: toolInput, retry: this.retries});
-        const result = await this.implment.rejectTool(toolInput);
+        const result = await this.implement.rejectTool(toolInput);
         if (result.type === 'executeError' || result.type === 'success') {
             return this.handleRejectFinishStep(result);
         }

@@ -167,18 +167,21 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         // we have to parse and generated arguments on every run,
         // but we are sure that the validation must be successful after the first time
         if (!this.arguments) {
-            yield* this.validate(generated);
+            const validationError = this.validate(generated);
+
+            if (validationError) {
+                yield validationError;
+                return;
+            }
         }
 
         const status = this.origin.getToolCallStatus();
         // It's actually a fragile self looping state machine :(
         switch (status) {
             case 'waitingValidate':
-                throw new Error('never');
             case 'validateError':
-                // TODO: Maybe it's better to fix parameter error here
-                // This is handled outside
-                break;
+                this.logger.error('ToolRunOnUnexpectedStatus', {messageUuid: this.origin.uuid, status});
+                throw new Error('A tool in waiting validate state should never run');
             // From now on we expect `this.arguments` to be truthy
             case 'validated':
                 yield* this.waitUserApprove(generated);
@@ -213,50 +216,6 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
         }
     }
 
-    private async *validate(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
-        const parsed = this.parseArgs(generated);
-        const validateResult = validateArguments(this.schema, parsed);
-
-        if (validateResult.type === 'valid') {
-            this.arguments = validateResult.args;
-            // This is called every time at any possible tool call status,
-            // but we should avoid reverting status to `validated` after the first validation
-            if (this.origin.getToolCallStatus() === 'waitingValidate') {
-                this.origin.markToolCallStatus('validated');
-            }
-            return;
-        }
-
-        this.origin.markToolCallStatus('validateError');
-
-        switch (validateResult.type) {
-            case 'missing':
-                yield {type: 'parameterMissing', parameter: validateResult.property};
-                break;
-            case 'type':
-                yield {
-                    type: 'parameterType',
-                    parameter: validateResult.property,
-                    expectedType: validateResult.expectedType,
-                };
-                break;
-            default:
-                yield {type: 'validationError', message: validateResult.message};
-                break;
-        }
-    }
-
-    private async *waitUserApprove(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
-        if (this.requireUserApprove()) {
-            this.origin.markToolCallStatus('waitingApprove');
-            yield {type: 'requireApprove'};
-        }
-        else {
-            this.origin.markToolCallStatus('userApproved');
-            yield* this.run(generated);
-        }
-    }
-
     protected getToolCallArguments() {
         if (!this.arguments) {
             throw new Error('Tool call has not been validated');
@@ -276,6 +235,47 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
     protected abstract parseArgs(args: Record<string, string | undefined>): Partial<A>;
 
     protected abstract execute(): Promise<ToolRunStep>;
+
+    private validate(generated: Record<string, string | undefined>): ToolInputError | null {
+        const parsed = this.parseArgs(generated);
+        const validateResult = validateArguments(this.schema, parsed);
+
+        if (validateResult.type === 'valid') {
+            this.arguments = validateResult.args;
+            // This is called every time at any possible tool call status,
+            // but we should avoid reverting status to `validated` after the first validation
+            if (this.origin.getToolCallStatus() === 'waitingValidate') {
+                this.origin.markToolCallStatus('validated');
+            }
+            return null;
+        }
+
+        this.origin.markToolCallStatus('validateError');
+
+        switch (validateResult.type) {
+            case 'missing':
+                return {type: 'parameterMissing', parameter: validateResult.property};
+            case 'type':
+                return {
+                    type: 'parameterType',
+                    parameter: validateResult.property,
+                    expectedType: validateResult.expectedType,
+                };
+            default:
+                return {type: 'validationError', message: validateResult.message};
+        }
+    }
+
+    private async *waitUserApprove(generated: Record<string, string | undefined>): AsyncIterable<ToolRunStep> {
+        if (this.requireUserApprove()) {
+            this.origin.markToolCallStatus('waitingApprove');
+            yield {type: 'requireApprove'};
+        }
+        else {
+            this.origin.markToolCallStatus('userApproved');
+            yield* this.run(generated);
+        }
+    }
 }
 
 export function codeBlock(code: string, language = '') {
