@@ -10,6 +10,8 @@ import {PatchFilesToolImplement} from './patchFile';
 import {DeleteFileToolImplement} from './deleteFile';
 import {RunCommandToolImplement} from './runCommand';
 import {BrowserPreviewToolImplement} from './browserPreview';
+import {AttemptCompletionToolImplement} from './attemptCompletion';
+import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
 
 export class ToolImplement {
     private readonly readFile: ToolImplementBase;
@@ -30,6 +32,10 @@ export class ToolImplement {
 
     private readonly browserPreview: ToolImplementBase;
 
+    private readonly attemptCompletion: ToolImplementBase;
+
+    private readonly askFollowupQuestion: ToolImplementBase;
+
     constructor(init: ToolImplementInit) {
         this.readFile = new ReadFileToolImplement(init);
         this.readDirectory = new ReadDirectoryToolImplement(init);
@@ -40,38 +46,20 @@ export class ToolImplement {
         this.deleteFile = new DeleteFileToolImplement(init);
         this.runCommand = new RunCommandToolImplement(init);
         this.browserPreview = new BrowserPreviewToolImplement(init);
+        this.attemptCompletion = new AttemptCompletionToolImplement(init);
+        this.askFollowupQuestion = new AskFollowupQuestionToolImplement(init);
     }
 
     async *callTool(input: ModelToolCallInput): AsyncIterable<ToolRunStep> {
         const implement = this.getImplement(input.name);
 
-        if (implement) {
-            yield* implement.run(input.arguments);
-        }
-        else {
-            // No implement means "skip and go", not something errored
-            yield {
-                type: 'success',
-                finished: true,
-                output: '',
-            };
-        }
+        yield* implement.run(input.arguments);
     }
 
     async rejectTool(input: ModelToolCallInput): Promise<ToolRunStep> {
         const implement = this.getImplement(input.name);
 
-        if (implement) {
-            return implement.reject();
-        }
-        else {
-            // No implement means "skip and go", not something errored
-            return {
-                type: 'success',
-                finished: true,
-                output: '',
-            };
-        }
+        return implement.reject();
     }
 
     private getImplement(name: ToolName) {
@@ -95,8 +83,9 @@ export class ToolImplement {
             case 'browser_preview':
                 return this.browserPreview;
             case 'attempt_completion':
+                return this.attemptCompletion;
             case 'ask_followup_question':
-                return null;
+                return this.askFollowupQuestion;
             default:
                 assertNever<string>(name, v => `Unknown tool ${v}`);
         }

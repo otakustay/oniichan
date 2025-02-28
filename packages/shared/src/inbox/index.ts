@@ -17,7 +17,6 @@ export {
 } from './message';
 export {
     isToolCallChunk,
-    isReactiveToolCallChunk,
     isAssistantMessage,
     assertThinkingChunk,
     assertToolCallChunk,

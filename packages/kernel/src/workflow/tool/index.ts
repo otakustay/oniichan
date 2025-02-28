@@ -130,7 +130,7 @@ export class ToolCallWorkflowRunner extends WorkflowRunner {
 
         if (this.retries >= RETRY_LIMIT) {
             this.logger.error('TooManyRetry', {retry: this.retries});
-            this.origin.setError('Model generates an invalid tool call and oniichan is unable to fix it');
+            this.origin.setError('Oniichan meets an invalid tool call and is unable to fix it');
             return {finished: true};
         }
 

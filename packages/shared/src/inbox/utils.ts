@@ -6,12 +6,6 @@ export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMe
     return chunk.type === 'toolCall';
 }
 
-export function isReactiveToolCallChunk(chunk: MessageContentChunk) {
-    return isToolCallChunk(chunk)
-        && chunk.toolName !== 'ask_followup_question'
-        && chunk.toolName !== 'attempt_completion';
-}
-
 export function isAssistantMessage(type: MessageType) {
     return type === 'assistantText' || type === 'toolCall';
 }

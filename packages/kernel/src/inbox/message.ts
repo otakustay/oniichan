@@ -13,7 +13,6 @@ import {
     ToolUseMessageData,
     MessageDataBase,
     isToolCallChunk,
-    isReactiveToolCallChunk,
     assertThinkingChunk,
     assertToolCallChunk,
     chunkToString,
@@ -355,7 +354,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
     }
 
     async toToolCallMessage(editorHost: EditorHost): Promise<ToolCallMessage | null> {
-        if (this.chunks.some(isReactiveToolCallChunk)) {
+        if (this.chunks.some(isToolCallChunk)) {
             const message = new ToolCallMessage(this.roundtrip, this.toMessageData());
             await message.takeFileEditSnapshot(editorHost);
             return message;
