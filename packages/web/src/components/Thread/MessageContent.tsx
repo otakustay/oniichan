@@ -52,6 +52,7 @@ export default function MessageContent({className, chunks, reasoning}: Props) {
                     ? <Thinking key={`thinking-chunk-${index}`} content={chunk.content} />
                     : null;
             case 'toolCall':
+            case 'parsedToolCall':
                 return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;
             default:
                 assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);

@@ -10,8 +10,8 @@ import InteractiveLabel from '@/components/InteractiveLabel';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
-import {useIsEditInteractive} from './FileEditContext';
-import CountLabel from './CountLabel';
+import CountLabel from '../CountLabel';
+import {useIsEditInteractive} from '../FileEditContext';
 
 const ErrorLabel = styled.div`
     color: var(--color-error);

@@ -7,16 +7,16 @@ import {
     InboxApproveToolRequest,
 } from '@oniichan/kernel/protocol';
 import {
-    MessageData,
     RoundtripStatus,
     MessageThreadData,
     AssistantTextMessageData,
-    ToolCallMessageData,
-    MessageContentChunk,
+    MessageViewChunk,
     ToolCallMessageChunk,
     ThinkingMessageChunk,
     MessageInputChunk,
     ReasoningMessageChunk,
+    RoundtripMessageData,
+    AssistantMessageData,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
@@ -63,12 +63,18 @@ export function useSetMessagelThreadList() {
     return useSetAtom(messageThreadListAtom);
 }
 
-interface MessageUpdateOptions {
-    create: () => MessageData;
-    update: (message: MessageData) => MessageData;
+interface ResponseUpdateOptions {
+    create: () => AssistantMessageData;
+    update: (message: AssistantMessageData) => AssistantMessageData;
 }
 
-function createThreadListUpdate(threadUuid: string, messageUuid: string, options: MessageUpdateOptions) {
+function locateRoundtripByMessageUuid(uuid: string) {
+    return (roundtrip: RoundtripMessageData) => {
+        return roundtrip.request.uuid === uuid || roundtrip.responses.some(v => v.uuid === uuid);
+    };
+}
+
+function createResponseUpdate(threadUuid: string, messageUuid: string, options: ResponseUpdateOptions) {
     return (threads: MessageThreadData[]): MessageThreadData[] => {
         const {create, update} = options;
         const threadIndex = threads.findIndex(v => v.uuid === threadUuid);
@@ -79,7 +85,7 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
 
         const targetThread = threads[threadIndex];
 
-        const roundtripIndex = targetThread.roundtrips.findIndex(v => v.messages.some(v => v.uuid === messageUuid));
+        const roundtripIndex = targetThread.roundtrips.findIndex(locateRoundtripByMessageUuid(messageUuid));
 
         if (roundtripIndex < 0) {
             return threads;
@@ -87,7 +93,8 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
 
         const targetRoundtrip = targetThread.roundtrips[roundtripIndex];
 
-        const messageIndex = targetRoundtrip.messages.findIndex(v => v.uuid === messageUuid);
+        // It's impossible to update the request message
+        const messageIndex = targetRoundtrip.responses.findIndex(v => v.uuid === messageUuid);
 
         if (messageIndex < 0) {
             const newMessage = create();
@@ -99,8 +106,8 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                         ...targetThread.roundtrips.slice(0, roundtripIndex),
                         {
                             ...targetRoundtrip,
-                            messages: [
-                                ...targetRoundtrip.messages,
+                            responses: [
+                                ...targetRoundtrip.responses,
                                 update(newMessage),
                             ],
                         },
@@ -111,7 +118,7 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
             ];
         }
 
-        const targetMessage = targetRoundtrip.messages[messageIndex];
+        const targetMessage = targetRoundtrip.responses[messageIndex];
         return [
             ...threads.slice(0, threadIndex),
             {
@@ -120,10 +127,10 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
                     ...targetThread.roundtrips.slice(0, roundtripIndex),
                     {
                         ...targetRoundtrip,
-                        messages: [
-                            ...targetRoundtrip.messages.slice(0, messageIndex),
+                        responses: [
+                            ...targetRoundtrip.responses.slice(0, messageIndex),
                             update(targetMessage),
-                            ...targetRoundtrip.messages.slice(messageIndex + 1),
+                            ...targetRoundtrip.responses.slice(messageIndex + 1),
                         ],
                     },
                     ...targetThread.roundtrips.slice(roundtripIndex + 1),
@@ -134,9 +141,7 @@ function createThreadListUpdate(threadUuid: string, messageUuid: string, options
     };
 }
 
-type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
-
-type MaybeChunk = MessageContentChunk | undefined;
+type MaybeChunk = MessageViewChunk | undefined;
 
 function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
     if (chunk?.type !== 'thinking') {
@@ -150,12 +155,12 @@ function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk 
     }
 }
 
-function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: MessageInputChunk): MessageData {
+function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: T, chunk: MessageInputChunk): T {
     // Reasoning chunk should be unique and on top of all chunks
     if (chunk.type === 'reasoning') {
         return {
             ...message,
-            chunks: updateItemInArray<MessageContentChunk, ReasoningMessageChunk>(
+            chunks: updateItemInArray<MessageViewChunk, ReasoningMessageChunk>(
                 message.chunks,
                 {
                     find: item => item.type === 'reasoning',
@@ -279,8 +284,8 @@ function handleChunkToAssistantMessage(message: AssistantMessageData, chunk: Mes
     }
 }
 
-function appendMessageBy(threadUuid: string, messageUuid: string, chunk: MessageInputChunk) {
-    return createThreadListUpdate(
+function appendResponseMessageBy(threadUuid: string, messageUuid: string, chunk: MessageInputChunk) {
+    return createResponseUpdate(
         threadUuid,
         messageUuid,
         {
@@ -294,18 +299,7 @@ function appendMessageBy(threadUuid: string, messageUuid: string, chunk: Message
                 return handleChunkToAssistantMessage(message, chunk);
             },
             update: message => {
-                if (message.type === 'assistantText' || message.type === 'toolCall') {
-                    return handleChunkToAssistantMessage(message, chunk);
-                }
-
-                if (chunk.type !== 'text') {
-                    throw new Error('User message should only receive text chunk');
-                }
-
-                return {
-                    ...message,
-                    content: message.content + chunk.content,
-                };
+                return handleChunkToAssistantMessage(message, chunk);
             },
         }
     );
@@ -328,7 +322,7 @@ export function useSendMessageToThread(threadUuid: string) {
             },
         };
         for await (const chunk of ipc.kernel.callStreaming(uuid, 'inboxSendMessage', request)) {
-            setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));
+            setMessageThreadList(appendResponseMessageBy(threadUuid, chunk.replyUuid, chunk.value));
         }
     };
 }
@@ -343,7 +337,7 @@ export function useApproveTool(threadUuid: string, messageUuid: string) {
             approved,
         };
         for await (const chunk of ipc.kernel.callStreaming(taskId, 'inboxApproveTool', request)) {
-            setMessageThreadList(appendMessageBy(threadUuid, chunk.replyUuid, chunk.value));
+            setMessageThreadList(appendResponseMessageBy(threadUuid, chunk.replyUuid, chunk.value));
         }
     };
 }

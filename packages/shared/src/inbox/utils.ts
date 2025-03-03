@@ -1,16 +1,17 @@
 import {assertNever} from '../error';
 import {FileEditData} from '../patch';
-import {MessageContentChunk, ToolCallMessageChunk, MessageType, ThinkingMessageChunk, MessageData} from './message';
+import {MessageType, ThinkingMessageChunk, MessageData, MessageViewChunk} from './message';
+import {ToolCallMessageChunk, ParsedToolCallMessageChunk, isFileEditToolCallChunk} from './tool';
 
-export function isToolCallChunk(chunk: MessageContentChunk): chunk is ToolCallMessageChunk {
-    return chunk.type === 'toolCall';
+export function isParsedToolCallChunk(chunk: MessageViewChunk): chunk is ParsedToolCallMessageChunk {
+    return chunk.type === 'parsedToolCall';
 }
 
 export function isAssistantMessage(type: MessageType) {
     return type === 'assistantText' || type === 'toolCall';
 }
 
-export function chunkToString(chunk: MessageContentChunk) {
+export function chunkToString(chunk: MessageViewChunk) {
     switch (chunk.type) {
         case 'reasoning':
             // Although reasoning content is mapped to a `<think>` tag,
@@ -22,13 +23,14 @@ export function chunkToString(chunk: MessageContentChunk) {
         case 'thinking':
             return `<thinking>${chunk.content}</thinking>`;
         case 'toolCall':
+        case 'parsedToolCall':
             return chunk.source;
         default:
             assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type}`);
     }
 }
 
-type MaybeChunk = MessageContentChunk | undefined;
+type MaybeChunk = MessageViewChunk | undefined;
 
 export function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
     if (chunk?.type !== 'thinking') {
@@ -74,8 +76,11 @@ function getFileEditFromMessage(message: MessageData): FileEditData[] {
         return [];
     }
 
-    const toolCall = message.chunks.find(v => v.type == 'toolCall');
-    return toolCall?.fileEdit ? [toolCall.fileEdit] : [];
+    const toolCall = message.chunks.find(v => v.type === 'parsedToolCall');
+
+    return toolCall && isFileEditToolCallChunk(toolCall)
+        ? (toolCall?.executionData ? [toolCall.executionData] : [])
+        : [];
 }
 
 export function extractFileEdits(messages: MessageData[]): Record<string, FileEditData[] | undefined> {

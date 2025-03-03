@@ -1,22 +1,24 @@
 export {
     ReasoningMessageChunk,
     TextMessageChunk,
-    ToolCallMessageChunk,
     ThinkingMessageChunk,
     MessageInputChunk,
-    MessageContentChunk,
     MessageViewChunk,
     MessageDataBase,
     MessageData,
+    AssistantMessageData,
     ToolUseMessageData,
     ToolCallMessageData,
     UserRequestMessageData,
     AssistantTextMessageData,
+    AssistantResponseMessageData,
     MessageType,
-    ToolCallChunkStatus,
+    MessageViewData,
+    MessageViewType,
+    AssistantTextMessageContentChunk,
+    ToolCallMessageContentChunk,
 } from './message';
 export {
-    isToolCallChunk,
     isAssistantMessage,
     assertThinkingChunk,
     assertToolCallChunk,
@@ -24,6 +26,24 @@ export {
     normalizeArguments,
     extractFileEdits,
 } from './utils';
+export {
+    WorkflowSourceChunkStatus,
+    WorkflowChunkStatus,
+    ToolCallMessageChunk,
+    ParsedToolCallMessageChunk,
+    ReadFileToolCallMessageChunk,
+    ReadDirectoryToolCallMessageChunk,
+    FindFilesByGlobToolCallMessageChunk,
+    FindFilesByRegExpToolCallMessageChunk,
+    WriteFileToolCallMessageChunk,
+    PatchFileToolCallMessageChunk,
+    DeleteFileToolCallMessageChunk,
+    RunCommandToolCallMessageChunk,
+    BrowserPreviewToolCallMessageChunk,
+    AttemptCompletionToolCallMessageChunk,
+    AskFollowupQuestionToolCallMessageChunk,
+    isFileEditToolCallChunk,
+} from './tool';
 export {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
 export {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
 export {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow';

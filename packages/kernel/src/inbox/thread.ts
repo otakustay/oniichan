@@ -1,11 +1,12 @@
-import {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from '@oniichan/shared/inbox';
-import {InboxRoundtrip} from './interface';
+import {MessageThreadData, MessageThreadPersistData} from '@oniichan/shared/inbox';
+import {assertHasValue} from '@oniichan/shared/error';
+import {InboxMessageThread, InboxRoundtrip} from './interface';
 import {Roundtrip} from './roundtrip';
 
 /**
  * A thread is a collection of roundtrips, this includes one or more user requests.
  */
-export class MessageThread {
+export class MessageThread implements InboxMessageThread {
     static from(data: MessageThreadPersistData) {
         const thread = new MessageThread(data.uuid);
         for (const roundtripData of data.roundtrips) {
@@ -43,12 +44,7 @@ export class MessageThread {
 
     findRoundtripByMessageUuidStrict(messageUuid: string) {
         const roundtrip = this.roundtrips.find(v => v.hasMessage(messageUuid));
-
-        if (!roundtrip) {
-            throw new Error(`No roundtrip found for message ${messageUuid}`);
-        }
-
-        return roundtrip;
+        return assertHasValue(roundtrip, `No roundtrip found for message ${messageUuid}`);
     }
 
     sliceRoundtripAfter(messageUuid: string) {
@@ -66,15 +62,9 @@ export class MessageThread {
     }
 
     toThreadData(): MessageThreadData {
-        const roundtripToData = (roundtrip: InboxRoundtrip): RoundtripMessageData => {
-            return {
-                status: roundtrip.getStatus(),
-                messages: roundtrip.toMessages().map(v => v.toMessageData()),
-            };
-        };
         return {
             uuid: this.uuid,
-            roundtrips: this.roundtrips.map(roundtripToData),
+            roundtrips: this.roundtrips.map(v => v.toRoundtripMessageData()),
         };
     }
 

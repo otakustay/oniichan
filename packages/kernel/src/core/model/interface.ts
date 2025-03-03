@@ -1,4 +1,4 @@
-import {ModelResponse, ModelFeature, ChatInputPayload} from '@oniichan/shared/model';
+import {ModelResponse, ModelFeature, ChatInputPayload, ModelTextResponse} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 
 export interface ModelChatOptions {
@@ -10,6 +10,6 @@ export interface ModelChatOptions {
 
 export interface ModelAccess {
     getModelFeature(): Promise<ModelFeature>;
-    chat(options: ModelChatOptions): Promise<ModelResponse>;
+    chat(options: ModelChatOptions): Promise<ModelTextResponse>;
     chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse>;
 }

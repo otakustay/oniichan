@@ -95,8 +95,8 @@ function ThreadItem({thread}: ThreadItemProps) {
     const setActive = useSetActiveMessageThread();
     const setEditing = useSetEditing();
     const lastRoundtrip = thread.roundtrips.at(-1);
-    const firstMessage = thread.roundtrips.at(0)?.messages.at(0);
-    const lastMessage = thread.roundtrips.at(-1)?.messages.at(-1);
+    const request = thread.roundtrips.at(0)?.request;
+    const lastMessage = thread.roundtrips.at(-1)?.responses.at(-1);
     const select = () => {
         setActive(thread.uuid);
         setEditing(null);
@@ -107,7 +107,7 @@ function ThreadItem({thread}: ThreadItemProps) {
             <ItemHeader>
                 <MessageStatusIcon status={lastRoundtrip?.status ?? 'read'} />
                 <ItemTitle>
-                    {firstMessage ? resolveMessageContent(firstMessage) : '(No Title)'}
+                    {request ? resolveMessageContent(request) : '(No Title)'}
                 </ItemTitle>
                 {lastMessage && <ItemDateTime time={lastMessage.createdAt} />}
             </ItemHeader>

@@ -40,21 +40,11 @@ interface Props {
     input: ToolCallMessageChunk;
 }
 
-export default function ToolUsage({input}: Props) {
+export default function TextToolUsage({input}: Props) {
     if (input.toolName === 'attempt_completion') {
-        const {result, command} = input.arguments;
-        const lines = [result];
-        if (command) {
-            lines.push(
-                '',
-                'You can run this command to verify this task.',
-                '',
-                '```shell',
-                command,
-                '```'
-            );
-        }
-        return <Markdown content={lines.join('\n')} />;
+        // Not neccessary to show command when tool is not validated
+        const {result} = input.arguments;
+        return result ? <Markdown content={result} /> : null;
     }
 
     if (input.toolName === 'ask_followup_question') {
@@ -67,7 +57,7 @@ export default function ToolUsage({input}: Props) {
                 file={input.arguments.path ?? ''}
                 // `patch` for `patch_file`, `content` for `write_file`
                 patch={input.arguments.patch ?? input.arguments.content ?? ''}
-                edit={input.fileEdit}
+                edit={null}
             />
         );
     }
@@ -77,7 +67,7 @@ export default function ToolUsage({input}: Props) {
     }
 
     if (input.toolName === 'browser_preview') {
-        return <PreviewUrl url={input.arguments.url ?? ''} closed={input.status !== 'generating'} />;
+        return <PreviewUrl url={input.arguments.url ?? ''} closed={false} />;
     }
 
     const [Icon, action, parameter] = renderLabelContent(input);

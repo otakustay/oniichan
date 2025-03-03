@@ -8,8 +8,9 @@ import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
-import {InboxRoundtrip, MessageThread, Roundtrip} from '../../inbox';
-import {WorkflowDetector, WorkflowDetectorInit, WorkflowRunner} from '../../workflow';
+import {createEmptyMessageThread, createEmptyRoundtrip, InboxRoundtrip, InboxMessage} from '../../inbox';
+import {WorkflowDetector, WorkflowRunner, WorkflowStepInit} from '../../workflow';
+import {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
 
@@ -35,9 +36,9 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     protected inboxConfig: InboxConfig = {enableDeepThink: false, automaticRunCommand: false, exceptionCommandList: []};
 
-    protected thread: MessageThread = new MessageThread(newUuid());
+    protected thread: InboxMessageThread = createEmptyMessageThread();
 
-    protected roundtrip: InboxRoundtrip = new Roundtrip();
+    protected roundtrip: InboxRoundtrip = createEmptyRoundtrip();
 
     protected modelAccess = new ModelAccessHost(this.context.editorHost, {enableDeepThink: false});
 
@@ -79,7 +80,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages});
         const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
-            messages: messages.map(v => v.toChatInputPayload()).filter(v => !!v),
+            messages: messages.map(v => v.toChatInputPayload()),
             telemetry: modelTelemetry,
             systemPrompt: this.systemPrompt,
         };
@@ -126,14 +127,14 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const workflowRunner = await this.detectWorkflowRunner();
 
         if (workflowRunner) {
-            yield* this.runWorkflow(workflowRunner, 'run');
+            yield* this.runWorkflow(workflowRunner);
         }
     }
 
     protected async detectWorkflowRunner() {
         const {logger, editorHost, commandExecutor} = this.context;
-        const detectorInit: WorkflowDetectorInit = {
-            threadUuid: this.thread.uuid,
+        const detectorInit: WorkflowStepInit = {
+            thread: this.thread,
             taskId: this.getTaskId(),
             systemPrompt: this.systemPrompt,
             telemetry: this.telemetry,
@@ -146,34 +147,29 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             onUpdateThread: () => this.pushStoreUpdate(),
         };
         const detector = new WorkflowDetector(detectorInit);
-        const workflowRunner = await detector.detectWorkflow();
-
-        if (workflowRunner) {
-            // Detecting workflow can change message content, such as move a text message to tool call message
-            this.pushStoreUpdate();
-        }
-
+        const workflowRunner = detector.detectWorkflow();
         return workflowRunner;
     }
 
-    protected async *runWorkflow(runner: WorkflowRunner, mode: 'run' | 'reject'): AsyncIterable<InboxMessageResponse> {
+    protected async *runWorkflow(runner: WorkflowRunner): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
-        const origin = runner.getWorkflow().getOriginMessage();
+        const reply = this.getReplyMessage();
         try {
-            logger.trace('RunWorkflow', {originUuid: origin.uuid});
-            await runner[mode]();
+            logger.trace('RunWorkflow', {threadUuid: this.thread.uuid, originUuid: reply.uuid});
+            await runner.run();
             logger.trace('RunWorkflowFinish');
         }
         catch (ex) {
             const reason = stringifyError(ex);
-            logger.error('RunWorkflowFail', {reason});
-            origin.setError(reason);
+            logger.error('RunWorkflowFail', {threadUuid: this.thread.uuid, originUuid: reply.uuid, reason});
+            reply.setError(reason);
         }
         finally {
             this.pushStoreUpdate(this.thread.uuid);
         }
 
-        if (runner.getWorkflow().shouldContinueRoundtrip()) {
+        const workflow = this.roundtrip.getLatestWorkflowStrict();
+        if (workflow.shouldContinueRoundtrip()) {
             yield* this.requestModelChat();
         }
     }
@@ -185,6 +181,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             store.moveThreadToTop(moveThreadToTop);
         }
         this.updateInboxThreadList(store.dump());
+    }
+
+    private getReplyMessage(): InboxMessage {
+        return this.roundtrip.getLatestTextMessage() ?? this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
     }
 
     private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {

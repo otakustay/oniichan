@@ -1,10 +1,11 @@
 import {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
+import {assertHasValue} from '@oniichan/shared/error';
 import {AssistantTextMessage, deserializeMessage, Message, ToolCallMessage} from './message';
-import {InboxRoundtrip} from './interface';
+import {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
 
-export type WorkflowOriginMessage = ToolCallMessage;
+export type WorkflowOriginMessage = AssistantTextMessage | ToolCallMessage;
 
-export class Workflow {
+export class Workflow implements InboxWorkflow {
     static from(data: WorkflowData, roundtrip: InboxRoundtrip): Workflow {
         const workflow = new Workflow(ToolCallMessage.from(data.origin, roundtrip), roundtrip);
         workflow.markStatus(data.status);
@@ -21,15 +22,15 @@ export class Workflow {
 
     private continueRoundtrip = false;
 
-    private readonly origin: WorkflowOriginMessage;
+    private readonly origin: InboxWorkflowOriginMessage;
 
     private readonly roundtrip: InboxRoundtrip;
 
-    private readonly reactions: Message[] = [];
+    private readonly reactions: InboxMessage[] = [];
 
     private readonly exposed: string[] = [];
 
-    constructor(origin: WorkflowOriginMessage, roundtrip: InboxRoundtrip) {
+    constructor(origin: InboxWorkflowOriginMessage, roundtrip: InboxRoundtrip) {
         this.origin = origin;
         this.roundtrip = roundtrip;
     }
@@ -110,11 +111,6 @@ export class Workflow {
 
     private findMessageStrict(messageUuid: string) {
         const message = this.findMessage(messageUuid);
-
-        if (!message) {
-            throw new Error(`Message ${messageUuid} not found in workflow`);
-        }
-
-        return message;
+        return assertHasValue(message, `Message ${messageUuid} not found in workflow`);
     }
 }

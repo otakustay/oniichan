@@ -1,30 +1,35 @@
-import {assertNever, stringifyError} from '@oniichan/shared/error';
+import {assertHasValue, assertNever} from '@oniichan/shared/error';
 import {ChatInputPayload} from '@oniichan/shared/model';
 import {now} from '@oniichan/shared/string';
-import {isEditToolName, ModelToolCallInput, ModelToolCallInputWithSource} from '@oniichan/shared/tool';
 import {
     MessageType,
     MessageData,
     UserRequestMessageData,
-    MessageContentChunk,
     AssistantTextMessageData,
     ToolCallMessageData,
     ToolCallMessageChunk,
     ToolUseMessageData,
     MessageDataBase,
-    isToolCallChunk,
     assertThinkingChunk,
     assertToolCallChunk,
     chunkToString,
-    normalizeArguments,
     MessageInputChunk,
-    ToolCallChunkStatus,
+    WorkflowSourceChunkStatus,
+    AssistantTextMessageContentChunk,
+    ToolCallMessageContentChunk,
+    ParsedToolCallMessageChunk,
+    WorkflowChunkStatus,
 } from '@oniichan/shared/inbox';
-import {EditorHost} from '../core/editor';
-import {InboxRoundtrip} from './interface';
-import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
+import {
+    InboxAssistantTextMessage,
+    InboxMessage,
+    InboxRoundtrip,
+    InboxToolCallMessage,
+    InboxToolUseMessage,
+    InboxUserRequestMessage,
+} from './interface';
 
-abstract class MessageBase<T extends MessageType> {
+abstract class MessageBase<T extends MessageType> implements InboxMessage<T> {
     readonly uuid: string;
 
     readonly type: T;
@@ -56,7 +61,7 @@ abstract class MessageBase<T extends MessageType> {
 
     abstract toMessageData(): MessageData;
 
-    abstract toChatInputPayload(): ChatInputPayload | null;
+    abstract toChatInputPayload(): ChatInputPayload;
 
     protected toMessageDataBase(): MessageDataBase {
         return {
@@ -67,7 +72,7 @@ abstract class MessageBase<T extends MessageType> {
     }
 }
 
-export class UserRequestMessage extends MessageBase<'userRequest'> {
+export class UserRequestMessage extends MessageBase<'userRequest'> implements InboxUserRequestMessage {
     static from(data: UserRequestMessageData, roundtrip: InboxRoundtrip) {
         const message = new UserRequestMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
@@ -97,8 +102,15 @@ export class UserRequestMessage extends MessageBase<'userRequest'> {
     }
 }
 
-abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends MessageBase<T> {
-    protected readonly chunks: MessageContentChunk[] = [];
+type AssistantMessageType = 'assistantText' | 'toolCall';
+
+type ResolvedAssistantChunkType<T extends AssistantMessageType> = T extends 'assistantText'
+    ? AssistantTextMessageContentChunk
+    : T extends 'toolCall' ? ToolCallMessageContentChunk
+    : never;
+
+abstract class AssistantMessage<T extends AssistantMessageType> extends MessageBase<T> {
+    protected readonly chunks: Array<ResolvedAssistantChunkType<T>> = [];
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
     constructor(uuid: string, type: T, roundtrip: InboxRoundtrip) {
@@ -109,14 +121,6 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
         return this.chunks.filter(v => v.type !== 'reasoning').map(chunkToString).join('');
     }
 
-    toMessageData(): AssistantTextMessageData | ToolCallMessageData {
-        return {
-            ...this.toMessageDataBase(),
-            type: this.type,
-            chunks: this.chunks,
-        };
-    }
-
     toChatInputPayload(): ChatInputPayload {
         return {
             role: 'assistant',
@@ -124,135 +128,32 @@ abstract class AssistantMessage<T extends 'assistantText' | 'toolCall'> extends 
         };
     }
 
-    protected restore(persistData: AssistantTextMessageData | ToolCallMessageData) {
-        super.restore(persistData);
-        this.chunks.push(...persistData.chunks);
-    }
-
     private getModelVisibleTextContent() {
         return this.chunks.filter(v => v.type !== 'reasoning' && v.type !== 'thinking').map(chunkToString).join('');
     }
 }
 
-export class ToolCallMessage extends AssistantMessage<'toolCall'> {
+export class ToolCallMessage extends AssistantMessage<'toolCall'> implements InboxToolCallMessage {
     static from(data: ToolCallMessageData, roundtrip: InboxRoundtrip) {
         const message = new ToolCallMessage(roundtrip, data);
         return message;
     }
 
-    constructor(roundtrip: InboxRoundtrip, source: AssistantTextMessageData | ToolCallMessageData) {
+    constructor(roundtrip: InboxRoundtrip, source: ToolCallMessageData) {
         super(source.uuid, 'toolCall', roundtrip);
         this.restore(source);
     }
 
-    getToolCallInputWithSource(): ModelToolCallInputWithSource {
-        const toolCall = this.findToolCallChunkStrict();
-
-        return {
-            name: toolCall.toolName,
-            arguments: normalizeArguments(toolCall.arguments),
-            source: toolCall.source,
-        };
-    }
-
-    getToolCallInput(): ModelToolCallInput {
-        const withSource = this.getToolCallInputWithSource();
-        return {
-            name: withSource.name,
-            arguments: withSource.arguments,
-        };
-    }
-
-    async replaceToolCallInput(input: ModelToolCallInputWithSource, editorHost: EditorHost) {
-        const chunk = this.findToolCallChunkStrict();
-        const index = this.chunks.indexOf(chunk);
-
-        if (index < 0) {
-            throw new Error('Invalid tool call message without tool chunk');
-        }
-
-        this.chunks[index] = {
-            type: 'toolCall',
-            toolName: input.name,
-            arguments: input.arguments,
-            status: chunk.status,
-            fileEdit: null,
-            source: input.source,
-        };
-        await this.takeFileEditSnapshot(editorHost);
-    }
-
-    getToolCallStatus(): ToolCallChunkStatus {
-        const chunk = this.findToolCallChunkStrict();
-        return chunk.status;
-    }
-
-    markToolCallStatus(status: ToolCallChunkStatus) {
-        const chunk = this.findToolCallChunkStrict();
-        chunk.status = status;
-    }
-
     toMessageData(): ToolCallMessageData {
         return {
-            ...super.toMessageData(),
+            ...this.toMessageDataBase(),
             type: this.type,
+            chunks: this.chunks,
         };
     }
 
-    getFileEdit() {
-        const toolCall = this.findToolCallChunkStrict();
-
-        return isEditToolName(toolCall.toolName) ? toolCall.fileEdit : null;
-    }
-
-    async takeFileEditSnapshot(editorHost: EditorHost) {
-        const toolCall = this.findToolCallChunkStrict();
-
-        if (toolCall.fileEdit || toolCall.status === 'generating' || !isEditToolName(toolCall.toolName)) {
-            return;
-        }
-
-        const file = toolCall.arguments.path ?? '';
-
-        if (!file) {
-            toolCall.fileEdit = {
-                file,
-                type: 'error',
-                errorType: 'parameterError',
-                message: 'Missing path argument',
-            };
-            return;
-        }
-
-        const editStack = this.roundtrip.getEditStackForFile(toolCall.arguments.path ?? '');
-        const previousEdit = editStack.at(-1);
-        const patchAction = toolCall.toolName === 'write_file'
-            ? 'write'
-            : (toolCall.toolName === 'patch_file' ? 'patch' : 'delete');
-        // `patch` for `patch_file`, `content` for `write_file`
-        const patch = toolCall.arguments.patch ?? toolCall.arguments.content ?? '';
-
-        if (previousEdit) {
-            toolCall.fileEdit = stackFileEdit(previousEdit, patchAction, patch);
-        }
-        else {
-            try {
-                const content = await editorHost.call('readWorkspaceFile', file);
-                toolCall.fileEdit = createFileEdit(file, content, patchAction, patch);
-            }
-            catch (ex) {
-                toolCall.fileEdit = {
-                    file,
-                    type: 'error',
-                    errorType: 'unknown',
-                    message: stringifyError(ex),
-                };
-            }
-        }
-    }
-
-    private findToolCallChunkStrict() {
-        const chunk = this.chunks.find(isToolCallChunk);
+    findToolCallChunkStrict(): ParsedToolCallMessageChunk {
+        const chunk = this.chunks.find(v => v.type === 'parsedToolCall');
 
         if (!chunk) {
             throw new Error('Invalid tool call message without tool chunk');
@@ -260,9 +161,24 @@ export class ToolCallMessage extends AssistantMessage<'toolCall'> {
 
         return chunk;
     }
+
+    getWorkflowOriginStatus(): WorkflowChunkStatus {
+        const chunk = this.findToolCallChunkStrict();
+        return chunk.status;
+    }
+
+    markWorkflowOriginStatus(status: WorkflowChunkStatus) {
+        const chunk = this.findToolCallChunkStrict();
+        chunk.status = status;
+    }
+
+    protected restore(persistData: ToolCallMessageData) {
+        super.restore(persistData);
+        this.chunks.push(...persistData.chunks);
+    }
 }
 
-export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
+export class AssistantTextMessage extends AssistantMessage<'assistantText'> implements InboxAssistantTextMessage {
     static from(data: AssistantTextMessageData, roundtrip: InboxRoundtrip) {
         const message = new AssistantTextMessage(data.uuid, roundtrip);
         message.restore(data);
@@ -310,7 +226,6 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
                 toolName: chunk.toolName,
                 arguments: {},
                 status: 'generating',
-                fileEdit: null,
                 source: chunk.source,
             };
             this.chunks.push(toolChunk);
@@ -348,23 +263,54 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> {
 
     toMessageData(): AssistantTextMessageData {
         return {
-            ...super.toMessageData(),
+            ...this.toMessageDataBase(),
             type: this.type,
+            chunks: this.chunks,
         };
     }
 
-    async toToolCallMessage(editorHost: EditorHost): Promise<ToolCallMessage | null> {
-        if (this.chunks.some(isToolCallChunk)) {
-            const message = new ToolCallMessage(this.roundtrip, this.toMessageData());
-            await message.takeFileEditSnapshot(editorHost);
-            return message;
+    getWorkflowSourceStatus(): WorkflowSourceChunkStatus {
+        const chunk = this.findToolCallChunkStrict();
+        return chunk.status;
+    }
+
+    markWorkflowSourceStatus(status: WorkflowSourceChunkStatus) {
+        const chunk = this.findToolCallChunkStrict();
+        chunk.status = status;
+    }
+
+    findToolCallChunk() {
+        const chunk = this.chunks.find(v => v.type === 'toolCall');
+
+        if (!chunk) {
+            throw new Error('Invalid tool call message without tool chunk');
         }
 
-        return null;
+        return chunk;
+    }
+
+    findToolCallChunkStrict() {
+        const chunk = this.findToolCallChunk();
+        return assertHasValue(chunk, 'Message does not contain tool call chunk');
+    }
+
+    replaceToolCallChunk(newChunk: ToolCallMessageChunk) {
+        const index = this.chunks.findIndex(v => v.type === 'toolCall');
+
+        if (index < 0) {
+            throw new Error('Invalid tool call message without tool chunk');
+        }
+
+        this.chunks[index] = newChunk;
+    }
+
+    protected restore(persistData: AssistantTextMessageData) {
+        super.restore(persistData);
+        this.chunks.push(...persistData.chunks);
     }
 }
 
-export class ToolUseMessage extends MessageBase<'toolUse'> {
+export class ToolUseMessage extends MessageBase<'toolUse'> implements InboxToolUseMessage {
     static from(data: ToolUseMessageData, roundtrip: InboxRoundtrip) {
         const message = new ToolUseMessage(data.uuid, roundtrip, data.content);
         message.restore(data);
@@ -379,7 +325,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> {
         this.content = content;
     }
 
-    toMessageData(): MessageData {
+    toMessageData(): ToolUseMessageData {
         return {
             ...this.toMessageDataBase(),
             type: this.type,

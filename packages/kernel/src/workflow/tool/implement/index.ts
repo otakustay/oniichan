@@ -1,17 +1,19 @@
-import {ModelToolCallInput, ToolName} from '@oniichan/shared/tool';
 import {assertNever} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
-import {ReadFileToolImplement} from './readFile';
-import {ReadDirectoryToolImplement} from './readDirectory';
+import {ToolName} from '@oniichan/shared/tool';
+import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
+import {AttemptCompletionToolImplement} from './attemptCompletion';
+import {ToolExecuteResult, ToolImplementBase, ToolImplementInit, Success, ExecuteError} from './base';
+import {BrowserPreviewToolImplement} from './browserPreview';
+import {DeleteFileToolImplement} from './deleteFile';
 import {GlobFilesToolImplement} from './globFiles';
 import {GrepFilesToolImplement} from './grepFiles';
-import {WriteFileToolImplement} from './writeFile';
 import {PatchFilesToolImplement} from './patchFile';
-import {DeleteFileToolImplement} from './deleteFile';
+import {ReadDirectoryToolImplement} from './readDirectory';
+import {ReadFileToolImplement} from './readFile';
 import {RunCommandToolImplement} from './runCommand';
-import {BrowserPreviewToolImplement} from './browserPreview';
-import {AttemptCompletionToolImplement} from './attemptCompletion';
-import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
+import {WriteFileToolImplement} from './writeFile';
+
+export {ToolExecuteResult, ToolImplementBase, ToolImplementInit, Success, ExecuteError};
 
 export class ToolImplement {
     private readonly readFile: ToolImplementBase;
@@ -50,16 +52,24 @@ export class ToolImplement {
         this.askFollowupQuestion = new AskFollowupQuestionToolImplement(init);
     }
 
-    async *callTool(input: ModelToolCallInput): AsyncIterable<ToolRunStep> {
-        const implement = this.getImplement(input.name);
-
-        yield* implement.run(input.arguments);
+    requireUserApprove(toolName: ToolName): boolean {
+        const implement = this.getImplement(toolName);
+        return implement.requireUserApprove();
     }
 
-    async rejectTool(input: ModelToolCallInput): Promise<ToolRunStep> {
-        const implement = this.getImplement(input.name);
+    executeApprove(toolName: ToolName, args: Record<string, any>): Promise<ToolExecuteResult> {
+        const implement = this.getImplement(toolName);
+        return implement.executeApprove(args);
+    }
 
-        return implement.reject();
+    async executeReject(toolName: ToolName): Promise<string> {
+        const implement = this.getImplement(toolName);
+        return implement.executeReject();
+    }
+
+    extractArguments(toolName: ToolName, generated: Record<string, string | undefined>): Record<string, unknown> {
+        const implement = this.getImplement(toolName);
+        return implement.extractParameters(generated);
     }
 
     private getImplement(name: ToolName) {

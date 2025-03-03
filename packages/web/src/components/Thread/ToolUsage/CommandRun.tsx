@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import {IoTerminalOutline, IoCheckmarkSharp, IoClose} from 'react-icons/io5';
-import {ToolCallChunkStatus} from '@oniichan/shared/inbox';
+import {WorkflowSourceChunkStatus, WorkflowChunkStatus} from '@oniichan/shared/inbox';
 import {useApproveTool} from '@oniichan/web-host/atoms/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import Button from '@/components/Button';
 import ActBar from '@/components/ActBar';
 import {showToast} from '@/components/Toast';
 import InteractiveLabel from '@/components/InteractiveLabel';
-import {useMessageIdentity} from './MessageContext';
+import {useMessageIdentity} from '../MessageContext';
 
 const Header = styled.div`
     display: grid;
@@ -55,7 +55,7 @@ const Layout = styled.div`
     }
 `;
 
-function renderIcon(status: ToolCallChunkStatus) {
+function renderIcon(status: WorkflowSourceChunkStatus | WorkflowChunkStatus) {
     switch (status) {
         case 'generating':
         case 'waitingValidate':
@@ -77,7 +77,7 @@ function renderIcon(status: ToolCallChunkStatus) {
 
 interface Props {
     command: string;
-    status: ToolCallChunkStatus;
+    status: WorkflowSourceChunkStatus | WorkflowChunkStatus;
 }
 
 export default function CommandRun({command, status}: Props) {

@@ -1,49 +1,31 @@
-import {
-    AssistantTextMessageData,
-    isAssistantMessage,
-    MessageData,
-    ReasoningMessageChunk,
-    RoundtripMessageData,
-    ToolCallMessageData,
-} from '@oniichan/shared/inbox';
+import {MessageViewData, ReasoningMessageChunk, RoundtripMessageData} from '@oniichan/shared/inbox';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
 import {EditSummary} from './EditSummary';
 
 interface MessageView {
-    message: MessageData;
+    message: MessageViewData;
     isActive: boolean;
     isReasoning: boolean;
 }
 
-type ProductionMessageData = AssistantTextMessageData | ToolCallMessageData;
-
-function isProductionMessage(message: MessageData): message is ProductionMessageData {
-    return message.type === 'assistantText' || message.type === 'toolCall';
-}
-
 function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] {
-    const messages: MessageView[] = [];
+    const messages: MessageView[] = [
+        {message: roundtrip.request, isActive: false, isReasoning: false},
+    ];
 
-    const request = roundtrip.messages.at(0);
-    const responses = roundtrip.messages.slice(1).filter(isProductionMessage);
-
-    if (request) {
-        messages.push({message: request, isActive: false, isReasoning: false});
-    }
-
-    if (!responses.length) {
+    if (!roundtrip.responses.length) {
         return messages;
     }
 
     // Combine messages in roundtrip to a single response
-    const [reply, ...reactions] = responses;
+    const [reply, ...reactions] = roundtrip.responses;
     const reasoningChunk: ReasoningMessageChunk = {
         type: 'reasoning',
         content: reply.chunks.find(v => v.type === 'reasoning')?.content ?? '',
     };
-    const response: AssistantTextMessageData = {
-        type: 'assistantText',
+    const response: MessageViewData = {
+        type: 'assistantResponse',
         chunks: reply.chunks.filter(v => v.type !== 'reasoning'),
         uuid: reply.uuid,
         createdAt: reply.createdAt,
@@ -93,7 +75,7 @@ export default function Roundtrip({threadUuid, roundtrip, isEditInteractive}: Pr
             roundtripStatus={roundtrip.status}
             message={view.message}
             showIndicator={roundtrip.status === 'running' && view.isActive}
-            showRollback={isAssistantMessage(view.message.type) && !isEditInteractive}
+            showRollback={view.message.type === 'assistantResponse' && !isEditInteractive}
             reasoning={view.isReasoning}
         />
     );

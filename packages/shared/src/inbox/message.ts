@@ -1,5 +1,5 @@
-import {FileEditData} from '../patch';
-import {ToolName, ToolParsedChunk} from '../tool';
+import {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
+import {ToolParsedChunk} from '../tool';
 
 export interface ReasoningMessageChunk {
     type: 'reasoning';
@@ -11,27 +11,6 @@ export interface TextMessageChunk {
     content: string;
 }
 
-export type ToolCallChunkStatus =
-    | 'generating'
-    | 'waitingValidate'
-    | 'validateError'
-    | 'validated'
-    | 'waitingApprove'
-    | 'userApproved'
-    | 'userRejected'
-    | 'executing'
-    | 'completed'
-    | 'failed';
-
-export interface ToolCallMessageChunk {
-    type: 'toolCall';
-    toolName: ToolName;
-    arguments: Record<string, string | undefined>;
-    status: ToolCallChunkStatus;
-    fileEdit: FileEditData | null;
-    source: string;
-}
-
 export interface ThinkingMessageChunk {
     type: 'thinking';
     content: string;
@@ -40,13 +19,19 @@ export interface ThinkingMessageChunk {
 
 export type MessageInputChunk = ReasoningMessageChunk | ToolParsedChunk;
 
-export type MessageContentChunk =
+export type AssistantTextMessageContentChunk =
     | ReasoningMessageChunk
     | TextMessageChunk
     | ToolCallMessageChunk
     | ThinkingMessageChunk;
 
-export type MessageViewChunk = MessageContentChunk;
+export type ToolCallMessageContentChunk =
+    | ReasoningMessageChunk
+    | TextMessageChunk
+    | ParsedToolCallMessageChunk
+    | ThinkingMessageChunk;
+
+export type MessageViewChunk = AssistantTextMessageContentChunk | ToolCallMessageContentChunk;
 
 export interface MessageDataBase {
     uuid: string;
@@ -59,14 +44,19 @@ export interface UserRequestMessageData extends MessageDataBase {
     content: string;
 }
 
+export interface AssistantResponseMessageData extends MessageDataBase {
+    type: 'assistantResponse';
+    chunks: MessageViewChunk[];
+}
+
 export interface AssistantTextMessageData extends MessageDataBase {
     type: 'assistantText';
-    chunks: MessageContentChunk[];
+    chunks: AssistantTextMessageContentChunk[];
 }
 
 export interface ToolCallMessageData extends MessageDataBase {
     type: 'toolCall';
-    chunks: MessageContentChunk[];
+    chunks: ToolCallMessageContentChunk[];
 }
 
 export interface ToolUseMessageData extends MessageDataBase {
@@ -74,6 +64,12 @@ export interface ToolUseMessageData extends MessageDataBase {
     content: string;
 }
 
-export type MessageData = UserRequestMessageData | AssistantTextMessageData | ToolCallMessageData | ToolUseMessageData;
+export type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
+
+export type MessageData = UserRequestMessageData | AssistantMessageData | ToolUseMessageData;
+
+export type MessageViewData = UserRequestMessageData | AssistantResponseMessageData;
 
 export type MessageType = MessageData['type'];
+
+export type MessageViewType = MessageViewData['type'];

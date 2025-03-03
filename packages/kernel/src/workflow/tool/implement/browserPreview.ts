@@ -1,19 +1,8 @@
-import {browserPreviewParameters, BrowserPreviewParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
+import {BrowserPreviewParameter} from '@oniichan/shared/tool';
+import {ToolImplementBase, ToolExecuteResult} from './base';
 
 export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
-    constructor(init: ToolImplementInit) {
-        super('BrowserPreviewToolImplement', init, browserPreviewParameters);
-    }
-
-    protected parseArgs(args: Record<string, string | undefined>) {
-        return {
-            url: args.url,
-        };
-    }
-
-    protected async execute(): Promise<ToolRunStep> {
-        const args = this.getToolCallArguments();
+    async executeApprove(args: BrowserPreviewParameter): Promise<ToolExecuteResult> {
         const response = await fetch(args.url);
 
         if (response.ok) {
@@ -28,6 +17,12 @@ export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPrevie
             type: 'success',
             finished: false,
             output: `This URL is not accessible for now, but its not a big problem, you can continue your work`,
+        };
+    }
+
+    extractParameters(generated: Record<string, string | undefined>): Partial<BrowserPreviewParameter> {
+        return {
+            url: generated.url?.trim(),
         };
     }
 }

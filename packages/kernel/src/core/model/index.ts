@@ -4,6 +4,7 @@ import {
     ModelConfiguration,
     ModelFeature,
     ModelResponse,
+    ModelTextResponse,
 } from '@oniichan/shared/model';
 import {ModelAccess, ModelChatOptions} from './interface';
 import {EditorHost} from '../editor';
@@ -31,7 +32,7 @@ export class ModelAccessHost implements ModelAccess {
         return implement.getModelFeature();
     }
 
-    async chat(options: ModelChatOptions): Promise<ModelResponse> {
+    async chat(options: ModelChatOptions): Promise<ModelTextResponse> {
         const implement = await this.createImplement();
         return implement.chat(options);
     }

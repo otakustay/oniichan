@@ -43,7 +43,7 @@ export default function Thread({uuid}: Props) {
     // As a mail inbox, the latest roundtrip is on top
     const roundtrips = [...thread.roundtrips].reverse();
     const renderRoundtrip = (roundtrip: RoundtripMessageData) => {
-        const key = roundtrip.messages.at(0)?.uuid ?? crypto.randomUUID();
+        const key = roundtrip.request.uuid;
         return (
             <Roundtrip
                 key={key}

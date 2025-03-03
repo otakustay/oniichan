@@ -1,7 +1,7 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import {InboxPromptReference} from '@oniichan/prompt';
-import {UserRequestMessage} from '../../inbox';
+import {setRoundtripRequest} from '../../inbox';
 import {InboxMessageResponse, InboxRequestHandler} from './handler';
 
 interface TextMessageBody {
@@ -46,7 +46,7 @@ export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessag
 
         logger.trace('EnsureRoundtrip');
         this.thread = store.ensureThread(payload.threadUuid);
-        this.roundtrip.setRequest(new UserRequestMessage(payload.uuid, this.roundtrip, payload.body.content));
+        setRoundtripRequest(this.roundtrip, payload.uuid, payload.body.content);
         this.thread.addRoundtrip(this.roundtrip);
         this.addReference(payload.references ?? []);
         store.moveThreadToTop(this.thread.uuid);

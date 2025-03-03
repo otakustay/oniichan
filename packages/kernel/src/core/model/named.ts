@@ -1,4 +1,4 @@
-import {ModelClient, ModelResponse, ModelFeature} from '@oniichan/shared/model';
+import {ModelClient, ModelResponse, ModelFeature, ModelTextResponse} from '@oniichan/shared/model';
 import {ModelChatOptions, ModelAccess} from './interface';
 
 export class NamedModelAccess implements ModelAccess {
@@ -12,7 +12,7 @@ export class NamedModelAccess implements ModelAccess {
         return this.client.getModelFeature();
     }
 
-    async chat(options: ModelChatOptions): Promise<ModelResponse> {
+    async chat(options: ModelChatOptions): Promise<ModelTextResponse> {
         const {messages, systemPrompt, telemetry, abortSignal} = options;
         telemetry.setRequest(messages);
         try {

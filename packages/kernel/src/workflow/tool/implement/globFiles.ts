@@ -1,21 +1,11 @@
 import path from 'node:path';
-import {findFilesByGlobParameters, FindFilesByGlobParameter} from '@oniichan/shared/tool';
+import {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
+import {ToolImplementBase, ToolExecuteResult} from './base';
+import {resultMarkdown} from '../utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {
-    constructor(init: ToolImplementInit) {
-        super('GlobFilesToolImplement', init, findFilesByGlobParameters);
-    }
-
-    protected parseArgs(args: Record<string, string | undefined>) {
-        return {
-            glob: args.glob,
-        };
-    }
-
-    protected async execute(): Promise<ToolRunStep> {
-        const args = this.getToolCallArguments();
+    async executeApprove(args: FindFilesByGlobParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -52,5 +42,11 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 output: `Unable to find files with pattern ${args.glob}: ${stringifyError(ex)}`,
             };
         }
+    }
+
+    extractParameters(generated: Record<string, string | undefined>): Partial<FindFilesByGlobParameter> {
+        return {
+            glob: generated.glob?.trim(),
+        };
     }
 }

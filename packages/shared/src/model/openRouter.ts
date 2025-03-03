@@ -5,8 +5,8 @@ import {
     ModelClient,
     ModelConfiguration,
     ModelMetaResponse,
-    ModelResponse,
     ModelStreamingResponse,
+    ModelTextResponse,
 } from './interface';
 import {getModelFeature, ModelFeature} from './feature';
 
@@ -29,7 +29,7 @@ export class OpenRouterModelClient implements ModelClient {
         this.provider = openRouter.chat(config.modelName, {includeReasoning: modelFeature.supportReasoning});
     }
 
-    async chat(options: ModelChatOptions): Promise<[ModelResponse, ModelMetaResponse]> {
+    async chat(options: ModelChatOptions): Promise<[ModelTextResponse, ModelMetaResponse]> {
         const request = this.getRequest(options);
         const result = await generateText(request);
         return [

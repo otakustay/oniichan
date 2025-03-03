@@ -1,7 +1,6 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import {InboxRequestHandler, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
-import {ToolCallWorkflowRunner, ToolCallWorkflowRunnerInit} from '../../workflow';
 
 export interface InboxApproveToolRequest extends InboxRoundtripIdentity {
     approved: boolean;
@@ -33,7 +32,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToo
     }
 
     private async *continueWorkflow(payload: InboxApproveToolRequest) {
-        const {store, logger, editorHost, commandExecutor} = this.context;
+        const {store, logger} = this.context;
         await this.prepareEnvironment();
 
         logger.trace('EnsureRoundtrip');
@@ -44,35 +43,20 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToo
         const latestWorkflow = this.roundtrip.getLatestWorkflowStrict();
         const origin = latestWorkflow.getOriginMessage();
 
-        if (origin.getToolCallStatus() !== 'waitingApprove') {
+        if (origin.getWorkflowOriginStatus() !== 'waitingApprove') {
             throw new Error('Workflow is not in a waiting approve state');
         }
 
         const status = payload.approved ? 'userApproved' : 'userRejected';
-        origin.markToolCallStatus(status);
+        origin.markWorkflowOriginStatus(status);
         this.pushStoreUpdate();
 
-        const toolCallMessage = latestWorkflow.getOriginMessage();
-        const messages = this.roundtrip.toMessages();
-
         await this.prepareSystemPrompt();
-        const init: ToolCallWorkflowRunnerInit = {
-            threadUuid: this.thread.uuid,
-            taskId: this.getTaskId(),
-            base: messages.filter(v => v !== toolCallMessage),
-            origin: toolCallMessage,
-            workflow: latestWorkflow,
-            telemetry: this.telemetry,
-            systemPrompt: this.systemPrompt,
-            modelAccess: this.modelAccess,
-            inboxConfig: this.inboxConfig,
-            editorHost,
-            commandExecutor,
-            logger,
-            onUpdateThread: () => this.pushStoreUpdate(),
-        };
-        const runner = new ToolCallWorkflowRunner(init);
-        const mode = payload.approved ? 'run' : 'reject';
-        yield* over(this.runWorkflow(runner, mode)).map(v => ({type: 'value', value: v} as const));
+        const runner = await this.detectWorkflowRunner();
+
+        if (!runner) {
+            throw new Error('No available tool workflow');
+        }
+        yield* over(this.runWorkflow(runner)).map(v => ({type: 'value', value: v} as const));
     }
 }

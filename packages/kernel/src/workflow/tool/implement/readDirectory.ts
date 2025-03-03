@@ -1,23 +1,12 @@
 import path from 'node:path';
-import {readDirectoryParameters, ReadDirectoryParameter} from '@oniichan/shared/tool';
+import {ReadDirectoryParameter} from '@oniichan/shared/tool';
 import {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
+import {ToolImplementBase, ToolExecuteResult} from './base';
+import {resultMarkdown} from '../utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
-    constructor(init: ToolImplementInit) {
-        super('ReadDirectoryToolImplement', init, readDirectoryParameters);
-    }
-
-    protected parseArgs(args: Record<string, string | undefined>) {
-        return {
-            path: args.path,
-            recursive: args.recursive === 'true',
-        };
-    }
-
-    protected async execute(): Promise<ToolRunStep> {
-        const args = this.getToolCallArguments();
+    async executeApprove(args: ReadDirectoryParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -76,5 +65,12 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 output: `Unable to read directory ${args.path}: ${stringifyError(ex)}`,
             };
         }
+    }
+
+    extractParameters(generated: Record<string, string | undefined>): Partial<ReadDirectoryParameter> {
+        return {
+            path: generated.path?.trim(),
+            recursive: generated.recursive === 'true',
+        };
     }
 }

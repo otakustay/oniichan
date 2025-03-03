@@ -1,7 +1,7 @@
-import {isAssistantMessage} from '@oniichan/shared/inbox';
+import {isAssistantMessage, isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import {diffCount, FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {Message} from '../../inbox';
+import {InboxMessage, InboxToolCallMessage} from '../../inbox';
 import {InboxMessageIdentity, InboxRequestHandler} from './handler';
 
 interface InboxRollbackAppliable {
@@ -61,9 +61,13 @@ export class InboxCheckRollbackHandler extends InboxRequestHandler<InboxMessageI
         }
     }
 
-    private computeRollbackFileEdits(messages: Message[]) {
+    private computeRollbackFileEdits(messages: InboxMessage[]) {
         const files: Record<string, FileEditData[]> = {};
-        const edits = messages.flatMap(v => v.type === 'toolCall' && v.getFileEdit() || []);
+        const edits = messages
+            .filter((v: InboxMessage): v is InboxToolCallMessage => v.type === 'toolCall')
+            .map(v => v.findToolCallChunkStrict())
+            .filter(isFileEditToolCallChunk)
+            .flatMap(v => v.executionData ?? []);
         for (const edit of edits) {
             const fileEdits = files[edit.file] ?? [];
             fileEdits.push(edit.type === 'error' ? edit : revertFileEdit(edit));

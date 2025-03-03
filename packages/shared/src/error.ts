@@ -10,3 +10,11 @@ export function stringifyError(error: unknown) {
 export function isAbortError(error: unknown): error is DOMException {
     return error instanceof DOMException && error.name === 'AbortError';
 }
+
+export function assertHasValue<T>(value: T | null | undefined, errorMessage: string): T {
+    if (value === null || value === undefined) {
+        throw new Error(errorMessage);
+    }
+
+    return value;
+}

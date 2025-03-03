@@ -1,18 +1,23 @@
-import {assertNever} from '@oniichan/shared/error';
-import {RoundtripData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
-import {AssistantTextMessage, UserRequestMessage, Message} from './message';
-import {Workflow, WorkflowOriginMessage} from './workflow';
-import {InboxRoundtrip} from './interface';
-import {FileEditData} from '@oniichan/shared/patch';
+import {assertHasValue, assertNever} from '@oniichan/shared/error';
+import {RoundtripData, RoundtripMessageData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
+import {AssistantTextMessage, UserRequestMessage} from './message';
+import {Workflow} from './workflow';
+import {
+    InboxAssistantTextMessage,
+    InboxMessage,
+    InboxRoundtrip,
+    InboxWorkflow,
+    InboxWorkflowOriginMessage,
+} from './interface';
 
 interface RoundtripMessageResponse {
     type: 'message';
-    message: AssistantTextMessage;
+    message: InboxAssistantTextMessage;
 }
 
 interface RoundtripWorkflowResponse {
     type: 'workflow';
-    workflow: Workflow;
+    workflow: InboxWorkflow;
 }
 
 type RoundtripResponse = RoundtripMessageResponse | RoundtripWorkflowResponse;
@@ -76,7 +81,7 @@ export class Roundtrip implements InboxRoundtrip {
         return response.message;
     }
 
-    startWorkflowResponse(origin: WorkflowOriginMessage) {
+    startWorkflowResponse(origin: InboxWorkflowOriginMessage) {
         // Before converted to a workflow, we already have a message response in roundtrip
         const response = this.findMessageResponseStrict(origin.uuid);
         const responseIndex = this.responses.lastIndexOf(response);
@@ -124,25 +129,24 @@ export class Roundtrip implements InboxRoundtrip {
 
         return null;
     }
-
-    getLatestTextMessageStrict(): AssistantTextMessage {
+    getLatestTextMessage(): InboxAssistantTextMessage | null {
         const lastResponse = this.responses.at(-1);
-
-        if (lastResponse?.type !== 'message') {
-            throw new Error('Roundtrip does not have a latest response of type text');
-        }
-
-        return lastResponse.message;
+        return lastResponse?.type === 'message' ? lastResponse.message : null;
     }
 
-    getLatestWorkflowStrict(): Workflow {
+    getLatestTextMessageStrict(): InboxAssistantTextMessage {
+        const message = this.getLatestTextMessage();
+        return assertHasValue(message, 'Roundtrip does not have a latest response of type text');
+    }
+
+    getLatestWorkflow(): InboxWorkflow | null {
         const lastResponse = this.responses.at(-1);
+        return lastResponse?.type === 'workflow' ? lastResponse.workflow : null;
+    }
 
-        if (lastResponse?.type !== 'workflow') {
-            throw new Error('Roundtrip does not have a latest response of type workflow');
-        }
-
-        return lastResponse.workflow;
+    getLatestWorkflowStrict(): InboxWorkflow {
+        const workflow = this.getLatestWorkflow();
+        return assertHasValue(workflow, 'Roundtrip does not have a latest response of type workflow');
     }
 
     addWarning(message: string) {
@@ -150,16 +154,10 @@ export class Roundtrip implements InboxRoundtrip {
     }
 
     toMessages() {
-        const messages: Message[] = [this.getRequest()];
-        for (const response of this.responses) {
-            if (response.type === 'message') {
-                messages.push(response.message);
-            }
-            else if (response.type === 'workflow') {
-                messages.push(...response.workflow.toMessages());
-            }
-        }
-        return messages;
+        return [
+            this.getRequest(),
+            ...this.getResponseMessages(),
+        ];
     }
 
     toRoundtripData(): RoundtripData {
@@ -186,14 +184,15 @@ export class Roundtrip implements InboxRoundtrip {
         };
     }
 
-    getEditStackForFile(file: string): FileEditData[] {
-        const responses = this.responses;
-        return responses
-            .filter(v => v.type === 'workflow')
-            .flatMap(v => v.workflow.toMessages())
-            .filter(v => v.type === 'toolCall')
-            .flatMap(v => v.getFileEdit() ?? [])
-            .filter(v => v.file === file);
+    toRoundtripMessageData(): RoundtripMessageData {
+        return {
+            status: this.getStatus(),
+            request: this.getRequest().toMessageData(),
+            responses: this
+                .getResponseMessages()
+                .map(v => v.toMessageData())
+                .filter(v => v.type === 'assistantText' || v.type === 'toolCall'),
+        };
     }
 
     private getRequest() {
@@ -228,5 +227,17 @@ export class Roundtrip implements InboxRoundtrip {
         }
 
         throw new Error(`Message ${messageUuid} not found`);
+    }
+
+    private getResponseMessages(): InboxMessage[] {
+        const convert = (response: RoundtripResponse): InboxMessage | InboxMessage[] => {
+            if (response.type === 'message') {
+                return response.message;
+            }
+            else {
+                return response.workflow.toMessages();
+            }
+        };
+        return this.responses.flatMap(convert);
     }
 }

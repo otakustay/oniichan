@@ -71,7 +71,7 @@ function Content({threadUuid, mode}: EditingValue) {
     const setEditing = useSetEditing();
     const sendMessage = useSendMessageToThread(threadUuid);
     const thread = useMessageThreadValueByUuid(threadUuid);
-    const requestMessageUuid = thread?.roundtrips.at(-1)?.messages.at(0)?.uuid;
+    const requestMessageUuid = thread?.roundtrips.at(-1)?.request.uuid;
     const ipc = useIpc();
     useEffect(
         () => {

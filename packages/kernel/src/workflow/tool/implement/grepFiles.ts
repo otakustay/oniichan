@@ -1,7 +1,8 @@
 import unixify from 'unixify';
-import {findFilesByRegExpParameters, FindFilesByRegExpParameter} from '@oniichan/shared/tool';
+import {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
+import {ToolImplementBase, ToolExecuteResult} from './base';
+import {resultMarkdown} from '../utils';
 
 // For each match, its a `begin - context - match - context - end` sequence,
 // so a maximum of 1000 lines contains 200 search results
@@ -48,20 +49,7 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
 
     private readonly results: GrepResult[] = [];
 
-    constructor(init: ToolImplementInit) {
-        super('GrepFilesToolImplement', init, findFilesByRegExpParameters);
-    }
-
-    protected parseArgs(args: Record<string, string | undefined>) {
-        return {
-            regex: args.regex,
-            path: args.path,
-            glob: args.glob,
-        };
-    }
-
-    protected async execute(): Promise<ToolRunStep> {
-        const args = this.getToolCallArguments();
+    async executeApprove(args: FindFilesByRegExpParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -126,6 +114,14 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 output: `Unable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
             };
         }
+    }
+
+    extractParameters(generated: Record<string, string | undefined>): Partial<FindFilesByRegExpParameter> {
+        return {
+            path: generated.path?.trim(),
+            glob: generated.glob?.trim(),
+            regex: generated.regex?.trim(),
+        };
     }
 
     private async consumeRipGrepOutput(stream: AsyncIterable<string>) {

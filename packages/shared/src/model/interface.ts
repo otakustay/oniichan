@@ -49,7 +49,7 @@ export interface ModelChatOptions {
 }
 
 export interface ModelClient {
-    chat(options: ModelChatOptions): Promise<[ModelResponse, ModelMetaResponse]>;
+    chat(options: ModelChatOptions): Promise<[ModelTextResponse, ModelMetaResponse]>;
     chatStreaming(options: ModelChatOptions): AsyncIterable<ModelStreamingResponse>;
     getModelFeature(): ModelFeature;
 }

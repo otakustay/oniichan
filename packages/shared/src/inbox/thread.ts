@@ -1,9 +1,10 @@
-import {MessageData} from './message';
+import {AssistantMessageData, UserRequestMessageData} from './message';
 import {RoundtripData, RoundtripStatus} from './roundtrip';
 
 export interface RoundtripMessageData {
     status: RoundtripStatus;
-    messages: MessageData[];
+    request: UserRequestMessageData;
+    responses: AssistantMessageData[];
 }
 
 export interface MessageThreadData {

@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function FileEditContextProvider({roundtrip, isEditInteractive, children}: Props) {
-    const edits = extractFileEdits(roundtrip.messages);
+    const edits = extractFileEdits(roundtrip.responses);
 
     return <Context value={{isEditInteractive, edits}}>{children}</Context>;
 }

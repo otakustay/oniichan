@@ -1,8 +1,16 @@
-import {runCommandParameters, RunCommandParameter} from '@oniichan/shared/tool';
+import {RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import {resultMarkdown, ToolImplementBase, ToolImplementInit, ToolRunStep} from './utils';
+import {ParsedToolCallMessageChunk, RunCommandToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ToolImplementBase, ToolExecuteResult} from './base';
+import {resultMarkdown} from '../utils';
 
 const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
+
+function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is RunCommandToolCallMessageChunk {
+    if (chunk.toolName !== 'run_command') {
+        throw new Error('Invalid tool call message chunk');
+    }
+}
 
 function findCommandNames(script: string): string[] {
     // This is a very simple implement, using `bash-parser` introduce too many complexity
@@ -15,18 +23,7 @@ function findCommandNames(script: string): string[] {
 }
 
 export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
-    constructor(init: ToolImplementInit) {
-        super('RunCommandToolImplement', init, runCommandParameters);
-    }
-
-    protected parseArgs(args: Record<string, string | undefined>) {
-        return {
-            command: args.command,
-        };
-    }
-
-    protected async execute(): Promise<ToolRunStep> {
-        const args = this.getToolCallArguments();
+    async executeApprove(args: RunCommandParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -99,19 +96,22 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
         }
     }
 
-    protected requireUserApprove(): boolean {
-        const args = this.getToolCallArguments();
-        const commands = findCommandNames(args.command);
+    extractParameters(generated: Record<string, string | undefined>): Partial<RunCommandParameter> {
+        return {
+            command: generated.command?.trim(),
+        };
+    }
+
+    requireUserApprove(): boolean {
+        const chunk = this.getToolCallChunkStrict();
+        assertChunk(chunk);
+        const commands = findCommandNames(chunk.arguments.command);
 
         const hasExceptionCommand = commands.some(v => this.inboxConfig.exceptionCommandList.includes(v));
         return this.inboxConfig.automaticRunCommand ? hasExceptionCommand : !hasExceptionCommand;
     }
 
-    protected async userReject(): Promise<ToolRunStep> {
-        return {
-            type: 'success',
-            finished: false,
-            output: 'User has rejected to run this command, you should continue without this command being executed',
-        };
+    async executeReject(): Promise<string> {
+        return 'User has rejected to run this command, you should continue without this command being executed';
     }
 }

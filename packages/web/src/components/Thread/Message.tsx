@@ -1,27 +1,22 @@
-import {ReactElement, ReactNode, RefObject, useEffect, useRef, useState} from 'react';
+import {ReactElement, ReactNode, RefObject, useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
 import {BiErrorAlt} from 'react-icons/bi';
-import {IoCaretUpOutline, IoCaretDownOutline} from 'react-icons/io5';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {MessageViewChunk, MessageData, RoundtripStatus, isAssistantMessage} from '@oniichan/shared/inbox';
+import {MessageViewChunk, RoundtripStatus, MessageViewData} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';
 import {MessageContextProvider} from './MessageContext';
 import MessageContent from './MessageContent';
-import InteractiveLabel from '../InteractiveLabel';
 import Indicator from './Indicator';
 import Rollback from './Rollback';
 
-function resolveSenderName(message: MessageData) {
+function resolveSenderName(message: MessageViewData) {
     switch (message.type) {
-        case 'assistantText':
-        case 'toolCall':
+        case 'assistantResponse':
             return 'Oniichan';
-        case 'toolUse':
-            return 'Super Tool';
         case 'userRequest':
             return 'Me';
         default:
@@ -29,17 +24,10 @@ function resolveSenderName(message: MessageData) {
     }
 }
 
-function isCollapsable(message: MessageData) {
-    return message.type === 'toolUse';
-}
-
-function renderAvatar(message: MessageData) {
+function renderAvatar(message: MessageViewData) {
     switch (message.type) {
-        case 'assistantText':
-        case 'toolCall':
+        case 'assistantResponse':
             return <Avatar.Assistant size="1.5em" />;
-        case 'toolUse':
-            return <Avatar.Tool size="1.5em" />;
         case 'userRequest':
             return <Avatar.User size="1.5em" />;
         default:
@@ -47,13 +35,11 @@ function renderAvatar(message: MessageData) {
     }
 }
 
-function resolveMessageContent(message: MessageData): MessageViewChunk[] {
+function resolveMessageContent(message: MessageViewData): MessageViewChunk[] {
     switch (message.type) {
         case 'userRequest':
-        case 'toolUse':
             return [{type: 'text', content: message.content}];
-        case 'assistantText':
-        case 'toolCall':
+        case 'assistantResponse':
             return message.chunks;
         default:
             assertNever<{type: string}>(message, v => `Unknown message type ${v.type}`);
@@ -71,11 +57,6 @@ const Layout = styled.div`
     border-radius: var(--item-border-radius, 0);
     background-color: var(--color-default-background);
 
-`;
-
-const Content = styled(MessageContent)<{collapsed: boolean}>`
-    max-height: ${props => (props.collapsed ? '200px' : undefined)};
-    overflow-y: hidden;
 `;
 
 const Header = styled.div<LayoutProps>`
@@ -129,28 +110,6 @@ function Error({reason}: ErrorProps) {
     );
 }
 
-const ToggleLayout = styled(InteractiveLabel)`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: .5em 0;
-    gap: .5em;
-`;
-
-interface ToggleProps {
-    collapsed: boolean;
-    onToggle: (value: boolean) => void;
-}
-
-function Toggle({collapsed, onToggle}: ToggleProps) {
-    return (
-        <ToggleLayout as="div" onClick={() => onToggle(!collapsed)}>
-            {collapsed ? <IoCaretDownOutline /> : <IoCaretUpOutline />}
-            {collapsed ? 'Show more' : 'Show less'}
-        </ToggleLayout>
-    );
-}
-
 interface MessageLayoutProps {
     className?: string;
     ref?: RefObject<HTMLDivElement | null>;
@@ -177,21 +136,20 @@ function MessageLayout({className, ref, compact, avatar, authorName, headerAddit
 interface Props {
     threadUuid: string;
     roundtripStatus: RoundtripStatus;
-    message: MessageData;
+    message: MessageViewData;
     showIndicator: boolean;
     showRollback: boolean;
     reasoning: boolean;
 }
 
 function Message({threadUuid, roundtripStatus, message, showIndicator, showRollback, reasoning}: Props) {
-    const [collapsed, setCollapsed] = useState(isCollapsable(message) ? true : false);
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
     const markMessageStatus = useMarkMessageStatus(threadUuid, message.uuid);
     const markAsRead = useRef(() => markMessageStatus('read'));
     useEffect(
         () => {
-            if (isAssistantMessage(message.type) && roundtripStatus === 'unread' && inView) {
+            if (message.type === 'assistantResponse' && roundtripStatus === 'unread' && inView) {
                 markAsRead.current();
             }
         },
@@ -207,7 +165,7 @@ function Message({threadUuid, roundtripStatus, message, showIndicator, showRollb
                 authorName={resolveSenderName(message)}
                 headerAddition={
                     <>
-                        <MessageStatusIcon status={isAssistantMessage(message.type) ? roundtripStatus : 'read'} />
+                        <MessageStatusIcon status={message.type === 'assistantResponse' ? roundtripStatus : 'read'} />
                         <HeaderEnd>
                             {showRollback && <Rollback threadUuid={threadUuid} messageUuid={message.uuid} />}
                             <Time time={message.createdAt} />
@@ -216,9 +174,8 @@ function Message({threadUuid, roundtripStatus, message, showIndicator, showRollb
                 }
                 body={
                     <>
-                        <Content chunks={chunks} collapsed={collapsed} reasoning={reasoning} />
+                        <MessageContent chunks={chunks} reasoning={reasoning} />
                         {showIndicator && <Indicator chunk={chunks.at(-1) ?? null} />}
-                        {isCollapsable(message) && <Toggle collapsed={collapsed} onToggle={setCollapsed} />}
                         <Error reason={message.error} />
                     </>
                 }
