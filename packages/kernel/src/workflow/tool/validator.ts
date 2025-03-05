@@ -2,9 +2,8 @@ import Ajv, {Schema, ValidateFunction} from 'ajv';
 import {FixToolCallView, renderFixToolCallPrompt} from '@oniichan/prompt';
 import {builtinTools} from '@oniichan/shared/tool';
 import {WorkflowStepInit, WorkflowValidator} from '../base';
-import {assertAssistantTextMessage} from './utils';
+import {assertAssistantTextMessage, createDetachedUserRequestMessage} from '../../inbox';
 import {ToolImplement, ToolImplementInit} from './implement';
-import {createDetachedUserRequestMessage} from '../../inbox/factory';
 
 const ajv = new Ajv();
 

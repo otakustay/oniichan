@@ -14,7 +14,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot read any file or directory now',
+                    output: 'No open workspace, you cannot read any file or directory now.',
                 };
             }
 
@@ -30,7 +30,7 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return {
                     type: 'success',
                     finished: false,
-                    output: `There are no files in directory ${args.path}`,
+                    output: `There are no files in directory ${args.path}.`,
                 };
             }
 

@@ -83,10 +83,17 @@ const DEFAULT_DENIED_COMMAND_LIST = [
     'safari',
 ];
 
+export interface InboxRingRingModeConfig {
+    enabled: boolean;
+    plannerModel: string;
+    actorModel: string;
+}
+
 export interface InboxConfig {
     enableDeepThink: boolean;
     automaticRunCommand: boolean;
     exceptionCommandList: string[];
+    ringRingMode: InboxRingRingModeConfig;
 }
 
 export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
@@ -100,12 +107,20 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const enableDeepThink = config.get<boolean>('enableDeepThink');
         const automaticRunCommand = config.get<boolean>('automaticRunCommand');
         const exceptionCommandList = config.get<string[]>('exceptionCommandList');
+        const ringRingModeEnabled = config.get<boolean>('ringRingMode.enabled') ?? false;
+        const ringRingModePlannerModel = config.get<string>('ringRingMode.plannerModel');
+        const ringRingModeActorModel = config.get<string>('ringRingMode.actorModel');
         yield {
             enableDeepThink: enableDeepThink ?? false,
             automaticRunCommand: automaticRunCommand ?? false,
             exceptionCommandList: exceptionCommandList?.length
                 ? exceptionCommandList
                 : (automaticRunCommand ? DEFAULT_DENIED_COMMAND_LIST : []),
+            ringRingMode: {
+                enabled: ringRingModeEnabled,
+                plannerModel: ringRingModePlannerModel ?? '',
+                actorModel: ringRingModeActorModel ?? '',
+            },
         };
 
         logger.info('Finish');

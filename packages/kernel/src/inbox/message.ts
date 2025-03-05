@@ -10,7 +10,6 @@ import {
     ToolCallMessageChunk,
     ToolUseMessageData,
     MessageDataBase,
-    assertThinkingChunk,
     assertToolCallChunk,
     chunkToString,
     MessageInputChunk,
@@ -19,15 +18,25 @@ import {
     ToolCallMessageContentChunk,
     ParsedToolCallMessageChunk,
     WorkflowChunkStatus,
+    assertTaggedChunk,
+    isContentfulChunk,
+    TaggedMessageChunk,
+    MessageViewChunk,
+    PlanMessageData,
+    PlanMessageContentChunk,
+    AssistantMessageType,
 } from '@oniichan/shared/inbox';
 import {
     InboxAssistantTextMessage,
     InboxMessage,
+    InboxPlanMessage,
     InboxRoundtrip,
     InboxToolCallMessage,
     InboxToolUseMessage,
     InboxUserRequestMessage,
+    PlanState,
 } from './interface';
+import {ContentTagName} from '@oniichan/shared/tool';
 
 abstract class MessageBase<T extends MessageType> implements InboxMessage<T> {
     readonly uuid: string;
@@ -102,12 +111,15 @@ export class UserRequestMessage extends MessageBase<'userRequest'> implements In
     }
 }
 
-type AssistantMessageType = 'assistantText' | 'toolCall';
-
 type ResolvedAssistantChunkType<T extends AssistantMessageType> = T extends 'assistantText'
     ? AssistantTextMessageContentChunk
-    : T extends 'toolCall' ? ToolCallMessageContentChunk
-    : never;
+    : (
+        T extends 'toolCall' ? ToolCallMessageContentChunk
+            : (
+                T extends 'plan' ? PlanMessageContentChunk
+                    : null
+            )
+    );
 
 abstract class AssistantMessage<T extends AssistantMessageType> extends MessageBase<T> {
     protected readonly chunks: Array<ResolvedAssistantChunkType<T>> = [];
@@ -129,7 +141,44 @@ abstract class AssistantMessage<T extends AssistantMessageType> extends MessageB
     }
 
     private getModelVisibleTextContent() {
-        return this.chunks.filter(v => v.type !== 'reasoning' && v.type !== 'thinking').map(chunkToString).join('');
+        return this.chunks.filter(isContentfulChunk).map(chunkToString).join('');
+    }
+}
+
+export class PlanMessage extends AssistantMessage<'plan'> implements InboxPlanMessage {
+    static from(data: PlanMessageData, roundtrip: InboxRoundtrip) {
+        const message = new PlanMessage(roundtrip, data);
+        return message;
+    }
+
+    constructor(roundtrip: InboxRoundtrip, source: PlanMessageData) {
+        super(source.uuid, 'plan', roundtrip);
+        this.restore(source);
+    }
+
+    getWorkflowOriginStatus(): WorkflowChunkStatus {
+        return 'completed';
+    }
+
+    markWorkflowOriginStatus(): void {
+    }
+
+    toMessageData(): PlanMessageData {
+        return {
+            ...this.toMessageDataBase(),
+            type: this.type,
+            chunks: this.chunks,
+        };
+    }
+
+    getPlanState(): PlanState {
+        const chunks = this.chunks.filter(v => v.type === 'content');
+        return chunks.some(v => v.tagName === 'plan') ? 'plan' : 'conclusion';
+    }
+
+    protected restore(persistData: PlanMessageData) {
+        super.restore(persistData);
+        this.chunks.push(...persistData.chunks);
     }
 }
 
@@ -217,8 +266,8 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
 
         const lastChunk = this.chunks.at(-1);
 
-        if (chunk.type === 'thinkingStart') {
-            this.chunks.push({type: 'thinking', content: '', status: 'generating'});
+        if (chunk.type === 'contentStart') {
+            this.chunks.push({type: 'content', tagName: chunk.tagName, content: '', status: 'generating'});
         }
         else if (chunk.type === 'toolStart') {
             const toolChunk: ToolCallMessageChunk = {
@@ -230,12 +279,12 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
             };
             this.chunks.push(toolChunk);
         }
-        else if (chunk.type === 'thinkingDelta') {
-            assertThinkingChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
+        else if (chunk.type === 'contentDelta') {
+            assertTaggedChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
             lastChunk.content += chunk.source;
         }
-        else if (chunk.type === 'thinkingEnd') {
-            assertThinkingChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
+        else if (chunk.type === 'contentEnd') {
+            assertTaggedChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
             lastChunk.status = 'completed';
         }
         else if (chunk.type === 'toolDelta') {
@@ -270,23 +319,33 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
     }
 
     getWorkflowSourceStatus(): WorkflowSourceChunkStatus {
-        const chunk = this.findToolCallChunkStrict();
-        return chunk.status;
+        const chunk = this.findToolCallChunk();
+        return chunk?.status ?? 'validated';
     }
 
     markWorkflowSourceStatus(status: WorkflowSourceChunkStatus) {
-        const chunk = this.findToolCallChunkStrict();
-        chunk.status = status;
+        // Tool call
+        const chunk = this.findToolCallChunk();
+        if (chunk) {
+            chunk.status = status;
+        }
+        // Plan has no status
+    }
+
+    findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null {
+        const isTaggedChunk = (chunk: MessageViewChunk, tagName: string): chunk is TaggedMessageChunk => {
+            return chunk.type === 'content' && chunk.tagName === tagName;
+        };
+        return this.chunks.find(v => isTaggedChunk(v, tagName)) ?? null;
+    }
+
+    findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk {
+        const chunk = this.findTaggedChunk(tagName);
+        return assertHasValue(chunk, `Message does not contain content chunk tagged as ${tagName}`);
     }
 
     findToolCallChunk() {
-        const chunk = this.chunks.find(v => v.type === 'toolCall');
-
-        if (!chunk) {
-            throw new Error('Invalid tool call message without tool chunk');
-        }
-
-        return chunk;
+        return this.chunks.find(v => v.type === 'toolCall') ?? null;
     }
 
     findToolCallChunkStrict() {
@@ -341,7 +400,7 @@ export class ToolUseMessage extends MessageBase<'toolUse'> implements InboxToolU
     }
 }
 
-export type Message = UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;
+export type Message = UserRequestMessage | AssistantTextMessage | PlanMessage | ToolCallMessage | ToolUseMessage;
 
 export function deserializeMessage(data: MessageData, roundtrip: InboxRoundtrip): Message {
     switch (data.type) {
@@ -349,6 +408,8 @@ export function deserializeMessage(data: MessageData, roundtrip: InboxRoundtrip)
             return UserRequestMessage.from(data, roundtrip);
         case 'assistantText':
             return AssistantTextMessage.from(data, roundtrip);
+        case 'plan':
+            return PlanMessage.from(data, roundtrip);
         case 'toolCall':
             return ToolCallMessage.from(data, roundtrip);
         case 'toolUse':

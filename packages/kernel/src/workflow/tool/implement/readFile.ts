@@ -19,7 +19,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
                 return {
                     type: 'success',
                     finished: false,
-                    output: `Unable to read file ${args.path}: file not exists`,
+                    output: `Unable to read file ${args.path}: file not exists.`,
                 };
             }
 
@@ -27,7 +27,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
                 return {
                     type: 'success',
                     finished: false,
-                    output: `File ${args.path} is an empty file`,
+                    output: `File ${args.path} is an empty file.`,
                 };
             }
 
@@ -35,7 +35,7 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> 
                 return {
                     type: 'success',
                     finished: false,
-                    output: `Unable to read file ${args.path}: This file is too large`,
+                    output: `Unable to read file ${args.path}: This file is too large.`,
                 };
             }
 

@@ -6,18 +6,23 @@ interface TextChunk {
     content: string;
 }
 
-interface ThinkingStartChunk {
-    type: 'thinkingStart';
+export type ContentTagName = 'thinking' | 'plan' | 'conclusion';
+
+interface ContentStartChunk {
+    type: 'contentStart';
+    tagName: ContentTagName;
     source: string;
 }
 
-interface ThinkingDeltaChunk {
-    type: 'thinkingDelta';
+interface ContentDeltaChunk {
+    type: 'contentDelta';
+    tagName: ContentTagName;
     source: string;
 }
 
-interface ThinkingEndChunk {
-    type: 'thinkingEnd';
+interface ContentEndChunk {
+    type: 'contentEnd';
+    tagName: ContentTagName;
     source: string;
 }
 
@@ -45,18 +50,18 @@ interface ToolEndChunk {
 
 export type ToolParsedChunk =
     | TextChunk
-    | ThinkingStartChunk
-    | ThinkingDeltaChunk
-    | ThinkingEndChunk
+    | ContentStartChunk
+    | ContentDeltaChunk
+    | ContentEndChunk
     | TextInToolChunk
     | ToolStartChunk
     | ToolDeltaChunk
     | ToolEndChunk;
 
-const THINKING_TAGS = ['thinking'];
+const CONTENT_TAGS: string[] = ['thinking', 'plan', 'conclusion'] satisfies ContentTagName[];
 
-function isThinkingTag(tag: string | undefined) {
-    return !!tag && THINKING_TAGS.includes(tag);
+function isContentTag(tag: string | undefined): tag is ContentTagName {
+    return !!tag && CONTENT_TAGS.includes(tag);
 }
 
 export class StreamingToolParser {
@@ -82,8 +87,8 @@ export class StreamingToolParser {
     *yieldForTextChunk(chunk: XmlParseTextChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
         // `<thinking>` tag has plain text inside it
-        if (isThinkingTag(activeTag)) {
-            yield {type: 'thinkingDelta', source: chunk.content};
+        if (isContentTag(activeTag)) {
+            yield {type: 'contentDelta', tagName: activeTag, source: chunk.content};
         }
         // We don't allow text content in top level tag, all tool calls contains only parameters
         else if (activeTag) {
@@ -101,8 +106,8 @@ export class StreamingToolParser {
 
     *yieldForTagStart(chunk: XmlParseTagStartChunk): Iterable<ToolParsedChunk> {
         const activeTag = this.tagStack.at(-1);
-        if (isThinkingTag(activeTag)) {
-            yield {type: 'thinkingDelta', source: chunk.source};
+        if (isContentTag(activeTag)) {
+            yield {type: 'contentDelta', tagName: activeTag, source: chunk.source};
         }
         else if (activeTag) {
             // We're already in a tool call, a tool call allow one level of nested tag to be parameters
@@ -115,9 +120,9 @@ export class StreamingToolParser {
                 yield {type: 'toolDelta', arguments: {[activeTag]: chunk.source}, source: chunk.source};
             }
         }
-        else if (isThinkingTag(chunk.tagName)) {
+        else if (isContentTag(chunk.tagName)) {
             this.tagStack.push(chunk.tagName);
-            yield {type: 'thinkingStart', source: chunk.source};
+            yield {type: 'contentStart', tagName: chunk.tagName, source: chunk.source};
         }
         else if (isToolName(chunk.tagName)) {
             this.tagStack.push(chunk.tagName);
@@ -134,19 +139,20 @@ export class StreamingToolParser {
             return;
         }
 
-        if (isThinkingTag(this.tagStack.at(-1))) {
-            if (isThinkingTag(chunk.tagName)) {
-                yield {type: 'thinkingEnd', source: chunk.source};
+        const activeTag = this.tagStack.at(-1);
+        if (isContentTag(activeTag)) {
+            if (chunk.tagName === activeTag) {
+                yield {type: 'contentEnd', tagName: activeTag, source: chunk.source};
                 this.tagStack.pop();
             }
             else {
-                yield {type: 'thinkingDelta', source: chunk.source};
+                yield {type: 'contentDelta', tagName: activeTag, source: chunk.source};
             }
             return;
         }
 
         // Not a matching tag, treat as text
-        if (chunk.tagName !== this.tagStack.at(-1)) {
+        if (chunk.tagName !== activeTag) {
             yield* this.yieldForTextChunk({type: 'text', content: chunk.source});
             return;
         }

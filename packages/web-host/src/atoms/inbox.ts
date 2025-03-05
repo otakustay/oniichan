@@ -11,12 +11,12 @@ import {
     MessageThreadData,
     AssistantTextMessageData,
     MessageViewChunk,
-    ToolCallMessageChunk,
-    ThinkingMessageChunk,
     MessageInputChunk,
     ReasoningMessageChunk,
     RoundtripMessageData,
     AssistantMessageData,
+    assertTaggedChunk,
+    assertToolCallChunk,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
@@ -141,20 +141,6 @@ function createResponseUpdate(threadUuid: string, messageUuid: string, options: 
     };
 }
 
-type MaybeChunk = MessageViewChunk | undefined;
-
-function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
-    if (chunk?.type !== 'thinking') {
-        throw new Error(message);
-    }
-}
-
-function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts chunk is ToolCallMessageChunk {
-    if (chunk?.type !== 'toolCall') {
-        throw new Error(message);
-    }
-}
-
 function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: T, chunk: MessageInputChunk): T {
     // Reasoning chunk should be unique and on top of all chunks
     if (chunk.type === 'reasoning') {
@@ -194,12 +180,12 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
         return message;
     }
 
-    if (chunk.type === 'thinkingStart') {
+    if (chunk.type === 'contentStart') {
         return {
             ...message,
             chunks: [
                 ...message.chunks,
-                {type: 'thinking', content: '', status: 'generating'},
+                {type: 'content', tagName: chunk.tagName, content: '', status: 'generating'},
             ],
         };
     }
@@ -222,8 +208,8 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
 
     const lastChunk = message.chunks.at(-1);
 
-    if (chunk.type === 'thinkingDelta') {
-        assertThinkingChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
+    if (chunk.type === 'contentDelta') {
+        assertTaggedChunk(lastChunk, 'Unexpected thinking delta chunk coming without a start chunk');
         return {
             ...message,
             chunks: [
@@ -235,8 +221,8 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
             ],
         };
     }
-    else if (chunk.type === 'thinkingEnd') {
-        assertThinkingChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
+    else if (chunk.type === 'contentEnd') {
+        assertTaggedChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
         return {
             ...message,
             chunks: [

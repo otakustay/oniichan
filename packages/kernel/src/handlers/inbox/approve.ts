@@ -51,7 +51,6 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToo
         origin.markWorkflowOriginStatus(status);
         this.pushStoreUpdate();
 
-        await this.prepareSystemPrompt();
         const runner = await this.detectWorkflowRunner();
 
         if (!runner) {

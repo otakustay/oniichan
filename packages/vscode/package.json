@@ -109,12 +109,15 @@
     "configuration": [
       {
         "title": "Model Configuration",
+        "order": 1,
         "properties": {
           "oniichan.model.apiKey": {
+            "order": 1,
             "type": "string",
             "description": "You must provide an OpenRouter API key to access configured model"
           },
           "oniichan.model.modelName": {
+            "order": 2,
             "type": "string",
             "description": "Model name on OpenRouter, such as `deepseek/deepseek-chat`, `anthropic/claude-3.5-sonnet`, etc..."
           }
@@ -122,31 +125,57 @@
       },
       {
         "title": "Inbox",
+        "order": 2,
         "properties": {
+          "oniichan.inbox.automaticRunCommand": {
+            "order": 1,
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically run LLM suggested commands unless it is in exception list"
+          },
+          "oniichan.inbox.exceptionCommandList": {
+            "order": 2,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exceptional commands which is allowed or denied to run automatically according to default mode"
+          },
+          "oniichan.inbox.ringRingMode.enabled": {
+            "order": 3,
+            "type": "boolean",
+            "default": false,
+            "description": "Enable ring-ring mode, which envolves multiple models work as planner and actor",
+            "tags": ["experimental"]
+          },
+          "oniichan.inbox.ringRingMode.plannerModel": {
+            "order": 4,
+            "type": "string",
+            "default": "deepseek/deepseek-r1",
+            "description": "The model used as planner in ring-ring mode",
+            "tags": ["experimental"]
+          },
+          "oniichan.inbox.ringRingMode.actorModel": {
+            "order": 5,
+            "type": "string",
+            "default": "qwen/qwen-plus",
+            "description": "The model used as task actor in ring-ring mode",
+            "tags": ["experimental"]
+          },
           "oniichan.inbox.enableDeepThink": {
+            "order": 6,
             "type": "boolean",
             "default": false,
             "description": "Involve a reasoning model (currently DeepSeek R1) to prepend a CoT before each message",
             "tags": [
               "experimental"
             ]
-          },
-          "oniichan.inbox.automaticRunCommand": {
-            "type": "boolean",
-            "default": false,
-            "description": "Automatically run LLM suggested commands unless it is in exception list"
-          },
-          "oniichan.inbox.exceptionCommandList": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Exceptional commands which is allowed or denied to run automatically according to default mode"
           }
         }
       },
       {
         "title": "Semantic Rewrite",
+        "order": 3,
         "properties": {
           "oniichan.semanticRewrite.triggerType": {
             "type": "string",

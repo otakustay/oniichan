@@ -19,7 +19,8 @@ export type ToolName =
     | 'run_command'
     | 'browser_preview'
     | 'attempt_completion'
-    | 'ask_followup_question';
+    | 'ask_followup_question'
+    | 'complete_plan';
 
 export interface ToolDescription {
     name: ToolName;
@@ -242,6 +243,21 @@ export interface AttemptCompletionParameter {
     command?: string;
 }
 
+export const completePlanParameters = {
+    type: 'object',
+    properties: {
+        numberOfTasks: {
+            type: 'number',
+            description: 'The number of tasks you have completed so far after the last plan',
+        },
+    },
+    required: ['numberOfTasks'],
+} as const satisfies ParameterInfo;
+
+export interface CompletePlanParameter {
+    numberOfTasks: number;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -366,12 +382,23 @@ export const builtinTools: ToolDescription[] = [
     {
         name: 'ask_followup_question',
         description:
-            `Ask the user a question to gather additional information needed to complete the task. This tool should be used when you encounter ambiguities, need clarification, or require more details to proceed effectively. It allows for interactive problem-solving by enabling direct communication with the user. Use this tool judiciously to maintain a balance between gathering necessary information and avoiding excessive back-and-forth`,
+            'Ask the user a question to gather additional information needed to complete the task. This tool should be used when you encounter ambiguities, need clarification, or require more details to proceed effectively. It allows for interactive problem-solving by enabling direct communication with the user. Use this tool judiciously to maintain a balance between gathering necessary information and avoiding excessive back-and-forth',
         parameters: askFollowupQuestionParameters,
         usage: dedent`
             <ask_followup_question>
                 <question>Your question</question>
             </ask_followup_question>
+        `,
+    },
+    {
+        name: 'complete_plan',
+        description:
+            'When you confirm that all tasks in given plan is completed, the user request is completed, use this tool to finish your work, provide the count of tasks. This tool is a hidden tool, user will not get any insight when this tool get executed, so do not leak the tool name or its paramters outside the tool call XML tag.',
+        parameters: completePlanParameters,
+        usage: dedent`
+            <complete_plan>
+                <numberOfTasks>3</numberOfTasks>
+            </complete_plan>
         `,
     },
 ];

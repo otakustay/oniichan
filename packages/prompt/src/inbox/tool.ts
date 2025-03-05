@@ -40,6 +40,7 @@ const guideline = dedent`
         - Any other relevant feedback or information related to the tool use.
     5. ALWAYS wait for user confirmation after each tool use before proceeding. Never assume the success of a tool use without explicit confirmation of the result from the user.
     6. For each message, when you provide a tool via XML format, you SHOULD NOT generate any content after the tool use.
+    7. Never include tool name outside of <thinking></thinking> tag in your response.
 
     It is crucial to proceed step-by-step, waiting for the user's message after each tool use before moving forward with the task. This approach allows you to:
 
@@ -79,9 +80,18 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const excludsTools: ToolName[] = [];
-    if (view.projectStructure) {
+    if (view.mode === 'act') {
+        excludsTools.push('ask_followup_question');
+        excludsTools.push('attempt_completion');
+    }
+    else {
+        excludsTools.push('complete_plan');
+    }
+
+    if (!view.projectStructure) {
         excludsTools.push('browser_preview');
     }
+
     const tools = view.tools.filter(v => !excludsTools.includes(v.name));
     const parts = [
         prefix,

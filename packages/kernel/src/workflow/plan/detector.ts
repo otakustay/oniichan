@@ -1,11 +1,11 @@
 import {assertAssistantTextMessage, InboxWorkflowOriginMessage, InboxWorkflowSourceMessage} from '../../inbox';
 import {WorkflowDetector} from '../base';
 
-export class ToolWorkflowDetector extends WorkflowDetector {
+export class PlanWorkflowDetector extends WorkflowDetector {
     detectWorkflow(source: InboxWorkflowSourceMessage): boolean {
         try {
             assertAssistantTextMessage(source);
-            return !!source.findToolCallChunk();
+            return !!source.findTaggedChunk('plan');
         }
         catch {
             return false;
@@ -13,6 +13,6 @@ export class ToolWorkflowDetector extends WorkflowDetector {
     }
 
     ableToHandleWorkflow(origin: InboxWorkflowOriginMessage): boolean {
-        return origin.type === 'toolCall';
+        return origin.type === 'plan';
     }
 }

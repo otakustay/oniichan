@@ -4,15 +4,15 @@ import {renderToolSection} from './tool';
 import {renderStructureSection} from './structure';
 import {renderObjectiveSection} from './objective';
 import {renderReferenceSection} from './reference';
-import {InboxPromptView, InboxPromptReference} from './interface';
+import {InboxPromptView, InboxPromptReference, InboxPromptMode} from './interface';
 
-export {InboxPromptView, InboxPromptReference};
+export {InboxPromptView, InboxPromptReference, InboxPromptMode};
 
 export async function renderInboxSystemPrompt(view: InboxPromptView) {
     const parts = [
         renderRuleSection(view),
         renderFormatSection(),
-        renderToolSection(view),
+        view.mode !== 'plan' && renderToolSection(view),
         '# Context',
         'This section provides some already known information for user\'s request.',
         view.projectStructure ? renderStructureSection(view) : '',

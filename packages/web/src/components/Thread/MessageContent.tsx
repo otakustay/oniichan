@@ -47,9 +47,10 @@ export default function MessageContent({className, chunks, reasoning}: Props) {
                 return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} running={reasoning} />;
             case 'text':
                 return chunk.content.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk.content} /> : null;
-            case 'thinking':
-                return viewMode.debug || index === dataSource.length - 1
-                    ? <Thinking key={`thinking-chunk-${index}`} content={chunk.content} />
+            // TODO: Specify different component for different tag names
+            case 'content':
+                return viewMode.debug || (chunk.tagName !== 'thinking' && index !== dataSource.length - 1)
+                    ? <Thinking key={`thinking-chunk-${index}`} tagName={chunk.tagName} content={chunk.content} />
                     : null;
             case 'toolCall':
             case 'parsedToolCall':

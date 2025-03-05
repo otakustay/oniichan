@@ -40,6 +40,10 @@ interface Props {
 }
 
 export default function ParsedToolUsage({input}: Props) {
+    if (input.toolName === 'complete_plan') {
+        return null;
+    }
+
     if (input.toolName === 'attempt_completion') {
         const {result, command} = input.arguments;
         const lines = [result];

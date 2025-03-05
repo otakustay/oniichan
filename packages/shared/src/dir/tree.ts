@@ -171,6 +171,8 @@ function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
         };
     }
 
+    // TODO: Return empty string if no entries
+
     // One line for tailing indication
     const sliceEnd = options.maxLines - 1;
     const slicedCount = lines.length - sliceEnd;

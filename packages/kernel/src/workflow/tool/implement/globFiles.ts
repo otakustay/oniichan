@@ -13,7 +13,7 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot read any file or directory now',
+                    output: 'No open workspace, you cannot read any file or directory now.',
                 };
             }
 
@@ -33,13 +33,13 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
             return {
                 type: 'success',
                 finished: false,
-                output: `There are no files matching glob \`${args.glob}\``,
+                output: `There are no files matching glob \`${args.glob}\`.`,
             };
         }
         catch (ex) {
             return {
                 type: 'executeError',
-                output: `Unable to find files with pattern ${args.glob}: ${stringifyError(ex)}`,
+                output: `Unable to find files with pattern ${args.glob}: ${stringifyError(ex)}.`,
             };
         }
     }

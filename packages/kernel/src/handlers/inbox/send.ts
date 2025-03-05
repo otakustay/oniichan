@@ -51,7 +51,6 @@ export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessag
         this.addReference(payload.references ?? []);
         store.moveThreadToTop(this.thread.uuid);
 
-        await this.prepareSystemPrompt();
         yield* over(this.requestModelChat()).map(v => ({type: 'value', value: v} as const));
     }
 }

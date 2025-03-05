@@ -1,14 +1,10 @@
 import {assertNever} from '../error';
 import {FileEditData} from '../patch';
-import {MessageType, ThinkingMessageChunk, MessageData, MessageViewChunk} from './message';
+import {TaggedMessageChunk, MessageData, MessageViewChunk} from './message';
 import {ToolCallMessageChunk, ParsedToolCallMessageChunk, isFileEditToolCallChunk} from './tool';
 
 export function isParsedToolCallChunk(chunk: MessageViewChunk): chunk is ParsedToolCallMessageChunk {
     return chunk.type === 'parsedToolCall';
-}
-
-export function isAssistantMessage(type: MessageType) {
-    return type === 'assistantText' || type === 'toolCall';
 }
 
 export function chunkToString(chunk: MessageViewChunk) {
@@ -20,8 +16,8 @@ export function chunkToString(chunk: MessageViewChunk) {
             return `<think>${chunk.content}</think}`;
         case 'text':
             return chunk.content;
-        case 'thinking':
-            return `<thinking>${chunk.content}</thinking>`;
+        case 'content':
+            return `<${chunk.tagName}>${chunk.content}</${chunk.tagName}>`;
         case 'toolCall':
         case 'parsedToolCall':
             return chunk.source;
@@ -32,8 +28,8 @@ export function chunkToString(chunk: MessageViewChunk) {
 
 type MaybeChunk = MessageViewChunk | undefined;
 
-export function assertThinkingChunk(chunk: MaybeChunk, message: string): asserts chunk is ThinkingMessageChunk {
-    if (chunk?.type !== 'thinking') {
+export function assertTaggedChunk(chunk: MaybeChunk, message: string): asserts chunk is TaggedMessageChunk {
+    if (chunk?.type !== 'content') {
         throw new Error(message);
     }
 }
@@ -42,6 +38,11 @@ export function assertToolCallChunk(chunk: MaybeChunk, message: string): asserts
     if (chunk?.type !== 'toolCall') {
         throw new Error(message);
     }
+}
+
+export function isContentfulChunk(chunk: MessageViewChunk) {
+    // Remove all thinking and reasoning content
+    return (chunk.type !== 'content' || chunk.tagName !== 'thinking') && chunk.type !== 'reasoning';
 }
 
 export function normalizeArguments(input: Record<string, string | undefined>) {

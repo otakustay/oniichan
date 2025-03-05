@@ -19,6 +19,5 @@ export function renderFormatSection() {
             - NEVER use code element around tool call XML tags.
             - NEVER put tool call XML in a code block.
             - This rule only apply to INLINE code, code blocks are not restricted by this rule.
-        6. Never include a tool name outside of <thinking></thinking> tag in your response.
     `;
 }

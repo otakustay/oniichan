@@ -31,7 +31,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot execute a command since we don\t have a working directory',
+                    output: 'No open workspace, you cannot execute a command since we don\t have a working directory.',
                 };
             }
 
@@ -56,7 +56,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         type: 'success',
                         finished: false,
                         output: result.output
-                            ? 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work'
+                            ? 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work.'
                             : resultMarkdown(
                                 'This command is still running, here is its output so far:',
                                 result.output,
@@ -69,7 +69,7 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                         type: 'success',
                         finished: false,
                         output:
-                            'We have already start this command in terminal, unfortunately we are not able to determine whether its finished, and we cannot retrieve any command output at this time, please continue your work',
+                            'We have already start this command in terminal, unfortunately we are not able to determine whether its finished, and we cannot retrieve any command output at this time, please continue your work.',
                     };
                 case 'longRunning':
                     this.logger.trace('RunCommandLongRunning');
@@ -112,6 +112,6 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
     }
 
     async executeReject(): Promise<string> {
-        return 'User has rejected to run this command, you should continue without this command being executed';
+        return 'User has rejected to run this command, you should continue without this command being executed.';
     }
 }

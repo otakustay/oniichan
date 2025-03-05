@@ -13,10 +13,10 @@ export class NamedModelAccess implements ModelAccess {
     }
 
     async chat(options: ModelChatOptions): Promise<ModelTextResponse> {
-        const {messages, systemPrompt, telemetry, abortSignal} = options;
+        const {messages, telemetry} = options;
         telemetry.setRequest(messages);
         try {
-            const [response, meta] = await this.client.chat({messages, systemPrompt, abortSignal});
+            const [response, meta] = await this.client.chat(options);
             telemetry.setResponseChunk(response);
             telemetry.setResponseChunk(meta);
             return response;
@@ -27,10 +27,10 @@ export class NamedModelAccess implements ModelAccess {
     }
 
     async *chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse> {
-        const {messages, systemPrompt, telemetry, abortSignal} = options;
+        const {messages, telemetry} = options;
         telemetry.setRequest(messages);
         try {
-            for await (const chunk of this.client.chatStreaming({messages, systemPrompt, abortSignal})) {
+            for await (const chunk of this.client.chatStreaming(options)) {
                 telemetry.setResponseChunk(chunk);
 
                 if (chunk.type !== 'meta') {

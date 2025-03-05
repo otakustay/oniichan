@@ -19,7 +19,10 @@ import {
     ToolUseMessageData,
     MessageThreadData,
     MessageThreadPersistData,
+    TaggedMessageChunk,
+    PlanMessageData,
 } from '@oniichan/shared/inbox';
+import {ContentTagName} from '@oniichan/shared/tool';
 
 export interface InboxRoundtrip {
     setRequest(request: InboxUserRequestMessage): void;
@@ -27,7 +30,7 @@ export interface InboxRoundtrip {
     getStatus(): RoundtripStatus;
     markStatus(status: RoundtripStatus): void;
     startTextResponse(messageUuid: string): InboxAssistantTextMessage;
-    startWorkflowResponse(origin: InboxWorkflowOriginMessage): InboxWorkflow;
+    startWorkflowResponse(origin: OriginMessageBase): InboxWorkflow;
     hasMessage(messageUuid: string): boolean;
     findMessageByUuid(messageUuid: string): InboxMessage | null;
     getLatestTextMessage(): InboxAssistantTextMessage | null;
@@ -62,26 +65,41 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessage {
     toMessageData(): AssistantTextMessageData;
     getTextContent(): string;
     addChunk(chunk: MessageInputChunk): void;
+    findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null;
+    findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk;
     findToolCallChunk(): ToolCallMessageChunk | null;
     findToolCallChunkStrict(): ToolCallMessageChunk;
     replaceToolCallChunk(newChunk: ToolCallMessageChunk): void;
 }
 
-export interface InboxWorkflowOriginMessage extends InboxMessage<'toolCall'> {
+type OriginType = 'toolCall' | 'plan';
+
+export interface OriginMessageBase<T extends OriginType = OriginType> extends InboxMessage<T> {
     getWorkflowOriginStatus(): WorkflowChunkStatus;
     markWorkflowOriginStatus(status: WorkflowChunkStatus): void;
     toMessageData(): WorkflowOriginMessageData;
 }
 
-export interface InboxToolCallMessage extends InboxWorkflowOriginMessage {
+export type PlanState = 'plan' | 'conclusion';
+
+export interface InboxPlanMessage extends OriginMessageBase<'plan'> {
+    toMessageData(): PlanMessageData;
+    getPlanState(): PlanState;
+}
+
+export interface InboxToolCallMessage extends OriginMessageBase<'toolCall'> {
     toMessageData(): ToolCallMessageData;
     getTextContent(): string;
     findToolCallChunkStrict(): ParsedToolCallMessageChunk;
 }
 
+export type InboxWorkflowOriginMessage = InboxPlanMessage | InboxToolCallMessage;
+
 export interface InboxToolUseMessage extends InboxMessage<'toolUse'> {
     toMessageData(): ToolUseMessageData;
 }
+
+export type InboxAssistantMessage = InboxAssistantTextMessage | InboxToolCallMessage | InboxPlanMessage;
 
 export interface InboxWorkflow {
     getStatus(): WorkflowStatus;
@@ -94,7 +112,7 @@ export interface InboxWorkflow {
     addReaction(message: InboxMessage, exposed: boolean): void;
     isOriginatedBy(uuid: string): boolean;
     hasMessage(messageUuid: string): boolean;
-    findMessage(messageUuid: string): InboxWorkflowOriginMessage | InboxMessage | null;
+    findMessage(messageUuid: string): InboxMessage | null;
     toMessages(): InboxMessage[];
     toWorkflowData(): WorkflowData;
 }

@@ -9,6 +9,7 @@ import {
     InboxWorkflow,
     InboxWorkflowOriginMessage,
 } from './interface';
+import {isAssistantMessage} from './assert';
 
 interface RoundtripMessageResponse {
     type: 'message';
@@ -188,10 +189,7 @@ export class Roundtrip implements InboxRoundtrip {
         return {
             status: this.getStatus(),
             request: this.getRequest().toMessageData(),
-            responses: this
-                .getResponseMessages()
-                .map(v => v.toMessageData())
-                .filter(v => v.type === 'assistantText' || v.type === 'toolCall'),
+            responses: this.getResponseMessages().filter(isAssistantMessage).map(v => v.toMessageData()),
         };
     }
 

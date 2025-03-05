@@ -9,14 +9,14 @@ export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPrevie
             return {
                 type: 'success',
                 finished: false,
-                output: 'User is glad to see the preview in browser, you can continue your work',
+                output: 'User is glad to see the preview in browser, you can continue your work.',
             };
         }
 
         return {
             type: 'success',
             finished: false,
-            output: `This URL is not accessible for now, but its not a big problem, you can continue your work`,
+            output: `This URL is not accessible for now, but its not a big problem, you can continue your work.`,
         };
     }
 

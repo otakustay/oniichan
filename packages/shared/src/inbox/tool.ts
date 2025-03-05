@@ -12,6 +12,7 @@ import {
     BrowserPreviewParameter,
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
+    CompletePlanParameter,
 } from '../tool';
 
 export type WorkflowSourceChunkStatus =
@@ -100,6 +101,11 @@ export interface AskFollowupQuestionToolCallMessageChunk extends ParsedToolCallM
     arguments: AskFollowupQuestionParameter;
 }
 
+export interface CompletePlanToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
+    toolName: 'complete_plan';
+    arguments: CompletePlanParameter;
+}
+
 export type ParsedToolCallMessageChunk =
     | ReadFileToolCallMessageChunk
     | ReadDirectoryToolCallMessageChunk
@@ -111,7 +117,8 @@ export type ParsedToolCallMessageChunk =
     | RunCommandToolCallMessageChunk
     | BrowserPreviewToolCallMessageChunk
     | AttemptCompletionToolCallMessageChunk
-    | AskFollowupQuestionToolCallMessageChunk;
+    | AskFollowupQuestionToolCallMessageChunk
+    | CompletePlanToolCallMessageChunk;
 
 export type FileEditToolCallMessageChunk =
     | WriteFileToolCallMessageChunk

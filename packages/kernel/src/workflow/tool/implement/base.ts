@@ -5,8 +5,7 @@ import {stringifyError} from '@oniichan/shared/error';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import {CommandExecutor} from '../../../core/command';
 import {EditorHost} from '../../../core/editor';
-import {InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
-import {assertToolCallMessage} from '../utils';
+import {assertToolCallMessage, InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
 
 export interface ToolImplementInit {
     roundtrip: InboxRoundtrip;
@@ -30,7 +29,7 @@ export interface ExecuteError {
 export type ToolExecuteResult = Success | ExecuteError;
 
 export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
-    private readonly roundtrip: InboxRoundtrip;
+    protected readonly roundtrip: InboxRoundtrip;
 
     protected readonly editorHost: EditorHost;
 

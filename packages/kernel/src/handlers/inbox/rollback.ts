@@ -1,7 +1,7 @@
-import {isAssistantMessage, isFileEditToolCallChunk} from '@oniichan/shared/inbox';
+import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import {diffCount, FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {InboxMessage, InboxToolCallMessage} from '../../inbox';
+import {InboxMessage, InboxToolCallMessage, isAssistantMessage} from '../../inbox';
 import {InboxMessageIdentity, InboxRequestHandler} from './handler';
 
 interface InboxRollbackAppliable {
@@ -38,15 +38,15 @@ export class InboxCheckRollbackHandler extends InboxRequestHandler<InboxMessageI
 
         const thread = store.findThreadByUuidStrict(payload.threadUuid);
         const affected = thread.sliceRoundtripAfter(payload.messageUuid);
-        const reverting = affected.flatMap(v => v.toMessages()).reverse().filter(v => isAssistantMessage(v.type));
+        const reversed = affected.flatMap(v => v.toMessages()).reverse().filter(isAssistantMessage);
 
-        if (!reverting.length) {
+        if (!reversed.length) {
             logger.error('RollbackToLatest');
             throw new Error('Unable to rollback to latest assistant message');
         }
 
         try {
-            const fileEdits = this.computeRollbackFileEdits(reverting);
+            const fileEdits = this.computeRollbackFileEdits(reversed);
             const items = await Promise.all(fileEdits.map(v => this.toCheckItem(v)));
             yield {
                 roundtripCount: affected.length,

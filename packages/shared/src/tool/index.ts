@@ -10,6 +10,7 @@ export {
     browserPreviewParameters,
     attemptCompletionParameters,
     askFollowupQuestionParameters,
+    completePlanParameters,
     ParameterInfo,
     ReadFileParameter,
     ReadDirectoryParameter,
@@ -22,6 +23,7 @@ export {
     BrowserPreviewParameter,
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
+    CompletePlanParameter,
     ModelToolCallInput,
     ModelToolCallInputWithSource,
     ToolDescription,
@@ -30,4 +32,4 @@ export {
     isToolName,
     isEditToolName,
 } from './definition';
-export {StreamingToolParser, ToolParsedChunk} from './parse';
+export {StreamingToolParser, ToolParsedChunk, ContentTagName} from './parse';

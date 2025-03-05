@@ -4,6 +4,7 @@ import {
     ToolCallMessageContentChunk,
     ParsedToolCallMessageChunk,
     ToolCallMessageData,
+    PlanMessageData,
 } from '@oniichan/shared/inbox';
 import {
     InboxRoundtrip,
@@ -12,8 +13,9 @@ import {
     InboxToolCallMessage,
     InboxMessageThread,
     InboxUserRequestMessage,
+    InboxPlanMessage,
 } from './interface';
-import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage} from './message';
+import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage, PlanMessage} from './message';
 import {Roundtrip} from './roundtrip';
 import {MessageThread} from './thread';
 
@@ -55,6 +57,14 @@ export function transferToToolCallMessage(source: InboxAssistantTextMessage, arg
         chunks: textMessageData.chunks.map(transformChunk),
     };
     return new ToolCallMessage(source.getRoundtrip(), toolCallMessageData);
+}
+
+export function transferToPlanMessage(source: InboxAssistantTextMessage): InboxPlanMessage {
+    const planMessageData: PlanMessageData = {
+        ...source.toMessageData(),
+        type: 'plan',
+    };
+    return new PlanMessage(source.getRoundtrip(), planMessageData);
 }
 
 export function createEmptyRoundtrip(): InboxRoundtrip {

@@ -84,6 +84,7 @@ function resolveMessageContent(message: MessageData) {
         case 'toolUse':
             return message.content;
         case 'assistantText':
+        case 'plan':
         case 'toolCall':
             return message.chunks.map(v => (v.type === 'text' ? v.content : '')).join('\n\n');
         default:

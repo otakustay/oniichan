@@ -1,7 +1,7 @@
 export {
     ReasoningMessageChunk,
     TextMessageChunk,
-    ThinkingMessageChunk,
+    TaggedMessageChunk,
     MessageInputChunk,
     MessageViewChunk,
     MessageDataBase,
@@ -17,14 +17,17 @@ export {
     MessageViewType,
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
+    PlanMessageData,
+    PlanMessageContentChunk,
+    AssistantMessageType,
 } from './message';
 export {
-    isAssistantMessage,
-    assertThinkingChunk,
+    assertTaggedChunk,
     assertToolCallChunk,
     chunkToString,
     normalizeArguments,
     extractFileEdits,
+    isContentfulChunk,
 } from './utils';
 export {
     WorkflowSourceChunkStatus,

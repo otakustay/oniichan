@@ -7,7 +7,10 @@ export interface InboxPromptReference {
     content: string;
 }
 
+export type InboxPromptMode = 'standalone' | 'plan' | 'act';
+
 export interface InboxPromptView {
+    mode: InboxPromptMode;
     tools: ToolDescription[];
     projectStructure: string;
     projectStructureTruncated: boolean;

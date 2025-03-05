@@ -1,4 +1,4 @@
-import {MessageViewData, ReasoningMessageChunk, RoundtripMessageData} from '@oniichan/shared/inbox';
+import {isContentfulChunk, MessageViewData, ReasoningMessageChunk, RoundtripMessageData} from '@oniichan/shared/inbox';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
 import {EditSummary} from './EditSummary';
@@ -41,7 +41,7 @@ function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] 
         if (reaction.error) {
             response.error = reaction.error;
         }
-        response.chunks.push(...reaction.chunks.filter(v => v.type !== 'thinking' && v.type !== 'reasoning'));
+        response.chunks.push(...reaction.chunks.filter(isContentfulChunk));
     }
     if (reasoningChunk.content) {
         response.chunks.unshift(reasoningChunk);

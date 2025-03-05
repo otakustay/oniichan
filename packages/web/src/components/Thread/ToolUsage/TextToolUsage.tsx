@@ -41,6 +41,10 @@ interface Props {
 }
 
 export default function TextToolUsage({input}: Props) {
+    if (input.toolName === 'complete_plan') {
+        return null;
+    }
+
     if (input.toolName === 'attempt_completion') {
         // Not neccessary to show command when tool is not validated
         const {result} = input.arguments;

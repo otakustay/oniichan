@@ -1,5 +1,10 @@
 import {streamText, generateText, CoreMessage} from 'ai';
-import {createOpenRouter, OpenRouterLanguageModel, OpenRouterProviderSettings} from '@openrouter/ai-sdk-provider';
+import {
+    createOpenRouter,
+    OpenRouterLanguageModel,
+    OpenRouterProvider,
+    OpenRouterProviderSettings,
+} from '@openrouter/ai-sdk-provider';
 import {
     ModelChatOptions,
     ModelClient,
@@ -13,7 +18,9 @@ import {getModelFeature, ModelFeature} from './feature';
 type AiChatRequest = Parameters<typeof streamText>[0];
 
 export class OpenRouterModelClient implements ModelClient {
-    private readonly provider: OpenRouterLanguageModel;
+    private readonly provider: OpenRouterProvider;
+
+    private readonly defaultModel: OpenRouterLanguageModel;
 
     constructor(config: ModelConfiguration) {
         const providerSettings: OpenRouterProviderSettings = {
@@ -24,9 +31,9 @@ export class OpenRouterModelClient implements ModelClient {
                 'X-Title': 'Oniichan',
             },
         };
-        const openRouter = createOpenRouter(providerSettings);
+        this.provider = createOpenRouter(providerSettings);
         const modelFeature = getModelFeature(config.modelName);
-        this.provider = openRouter.chat(config.modelName, {includeReasoning: modelFeature.supportReasoning});
+        this.defaultModel = this.provider.chat(config.modelName, {includeReasoning: modelFeature.supportReasoning});
     }
 
     async chat(options: ModelChatOptions): Promise<[ModelTextResponse, ModelMetaResponse]> {
@@ -36,7 +43,7 @@ export class OpenRouterModelClient implements ModelClient {
             {type: 'text', content: result.text},
             {
                 type: 'meta',
-                model: this.provider.modelId,
+                model: this.defaultModel.modelId,
                 usage: {
                     inputTokens: result.usage.promptTokens,
                     outputTokens: result.usage.completionTokens,
@@ -61,7 +68,7 @@ export class OpenRouterModelClient implements ModelClient {
         const usage = await result.usage;
         yield {
             type: 'meta',
-            model: this.provider.modelId,
+            model: this.defaultModel.modelId,
             usage: {
                 inputTokens: usage.promptTokens,
                 outputTokens: usage.completionTokens,
@@ -70,7 +77,7 @@ export class OpenRouterModelClient implements ModelClient {
     }
 
     getModelFeature(): ModelFeature {
-        return getModelFeature(this.provider.modelId);
+        return getModelFeature(this.defaultModel.modelId);
     }
 
     private getRequest(options: ModelChatOptions): AiChatRequest {
@@ -93,7 +100,7 @@ export class OpenRouterModelClient implements ModelClient {
 
         return {
             messages,
-            model: this.provider,
+            model: this.getOrCreateModel(options.overrideModelName),
             temperature: feature.temperature,
             abortSignal: options.abortSignal,
         };
@@ -110,5 +117,14 @@ export class OpenRouterModelClient implements ModelClient {
             user,
         ];
         return lines.join('\n');
+    }
+
+    private getOrCreateModel(modelName: string | undefined) {
+        if (!modelName || modelName === this.defaultModel.modelId) {
+            return this.defaultModel;
+        }
+
+        const modelFeature = getModelFeature(modelName);
+        return this.provider.chat(modelName, {includeReasoning: modelFeature.supportReasoning});
     }
 }

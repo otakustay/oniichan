@@ -6,6 +6,7 @@ export interface ModelChatOptions {
     telemetry: ModelUsageTelemetry;
     systemPrompt?: string;
     abortSignal?: AbortSignal;
+    overrideModelName?: string;
 }
 
 export interface ModelAccess {

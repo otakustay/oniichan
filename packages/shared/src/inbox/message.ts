@@ -1,5 +1,5 @@
 import {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
-import {ToolParsedChunk} from '../tool';
+import {ToolParsedChunk, ContentTagName} from '../tool';
 
 export interface ReasoningMessageChunk {
     type: 'reasoning';
@@ -11,8 +11,9 @@ export interface TextMessageChunk {
     content: string;
 }
 
-export interface ThinkingMessageChunk {
-    type: 'thinking';
+export interface TaggedMessageChunk {
+    type: 'content';
+    tagName: ContentTagName;
     content: string;
     status: 'generating' | 'completed';
 }
@@ -23,13 +24,15 @@ export type AssistantTextMessageContentChunk =
     | ReasoningMessageChunk
     | TextMessageChunk
     | ToolCallMessageChunk
-    | ThinkingMessageChunk;
+    | TaggedMessageChunk;
+
+export type PlanMessageContentChunk = AssistantTextMessageContentChunk;
 
 export type ToolCallMessageContentChunk =
     | ReasoningMessageChunk
     | TextMessageChunk
     | ParsedToolCallMessageChunk
-    | ThinkingMessageChunk;
+    | TaggedMessageChunk;
 
 export type MessageViewChunk = AssistantTextMessageContentChunk | ToolCallMessageContentChunk;
 
@@ -54,6 +57,11 @@ export interface AssistantTextMessageData extends MessageDataBase {
     chunks: AssistantTextMessageContentChunk[];
 }
 
+export interface PlanMessageData extends MessageDataBase {
+    type: 'plan';
+    chunks: PlanMessageContentChunk[];
+}
+
 export interface ToolCallMessageData extends MessageDataBase {
     type: 'toolCall';
     chunks: ToolCallMessageContentChunk[];
@@ -64,12 +72,14 @@ export interface ToolUseMessageData extends MessageDataBase {
     content: string;
 }
 
-export type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
+export type AssistantMessageData = AssistantTextMessageData | PlanMessageData | ToolCallMessageData;
 
 export type MessageData = UserRequestMessageData | AssistantMessageData | ToolUseMessageData;
 
 export type MessageViewData = UserRequestMessageData | AssistantResponseMessageData;
 
 export type MessageType = MessageData['type'];
+
+export type AssistantMessageType = 'assistantText' | 'plan' | 'toolCall';
 
 export type MessageViewType = MessageViewData['type'];

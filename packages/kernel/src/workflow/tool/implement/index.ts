@@ -12,6 +12,7 @@ import {ReadDirectoryToolImplement} from './readDirectory';
 import {ReadFileToolImplement} from './readFile';
 import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
+import {CompletePlanToolImplement} from './completePlan';
 
 export {ToolExecuteResult, ToolImplementBase, ToolImplementInit, Success, ExecuteError};
 
@@ -38,6 +39,8 @@ export class ToolImplement {
 
     private readonly askFollowupQuestion: ToolImplementBase;
 
+    private readonly completePlanQuestion: ToolImplementBase;
+
     constructor(init: ToolImplementInit) {
         this.readFile = new ReadFileToolImplement(init);
         this.readDirectory = new ReadDirectoryToolImplement(init);
@@ -50,6 +53,7 @@ export class ToolImplement {
         this.browserPreview = new BrowserPreviewToolImplement(init);
         this.attemptCompletion = new AttemptCompletionToolImplement(init);
         this.askFollowupQuestion = new AskFollowupQuestionToolImplement(init);
+        this.completePlanQuestion = new CompletePlanToolImplement(init);
     }
 
     requireUserApprove(toolName: ToolName): boolean {
@@ -96,6 +100,8 @@ export class ToolImplement {
                 return this.attemptCompletion;
             case 'ask_followup_question':
                 return this.askFollowupQuestion;
+            case 'complete_plan':
+                return this.completePlanQuestion;
             default:
                 assertNever<string>(name, v => `Unknown tool ${v}`);
         }

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import {IoChatbubbleEllipsesOutline} from 'react-icons/io5';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import ActBar from '@/components/ActBar';
+import {ContentTagName} from '@oniichan/shared/tool';
 
 const Content = styled.p`
     white-space: pre-wrap;
@@ -22,17 +23,18 @@ const DebugLayout = styled(ActBar.Layout)`
 `;
 
 interface Props {
+    tagName: ContentTagName;
     content: string;
 }
 
-export default function Thinking({content}: Props) {
+export default function Thinking({tagName, content}: Props) {
     const viewMode = useViewModeValue();
-    if (viewMode.debug) {
+    if (viewMode.debug || tagName !== 'thinking') {
         return (
             <DebugLayout>
                 <DebugTitle>
                     <IoChatbubbleEllipsesOutline />
-                    Thinking...
+                    {tagName === 'thinking' ? 'Thinking...' : (tagName === 'plan' ? 'Planning...' : 'Conclusion...')}
                 </DebugTitle>
                 <Content>{content.trim()}</Content>
             </DebugLayout>

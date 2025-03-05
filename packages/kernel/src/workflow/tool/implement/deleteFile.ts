@@ -29,8 +29,8 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
             type: 'success',
             finished: false,
             output: exists
-                ? `File ${args.path} is deleted`
-                : `You're deleting a non-existent file ${args.path}, this action take no effect, please continue your task`,
+                ? `File ${args.path} is deleted.`
+                : `You're deleting a non-existent file ${args.path}, this action take no effect, please continue your task.`,
         };
     }
 

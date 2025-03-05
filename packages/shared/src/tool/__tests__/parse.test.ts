@@ -17,13 +17,14 @@ interface ToolCall {
     closed: boolean;
 }
 
-interface Thinking {
-    type: 'thinking';
+interface ContentTag {
+    type: 'content';
+    tagName: string;
     content: string;
 }
 
 async function consume(content: string) {
-    const chunks: Array<ToolCall | Thinking> = [];
+    const chunks: Array<ToolCall | ContentTag> = [];
     const parser = new StreamingToolParser();
     for await (const chunk of parser.parse(tokenize(content))) {
         if (chunk.type === 'text') {
@@ -33,8 +34,8 @@ async function consume(content: string) {
             chunks.push({type: 'tool', toolName: chunk.toolName, args: {}, closed: false});
             continue;
         }
-        if (chunk.type === 'thinkingStart') {
-            chunks.push({type: 'thinking', content: ''});
+        if (chunk.type === 'contentStart') {
+            chunks.push({type: 'content', tagName: chunk.tagName, content: ''});
             continue;
         }
 
@@ -48,8 +49,8 @@ async function consume(content: string) {
             throw new Error('Unexpected tool chunk');
         }
 
-        if (/thinking/i.test(chunk.type) && lastChunk?.type !== 'thinking') {
-            throw new Error('Unexpected thinking chunk');
+        if (/content/i.test(chunk.type) && lastChunk?.type !== 'content') {
+            throw new Error(`Unexpected content chunk`);
         }
 
         if (chunk.type === 'toolDelta') {
@@ -65,9 +66,9 @@ async function consume(content: string) {
                 }
             }
         }
-        if (chunk.type === 'thinkingDelta') {
+        if (chunk.type === 'contentDelta') {
             const call = chunks.at(-1);
-            if (call?.type === 'thinking') {
+            if (call?.type === 'content') {
                 call.content += chunk.source;
             }
         }
@@ -198,7 +199,7 @@ test('with thinking', async () => {
         args: {path: 'src/main.ts'},
         closed: true,
     };
-    expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
+    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
 
@@ -224,7 +225,7 @@ test('xml inside thinking', async () => {
         args: {path: 'src/main.ts'},
         closed: true,
     };
-    expect(chunks.at(0)).toEqual({type: 'thinking', content: thinkingContent});
+    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
 
@@ -253,4 +254,39 @@ test('nested xml tags inside parameter', async () => {
         closed: true,
     };
     expect(tools.at(0)).toEqual(expected);
+});
+
+test('plan tag', async () => {
+    const message = dedent`
+        <plan>
+            This is a plan
+        </plan>
+    `;
+    const tools = await consume(message);
+    expect(tools.length).toBe(1);
+    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'plan'});
+});
+
+test('conclusion tag', async () => {
+    const message = dedent`
+        <conclusion>
+            Task is finished
+        </conclusion>
+    `;
+    const tools = await consume(message);
+    expect(tools.length).toBe(1);
+    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'conclusion'});
+});
+
+test('mixed nestecontent tag', async () => {
+    const message = dedent`
+        <conclusion>
+            <plan>
+                Task is finished
+            </plan>
+        </conclusion>
+    `;
+    const tools = await consume(message);
+    expect(tools.length).toBe(1);
+    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'conclusion'});
 });
