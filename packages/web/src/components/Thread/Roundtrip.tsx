@@ -1,7 +1,12 @@
-import {isContentfulChunk, MessageViewData, ReasoningMessageChunk, RoundtripMessageData} from '@oniichan/shared/inbox';
+import {MessageViewChunk, MessageViewData, RoundtripMessageData} from '@oniichan/shared/inbox';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
 import {EditSummary} from './EditSummary';
+
+function isVisibleChunk(chunk: MessageViewChunk): boolean {
+    // Remove thinking chunks from UI
+    return chunk.type !== 'content' || chunk.tagName !== 'thinking';
+}
 
 interface MessageView {
     message: MessageViewData;
@@ -20,31 +25,18 @@ function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] 
 
     // Combine messages in roundtrip to a single response
     const [reply, ...reactions] = roundtrip.responses;
-    const reasoningChunk: ReasoningMessageChunk = {
-        type: 'reasoning',
-        content: reply.chunks.find(v => v.type === 'reasoning')?.content ?? '',
-    };
     const response: MessageViewData = {
         type: 'assistantResponse',
-        chunks: reply.chunks.filter(v => v.type !== 'reasoning'),
+        chunks: [...reply.chunks],
         uuid: reply.uuid,
         createdAt: reply.createdAt,
         error: reply.error,
     };
     for (const reaction of reactions) {
-        const reasoningContent = reaction.chunks.find(v => v.type === 'reasoning')?.content;
-        // `reasoningContent` can be an empty string for a short time,
-        // in this case we should keep reasoning text from the previous message
-        if (reasoningContent) {
-            reasoningChunk.content = reasoningContent;
-        }
         if (reaction.error) {
             response.error = reaction.error;
         }
-        response.chunks.push(...reaction.chunks.filter(isContentfulChunk));
-    }
-    if (reasoningChunk.content) {
-        response.chunks.unshift(reasoningChunk);
+        response.chunks.push(...reaction.chunks.filter(isVisibleChunk));
     }
 
     const lastMessage = reactions.at(-1) ?? reply;

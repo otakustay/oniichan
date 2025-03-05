@@ -70,6 +70,8 @@ function renderObjectiveWithThinking() {
     `;
 }
 
+// TODO: Devide task into <read> and <write>
+// TODO: Create standalone UI for task list
 function renderPlanObject() {
     return dedent`
         # Objective
