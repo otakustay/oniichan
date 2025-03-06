@@ -21,6 +21,7 @@ import {
     MessageThreadPersistData,
     TaggedMessageChunk,
     PlanMessageData,
+    PlanMessageChunk,
 } from '@oniichan/shared/inbox';
 import {ContentTagName} from '@oniichan/shared/tool';
 
@@ -65,6 +66,8 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessage {
     toMessageData(): AssistantTextMessageData;
     getTextContent(): string;
     addChunk(chunk: MessageInputChunk): void;
+    findPlanChunk(): PlanMessageChunk | null;
+    findPlanChunkStrict(): PlanMessageChunk;
     findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null;
     findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk;
     findToolCallChunk(): ToolCallMessageChunk | null;

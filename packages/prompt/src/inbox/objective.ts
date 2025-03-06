@@ -70,8 +70,6 @@ function renderObjectiveWithThinking() {
     `;
 }
 
-// TODO: Devide task into <read> and <write>
-// TODO: Create standalone UI for task list
 function renderPlanObject() {
     return dedent`
         # Objective
@@ -106,19 +104,25 @@ function renderPlanObject() {
 
         You may also be given information from previous tasks, they are represented by standalone messages, in this case, you are required to determine if user's request is satisfied and completed and take one of these format:
 
-        1. To create a new plan, output the plan inside a <plan> XML tag with one or more <task> tags.
+        1. To create a new plan, output the plan inside a <plan> XML tag with one or more <read> or <coding> tags.
         2. Once the user's request is completely fulfilled, make a conclusion inside a <conclusion> XML tag  with markdown format.
 
         You should only create the plan or make a conclusion in text, you are not allowed to take any action before the plan is created.
 
-        A plan can include one or more todo tasks, each being a <task> tag with its content as one of these types:
+        A plan can include one or more todo tasks, each being a <read> or <coding> tag with its content as one of these types.
+
+        A <read> tag is used to describe a task that requires reading or searching for files, place a description of the task inside this tag, it can be either:
 
         1. To read a file, including the accurate filename based on project root, and the reason for requiring this file.
         2. To search file with a regexp and an optional file name glob to narrow the search scope, you are supposed to just clarify what you are searching for, the regexp and glob are optional.
         3. To look into a directory for certain files or code snippets, include the accurate directory path based on project root in this task, and a detailed explantion of the targeting file or code is required, this task can break down into more steps like recursively walk a directory or read multiple files in future.
         4. To run a terminal command and get the output of the command, you should at least provide a description of your gathering information, such as "install dependencies" or "find out the docker version", the actual command can be generated when this task is started.
-        5. To write some code to a file, the accurate filename based on project root is required, the file can be either exists or non-exists. A detailed explanation on the purpose of this code is also required, keep the explanation as detailed as possible to prevent misunderstanding and incorrectly code. Do not include this task in plan if you don't know how the code should be implemented.
-        6. To delete an existing file, keep the accurate filename based on project root in this task, a description of the task is also welcome. Do not include this task in plan if you don't know the exact filename and its content.
+
+        A <coding> tag is used to describe a task that requires writing code in files, place a description of the task inside this tag, it can be either:
+
+        1. To write some code to a file, the accurate filename based on project root is required, the file can be either exists or non-exists. A detailed explanation on the purpose of this code is also required, keep the explanation as detailed as possible to prevent misunderstanding and incorrectly code. Do not include this task in plan if you don't know how the code should be implemented.
+        2. To modify an existing file, it also required the accurate filename based on project root and detailed purpose of a modification. Do not include this task in plan if you don't know the exact filename and its content.
+        2. To delete an existing file, keep the accurate filename based on project root in this task, a description of the task is also welcome. Do not include this task in plan if you don't know the exact filename and its content.
 
         A typical plan may looks like this:
 
@@ -126,9 +130,10 @@ function renderPlanObject() {
         <plan>
         To accomplish ..., we need to:
 
-        <task>Read \`package.json\` to find if lodash is installed.</task>
-        <task>Run \`npm list lodash\` to check if it's installed.</task>
-        <task>Modify \`src/main.ts\` to delete the import of \`xxx\`.</task>
+        <read>Read \`package.json\` to find if lodash is installed</read>
+        <read>Run \`npm list lodash\` to check if it's installed</read>
+        <coding>Modify \`src/main.ts\` to delete the import of \`xxx\`</coding>
+        <coding>Delete imported file \`xxx.ts\`</coding>
         </plan>
 
         You are encourage to plan multiple tasks at a time, do not hesitate to gather information aggressively, but side effectful tasks like writing code or running command should always be taken cautiously.
@@ -161,8 +166,8 @@ export function renderActObjective() {
 
         You must accomplish the plan task iteratively, breaking it down into clear steps and working through them methodically.
 
-        1. Analyze the first <task> which is not executed from plan, set a clear, achievable goals to accomplish it.
-        2. Create a <thinking></thinking> XML tag, which contains the task you selected from plan, be sure the task is picked from a <task> tag.
+        1. Analyze the first <read> or <coding> tag which is not executed from plan, set a clear, achievable goals to accomplish it.
+        2. Create a <thinking></thinking> XML tag, which contains the task you selected from plan, be sure the task is picked from a <read> or <coding> tag.
         3. Utilizing available tools one at a time as necessary to finish the task, only use one tool a time, **stop everything after you have invoked a tool with XML tags**.
         4. Remember, you have extensive capabilities with access to a wide range of tools that can be used in powerful and clever ways as necessary to accomplish the task, choose the most appropriate tool and carefully construct XML style tags to use them.
         5. Once you've completed the entire plan, you must use the attempt_completion tool to present the result of the task to the user.
@@ -175,9 +180,11 @@ export function renderActObjective() {
 =
         Your response should almost always formed in this structure:
 
-        1. Pick a new unfinished <task> tag from last <plan> tag, provide a short description on what you will do to complete the task.
+        1. Pick a new unfinished <read> or <coding> tag from last <plan> tag, provide a short description on what you will do to complete the task.
         3. A <thinking> tag with the description of task you picked from plan.
         2. A tool call in a XML-style tag, use the tool name as root tag, carefully put every parameter as an child tag. You MUST use one tool per message, and the tool usage must happen at the end of the message, you should not output anything after a tool call.
+
+        The user is glad to see some friendly explanation of what you are doing, so try your best to put a clear and concise explanation paragraph before the <thinking> tag, note this paragraph is all about your next action, NOT a summary or analysis of previous message.
 
         Content inside the code block below is an example to demonstrate how to archive a task of reading a file from plan:
 

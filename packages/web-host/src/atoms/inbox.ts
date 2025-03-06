@@ -17,6 +17,7 @@ import {
     AssistantMessageData,
     assertTaggedChunk,
     assertToolCallChunk,
+    assertPlanChunk,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
@@ -176,7 +177,8 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
         };
     }
 
-    if (chunk.type === 'textInTool') {
+    // We don't store source in web
+    if (chunk.type === 'textInTool' || chunk.type === 'textInPlan' || chunk.type === 'planTaskEnd') {
         return message;
     }
 
@@ -202,6 +204,15 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
                     fileEdit: null,
                     source: chunk.source,
                 },
+            ],
+        };
+    }
+    if (chunk.type === 'planStart') {
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks,
+                {type: 'plan', tasks: [], source: chunk.source},
             ],
         };
     }
@@ -254,6 +265,60 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
     }
     else if (chunk.type === 'toolEnd') {
         assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    status: 'completed',
+                },
+            ],
+        };
+    }
+    else if (chunk.type === 'planTaskStart') {
+        assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    tasks: [
+                        ...lastChunk.tasks,
+                        {taskType: chunk.taskType, text: ''},
+                    ],
+                },
+            ],
+        };
+    }
+    else if (chunk.type === 'planTaskDelta') {
+        assertPlanChunk(lastChunk, 'Unexpected plan task delta chunk coming without a plan start chunk');
+        const lastTask = lastChunk.tasks.at(-1);
+
+        if (!lastTask) {
+            throw new Error('Unexpected plan task delta chunk coming without an existing task');
+        }
+        if (lastTask.taskType !== chunk.taskType) {
+            throw new Error('Unexpected plan task delta chunk coming without corresponding task');
+        }
+
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -2),
+                {
+                    ...lastChunk,
+                    tasks: [
+                        ...lastChunk.tasks.slice(0, -1),
+                        {taskType: lastTask.taskType, text: lastTask.text + chunk.source},
+                    ],
+                },
+            ],
+        };
+    }
+    else if (chunk.type === 'planEnd') {
+        assertPlanChunk(lastChunk, 'Unexpected plan task delta chunk coming without a plan start chunk');
         return {
             ...message,
             chunks: [

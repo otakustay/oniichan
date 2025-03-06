@@ -1,5 +1,5 @@
 import {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
-import {ToolParsedChunk, ContentTagName} from '../tool';
+import {ToolParsedChunk, ContentTagName, PlanTaskType} from '../tool';
 
 export interface ReasoningMessageChunk {
     type: 'reasoning';
@@ -9,6 +9,18 @@ export interface ReasoningMessageChunk {
 export interface TextMessageChunk {
     type: 'text';
     content: string;
+}
+
+export interface PlanTask {
+    taskType: PlanTaskType;
+    text: string;
+}
+
+export interface PlanMessageChunk {
+    type: 'plan';
+    tasks: PlanTask[];
+    source: string;
+    status: 'generating' | 'completed';
 }
 
 export interface TaggedMessageChunk {
@@ -23,6 +35,7 @@ export type MessageInputChunk = ReasoningMessageChunk | ToolParsedChunk;
 export type AssistantTextMessageContentChunk =
     | ReasoningMessageChunk
     | TextMessageChunk
+    | PlanMessageChunk
     | ToolCallMessageChunk
     | TaggedMessageChunk;
 

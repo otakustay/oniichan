@@ -40,7 +40,7 @@ export function createEmptyAssistantTextMessage(roundtrip: InboxRoundtrip): Inbo
 
 export function transferToToolCallMessage(source: InboxAssistantTextMessage, args: unknown): InboxToolCallMessage {
     const textMessageData = source.toMessageData();
-    const transformChunk = (chunk: AssistantTextMessageContentChunk): ToolCallMessageContentChunk => {
+    const transformChunk = (chunk: AssistantTextMessageContentChunk): ToolCallMessageContentChunk | [] => {
         if (chunk.type === 'toolCall') {
             return {
                 ...chunk,
@@ -49,12 +49,15 @@ export function transferToToolCallMessage(source: InboxAssistantTextMessage, arg
                 arguments: args,
             } as unknown as ParsedToolCallMessageChunk;
         }
+        if (chunk.type === 'plan') {
+            return [];
+        }
         return chunk;
     };
     const toolCallMessageData: ToolCallMessageData = {
         ...textMessageData,
         type: 'toolCall',
-        chunks: textMessageData.chunks.map(transformChunk),
+        chunks: textMessageData.chunks.flatMap(transformChunk),
     };
     return new ToolCallMessage(source.getRoundtrip(), toolCallMessageData);
 }

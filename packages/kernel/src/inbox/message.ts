@@ -25,6 +25,8 @@ import {
     PlanMessageData,
     PlanMessageContentChunk,
     AssistantMessageType,
+    PlanMessageChunk,
+    assertPlanChunk,
 } from '@oniichan/shared/inbox';
 import {
     InboxAssistantTextMessage,
@@ -172,8 +174,10 @@ export class PlanMessage extends AssistantMessage<'plan'> implements InboxPlanMe
     }
 
     getPlanState(): PlanState {
-        const chunks = this.chunks.filter(v => v.type === 'content');
-        return chunks.some(v => v.tagName === 'plan') ? 'plan' : 'conclusion';
+        if (this.chunks.some(v => v.type === 'plan')) {
+            return 'plan';
+        }
+        return 'conclusion';
     }
 
     protected restore(persistData: PlanMessageData) {
@@ -305,6 +309,49 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
             assertToolCallChunk(lastChunk, 'Unexpected tool end chunk coming without a start chunk');
             lastChunk.source += chunk.source;
         }
+        else if (chunk.type === 'planStart') {
+            this.chunks.push({type: 'plan', tasks: [], status: 'generating', source: chunk.source});
+        }
+        else if (chunk.type === 'planTaskStart') {
+            assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
+            lastChunk.source += chunk.source;
+            lastChunk.tasks.push({taskType: chunk.taskType, text: ''});
+        }
+        else if (chunk.type === 'planTaskDelta') {
+            assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
+            lastChunk.source += chunk.source;
+            const task = lastChunk.tasks.at(-1);
+
+            if (!task) {
+                throw new Error('Unexpected plan task delta chunk coming without an existing task');
+            }
+            if (task.taskType !== chunk.taskType) {
+                throw new Error('Unexpected plan task delta chunk coming without corresponding task');
+            }
+
+            task.text += chunk.source;
+        }
+        else if (chunk.type === 'planTaskEnd') {
+            assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
+            lastChunk.source += chunk.source;
+            const task = lastChunk.tasks.at(-1);
+
+            if (!task) {
+                throw new Error('Unexpected plan task end chunk coming without an existing task');
+            }
+            if (task.taskType !== chunk.taskType) {
+                throw new Error('Unexpected plan task end chunk coming without corresponding task');
+            }
+        }
+        else if (chunk.type === 'planEnd') {
+            assertPlanChunk(lastChunk, 'Unexpected plan end chunk coming without a plan start chunk');
+            lastChunk.source += chunk.source;
+            lastChunk.status = 'completed';
+        }
+        else if (chunk.type === 'textInPlan') {
+            assertPlanChunk(lastChunk, 'Unexpected text in plan chunk coming without a plan start chunk');
+            lastChunk.source += chunk.source;
+        }
         else {
             assertNever<{type: string}>(chunk, v => `Unexpected chunk type: ${v.type}`);
         }
@@ -330,6 +377,15 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
             chunk.status = status;
         }
         // Plan has no status
+    }
+
+    findPlanChunk(): PlanMessageChunk | null {
+        return this.chunks.find(v => v.type === 'plan') ?? null;
+    }
+
+    findPlanChunkStrict(): PlanMessageChunk {
+        const chunk = this.findPlanChunk();
+        return assertHasValue(chunk, 'Message does not contain plan chunk');
     }
 
     findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null {

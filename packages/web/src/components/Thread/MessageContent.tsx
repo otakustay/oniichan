@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import {MessageViewChunk} from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import Thinking from './Thinking';
 import Reasoning from './Reasoning';
+import {Plan} from './Plan';
 
 const Layout = styled.div`
     & :where(code) {
@@ -40,18 +40,24 @@ interface Props {
 }
 
 export default function MessageContent({className, chunks, reasoning}: Props) {
-    const viewMode = useViewModeValue();
     const renderChunk = (chunk: MessageViewChunk, index: number, dataSource: MessageViewChunk[]) => {
         switch (chunk.type) {
             case 'reasoning':
                 return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} running={reasoning} />;
             case 'text':
                 return chunk.content.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk.content} /> : null;
-            // TODO: Specify different component for different tag names
             case 'content':
-                return viewMode.debug || (chunk.tagName !== 'thinking' && index !== dataSource.length - 1)
-                    ? <Thinking key={`thinking-chunk-${index}`} tagName={chunk.tagName} content={chunk.content} />
-                    : null;
+                return chunk.tagName === 'conclusion'
+                    ? <Markdown key={`conclusion-chunk-${index}`} content={chunk.content} />
+                    : (
+                        <Thinking
+                            key={`content-chunk-${index}`}
+                            content={chunk.content}
+                            active={index !== dataSource.length - 1}
+                        />
+                    );
+            case 'plan':
+                return <Plan tasks={chunk.tasks} closed={chunk.status === 'completed'} />;
             case 'toolCall':
             case 'parsedToolCall':
                 return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;

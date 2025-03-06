@@ -1,6 +1,8 @@
 export {
     ReasoningMessageChunk,
     TextMessageChunk,
+    PlanTask,
+    PlanMessageChunk,
     TaggedMessageChunk,
     MessageInputChunk,
     MessageViewChunk,
@@ -24,6 +26,7 @@ export {
 export {
     assertTaggedChunk,
     assertToolCallChunk,
+    assertPlanChunk,
     chunkToString,
     normalizeArguments,
     extractFileEdits,

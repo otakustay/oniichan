@@ -1,6 +1,6 @@
 import {assertNever} from '../error';
 import {FileEditData} from '../patch';
-import {TaggedMessageChunk, MessageData, MessageViewChunk} from './message';
+import {TaggedMessageChunk, MessageData, MessageViewChunk, PlanMessageChunk} from './message';
 import {ToolCallMessageChunk, ParsedToolCallMessageChunk, isFileEditToolCallChunk} from './tool';
 
 export function isParsedToolCallChunk(chunk: MessageViewChunk): chunk is ParsedToolCallMessageChunk {
@@ -18,6 +18,7 @@ export function chunkToString(chunk: MessageViewChunk) {
             return chunk.content;
         case 'content':
             return `<${chunk.tagName}>${chunk.content}</${chunk.tagName}>`;
+        case 'plan':
         case 'toolCall':
         case 'parsedToolCall':
             return chunk.source;
@@ -30,6 +31,12 @@ type MaybeChunk = MessageViewChunk | undefined;
 
 export function assertTaggedChunk(chunk: MaybeChunk, message: string): asserts chunk is TaggedMessageChunk {
     if (chunk?.type !== 'content') {
+        throw new Error(message);
+    }
+}
+
+export function assertPlanChunk(chunk: MaybeChunk, message: string): asserts chunk is PlanMessageChunk {
+    if (chunk?.type !== 'plan') {
         throw new Error(message);
     }
 }

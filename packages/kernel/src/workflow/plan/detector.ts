@@ -5,7 +5,7 @@ export class PlanWorkflowDetector extends WorkflowDetector {
     detectWorkflow(source: InboxWorkflowSourceMessage): boolean {
         try {
             assertAssistantTextMessage(source);
-            return !!source.findTaggedChunk('plan');
+            return !!source.findPlanChunk();
         }
         catch {
             return false;

@@ -32,4 +32,4 @@ export {
     isToolName,
     isEditToolName,
 } from './definition';
-export {StreamingToolParser, ToolParsedChunk, ContentTagName} from './parse';
+export {StreamingToolParser, ToolParsedChunk, ContentTagName, PlanTaskType} from './parse';

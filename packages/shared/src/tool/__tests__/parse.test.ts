@@ -1,6 +1,6 @@
 import {test, expect} from 'vitest';
 import dedent from 'dedent';
-import {StreamingToolParser} from '../parse';
+import {PlanTaskType, StreamingToolParser} from '../parse';
 
 async function* tokenize(content: string): AsyncIterable<string> {
     const tokens = content.split(/([^a-zA-Z0-9]+)/);
@@ -21,10 +21,22 @@ interface ContentTag {
     type: 'content';
     tagName: string;
     content: string;
+    closed: boolean;
+}
+
+interface PlanTask {
+    type: PlanTaskType;
+    text: string;
+}
+
+interface Plan {
+    type: 'plan';
+    tasks: PlanTask[];
+    closed: boolean;
 }
 
 async function consume(content: string) {
-    const chunks: Array<ToolCall | ContentTag> = [];
+    const chunks: Array<ToolCall | ContentTag | Plan> = [];
     const parser = new StreamingToolParser();
     for await (const chunk of parser.parse(tokenize(content))) {
         if (chunk.type === 'text') {
@@ -35,7 +47,11 @@ async function consume(content: string) {
             continue;
         }
         if (chunk.type === 'contentStart') {
-            chunks.push({type: 'content', tagName: chunk.tagName, content: ''});
+            chunks.push({type: 'content', tagName: chunk.tagName, content: '', closed: false});
+            continue;
+        }
+        if (chunk.type === 'planStart') {
+            chunks.push({type: 'plan', tasks: [], closed: false});
             continue;
         }
 
@@ -48,9 +64,11 @@ async function consume(content: string) {
         if (/tool/i.test(chunk.type) && lastChunk?.type !== 'tool') {
             throw new Error('Unexpected tool chunk');
         }
-
         if (/content/i.test(chunk.type) && lastChunk?.type !== 'content') {
             throw new Error(`Unexpected content chunk`);
+        }
+        if (/plan/i.test(chunk.type) && lastChunk?.type !== 'plan') {
+            throw new Error(`Unexpected plan chunk`);
         }
 
         if (chunk.type === 'toolDelta') {
@@ -72,11 +90,39 @@ async function consume(content: string) {
                 call.content += chunk.source;
             }
         }
+        if (chunk.type === 'planTaskStart') {
+            const plan = chunks.at(-1);
+            if (plan?.type === 'plan') {
+                plan.tasks.push({type: chunk.taskType, text: ''});
+            }
+        }
+        if (chunk.type === 'planTaskDelta') {
+            const plan = chunks.at(-1);
+            if (plan?.type === 'plan') {
+                const task = plan.tasks.at(-1);
+                if (!task) {
+                    throw new Error('No task in plan');
+                }
+                task.text += chunk.source;
+            }
+        }
 
         if (chunk.type === 'toolEnd') {
             const call = chunks.at(-1);
             if (call?.type === 'tool') {
                 call.closed = true;
+            }
+        }
+        if (chunk.type === 'contentEnd') {
+            const call = chunks.at(-1);
+            if (call?.type === 'content') {
+                call.closed = true;
+            }
+        }
+        if (chunk.type === 'planEnd') {
+            const plan = chunks.at(-1);
+            if (plan?.type === 'plan') {
+                plan.closed = true;
             }
         }
     }
@@ -119,15 +165,15 @@ test('simple tool call', async () => {
             <path>src/main.ts</path>
         </read_file>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
     const expected = {
         type: 'tool',
         toolName: 'read_file',
         args: {path: 'src/main.ts'},
         closed: true,
     };
-    expect(tools.at(0)).toEqual(expected);
+    expect(chunks.at(0)).toEqual(expected);
 });
 
 test('multiple parameters', async () => {
@@ -139,15 +185,15 @@ test('multiple parameters', async () => {
         <recursive>true</recursive>
         </read_directory>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
     const expected = {
         type: 'tool',
         toolName: 'read_directory',
         args: {path: 'src/main.ts', recursive: 'true'},
         closed: true,
     };
-    expect(tools.at(0)).toEqual(expected);
+    expect(chunks.at(0)).toEqual(expected);
 });
 
 test('cross line parameters', async () => {
@@ -160,15 +206,15 @@ test('cross line parameters', async () => {
         <recursive>true</recursive>
         </read_directory>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
     const expected = {
         type: 'tool',
         toolName: 'read_directory',
         args: {path: 'src/\nmain.ts', recursive: 'true'},
         closed: true,
     };
-    expect(tools.at(0)).toEqual(expected);
+    expect(chunks.at(0)).toEqual(expected);
 });
 
 test('not a tool', async () => {
@@ -179,8 +225,8 @@ test('not a tool', async () => {
             <command>git status</command>
         </run_command_test>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(0);
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(0);
 });
 
 test('with thinking', async () => {
@@ -199,7 +245,7 @@ test('with thinking', async () => {
         args: {path: 'src/main.ts'},
         closed: true,
     };
-    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent});
+    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent, closed: true});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
 
@@ -225,7 +271,7 @@ test('xml inside thinking', async () => {
         args: {path: 'src/main.ts'},
         closed: true,
     };
-    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent});
+    expect(chunks.at(0)).toEqual({type: 'content', tagName: 'thinking', content: thinkingContent, closed: true});
     expect(chunks.at(1)).toEqual(expectedToolCall);
 });
 
@@ -245,26 +291,15 @@ test('nested xml tags inside parameter', async () => {
         </content>
         </write_file>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
     const expected = {
         type: 'tool',
         toolName: 'write_file',
         args: {path: 'src/index.html', content: `\n${content}\n`},
         closed: true,
     };
-    expect(tools.at(0)).toEqual(expected);
-});
-
-test('plan tag', async () => {
-    const message = dedent`
-        <plan>
-            This is a plan
-        </plan>
-    `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
-    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'plan'});
+    expect(chunks.at(0)).toEqual(expected);
 });
 
 test('conclusion tag', async () => {
@@ -273,9 +308,9 @@ test('conclusion tag', async () => {
             Task is finished
         </conclusion>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
-    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'conclusion'});
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
+    expect(chunks.at(0)).toMatchObject({type: 'content', tagName: 'conclusion', closed: true});
 });
 
 test('mixed nestecontent tag', async () => {
@@ -286,7 +321,27 @@ test('mixed nestecontent tag', async () => {
             </plan>
         </conclusion>
     `;
-    const tools = await consume(message);
-    expect(tools.length).toBe(1);
-    expect(tools.at(0)).toMatchObject({type: 'content', tagName: 'conclusion'});
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
+    expect(chunks.at(0)).toMatchObject({type: 'content', tagName: 'conclusion', closed: true});
+});
+
+test('plan tag', async () => {
+    const message = dedent`
+        <plan>
+            <read>A read task</read>
+            <coding>A coding task</coding>
+        </plan>
+    `;
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
+    const expected: Plan = {
+        type: 'plan',
+        closed: true,
+        tasks: [
+            {type: 'read', text: 'A read task'},
+            {type: 'coding', text: 'A coding task'},
+        ],
+    };
+    expect(chunks.at(0)).toEqual(expected);
 });
