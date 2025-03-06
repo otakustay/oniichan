@@ -20,7 +20,7 @@ export type ToolName =
     | 'browser_preview'
     | 'attempt_completion'
     | 'ask_followup_question'
-    | 'complete_plan';
+    | 'complete_task';
 
 export interface ToolDescription {
     name: ToolName;
@@ -243,19 +243,20 @@ export interface AttemptCompletionParameter {
     command?: string;
 }
 
-export const completePlanParameters = {
+export const completeTaskParameters = {
     type: 'object',
     properties: {
-        numberOfTasks: {
+        confidence: {
             type: 'number',
-            description: 'The number of tasks you have completed so far after the last plan',
+            description:
+                'The confidence value as you regard yourself completely fulfilled this task, an integer from 0 to 100, larger number means more confident',
         },
     },
-    required: ['numberOfTasks'],
+    required: ['confidence'],
 } as const satisfies ParameterInfo;
 
-export interface CompletePlanParameter {
-    numberOfTasks: number;
+export interface CompleteTaskParameter {
+    confidence: number;
 }
 
 export const builtinTools: ToolDescription[] = [
@@ -391,14 +392,14 @@ export const builtinTools: ToolDescription[] = [
         `,
     },
     {
-        name: 'complete_plan',
+        name: 'complete_task',
         description:
-            'When you confirm that all tasks in given plan is completed, the user request is completed, use this tool to finish your work, provide the count of tasks. This tool is a hidden tool, user will not get any insight when this tool get executed, so do not leak the tool name or its paramters outside the tool call XML tag.',
-        parameters: completePlanParameters,
+            'When you confirm the task given is completed, use this tool to finish your work, provide a confidence value. This tool is a hidden tool, user will not get any insight when this tool get executed, so do not leak the tool name or its paramters outside the tool call XML tag.',
+        parameters: completeTaskParameters,
         usage: dedent`
-            <complete_plan>
-                <numberOfTasks>3</numberOfTasks>
-            </complete_plan>
+            <complete_task>
+                <confidence>87</confidence>
+            </complete_task>
         `,
     },
 ];

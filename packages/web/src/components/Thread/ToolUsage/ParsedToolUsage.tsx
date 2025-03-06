@@ -40,7 +40,7 @@ interface Props {
 }
 
 export default function ParsedToolUsage({input}: Props) {
-    if (input.toolName === 'complete_plan') {
+    if (input.toolName === 'complete_task') {
         return null;
     }
 

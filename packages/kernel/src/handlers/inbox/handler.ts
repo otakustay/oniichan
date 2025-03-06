@@ -5,7 +5,7 @@ import {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
-import {assertHasValue, stringifyError} from '@oniichan/shared/error';
+import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {createEmptyMessageThread, createEmptyRoundtrip, InboxRoundtrip, isToolCallMessageOf} from '../../inbox';
@@ -13,6 +13,17 @@ import {WorkflowDetector, WorkflowRunner, WorkflowStepInit} from '../../workflow
 import {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
+
+function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
+    // For every type that "can stream very freauently", we don't flush them immediately
+    return chunk.type !== 'text'
+        && chunk.type !== 'contentDelta'
+        && chunk.type !== 'planTaskDelta'
+        && chunk.type !== 'toolDelta'
+        && chunk.type !== 'reasoning'
+        && chunk.type !== 'textInPlan'
+        && chunk.type !== 'textInTool';
+}
 
 export interface InboxMessageIdentity {
     threadUuid: string;
@@ -46,6 +57,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             enabled: false,
             plannerModel: '',
             actorModel: '',
+            coderModel: '',
         },
     };
 
@@ -95,8 +107,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
                 reply.addChunk(chunk);
                 yield {replyUuid: reply.uuid, value: chunk};
 
-                // Less frequently flush message to frontend
-                if (chunk.type !== 'text' && chunk.type !== 'reasoning') {
+                if (isChunkAbleToFlushImmediately(chunk)) {
                     this.pushStoreUpdate();
                 }
 
@@ -104,6 +115,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
                 if (chunk.type === 'toolEnd') {
                     state.toolCallOccured = true;
                 }
+            }
+
+            if (!reply.getTextContent().trim()) {
+                reply.setError('Model replies empty content');
             }
         }
         catch (ex) {
@@ -113,8 +128,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             // Broadcast update when one message is fully generated
             this.pushStoreUpdate(this.thread.uuid);
         }
-
-        // TODO: Add a special error if message is empty after request complete
 
         logger.trace('RequestModelFinish');
 
@@ -202,8 +215,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         };
 
         if (this.workingMode !== 'standalone') {
-            assertHasValue(this.inboxConfig.ringRingMode.plannerModel, 'Planner model is not configured');
-            assertHasValue(this.inboxConfig.ringRingMode.actorModel, 'Actor model is not configured');
+            // TODO: Use coder model
             options.overrideModelName = this.workingMode === 'plan'
                 ? this.inboxConfig.ringRingMode.plannerModel
                 : this.inboxConfig.ringRingMode.actorModel;
@@ -242,9 +254,11 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         }
 
         const reply = this.getReplyMessage();
-        // If the last message includes `complete_plan` tool, back to plan mode
-        if (isToolCallMessageOf(reply, 'complete_plan')) {
-            return 'plan';
+        if (isToolCallMessageOf(reply, 'complete_task')) {
+            const chunk = reply.findToolCallChunkStrict();
+            const progress = chunk.toolName === 'complete_task' ? chunk.executionData : null;
+            // Is a `complete_task` indicates all tasks are finished, back to plan mode
+            return (progress && progress.completedTasks === progress.totalTasks) ? 'plan' : 'act';
         }
 
         // Go act mode if plan exists in previous messages

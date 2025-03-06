@@ -3,8 +3,8 @@ import styled from '@emotion/styled';
 import {css} from '@emotion/react';
 import Toggle from '@/components/Toggle';
 import Button from '@/components/Button';
+import LoadingIcon from '@/components/LoadingIcon';
 import TitledActBar from './Titled';
-import Loading from './Loading';
 
 interface ModeProps {
     mode?: 'default' | 'contrast';
@@ -54,6 +54,10 @@ const RichLayout = styled.div<ModeProps>`
 const Layout = styled.div<ModeProps>`
     ${barStyle};
     ${props => createWrppaerStyle(props)}
+`;
+
+const Loading = styled(LoadingIcon)`
+    font-size: .8em;
 `;
 
 interface Props extends ModeProps {

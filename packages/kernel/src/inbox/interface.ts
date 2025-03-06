@@ -22,6 +22,8 @@ import {
     TaggedMessageChunk,
     PlanMessageData,
     PlanMessageChunk,
+    PlanTask,
+    PlanCompletionProgress,
 } from '@oniichan/shared/inbox';
 import {ContentTagName} from '@oniichan/shared/tool';
 
@@ -87,12 +89,14 @@ export type PlanState = 'plan' | 'conclusion';
 
 export interface InboxPlanMessage extends OriginMessageBase<'plan'> {
     toMessageData(): PlanMessageData;
+    pickFirstPendingTask(): PlanTask | null;
+    completeExecutingTask(): void;
+    getProgress(): PlanCompletionProgress;
     getPlanState(): PlanState;
 }
 
 export interface InboxToolCallMessage extends OriginMessageBase<'toolCall'> {
     toMessageData(): ToolCallMessageData;
-    getTextContent(): string;
     findToolCallChunkStrict(): ParsedToolCallMessageChunk;
 }
 
@@ -112,6 +116,7 @@ export interface InboxWorkflow {
     markStatus(status: WorkflowStatus): void;
     startReaction(uuid: string): InboxAssistantTextMessage;
     exposeMessage(messageUuid: string): void;
+    addTextReaction(text: string, exposed: boolean): void;
     addReaction(message: InboxMessage, exposed: boolean): void;
     isOriginatedBy(uuid: string): boolean;
     hasMessage(messageUuid: string): boolean;

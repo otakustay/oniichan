@@ -27,7 +27,7 @@ function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] 
     const [reply, ...reactions] = roundtrip.responses;
     const response: MessageViewData = {
         type: 'assistantResponse',
-        chunks: [...reply.chunks],
+        chunks: reply.chunks.filter(isVisibleChunk),
         uuid: reply.uuid,
         createdAt: reply.createdAt,
         error: reply.error,
@@ -39,12 +39,10 @@ function buildMessageDataSource(roundtrip: RoundtripMessageData): MessageView[] 
         response.chunks.push(...reaction.chunks.filter(isVisibleChunk));
     }
 
-    const lastMessage = reactions.at(-1) ?? reply;
-    const lastReasoningChunkIndex = lastMessage.chunks.findIndex(v => v.type === 'reasoning');
     const view: MessageView = {
         message: response,
         isActive: true,
-        isReasoning: !!lastMessage && lastReasoningChunkIndex === lastMessage.chunks.length - 1,
+        isReasoning: response.chunks.at(-1)?.type === 'reasoning',
     };
     messages.push(view);
 

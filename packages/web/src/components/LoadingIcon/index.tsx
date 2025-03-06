@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
 import {AiOutlineLoading3Quarters} from 'react-icons/ai';
 
-const Loading = styled(AiOutlineLoading3Quarters)`
+const LoadingIcon = styled(AiOutlineLoading3Quarters)`
     animation: spin 1s linear infinite;
-    font-size: .8em;
 
     @keyframes spin {
         from {
@@ -15,4 +14,4 @@ const Loading = styled(AiOutlineLoading3Quarters)`
     }
 `;
 
-export default Loading;
+export default LoadingIcon;

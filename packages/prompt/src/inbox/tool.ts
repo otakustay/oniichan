@@ -85,7 +85,7 @@ export function renderToolSection(view: InboxPromptView) {
         excludsTools.push('attempt_completion');
     }
     else {
-        excludsTools.push('complete_plan');
+        excludsTools.push('complete_task');
     }
 
     if (!view.projectStructure) {

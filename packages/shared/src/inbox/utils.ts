@@ -19,6 +19,7 @@ export function chunkToString(chunk: MessageViewChunk) {
         case 'content':
             return `<${chunk.tagName}>${chunk.content}</${chunk.tagName}>`;
         case 'plan':
+            return `<plan>A plan with ${chunk.tasks.length} tasks was generated</plan>`;
         case 'toolCall':
         case 'parsedToolCall':
             return chunk.source;

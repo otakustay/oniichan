@@ -11,9 +11,12 @@ export interface TextMessageChunk {
     content: string;
 }
 
+export type PlanTaskStatus = 'generating' | 'pending' | 'executing' | 'completed';
+
 export interface PlanTask {
     taskType: PlanTaskType;
     text: string;
+    status: PlanTaskStatus;
 }
 
 export interface PlanMessageChunk {

@@ -45,7 +45,7 @@ export default function MessageContent({className, chunks, reasoning}: Props) {
             case 'reasoning':
                 return <Reasoning key={`reasoning-chunk-${index}`} content={chunk.content} running={reasoning} />;
             case 'text':
-                return chunk.content.trim() ? <Markdown key={`string-chunk-${index}`} content={chunk.content} /> : null;
+                return chunk.content.trim() ? <Markdown key={`text-chunk-${index}`} content={chunk.content} /> : null;
             case 'content':
                 return chunk.tagName === 'conclusion'
                     ? <Markdown key={`conclusion-chunk-${index}`} content={chunk.content} />
@@ -57,7 +57,7 @@ export default function MessageContent({className, chunks, reasoning}: Props) {
                         />
                     );
             case 'plan':
-                return <Plan tasks={chunk.tasks} closed={chunk.status === 'completed'} />;
+                return <Plan key={`plan-chunk-${index}`} tasks={chunk.tasks} closed={chunk.status === 'completed'} />;
             case 'toolCall':
             case 'parsedToolCall':
                 return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;

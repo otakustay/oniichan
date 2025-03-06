@@ -12,7 +12,7 @@ export function isAbortError(error: unknown): error is DOMException {
 }
 
 export function assertHasValue<T>(value: T | null | undefined, errorMessage: string): T {
-    if (value === null || value === undefined) {
+    if (!value) {
         throw new Error(errorMessage);
     }
 

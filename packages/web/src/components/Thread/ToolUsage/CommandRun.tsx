@@ -4,9 +4,9 @@ import {WorkflowSourceChunkStatus, WorkflowChunkStatus} from '@oniichan/shared/i
 import {useApproveTool} from '@oniichan/web-host/atoms/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import Button from '@/components/Button';
-import ActBar from '@/components/ActBar';
 import {showToast} from '@/components/Toast';
 import InteractiveLabel from '@/components/InteractiveLabel';
+import LoadingIcon from '@/components/LoadingIcon';
 import {useMessageIdentity} from '../MessageContext';
 
 const Header = styled.div`
@@ -63,7 +63,7 @@ function renderIcon(status: WorkflowSourceChunkStatus | WorkflowChunkStatus) {
         case 'waitingApprove':
         case 'userApproved':
         case 'executing':
-            return <ActBar.Loading />;
+            return <LoadingIcon />;
         case 'userRejected':
         case 'failed':
         case 'validateError':

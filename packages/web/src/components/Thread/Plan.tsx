@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import {IoEllipsisVerticalOutline} from 'react-icons/io5';
-import {PlanTask} from '@oniichan/shared/inbox';
-import ActBar from '../ActBar';
+import {IoCheckboxOutline, IoEllipsisVerticalOutline, IoSquareOutline} from 'react-icons/io5';
+import {PlanTask, PlanTaskStatus} from '@oniichan/shared/inbox';
+import ActBar from '@/components/ActBar';
+import LoadingIcon from '@/components/LoadingIcon';
 
 const NameLabel = styled.span`
     color: var(--color-secondary-foreground);
@@ -14,12 +15,49 @@ const DescriptionLabel = styled.span`
     border-radius: .25em;
 `;
 
+const Icon = styled.i`
+    position: relative;
+    top: .12em;
+    margin-right: .5em;
+    color: var(--color-secondary-foreground);
+`;
+
+interface TaskIconProps {
+    status: PlanTaskStatus;
+}
+
+function TaskIcon({status}: TaskIconProps) {
+    const icon = status === 'executing'
+        ? <LoadingIcon />
+        : (status === 'completed' ? <IoCheckboxOutline /> : <IoSquareOutline />);
+
+    return (
+        <Icon>
+            {icon}
+        </Icon>
+    );
+}
+
 const TaskList = styled.ol`
-    padding-inline-start: 2em;
+    padding: 0;
     line-height: 1.5;
     margin: 1em 0 0;
     font-size: .8em;
+    list-style: none;
 `;
+
+interface TaskProps {
+    task: PlanTask;
+}
+
+function Task({task}: TaskProps) {
+    return (
+        <li>
+            <TaskIcon status={task.status} />
+            {task.text}
+        </li>
+    );
+}
 
 interface Props {
     tasks: PlanTask[];
@@ -34,7 +72,7 @@ export function Plan({tasks, closed}: Props) {
 
         return (
             <TaskList>
-                {tasks.map((v, i) => <li key={`task-${v.taskType}-${i}`}>{v.text}</li>)}
+                {tasks.map((v, i) => <Task key={`task-${v.taskType}-${i}`} task={v} />)}
             </TaskList>
         );
     };

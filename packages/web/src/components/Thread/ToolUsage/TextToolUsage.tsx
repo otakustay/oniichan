@@ -41,7 +41,7 @@ interface Props {
 }
 
 export default function TextToolUsage({input}: Props) {
-    if (input.toolName === 'complete_plan') {
+    if (input.toolName === 'complete_task') {
         return null;
     }
 

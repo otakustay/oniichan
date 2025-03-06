@@ -1,6 +1,7 @@
 export {
     ReasoningMessageChunk,
     TextMessageChunk,
+    PlanTaskStatus,
     PlanTask,
     PlanMessageChunk,
     TaggedMessageChunk,
@@ -48,6 +49,8 @@ export {
     BrowserPreviewToolCallMessageChunk,
     AttemptCompletionToolCallMessageChunk,
     AskFollowupQuestionToolCallMessageChunk,
+    PlanCompletionProgress,
+    CompleteTaskToolCallMessageChunk,
     isFileEditToolCallChunk,
 } from './tool';
 export {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';

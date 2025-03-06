@@ -27,6 +27,8 @@ import {
     AssistantMessageType,
     PlanMessageChunk,
     assertPlanChunk,
+    PlanTask,
+    PlanCompletionProgress,
 } from '@oniichan/shared/inbox';
 import {
     InboxAssistantTextMessage,
@@ -173,6 +175,27 @@ export class PlanMessage extends AssistantMessage<'plan'> implements InboxPlanMe
         };
     }
 
+    pickFirstPendingTask(): PlanTask | null {
+        const chunk = this.chunks.find(v => v.type === 'plan');
+        return chunk?.tasks.find(v => v.status === 'pending') ?? null;
+    }
+
+    completeExecutingTask(): void {
+        const chunk = this.chunks.find(v => v.type === 'plan');
+        const task = chunk?.tasks.find(v => v.status === 'executing');
+        if (task) {
+            task.status = 'completed';
+        }
+    }
+
+    getProgress(): PlanCompletionProgress {
+        const chunk = this.chunks.find(v => v.type === 'plan');
+        return {
+            totalTasks: chunk?.tasks.length ?? 0,
+            completedTasks: chunk?.tasks.filter(v => v.status === 'completed').length ?? 0,
+        };
+    }
+
     getPlanState(): PlanState {
         if (this.chunks.some(v => v.type === 'plan')) {
             return 'plan';
@@ -315,7 +338,7 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
         else if (chunk.type === 'planTaskStart') {
             assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
             lastChunk.source += chunk.source;
-            lastChunk.tasks.push({taskType: chunk.taskType, text: ''});
+            lastChunk.tasks.push({taskType: chunk.taskType, text: '', status: 'generating'});
         }
         else if (chunk.type === 'planTaskDelta') {
             assertPlanChunk(lastChunk, 'Unexpected plan task start chunk coming without a plan start chunk');
@@ -342,6 +365,8 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
             if (task.taskType !== chunk.taskType) {
                 throw new Error('Unexpected plan task end chunk coming without corresponding task');
             }
+
+            task.status = 'pending';
         }
         else if (chunk.type === 'planEnd') {
             assertPlanChunk(lastChunk, 'Unexpected plan end chunk coming without a plan start chunk');

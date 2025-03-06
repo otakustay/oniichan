@@ -1,5 +1,6 @@
 import {commands, InputBoxOptions, window, workspace} from 'vscode';
 import {ModelConfiguration} from '@oniichan/shared/model';
+import {assertHasValue} from '@oniichan/shared/error';
 import {getModelConfig} from '../../utils/config';
 import {RequestHandler} from './handler';
 
@@ -87,6 +88,7 @@ export interface InboxRingRingModeConfig {
     enabled: boolean;
     plannerModel: string;
     actorModel: string;
+    coderModel: string | null;
 }
 
 export interface InboxConfig {
@@ -110,7 +112,8 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const ringRingModeEnabled = config.get<boolean>('ringRingMode.enabled') ?? false;
         const ringRingModePlannerModel = config.get<string>('ringRingMode.plannerModel');
         const ringRingModeActorModel = config.get<string>('ringRingMode.actorModel');
-        yield {
+        const ringRingModeCoderModel = config.get<string>('ringRingMode.coderModel');
+        const result: InboxConfig = {
             enableDeepThink: enableDeepThink ?? false,
             automaticRunCommand: automaticRunCommand ?? false,
             exceptionCommandList: exceptionCommandList?.length
@@ -120,10 +123,20 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
                 enabled: ringRingModeEnabled,
                 plannerModel: ringRingModePlannerModel ?? '',
                 actorModel: ringRingModeActorModel ?? '',
+                coderModel: ringRingModeCoderModel ?? null,
             },
         };
+        this.validate(result);
+        yield result;
 
         logger.info('Finish');
+    }
+
+    private validate(config: InboxConfig) {
+        if (config.ringRingMode.enabled) {
+            assertHasValue(config.ringRingMode.plannerModel, 'Planner model is not configured');
+            assertHasValue(config.ringRingMode.actorModel, 'Actor model is not configured');
+        }
     }
 }
 
