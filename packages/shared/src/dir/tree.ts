@@ -126,6 +126,14 @@ function treeToLines(root: TreeifyNode, strip: boolean) {
 }
 
 function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
+    if (!nodes.length) {
+        return {
+            tree: '',
+            totalCount: 0,
+            truncatedCount: 0,
+        };
+    }
+
     const counter = {
         totalCount: 1,
         strippableCount: 0,
@@ -170,8 +178,6 @@ function treeify(nodes: Node[], options: TreeifyOptions): TreeifyResult {
             truncatedCount: counter.strippableCount,
         };
     }
-
-    // TODO: Return empty string if no entries
 
     // One line for tailing indication
     const sliceEnd = options.maxLines - 1;

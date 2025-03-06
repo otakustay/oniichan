@@ -116,3 +116,11 @@ test('overview structure mixed trim', () => {
     expect(tree.split('\n').length).toBe(200);
     expect(tree.split('\n').filter(v => v.includes('not shown')).length).toBe(29);
 });
+
+test('empty structure', () => {
+    const structure = new WorkspaceFileStructure();
+    const {tree, totalCount, truncatedCount} = structure.toOverviewStructure();
+    expect(tree).toBe('');
+    expect(totalCount).toBe(0);
+    expect(truncatedCount).toBe(0);
+});
