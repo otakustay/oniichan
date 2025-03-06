@@ -121,8 +121,13 @@ export class StreamXmlParser {
             return;
         }
 
-        if (/^<[^>]+>$/.test(this.buffer)) {
-            const tagName = this.buffer.slice(1, -1);
+        // DeepSeek R1 has a change to emit double `<` like `<<read_file>`
+        if (this.buffer === '<<') {
+            return;
+        }
+
+        if (/^<{1,2}[^>]+>$/.test(this.buffer)) {
+            const tagName = this.buffer.replace(/(^<{1,2})|(>$)/g, '');
             yield {type: 'tagStart', tagName, source: this.buffer};
             this.buffer = '';
             this.tagStack.push(tagName);

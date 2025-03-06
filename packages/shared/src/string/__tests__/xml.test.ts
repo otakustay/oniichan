@@ -154,4 +154,21 @@ describe('StreamXmlParser', () => {
         const tags = chunks.filter(v => v.type !== 'text');
         expect(tags.length).toBe(0);
     });
+
+    test('deepseek r1 double <', async () => {
+        const message = dedent`
+            <<read_file>
+                <<path>
+                src/helper/index.ts
+            </path>
+            </read_file>
+        `;
+        const chunks = await parse(message);
+        const tags = chunks.filter(v => v.type !== 'text');
+        expect(tags.at(0)).toEqual({type: 'tagStart', tagName: 'read_file', source: '<<read_file>'});
+        expect(tags.at(1)).toEqual({type: 'tagStart', tagName: 'path', source: '<<path>'});
+        expect(tags.at(2)).toEqual({type: 'tagEnd', tagName: 'path', source: '</path>'});
+        expect(tags.at(3)).toEqual({type: 'tagEnd', tagName: 'read_file', source: '</read_file>'});
+        expect(readContent(chunks)).toBe(message);
+    });
 });
