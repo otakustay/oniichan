@@ -32,7 +32,7 @@ import {
 } from '@oniichan/shared/inbox';
 import {
     InboxAssistantTextMessage,
-    InboxMessage,
+    InboxMessageBase,
     InboxPlanMessage,
     InboxRoundtrip,
     InboxToolCallMessage,
@@ -42,7 +42,7 @@ import {
 } from './interface';
 import {ContentTagName} from '@oniichan/shared/tool';
 
-abstract class MessageBase<T extends MessageType> implements InboxMessage<T> {
+abstract class MessageBase<T extends MessageType> implements InboxMessageBase<T> {
     readonly uuid: string;
 
     readonly type: T;
@@ -180,9 +180,13 @@ export class PlanMessage extends AssistantMessage<'plan'> implements InboxPlanMe
         return chunk?.tasks.find(v => v.status === 'pending') ?? null;
     }
 
-    completeExecutingTask(): void {
+    getExecutingTask(): PlanTask | null {
         const chunk = this.chunks.find(v => v.type === 'plan');
-        const task = chunk?.tasks.find(v => v.status === 'executing');
+        return chunk?.tasks.find(v => v.status === 'executing') ?? null;
+    }
+
+    completeExecutingTask(): void {
+        const task = this.getExecutingTask();
         if (task) {
             task.status = 'completed';
         }
@@ -410,7 +414,8 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
 
     findPlanChunkStrict(): PlanMessageChunk {
         const chunk = this.findPlanChunk();
-        return assertHasValue(chunk, 'Message does not contain plan chunk');
+        assertHasValue(chunk, 'Message does not contain plan chunk');
+        return chunk;
     }
 
     findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null {
@@ -422,7 +427,8 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
 
     findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk {
         const chunk = this.findTaggedChunk(tagName);
-        return assertHasValue(chunk, `Message does not contain content chunk tagged as ${tagName}`);
+        assertHasValue(chunk, `Message does not contain content chunk tagged as ${tagName}`);
+        return chunk;
     }
 
     findToolCallChunk() {
@@ -431,7 +437,8 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
 
     findToolCallChunkStrict() {
         const chunk = this.findToolCallChunk();
-        return assertHasValue(chunk, 'Message does not contain tool call chunk');
+        assertHasValue(chunk, 'Message does not contain tool call chunk');
+        return chunk;
     }
 
     replaceToolCallChunk(newChunk: ToolCallMessageChunk) {

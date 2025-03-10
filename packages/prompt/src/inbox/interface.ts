@@ -7,7 +7,7 @@ export interface InboxPromptReference {
     content: string;
 }
 
-export type InboxPromptMode = 'standalone' | 'plan' | 'act';
+export type InboxPromptMode = 'standalone' | 'plan' | 'act' | 'code';
 
 export interface InboxPromptView {
     mode: InboxPromptMode;

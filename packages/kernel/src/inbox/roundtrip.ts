@@ -137,7 +137,8 @@ export class Roundtrip implements InboxRoundtrip {
 
     getLatestTextMessageStrict(): InboxAssistantTextMessage {
         const message = this.getLatestTextMessage();
-        return assertHasValue(message, 'Roundtrip does not have a latest response of type text');
+        assertHasValue(message, 'Roundtrip does not have a latest response of type text');
+        return message;
     }
 
     getLatestWorkflow(): InboxWorkflow | null {
@@ -147,7 +148,8 @@ export class Roundtrip implements InboxRoundtrip {
 
     getLatestWorkflowStrict(): InboxWorkflow {
         const workflow = this.getLatestWorkflow();
-        return assertHasValue(workflow, 'Roundtrip does not have a latest response of type workflow');
+        assertHasValue(workflow, 'Roundtrip does not have a latest response of type workflow');
+        return workflow;
     }
 
     addWarning(message: string) {

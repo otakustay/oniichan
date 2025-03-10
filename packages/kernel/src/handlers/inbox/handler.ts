@@ -5,7 +5,7 @@ import {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
-import {stringifyError} from '@oniichan/shared/error';
+import {assertHasValue, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost, ModelChatOptions} from '../../core/model';
 import {createEmptyMessageThread, createEmptyRoundtrip, InboxRoundtrip, isToolCallMessageOf} from '../../inbox';
@@ -15,7 +15,7 @@ import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
-    // For every type that "can stream very freauently", we don't flush them immediately
+    // For every type that "will stream very freauently", we don't flush them immediately
     return chunk.type !== 'text'
         && chunk.type !== 'contentDelta'
         && chunk.type !== 'planTaskDelta'
@@ -214,11 +214,15 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             systemPrompt: this.systemPrompt,
         };
 
+        if (this.workingMode === 'act') {
+            options.messages[0].content = '(User request is hidden currently)';
+        }
+
         if (this.workingMode !== 'standalone') {
-            // TODO: Use coder model
+            const {plannerModel, actorModel, coderModel} = this.inboxConfig.ringRingMode;
             options.overrideModelName = this.workingMode === 'plan'
-                ? this.inboxConfig.ringRingMode.plannerModel
-                : this.inboxConfig.ringRingMode.actorModel;
+                ? plannerModel
+                : (this.workingMode === 'code' ? coderModel || actorModel : actorModel);
         }
 
         return options;
@@ -228,7 +232,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         return this.roundtrip.getLatestTextMessage() ?? this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
     }
 
-    // TODO: Move ring ring mode logic to `send` handler
+    // TODO: Split ring ring mode and standalone mode into different implement
     private prepareWorkingMode() {
         const {logger} = this.context;
 
@@ -254,11 +258,28 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         }
 
         const reply = this.getReplyMessage();
+
+        // The plan tool executor moves the first task into `executing` state
+        if (reply.type === 'plan') {
+            const task = reply.getExecutingTask();
+            return task ? (task.taskType === 'coding' ? 'code' : 'act') : 'plan';
+        }
+
+        // The `complete_task` tool forwards the next pending task to `executing` state, or completes the entire plan
         if (isToolCallMessageOf(reply, 'complete_task')) {
             const chunk = reply.findToolCallChunkStrict();
             const progress = chunk.toolName === 'complete_task' ? chunk.executionData : null;
-            // Is a `complete_task` indicates all tasks are finished, back to plan mode
-            return (progress && progress.completedTasks === progress.totalTasks) ? 'plan' : 'act';
+
+            // If a `complete_task` indicates all tasks are finished, back to plan mode
+            if (progress && progress.completedTasks === progress.totalTasks) {
+                return 'plan';
+            }
+
+            const lastPlan = messages.findLast(v => v.type === 'plan');
+            assertHasValue(lastPlan, 'A complete task message must be preceded by a plan message');
+            const task = lastPlan.getExecutingTask();
+
+            return task ? (task.taskType === 'coding' ? 'code' : 'act') : 'plan';
         }
 
         // Go act mode if plan exists in previous messages

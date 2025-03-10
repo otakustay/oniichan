@@ -56,6 +56,7 @@ export function mergeFileEdits(edits: FileEditData[]): FileEditData {
             return y;
         }
 
+        // TODO: This can cause infinite error loop
         if (x.type === 'error') {
             return {
                 type: 'error',

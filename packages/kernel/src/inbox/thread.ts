@@ -44,7 +44,8 @@ export class MessageThread implements InboxMessageThread {
 
     findRoundtripByMessageUuidStrict(messageUuid: string) {
         const roundtrip = this.roundtrips.find(v => v.hasMessage(messageUuid));
-        return assertHasValue(roundtrip, `No roundtrip found for message ${messageUuid}`);
+        assertHasValue(roundtrip, `No roundtrip found for message ${messageUuid}`);
+        return roundtrip;
     }
 
     sliceRoundtripAfter(messageUuid: string) {

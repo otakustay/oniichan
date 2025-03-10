@@ -33,7 +33,7 @@ export interface InboxRoundtrip {
     getStatus(): RoundtripStatus;
     markStatus(status: RoundtripStatus): void;
     startTextResponse(messageUuid: string): InboxAssistantTextMessage;
-    startWorkflowResponse(origin: OriginMessageBase): InboxWorkflow;
+    startWorkflowResponse(origin: InboxOriginMessageBase): InboxWorkflow;
     hasMessage(messageUuid: string): boolean;
     findMessageByUuid(messageUuid: string): InboxMessage | null;
     getLatestTextMessage(): InboxAssistantTextMessage | null;
@@ -46,7 +46,7 @@ export interface InboxRoundtrip {
     toRoundtripMessageData(): RoundtripMessageData;
 }
 
-export interface InboxMessage<T extends MessageType = MessageType> {
+export interface InboxMessageBase<T extends MessageType = MessageType> {
     readonly uuid: string;
     readonly type: T;
     getRoundtrip(): InboxRoundtrip;
@@ -55,16 +55,16 @@ export interface InboxMessage<T extends MessageType = MessageType> {
     toChatInputPayload(): ChatInputPayload;
 }
 
-export interface InboxUserRequestMessage extends InboxMessage<'userRequest'> {
+export interface InboxUserRequestMessage extends InboxMessageBase<'userRequest'> {
     toMessageData(): UserRequestMessageData;
 }
 
-export interface InboxWorkflowSourceMessage extends InboxMessage<'assistantText'> {
+interface InboxWorkflowSourceMessageBase extends InboxMessageBase<'assistantText'> {
     getWorkflowSourceStatus(): WorkflowSourceChunkStatus;
     markWorkflowSourceStatus(status: WorkflowSourceChunkStatus): void;
 }
 
-export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessage {
+export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessageBase {
     toMessageData(): AssistantTextMessageData;
     getTextContent(): string;
     addChunk(chunk: MessageInputChunk): void;
@@ -79,7 +79,7 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessage {
 
 type OriginType = 'toolCall' | 'plan';
 
-export interface OriginMessageBase<T extends OriginType = OriginType> extends InboxMessage<T> {
+interface InboxOriginMessageBase<T extends OriginType = OriginType> extends InboxMessageBase<T> {
     getWorkflowOriginStatus(): WorkflowChunkStatus;
     markWorkflowOriginStatus(status: WorkflowChunkStatus): void;
     toMessageData(): WorkflowOriginMessageData;
@@ -87,26 +87,36 @@ export interface OriginMessageBase<T extends OriginType = OriginType> extends In
 
 export type PlanState = 'plan' | 'conclusion';
 
-export interface InboxPlanMessage extends OriginMessageBase<'plan'> {
+export interface InboxPlanMessage extends InboxOriginMessageBase<'plan'> {
     toMessageData(): PlanMessageData;
     pickFirstPendingTask(): PlanTask | null;
+    getExecutingTask(): PlanTask | null;
     completeExecutingTask(): void;
     getProgress(): PlanCompletionProgress;
     getPlanState(): PlanState;
 }
 
-export interface InboxToolCallMessage extends OriginMessageBase<'toolCall'> {
+export interface InboxToolCallMessage extends InboxOriginMessageBase<'toolCall'> {
     toMessageData(): ToolCallMessageData;
     findToolCallChunkStrict(): ParsedToolCallMessageChunk;
 }
 
-export type InboxWorkflowOriginMessage = InboxPlanMessage | InboxToolCallMessage;
-
-export interface InboxToolUseMessage extends InboxMessage<'toolUse'> {
+export interface InboxToolUseMessage extends InboxMessageBase<'toolUse'> {
     toMessageData(): ToolUseMessageData;
 }
 
 export type InboxAssistantMessage = InboxAssistantTextMessage | InboxToolCallMessage | InboxPlanMessage;
+
+export type InboxWorkflowSourceMessage = InboxAssistantTextMessage;
+
+export type InboxWorkflowOriginMessage = InboxPlanMessage | InboxToolCallMessage;
+
+export type InboxMessage =
+    | InboxUserRequestMessage
+    | InboxAssistantTextMessage
+    | InboxToolCallMessage
+    | InboxPlanMessage
+    | InboxToolUseMessage;
 
 export interface InboxWorkflow {
     getStatus(): WorkflowStatus;

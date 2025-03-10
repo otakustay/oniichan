@@ -127,6 +127,7 @@ export class Workflow implements InboxWorkflow {
 
     private findMessageStrict(messageUuid: string) {
         const message = this.findMessage(messageUuid);
-        return assertHasValue(message, `Message ${messageUuid} not found in workflow`);
+        assertHasValue(message, `Message ${messageUuid} not found in workflow`);
+        return message;
     }
 }

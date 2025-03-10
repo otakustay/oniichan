@@ -125,7 +125,7 @@ function renderPlanObject() {
         2. To modify an existing file, it also required the accurate filename based on project root and detailed purpose of a modification. Do not include this task in plan if you don't know the exact filename and its content.
         2. To delete an existing file, keep the accurate filename based on project root in this task, a description of the task is also welcome. Do not include this task in plan if you don't know the exact filename and its content.
 
-        A typical plan may looks like this:
+        All <plan>, <read> and <coding> start tag must be placed at the start of a line, no preceding characters are allowed. A typical plan may looks like this, be sure you understand the XML structure, there is no extra text out of <read> or <coding> tag inside a <plan> tag:
 
         \`\`\`
         <plan>
@@ -151,7 +151,14 @@ function renderPlanObject() {
 
         Be aware that your plan is going to be executed, but not already completed, the <conclusion> tag is never allowed if a plan is exists in your response.
 
-        Also, you should be very serious about the plan, only use <conclusion> if all user's original request is completely fulfilled, if not, use a <plan> tag to iterate a new plan.
+        Also, you should be very serious about the plan, if you use a <conclusion> tag before all user's original request is completely fulfilled, user will have no chance to enjoy the result, they are not happy if they need to handle some steps by themselves, please carefully consider these aspects:
+
+        1. Is the question from user clearly understood?
+        2. Is all neccessary files are created, modified or deleted?
+        3. Is the result of code edits validated via command lines or other means?
+        4. Are all aspects of the original request solved?
+
+        If one of these answer is NO, use a <plan> tag to iterate a new plan.
     `;
 
     // Before you create the plan, you must first do some analysis within <thinking></thinking> tags, inside the <thinking> tag you can review the previous gathered information, the uncompleted tasks or further required steps, once you find yourself in a state to generate a detailed and meaningful plan, close the <thinking> tag and then write the entire plan in markdown format.

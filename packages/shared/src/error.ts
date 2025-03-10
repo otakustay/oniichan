@@ -11,10 +11,8 @@ export function isAbortError(error: unknown): error is DOMException {
     return error instanceof DOMException && error.name === 'AbortError';
 }
 
-export function assertHasValue<T>(value: T | null | undefined, errorMessage: string): T {
+export function assertHasValue<T>(value: T | null | undefined, errorMessage: string): asserts value is T {
     if (!value) {
         throw new Error(errorMessage);
     }
-
-    return value;
 }

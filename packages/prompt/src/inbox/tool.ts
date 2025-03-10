@@ -80,12 +80,26 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const excludsTools: ToolName[] = [];
-    if (view.mode === 'act') {
-        excludsTools.push('ask_followup_question');
-        excludsTools.push('attempt_completion');
-    }
-    else {
-        excludsTools.push('complete_task');
+    switch (view.mode) {
+        case 'act':
+            excludsTools.push(
+                'ask_followup_question',
+                'attempt_completion',
+                'delete_file',
+                'patch_file',
+                'write_file',
+                'browser_preview'
+            );
+            break;
+        case 'code':
+            excludsTools.push(
+                'ask_followup_question',
+                'attempt_completion'
+            );
+            break;
+        case 'standalone':
+            excludsTools.push('complete_task');
+            break;
     }
 
     if (!view.projectStructure) {

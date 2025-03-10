@@ -68,7 +68,7 @@ export class OpenRouterModelClient implements ModelClient {
         const usage = await result.usage;
         yield {
             type: 'meta',
-            model: this.defaultModel.modelId,
+            model: request.model.modelId,
             usage: {
                 inputTokens: usage.promptTokens,
                 outputTokens: usage.completionTokens,
