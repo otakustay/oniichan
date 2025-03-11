@@ -8,23 +8,15 @@ import {
 } from '@oniichan/shared/model';
 import {ModelAccess, ModelChatOptions} from './interface';
 import {EditorHost} from '../editor';
-import {MixtureModelAccess} from './mixture';
 import {NamedModelAccess} from './named';
 
 export {ModelChatOptions};
 
-export interface ModelAccessHostInit {
-    enableDeepThink: boolean;
-}
-
 export class ModelAccessHost implements ModelAccess {
     private readonly editorHost: EditorHost;
 
-    private readonly enableDeepThink: boolean;
-
-    constructor(editorHost: EditorHost, init: ModelAccessHostInit) {
+    constructor(editorHost: EditorHost) {
         this.editorHost = editorHost;
-        this.enableDeepThink = init.enableDeepThink;
     }
 
     async getModelFeature(): Promise<ModelFeature> {
@@ -43,12 +35,7 @@ export class ModelAccessHost implements ModelAccess {
     }
 
     private createImplementFromConfig(config: ModelConfiguration): ModelAccess {
-        return this.enableDeepThink && config.modelName !== 'deepseek/deepseek-r1'
-            ? new MixtureModelAccess(
-                createModelClient({...config, modelName: 'deepseek/deepseek-r1'}),
-                createModelClient(config)
-            )
-            : new NamedModelAccess(createModelClient(config));
+        return new NamedModelAccess(createModelClient(config));
     }
 
     private async createImplement(triggerUserConfigure = true): Promise<ModelAccess> {

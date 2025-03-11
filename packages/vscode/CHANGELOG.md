@@ -1,5 +1,11 @@
 # Change Log
 
+[UNRELEASED]
+
+### Removed
+
+- 移除实验中的“Deep Think”功能，无论在体验上还是生产质量上都非常糟糕。
+
 [3.3.0] - 2025-02-27
 
 ### Added

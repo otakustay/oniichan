@@ -167,15 +167,6 @@
             "type": "string",
             "description": "The model used as coder in ring-ring mode, default to the same as actor model",
             "tags": ["experimental"]
-          },
-          "oniichan.inbox.enableDeepThink": {
-            "order": 7,
-            "type": "boolean",
-            "default": false,
-            "description": "Involve a reasoning model (currently DeepSeek R1) to prepend a CoT before each message",
-            "tags": [
-              "experimental"
-            ]
           }
         }
       },

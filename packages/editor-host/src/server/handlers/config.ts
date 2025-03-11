@@ -92,7 +92,6 @@ export interface InboxRingRingModeConfig {
 }
 
 export interface InboxConfig {
-    enableDeepThink: boolean;
     automaticRunCommand: boolean;
     exceptionCommandList: string[];
     ringRingMode: InboxRingRingModeConfig;
@@ -106,7 +105,6 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         logger.info('Start');
 
         const config = workspace.getConfiguration('oniichan.inbox');
-        const enableDeepThink = config.get<boolean>('enableDeepThink');
         const automaticRunCommand = config.get<boolean>('automaticRunCommand');
         const exceptionCommandList = config.get<string[]>('exceptionCommandList');
         const ringRingModeEnabled = config.get<boolean>('ringRingMode.enabled') ?? false;
@@ -114,7 +112,6 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const ringRingModeActorModel = config.get<string>('ringRingMode.actorModel');
         const ringRingModeCoderModel = config.get<string>('ringRingMode.coderModel');
         const result: InboxConfig = {
-            enableDeepThink: enableDeepThink ?? false,
             automaticRunCommand: automaticRunCommand ?? false,
             exceptionCommandList: exceptionCommandList?.length
                 ? exceptionCommandList

@@ -50,7 +50,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private readonly references: InboxPromptReference[] = [];
 
     private inboxConfig: InboxConfig = {
-        enableDeepThink: false,
         automaticRunCommand: false,
         exceptionCommandList: [],
         ringRingMode: {
@@ -61,7 +60,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         },
     };
 
-    private modelAccess = new ModelAccessHost(this.context.editorHost, {enableDeepThink: false});
+    private modelAccess = new ModelAccessHost(this.context.editorHost);
 
     private systemPrompt = '';
 
@@ -78,7 +77,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         this.inboxConfig = await editorHost.call('getInboxConfig');
 
         logger.trace('PrepareModelAccess');
-        this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: this.inboxConfig.enableDeepThink});
+        this.modelAccess = new ModelAccessHost(editorHost);
     }
 
     protected async *requestModelChat(): AsyncIterable<InboxMessageResponse> {

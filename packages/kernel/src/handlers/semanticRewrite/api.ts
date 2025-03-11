@@ -22,7 +22,7 @@ export class SemanticRewriteApi {
     private readonly modelAccess: ModelAccessHost;
 
     constructor(editorHost: EditorHost) {
-        this.modelAccess = new ModelAccessHost(editorHost, {enableDeepThink: false});
+        this.modelAccess = new ModelAccessHost(editorHost);
     }
 
     async rewrite(payload: SemanticRewritePayload, telemetry: FunctionUsageTelemetry): Promise<string> {
