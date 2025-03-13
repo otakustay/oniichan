@@ -44,6 +44,11 @@ const ActionButton = styled(Button)`
     min-width: fit-content;
 `;
 
+const Icon = styled.i`
+    display: inline-flex;
+    width: 1em;
+`;
+
 const Bar = styled.div`
     ${barStyle};
 `;
@@ -75,7 +80,7 @@ function ActBar({icon, content, actions, richContent, mode}: Props) {
         return (
             <RichLayout mode={mode}>
                 <Bar>
-                    {icon}
+                    <Icon>{icon}</Icon>
                     {content}
                     <ActionSection>
                         {actions}
@@ -89,7 +94,7 @@ function ActBar({icon, content, actions, richContent, mode}: Props) {
 
     return (
         <Layout mode={mode}>
-            {icon}
+            <Icon>{icon}</Icon>
             {content}
             {actions && <ActionSection>{actions}</ActionSection>}
         </Layout>

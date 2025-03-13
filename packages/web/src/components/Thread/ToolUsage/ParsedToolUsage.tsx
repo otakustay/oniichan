@@ -15,22 +15,36 @@ const ParameterLabel = styled.span`
     font-size: .8em;
     padding: .25em .5em;
     border-radius: .25em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 `;
 
 const ActionLabel = styled.span`
     color: var(--color-secondary-foreground);
+    white-space: nowrap;
 `;
 
-function renderLabelContent(input: ParsedToolCallMessageChunk): [ComponentType, string, string] {
+function renderLabelContent(input: ParsedToolCallMessageChunk): [ComponentType, string, string, string] {
     switch (input.toolName) {
         case 'read_file':
-            return [IoDocumentTextOutline, 'Read file', trimPathString(input.arguments.path ?? '')];
+            return [
+                IoDocumentTextOutline,
+                'Read file',
+                trimPathString(input.arguments.path ?? ''),
+                input.arguments.path,
+            ];
         case 'read_directory':
-            return [IoFolderOpenOutline, 'Read directory', trimPathString(input.arguments.path ?? '')];
+            return [
+                IoFolderOpenOutline,
+                'Read directory',
+                trimPathString(input.arguments.path ?? ''),
+                input.arguments.path,
+            ];
         case 'find_files_by_glob':
-            return [IoSearchOutline, 'Find files', input.arguments.glob ?? ''];
+            return [IoSearchOutline, 'Find files', input.arguments.glob ?? '', ''];
         case 'find_files_by_regex':
-            return [IoSearchOutline, 'Grep', input.arguments.regex ?? ''];
+            return [IoSearchOutline, 'Grep', input.arguments.regex ?? '', ''];
         default:
             throw new Error(`Unknown reference type`);
     }
@@ -86,7 +100,7 @@ export default function ParsedToolUsage({input}: Props) {
         return <PreviewUrl closed url={input.arguments.url} />;
     }
 
-    const [Icon, action, parameter] = renderLabelContent(input);
+    const [Icon, action, parameter, title] = renderLabelContent(input);
 
     return (
         <ActBar
@@ -94,7 +108,7 @@ export default function ParsedToolUsage({input}: Props) {
             content={
                 <>
                     <ActionLabel>{action}</ActionLabel>
-                    {parameter && <ParameterLabel>{parameter}</ParameterLabel>}
+                    {parameter && <ParameterLabel title={title}>{parameter}</ParameterLabel>}
                 </>
             }
         />
