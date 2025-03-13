@@ -1,12 +1,13 @@
 import {MessagePort, parentPort, workerData} from 'node:worker_threads';
-import {ExecutionMessage, isExecutionMessage, Port} from '@otakustay/ipc';
+import {isExecutionMessage} from '@otakustay/ipc';
+import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {ThreadStore, CommandExecutor} from '@oniichan/kernel';
 import {stringifyError} from '@oniichan/shared/error';
 import {Logger, ConsoleLogger} from '@oniichan/shared/logger';
 import {DependencyContainer} from '@oniichan/shared/container';
-import {MessageThreadPersistData} from '@oniichan/shared/inbox';
+import type {MessageThreadPersistData} from '@oniichan/shared/inbox';
 
 const initialMessageThreads: MessageThreadPersistData[] = [];
 

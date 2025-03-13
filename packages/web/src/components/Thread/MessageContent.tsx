@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import {MessageViewChunk} from '@oniichan/shared/inbox';
+import type {MessageViewChunk} from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';

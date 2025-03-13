@@ -1,11 +1,12 @@
-import {streamText, generateText, CoreMessage} from 'ai';
-import {
-    createOpenRouter,
+import {streamText, generateText} from 'ai';
+import type {CoreMessage} from 'ai';
+import {createOpenRouter} from '@openrouter/ai-sdk-provider';
+import type {
     OpenRouterLanguageModel,
     OpenRouterProvider,
     OpenRouterProviderSettings,
 } from '@openrouter/ai-sdk-provider';
-import {
+import type {
     ModelChatOptions,
     ModelClient,
     ModelConfiguration,
@@ -13,7 +14,8 @@ import {
     ModelStreamingResponse,
     ModelTextResponse,
 } from './interface';
-import {getModelFeature, ModelFeature} from './feature';
+import {getModelFeature} from './feature';
+import type {ModelFeature} from './feature';
 
 type AiChatRequest = Parameters<typeof streamText>[0];
 

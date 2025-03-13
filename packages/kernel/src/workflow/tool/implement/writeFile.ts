@@ -1,6 +1,7 @@
-import {WriteFileParameter} from '@oniichan/shared/tool';
-import {ParsedToolCallMessageChunk, WriteFileToolCallMessageChunk} from '@oniichan/shared/inbox';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import type {WriteFileParameter} from '@oniichan/shared/tool';
+import type {ParsedToolCallMessageChunk, WriteFileToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 
 function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is WriteFileToolCallMessageChunk {
     if (chunk.toolName !== 'write_file') {

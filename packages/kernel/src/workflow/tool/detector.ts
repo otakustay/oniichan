@@ -1,4 +1,5 @@
-import {assertAssistantTextMessage, InboxWorkflowOriginMessage, InboxWorkflowSourceMessage} from '../../inbox';
+import {assertAssistantTextMessage} from '../../inbox';
+import type {InboxWorkflowOriginMessage, InboxWorkflowSourceMessage} from '../../inbox';
 import {WorkflowDetector} from '../base';
 
 export class ToolWorkflowDetector extends WorkflowDetector {

@@ -1,6 +1,7 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
-import {InboxRequestHandler, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
+import {InboxRequestHandler} from './handler';
+import type {InboxMessageResponse, InboxRoundtripIdentity} from './handler';
 
 export interface InboxApproveToolRequest extends InboxRoundtripIdentity {
     approved: boolean;

@@ -1,6 +1,7 @@
 import {test, expect} from 'vitest';
 import dedent from 'dedent';
-import {PlanTaskType, StreamingToolParser} from '../parse';
+import {StreamingToolParser} from '../parse';
+import type {PlanTaskType} from '../parse';
 
 async function* tokenize(content: string): AsyncIterable<string> {
     const tokens = content.split(/([^a-zA-Z0-9]+)/);

@@ -1,11 +1,12 @@
 import {builtinTools} from '@oniichan/shared/tool';
-import {InboxPromptReference, InboxPromptView, InboxPromptMode, renderInboxSystemPrompt} from '@oniichan/prompt';
+import {renderInboxSystemPrompt} from '@oniichan/prompt';
+import type {InboxPromptReference, InboxPromptView, InboxPromptMode} from '@oniichan/prompt';
 import {stringifyError} from '@oniichan/shared/error';
-import {ModelFeature} from '@oniichan/shared/model';
+import type {ModelFeature} from '@oniichan/shared/model';
 import {uniqueBy} from '@oniichan/shared/array';
 import {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
-import {EditorHost} from '../../core/editor';
+import type {EditorHost} from '../../core/editor';
 
 export class SystemPromptGenerator {
     private readonly logger: Logger;

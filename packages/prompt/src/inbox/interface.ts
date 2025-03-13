@@ -1,5 +1,5 @@
-import {ModelFeature} from '@oniichan/shared/model';
-import {ToolDescription} from '@oniichan/shared/tool';
+import type {ModelFeature} from '@oniichan/shared/model';
+import type {ToolDescription} from '@oniichan/shared/tool';
 
 export interface InboxPromptReference {
     type: 'file';

@@ -1,4 +1,5 @@
-import {createContext, ReactElement, use} from 'react';
+import {createContext, use} from 'react';
+import type {ReactElement} from 'react';
 
 const Context = createContext('');
 Context.displayName = 'MarkdownContentContext';

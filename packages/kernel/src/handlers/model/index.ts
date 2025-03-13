@@ -1,4 +1,4 @@
-import {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
+import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost} from '../../core/model';

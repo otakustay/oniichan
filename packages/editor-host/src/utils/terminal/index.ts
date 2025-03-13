@@ -1,4 +1,5 @@
-import {Terminal, Disposable, window} from 'vscode';
+import {Disposable, window} from 'vscode';
+import type {Terminal} from 'vscode';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 import {Logger} from '@oniichan/shared/logger';
 import {DependencyContainer} from '@oniichan/shared/container';

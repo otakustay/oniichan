@@ -1,8 +1,10 @@
 import {assertNever} from '@oniichan/shared/error';
-import {ToolName} from '@oniichan/shared/tool';
+import type {ToolName} from '@oniichan/shared/tool';
 import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
 import {AttemptCompletionToolImplement} from './attemptCompletion';
-import {ToolExecuteResult, ToolImplementBase, ToolImplementInit, Success, ExecuteError} from './base';
+import type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError} from './base';
+import * as base from './base';
+import {ToolImplementBase} from './base';
 import {BrowserPreviewToolImplement} from './browserPreview';
 import {DeleteFileToolImplement} from './deleteFile';
 import {GlobFilesToolImplement} from './globFiles';
@@ -14,32 +16,33 @@ import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
 import {CompleteTaskToolImplement} from './completeTask';
 
-export {ToolExecuteResult, ToolImplementBase, ToolImplementInit, Success, ExecuteError};
+export {ToolImplementBase};
+export type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError};
 
 export class ToolImplement {
-    private readonly readFile: ToolImplementBase;
+    private readonly readFile: base.ToolImplementBase;
 
-    private readonly readDirectory: ToolImplementBase;
+    private readonly readDirectory: base.ToolImplementBase;
 
-    private readonly globFiles: ToolImplementBase;
+    private readonly globFiles: base.ToolImplementBase;
 
-    private readonly grepFiles: ToolImplementBase;
+    private readonly grepFiles: base.ToolImplementBase;
 
-    private readonly writeFile: ToolImplementBase;
+    private readonly writeFile: base.ToolImplementBase;
 
-    private readonly patchFile: ToolImplementBase;
+    private readonly patchFile: base.ToolImplementBase;
 
-    private readonly deleteFile: ToolImplementBase;
+    private readonly deleteFile: base.ToolImplementBase;
 
-    private readonly runCommand: ToolImplementBase;
+    private readonly runCommand: base.ToolImplementBase;
 
-    private readonly browserPreview: ToolImplementBase;
+    private readonly browserPreview: base.ToolImplementBase;
 
-    private readonly attemptCompletion: ToolImplementBase;
+    private readonly attemptCompletion: base.ToolImplementBase;
 
-    private readonly askFollowupQuestion: ToolImplementBase;
+    private readonly askFollowupQuestion: base.ToolImplementBase;
 
-    private readonly completeTask: ToolImplementBase;
+    private readonly completeTask: base.ToolImplementBase;
 
     constructor(init: ToolImplementInit) {
         this.readFile = new ReadFileToolImplement(init);

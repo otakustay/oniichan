@@ -1,11 +1,11 @@
-import {ExtensionContext} from 'vscode';
+import type {ExtensionContext} from 'vscode';
 import {Server} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {LoadingManager} from '../ui/loading';
 import {DiffViewManager} from '../ui/diff';
-import {Context} from './interface';
+import type {Context} from './interface';
 import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
@@ -14,7 +14,7 @@ import {
 } from './handlers/document';
 import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
-import {EditorHostProtocol} from './protocol';
+import type {EditorHostProtocol} from './protocol';
 import {
     DeleteWorkspaceFileHandler,
     FindFilesHandler,

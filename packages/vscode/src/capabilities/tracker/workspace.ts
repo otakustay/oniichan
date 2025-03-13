@@ -5,7 +5,7 @@ import {newUuid} from '@oniichan/shared/id';
 import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';
 import {WebHostClient} from '@oniichan/web-host/client';
-import {WorkspaceState} from '@oniichan/web-host/atoms/workspace';
+import type {WorkspaceState} from '@oniichan/web-host/atoms/workspace';
 import {streamingListEntries, WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {WebConnection} from '../web';
 

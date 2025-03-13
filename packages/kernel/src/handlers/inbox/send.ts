@@ -1,8 +1,9 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
-import {InboxPromptReference} from '@oniichan/prompt';
+import type {InboxPromptReference} from '@oniichan/prompt';
 import {setRoundtripRequest} from '../../inbox';
-import {InboxMessageResponse, InboxRequestHandler} from './handler';
+import {InboxRequestHandler} from './handler';
+import type {InboxMessageResponse} from './handler';
 
 interface TextMessageBody {
     type: 'text';

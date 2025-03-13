@@ -1,12 +1,14 @@
-import {ExtensionContext} from 'vscode';
+import type {ExtensionContext} from 'vscode';
 import EventEmitter from 'node:events';
-import fastify, {FastifyInstance} from 'fastify';
+import fastify from 'fastify';
+import type {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
 import proxy from '@fastify/http-proxy';
 import {WebSocket} from 'ws';
 import detectPort from 'detect-port';
-import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {isExecutionMessage} from '@otakustay/ipc';
+import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';

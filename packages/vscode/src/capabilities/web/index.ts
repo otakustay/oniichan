@@ -1,19 +1,9 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import {
-    commands,
-    WebviewViewProvider,
-    Disposable,
-    ExtensionContext,
-    StatusBarAlignment,
-    StatusBarItem,
-    Uri,
-    ViewColumn,
-    Webview,
-    window,
-    WebviewView,
-} from 'vscode';
-import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {commands, Disposable, StatusBarAlignment, Uri, ViewColumn, window} from 'vscode';
+import type {WebviewViewProvider, ExtensionContext, StatusBarItem, Webview, WebviewView} from 'vscode';
+import {isExecutionMessage} from '@otakustay/ipc';
+import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {waitCondition} from '@oniichan/shared/promise';

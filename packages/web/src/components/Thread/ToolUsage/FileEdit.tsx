@@ -3,7 +3,7 @@ import {IoAlertCircleOutline} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {stringifyError} from '@oniichan/shared/error';
-import {FileEditData} from '@oniichan/shared/patch';
+import type {FileEditData} from '@oniichan/shared/patch';
 import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import InteractiveLabel from '@/components/InteractiveLabel';

@@ -1,5 +1,6 @@
-import {AskFollowupQuestionParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import type {AskFollowupQuestionParameter} from '@oniichan/shared/tool';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 
 export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollowupQuestionParameter> {
     async executeApprove(): Promise<ToolExecuteResult> {

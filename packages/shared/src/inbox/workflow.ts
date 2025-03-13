@@ -1,4 +1,4 @@
-import {MessageData, PlanMessageData, ToolCallMessageData} from './message';
+import type {MessageData, PlanMessageData, ToolCallMessageData} from './message';
 
 export type WorkflowStatus = 'running' | 'completed' | 'failed';
 

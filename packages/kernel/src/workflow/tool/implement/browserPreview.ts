@@ -1,5 +1,6 @@
-import {BrowserPreviewParameter} from '@oniichan/shared/tool';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import type {BrowserPreviewParameter} from '@oniichan/shared/tool';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 
 export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
     async executeApprove(args: BrowserPreviewParameter): Promise<ToolExecuteResult> {

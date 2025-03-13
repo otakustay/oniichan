@@ -1,8 +1,10 @@
 import {ToolWorkflowRunner} from './tool';
 import {PlanWorkflowRunner} from './plan';
-import {WorkflowRunner, WorkflowStepInit} from './base';
+import {WorkflowRunner} from './base';
+import type {WorkflowStepInit} from './base';
 
-export {WorkflowRunner, WorkflowStepInit};
+export {WorkflowRunner};
+export type {WorkflowStepInit};
 
 export class WorkflowDetector {
     private readonly context: WorkflowStepInit;

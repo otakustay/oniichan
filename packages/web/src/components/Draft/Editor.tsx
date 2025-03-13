@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react';
 import styled from '@emotion/styled';
-import {MentionsInput, Mention, SuggestionDataItem} from 'react-mentions';
+import {MentionsInput, Mention} from 'react-mentions';
+import type {SuggestionDataItem} from 'react-mentions';
 import {useSearchWorkspaceFiles} from '@oniichan/web-host/atoms/workspace';
 import {useDraftContentValue, useSetDraftContent} from '@oniichan/web-host/atoms/draft';
 import mentionStyle from './mentionStyle';

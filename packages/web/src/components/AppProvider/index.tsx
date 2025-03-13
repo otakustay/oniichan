@@ -1,4 +1,4 @@
-import {ReactNode} from 'react';
+import type {ReactNode} from 'react';
 import IpcProvider, {useIpc} from './Ipc';
 import ColorSchemeProvider, {useColorScheme} from './ColorScheme';
 import WideScreenProvider, {useIsWideScreen} from './WideScreen';

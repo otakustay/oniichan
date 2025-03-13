@@ -11,6 +11,11 @@ export {
     attemptCompletionParameters,
     askFollowupQuestionParameters,
     completeTaskParameters,
+    builtinTools,
+    isToolName,
+    isEditToolName,
+} from './definition';
+export type {
     ParameterInfo,
     ReadFileParameter,
     ReadDirectoryParameter,
@@ -28,8 +33,6 @@ export {
     ModelToolCallInputWithSource,
     ToolDescription,
     ToolName,
-    builtinTools,
-    isToolName,
-    isEditToolName,
 } from './definition';
-export {StreamingToolParser, ToolParsedChunk, ContentTagName, PlanTaskType} from './parse';
+export {StreamingToolParser} from './parse';
+export type {ToolParsedChunk, ContentTagName, PlanTaskType} from './parse';

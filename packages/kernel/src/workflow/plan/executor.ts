@@ -1,5 +1,6 @@
 import {assertPlanMessage} from '../../inbox';
-import {WorkflowExecuteResult, WorkflowExecutor} from '../base';
+import {WorkflowExecutor} from '../base';
+import type {WorkflowExecuteResult} from '../base';
 
 export class PlanWorkflowExecutor extends WorkflowExecutor {
     async executeWorkflow(): Promise<WorkflowExecuteResult> {

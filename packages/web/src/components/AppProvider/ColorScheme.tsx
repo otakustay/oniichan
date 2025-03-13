@@ -1,4 +1,5 @@
-import {createContext, ReactNode, use, useEffect, useState} from 'react';
+import {createContext, use, useEffect, useState} from 'react';
+import type {ReactNode} from 'react';
 
 interface ColorSchemeResult {
     source: 'vscode' | 'html';

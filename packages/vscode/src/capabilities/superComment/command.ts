@@ -1,10 +1,12 @@
 import path from 'node:path';
-import {commands, Disposable, Range, Position, window, workspace, TextEditor} from 'vscode';
+import {commands, Disposable, Range, Position, window, workspace} from 'vscode';
+import type {TextEditor} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
-import {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
+import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
 import {getLanguageConfig} from '@oniichan/shared/language';
-import {TaskContainer, TaskManager} from '@oniichan/editor-host/utils/task';
+import {TaskManager} from '@oniichan/editor-host/utils/task';
+import type {TaskContainer} from '@oniichan/editor-host/utils/task';
 import {Logger} from '@oniichan/shared/logger';
 import {KernelClient} from '../../kernel';
 

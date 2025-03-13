@@ -1,5 +1,5 @@
-import {FileEditData} from '../patch';
-import {
+import type {FileEditData} from '../patch';
+import type {
     ToolName,
     ReadFileParameter,
     ReadDirectoryParameter,

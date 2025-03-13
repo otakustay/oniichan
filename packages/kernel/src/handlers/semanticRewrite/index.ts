@@ -1,7 +1,8 @@
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {RequestHandler} from '../handler';
-import {EnhancedContextSnippet, SemanticRewriteApi} from './api';
+import {SemanticRewriteApi} from './api';
+import type {EnhancedContextSnippet} from './api';
 
 export interface SemanticRewriteRequest {
     documentUri: string;

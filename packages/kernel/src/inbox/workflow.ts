@@ -1,14 +1,8 @@
-import {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
+import type {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import {
-    AssistantTextMessage,
-    deserializeMessage,
-    Message,
-    PlanMessage,
-    ToolCallMessage,
-    UserRequestMessage,
-} from './message';
-import {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
+import {AssistantTextMessage, deserializeMessage, PlanMessage, ToolCallMessage, UserRequestMessage} from './message';
+import type {Message} from './message';
+import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
 import {newUuid} from '@oniichan/shared/id';
 
 export type WorkflowOriginMessage = AssistantTextMessage | ToolCallMessage;

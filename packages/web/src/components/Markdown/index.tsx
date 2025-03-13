@@ -1,4 +1,4 @@
-import {ComponentType} from 'react';
+import type {ComponentType} from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from './CodeBlock';
 import ContentProvider from './ContentProvider';

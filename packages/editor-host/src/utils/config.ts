@@ -1,5 +1,5 @@
 import {workspace} from 'vscode';
-import {ModelConfiguration} from '@oniichan/shared/model';
+import type {ModelConfiguration} from '@oniichan/shared/model';
 
 export type SemanticRewriteTriggerType = 'Manual' | 'Automatic';
 

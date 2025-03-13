@@ -1,4 +1,4 @@
-import {MentionsInputStyle} from 'react-mentions';
+import type {MentionsInputStyle} from 'react-mentions';
 
 const style: MentionsInputStyle = {
     suggestions: {

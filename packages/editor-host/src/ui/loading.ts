@@ -1,14 +1,5 @@
-import {
-    window,
-    Range,
-    DecorationRenderOptions,
-    Position,
-    OverviewRulerLane,
-    ThemeColor,
-    Disposable,
-    workspace,
-    TextDocumentChangeEvent,
-} from 'vscode';
+import {window, Range, Position, OverviewRulerLane, ThemeColor, Disposable, workspace} from 'vscode';
+import type {DecorationRenderOptions, TextDocumentChangeEvent} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
 import {TextEditorReference} from '../utils/editor';
 import {DisposableAbortSignal} from '../utils/task';

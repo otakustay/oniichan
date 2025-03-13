@@ -1,8 +1,11 @@
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
-import {diffCount, FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
+import {diffCount, revertFileEdit} from '@oniichan/shared/patch';
+import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {InboxMessage, InboxToolCallMessage, isAssistantMessage} from '../../inbox';
-import {InboxMessageIdentity, InboxRequestHandler} from './handler';
+import {isAssistantMessage} from '../../inbox';
+import type {InboxMessage, InboxToolCallMessage} from '../../inbox';
+import {InboxRequestHandler} from './handler';
+import type {InboxMessageIdentity} from './handler';
 
 interface InboxRollbackAppliable {
     file: string;

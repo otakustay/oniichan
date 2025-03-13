@@ -1,7 +1,9 @@
-import {Range, TextDocument} from 'vscode';
+import {Range} from 'vscode';
+import type {TextDocument} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
-import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {SemanticRewriteRequest} from '@oniichan/kernel/protocol';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import type {FunctionUsageResult} from '@oniichan/storage/telemetry';
+import type {SemanticRewriteRequest} from '@oniichan/kernel/protocol';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';

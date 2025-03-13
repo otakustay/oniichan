@@ -1,10 +1,11 @@
-import {ChatUserMessagePayload} from '@oniichan/shared/model';
+import type {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
 import {over} from '@otakustay/async-iterator';
 import {ModelAccessHost} from '../../core/model';
-import {EditorHost} from '../../core/editor';
-import {consumeModelResponse, ParsedChunk} from './parse';
+import type {EditorHost} from '../../core/editor';
+import {consumeModelResponse} from './parse';
+import type {ParsedChunk} from './parse';
 
 export interface ScaffoldSnippet {
     path: string;

@@ -1,7 +1,9 @@
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {assertToolCallMessage, createToolUseMessage} from '../../inbox';
-import {WorkflowStepInit, WorkflowExecuteResult, WorkflowExecutor} from '../base';
-import {ExecuteError, Success, ToolImplement, ToolImplementInit} from './implement';
+import {WorkflowExecutor} from '../base';
+import type {WorkflowStepInit, WorkflowExecuteResult} from '../base';
+import {ToolImplement} from './implement';
+import type {ExecuteError, Success, ToolImplementInit} from './implement';
 
 export class ToolWorkflowExecutor extends WorkflowExecutor {
     private readonly implement: ToolImplement;

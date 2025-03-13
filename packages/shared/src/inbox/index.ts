@@ -1,4 +1,4 @@
-export {
+export type {
     ReasoningMessageChunk,
     TextMessageChunk,
     PlanTaskStatus,
@@ -34,6 +34,9 @@ export {
     isContentfulChunk,
 } from './utils';
 export {
+    isFileEditToolCallChunk,
+} from './tool';
+export type {
     WorkflowSourceChunkStatus,
     WorkflowChunkStatus,
     ToolCallMessageChunk,
@@ -51,8 +54,7 @@ export {
     AskFollowupQuestionToolCallMessageChunk,
     PlanCompletionProgress,
     CompleteTaskToolCallMessageChunk,
-    isFileEditToolCallChunk,
 } from './tool';
-export {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
-export {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
-export {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow';
+export type {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
+export type {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
+export type {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow';

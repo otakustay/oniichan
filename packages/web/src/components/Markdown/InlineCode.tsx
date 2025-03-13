@@ -1,4 +1,5 @@
-import {ReactNode, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
+import type {ReactNode} from 'react';
 import styled from '@emotion/styled';
 import {useIpc} from '@/components/AppProvider';
 import InteractiveLabel from '@/components/InteractiveLabel';

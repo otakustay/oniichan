@@ -1,5 +1,6 @@
-import {ExtensionContext} from 'vscode';
-import {Client, ExecutionRequest, Port, RequestHandler, Server, ServerInit} from '@otakustay/ipc';
+import type {ExtensionContext} from 'vscode';
+import {Client, RequestHandler, Server} from '@otakustay/ipc';
+import type {ExecutionRequest, Port, ServerInit} from '@otakustay/ipc';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {KernelClient} from '../../kernel';
 import {EditorHostServer} from '@oniichan/editor-host/server';

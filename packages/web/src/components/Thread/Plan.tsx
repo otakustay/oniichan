@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import {IoCheckboxOutline, IoEllipsisVerticalOutline, IoSquareOutline} from 'react-icons/io5';
-import {PlanTask, PlanTaskStatus} from '@oniichan/shared/inbox';
+import type {PlanTask, PlanTaskStatus} from '@oniichan/shared/inbox';
 import ActBar from '@/components/ActBar';
 import LoadingIcon from '@/components/LoadingIcon';
 

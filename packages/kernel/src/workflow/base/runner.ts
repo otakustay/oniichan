@@ -1,4 +1,5 @@
-import {WorkflowStep, WorkflowStepInit} from './step';
+import {WorkflowStep} from './step';
+import type {WorkflowStepInit} from './step';
 import {WorkflowDetector} from './detector';
 import {WorkflowValidator} from './validator';
 import {WorkflowInitializer} from './initializer';

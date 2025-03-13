@@ -1,4 +1,4 @@
-import {ExecuteStatus} from '../../utils/terminal';
+import type {ExecuteStatus} from '../../utils/terminal';
 import {RequestHandler} from './handler';
 
 export interface ExecuteTerminalRequest {

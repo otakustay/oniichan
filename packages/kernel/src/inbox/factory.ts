@@ -1,12 +1,12 @@
 import {newUuid} from '@oniichan/shared/id';
-import {
+import type {
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
     ParsedToolCallMessageChunk,
     ToolCallMessageData,
     PlanMessageData,
 } from '@oniichan/shared/inbox';
-import {
+import type {
     InboxRoundtrip,
     InboxToolUseMessage,
     InboxAssistantTextMessage,

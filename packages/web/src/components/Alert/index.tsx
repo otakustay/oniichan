@@ -1,4 +1,4 @@
-import {CSSProperties} from 'react';
+import type {CSSProperties} from 'react';
 import styled from '@emotion/styled';
 import {IoInformationCircleOutline, IoWarningOutline, IoAlertCircleOutline} from 'react-icons/io5';
 

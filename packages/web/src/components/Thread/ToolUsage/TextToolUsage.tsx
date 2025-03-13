@@ -1,9 +1,9 @@
-import {ComponentType} from 'react';
+import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {isEditToolName} from '@oniichan/shared/tool';
 import {trimPathString} from '@oniichan/shared/string';
-import {ToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
 import ActBar from '@/components/ActBar';
 import FileEdit from './FileEdit';

@@ -1,16 +1,19 @@
-import {InboxConfig} from '@oniichan/editor-host/protocol';
-import {InboxPromptMode, InboxPromptReference} from '@oniichan/prompt';
-import {ModelResponse} from '@oniichan/shared/model';
-import {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
+import type {InboxConfig} from '@oniichan/editor-host/protocol';
+import type {InboxPromptMode, InboxPromptReference} from '@oniichan/prompt';
+import type {ModelResponse} from '@oniichan/shared/model';
+import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
 import {assertHasValue, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
-import {ModelAccessHost, ModelChatOptions} from '../../core/model';
-import {createEmptyMessageThread, createEmptyRoundtrip, InboxRoundtrip, isToolCallMessageOf} from '../../inbox';
-import {WorkflowDetector, WorkflowRunner, WorkflowStepInit} from '../../workflow';
-import {InboxMessageThread} from '../../inbox';
+import {ModelAccessHost} from '../../core/model';
+import type {ModelChatOptions} from '../../core/model';
+import {createEmptyMessageThread, createEmptyRoundtrip, isToolCallMessageOf} from '../../inbox';
+import type {InboxRoundtrip} from '../../inbox';
+import {WorkflowDetector, WorkflowRunner} from '../../workflow';
+import type {WorkflowStepInit} from '../../workflow';
+import type {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
 import {SystemPromptGenerator} from './prompt';
 

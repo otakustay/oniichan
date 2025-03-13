@@ -1,4 +1,4 @@
-import {MessageThreadData} from '@oniichan/shared/inbox';
+import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {RequestHandler} from '../handler';
 

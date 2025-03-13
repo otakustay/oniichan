@@ -1,10 +1,11 @@
-import {ReactElement, ReactNode, RefObject, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
+import type {ReactElement, ReactNode, RefObject} from 'react';
 import styled from '@emotion/styled';
 import {useInView} from 'motion/react';
 import {BiErrorAlt} from 'react-icons/bi';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {MessageViewChunk, RoundtripStatus, MessageViewData} from '@oniichan/shared/inbox';
+import type {MessageViewChunk, RoundtripStatus, MessageViewData} from '@oniichan/shared/inbox';
 import {TimeAgo} from '@/components/TimeAgo';
 import Avatar from '@/components/Avatar';
 import MessageStatusIcon from '@/components/MessageStatusIcon';

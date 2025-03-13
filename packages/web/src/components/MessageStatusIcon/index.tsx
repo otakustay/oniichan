@@ -1,7 +1,7 @@
 import {createElement} from 'react';
 import {FaCircle, FaDownload} from 'react-icons/fa';
 import {css} from '@emotion/css';
-import {RoundtripStatus} from '@oniichan/shared/inbox';
+import type {RoundtripStatus} from '@oniichan/shared/inbox';
 
 const className = css`
     color: var(--color-information);

@@ -1,12 +1,13 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai';
 import {now} from '@oniichan/shared/string';
 import {updateItemInArray} from '@oniichan/shared/array';
-import {
+import type {
     InboxSendMessageRequest,
     InboxMarkRoundtripStatusRequest,
     InboxApproveToolRequest,
 } from '@oniichan/kernel/protocol';
-import {
+import {assertTaggedChunk, assertToolCallChunk, assertPlanChunk} from '@oniichan/shared/inbox';
+import type {
     RoundtripStatus,
     MessageThreadData,
     AssistantTextMessageData,
@@ -15,9 +16,6 @@ import {
     ReasoningMessageChunk,
     RoundtripMessageData,
     AssistantMessageData,
-    assertTaggedChunk,
-    assertToolCallChunk,
-    assertPlanChunk,
     PlanTask,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';

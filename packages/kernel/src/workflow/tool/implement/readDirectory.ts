@@ -1,8 +1,9 @@
 import path from 'node:path';
-import {ReadDirectoryParameter} from '@oniichan/shared/tool';
-import {FileEntry} from '@oniichan/editor-host/protocol';
+import type {ReadDirectoryParameter} from '@oniichan/shared/tool';
+import type {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {

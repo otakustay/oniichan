@@ -146,27 +146,35 @@
             "type": "boolean",
             "default": false,
             "description": "Enable ring-ring mode, which envolves multiple models work as planner and actor",
-            "tags": ["experimental"]
+            "tags": [
+              "experimental"
+            ]
           },
           "oniichan.inbox.ringRingMode.plannerModel": {
             "order": 4,
             "type": "string",
             "default": "deepseek/deepseek-r1",
             "description": "The model used as planner in ring-ring mode",
-            "tags": ["experimental"]
+            "tags": [
+              "experimental"
+            ]
           },
           "oniichan.inbox.ringRingMode.actorModel": {
             "order": 5,
             "type": "string",
             "default": "qwen/qwen-plus",
             "description": "The model used as task actor in ring-ring mode",
-            "tags": ["experimental"]
+            "tags": [
+              "experimental"
+            ]
           },
           "oniichan.inbox.ringRingMode.coderModel": {
             "order": 6,
             "type": "string",
             "description": "The model used as coder in ring-ring mode, default to the same as actor model",
-            "tags": ["experimental"]
+            "tags": [
+              "experimental"
+            ]
           }
         }
       },
@@ -231,10 +239,12 @@
     "@otakustay/text-pin": "^1.0.0",
     "@types/node": "20.x",
     "@types/vscode": "1.95.x",
+    "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.5.14",
     "detect-port": "^2.1.0",
     "esbuild": "^0.25.0",
     "fastify": "^5.2.1",
-    "open": "^10.1.0"
+    "open": "^10.1.0",
+    "ws": "^8.18.1"
   }
 }

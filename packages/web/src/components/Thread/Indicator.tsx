@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import {MessageViewChunk} from '@oniichan/shared/inbox';
+import type {MessageViewChunk} from '@oniichan/shared/inbox';
 
 function resolveTextFromChunk(chunk: MessageViewChunk | null): string {
     if (chunk?.type === 'toolCall') {

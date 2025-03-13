@@ -1,6 +1,9 @@
-import {assertAssistantTextMessage, InboxWorkflowOriginMessage, transferToToolCallMessage} from '../../inbox';
-import {WorkflowInitializer, WorkflowStepInit} from '../base';
-import {ToolImplement, ToolImplementInit} from './implement';
+import {assertAssistantTextMessage, transferToToolCallMessage} from '../../inbox';
+import type {InboxWorkflowOriginMessage} from '../../inbox';
+import {WorkflowInitializer} from '../base';
+import type {WorkflowStepInit} from '../base';
+import {ToolImplement} from './implement';
+import type {ToolImplementInit} from './implement';
 
 export class ToolWorkflowInitializer extends WorkflowInitializer {
     private readonly implement: ToolImplement;

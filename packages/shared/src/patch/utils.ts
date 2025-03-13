@@ -1,5 +1,5 @@
 import {diffLines} from 'diff';
-import {PatchAction} from './patch';
+import type {PatchAction} from './patch';
 import {stackFileEdit} from './stack';
 
 export type FileEditAction = 'create' | 'delete' | 'edit';

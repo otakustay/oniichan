@@ -1,16 +1,13 @@
 import {Logger} from '@oniichan/shared/logger';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {InboxConfig} from '@oniichan/editor-host/protocol';
-import {
-    createEmptyAssistantTextMessage,
-    InboxRoundtrip,
-    InboxWorkflowOriginMessage,
-    InboxWorkflowSourceMessage,
-} from '../../inbox';
+import type {InboxConfig} from '@oniichan/editor-host/protocol';
+import {createEmptyAssistantTextMessage} from '../../inbox';
+import * as inbox from '../../inbox';
 import {CommandExecutor} from '../../core/command';
-import {ModelAccessHost, ModelChatOptions} from '../../core/model';
-import {EditorHost} from '../../core/editor';
-import {InboxMessage, InboxMessageThread} from '../../inbox';
+import {ModelAccessHost} from '../../core/model';
+import type {ModelChatOptions} from '../../core/model';
+import type {EditorHost} from '../../core/editor';
+import type {InboxMessage, InboxMessageThread} from '../../inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 
 async function* iterable(content: string): AsyncIterable<string> {
@@ -26,7 +23,7 @@ export interface WorkflowStepInit {
     // context
     taskId: string;
     thread: InboxMessageThread;
-    roundtrip: InboxRoundtrip;
+    roundtrip: inbox.InboxRoundtrip;
     inboxConfig: InboxConfig;
     systemPrompt: string;
     // tool
@@ -42,7 +39,7 @@ export interface WorkflowStepInit {
 export abstract class WorkflowStep {
     protected readonly thread: InboxMessageThread;
 
-    protected readonly roundtrip: InboxRoundtrip;
+    protected readonly roundtrip: inbox.InboxRoundtrip;
 
     protected readonly editorHost: EditorHost;
 
@@ -70,19 +67,19 @@ export abstract class WorkflowStep {
         this.onUpdateThread = init.onUpdateThread;
     }
 
-    protected getWorkflowSourceMessage(): InboxWorkflowSourceMessage | null {
+    protected getWorkflowSourceMessage(): inbox.InboxWorkflowSourceMessage | null {
         return this.roundtrip.getLatestTextMessage();
     }
 
-    protected getWorkflowSourceMessageStrict(): InboxWorkflowSourceMessage {
+    protected getWorkflowSourceMessageStrict(): inbox.InboxWorkflowSourceMessage {
         return this.roundtrip.getLatestTextMessageStrict();
     }
 
-    protected getWorkflowOriginMessage(): InboxWorkflowOriginMessage | null {
+    protected getWorkflowOriginMessage(): inbox.InboxWorkflowOriginMessage | null {
         return this.roundtrip.getLatestWorkflow()?.getOriginMessage() ?? null;
     }
 
-    protected getWorkflowOriginMessageStrict(): InboxWorkflowOriginMessage {
+    protected getWorkflowOriginMessageStrict(): inbox.InboxWorkflowOriginMessage {
         return this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
     }
 

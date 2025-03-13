@@ -1,4 +1,4 @@
-import {ToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
 import TextToolUsage from './TextToolUsage';
 import ParsedToolUsage from './ParsedToolUsage';
 

@@ -1,4 +1,5 @@
-import {WorkflowRunner, WorkflowStepInit} from '../base';
+import {WorkflowRunner} from '../base';
+import type {WorkflowStepInit} from '../base';
 import {ToolWorkflowDetector} from './detector';
 import {ToolWorkflowExecutor} from './executor';
 import {ToolWorkflowInitializer} from './initializer';

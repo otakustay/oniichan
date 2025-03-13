@@ -1,4 +1,5 @@
-import {Range, TextEditor, Uri, window, workspace, WorkspaceEdit} from 'vscode';
+import {Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
+import type {TextEditor} from 'vscode';
 
 export class TextEditorReference {
     private readonly uri: string;

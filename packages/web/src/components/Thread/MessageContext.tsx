@@ -1,4 +1,5 @@
-import {createContext, ReactNode, use} from 'react';
+import {createContext, use} from 'react';
+import type {ReactNode} from 'react';
 
 interface MessageContextValue {
     threadUuid: string;

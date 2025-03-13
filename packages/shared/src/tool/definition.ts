@@ -1,5 +1,5 @@
 import dedent from 'dedent';
-import {JSONSchema7} from 'json-schema';
+import type {JSONSchema7} from 'json-schema';
 
 export interface ParameterInfo {
     type: 'object';

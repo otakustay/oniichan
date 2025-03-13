@@ -1,6 +1,6 @@
 import {getDefaultStore} from 'jotai';
 import {RequestHandler} from '@otakustay/ipc';
-import {MessageThreadData} from '@oniichan/shared/inbox';
+import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {activeTheadUuidAtom, messageThreadListAtom} from '../atoms/inbox';
 
 export class UpdateThreadListHandler extends RequestHandler<MessageThreadData[], void> {

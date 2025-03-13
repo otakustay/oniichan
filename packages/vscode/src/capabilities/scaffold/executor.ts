@@ -1,12 +1,15 @@
-import {window, TextEditor, Position, Uri, workspace, Disposable, Range} from 'vscode';
-import {TaskManager, TaskContainer, TaskContext} from '@oniichan/editor-host/utils/task';
-import {ScaffoldRequest} from '@oniichan/kernel/protocol';
+import {window, Position, Uri, workspace, Disposable, Range} from 'vscode';
+import type {TextEditor} from 'vscode';
+import {TaskManager, TaskContext} from '@oniichan/editor-host/utils/task';
+import type {TaskContainer} from '@oniichan/editor-host/utils/task';
+import type {ScaffoldRequest} from '@oniichan/kernel/protocol';
 import {Logger} from '@oniichan/shared/logger';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {stringifyError} from '@oniichan/shared/error';
-import {FunctionUsageResult, FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import type {FunctionUsageResult} from '@oniichan/storage/telemetry';
 import {KernelClient} from '../../kernel';
 import {ScaffoldCodeWriter} from './writer';
 

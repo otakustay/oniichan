@@ -1,5 +1,5 @@
-import {ToolName} from '@oniichan/shared/tool';
-import {
+import type {ToolName} from '@oniichan/shared/tool';
+import type {
     InboxAssistantMessage,
     InboxAssistantTextMessage,
     InboxMessage,

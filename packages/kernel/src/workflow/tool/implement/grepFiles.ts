@@ -1,7 +1,8 @@
 import unixify from 'unixify';
-import {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
+import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 
 // For each match, its a `begin - context - match - context - end` sequence,

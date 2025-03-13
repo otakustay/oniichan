@@ -1,11 +1,13 @@
-import {InboxConfig} from '@oniichan/editor-host/protocol';
+import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import {Logger} from '@oniichan/shared/logger';
-import {createFileEdit, FileEditData, PatchAction, stackFileEdit} from '@oniichan/shared/patch';
+import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
+import type {FileEditData, PatchAction} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import {CommandExecutor} from '../../../core/command';
-import {EditorHost} from '../../../core/editor';
-import {assertToolCallMessage, InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
+import type {EditorHost} from '../../../core/editor';
+import {assertToolCallMessage} from '../../../inbox';
+import type {InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
 
 export interface ToolImplementInit {
     roundtrip: InboxRoundtrip;

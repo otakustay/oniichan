@@ -4,9 +4,9 @@ import {renderToolSection} from './tool';
 import {renderStructureSection} from './structure';
 import {renderObjectiveSection} from './objective';
 import {renderReferenceSection} from './reference';
-import {InboxPromptView, InboxPromptReference, InboxPromptMode} from './interface';
+import type {InboxPromptView, InboxPromptReference, InboxPromptMode} from './interface';
 
-export {InboxPromptView, InboxPromptReference, InboxPromptMode};
+export type {InboxPromptView, InboxPromptReference, InboxPromptMode};
 
 export async function renderInboxSystemPrompt(view: InboxPromptView) {
     const parts = [

@@ -1,4 +1,5 @@
-import {ExecutionMessage, Port, isExecutionMessage} from '@otakustay/ipc';
+import {isExecutionMessage} from '@otakustay/ipc';
+import type {ExecutionMessage, Port} from '@otakustay/ipc';
 
 export class WebSocketPort implements Port {
     private readonly socket: WebSocket;

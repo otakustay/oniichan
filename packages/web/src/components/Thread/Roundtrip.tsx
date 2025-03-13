@@ -1,4 +1,4 @@
-import {MessageViewChunk, MessageViewData, RoundtripMessageData} from '@oniichan/shared/inbox';
+import type {MessageViewChunk, MessageViewData, RoundtripMessageData} from '@oniichan/shared/inbox';
 import Message from './Message';
 import FileEditContextProvider from './FileEditContext';
 import {EditSummary} from './EditSummary';

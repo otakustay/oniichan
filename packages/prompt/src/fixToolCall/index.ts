@@ -1,4 +1,4 @@
-import {ToolDescription} from '@oniichan/shared/tool';
+import type {ToolDescription} from '@oniichan/shared/tool';
 
 export interface FixToolCallView {
     tool: ToolDescription;

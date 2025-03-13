@@ -1,5 +1,6 @@
 import {getDefaultStore} from 'jotai';
-import {workspaceFilesAtom, WorkspaceState} from '../atoms/workspace';
+import {workspaceFilesAtom} from '../atoms/workspace';
+import type {WorkspaceState} from '../atoms/workspace';
 import {RequestHandler} from '@otakustay/ipc';
 
 export class UpdateWorkspaceStateHandler extends RequestHandler<Partial<WorkspaceState>, void> {

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import {RoundtripMessageData} from '@oniichan/shared/inbox';
+import type {RoundtripMessageData} from '@oniichan/shared/inbox';
 import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
 import {mediaWideScreen} from '@/styles';

@@ -1,4 +1,4 @@
-import {InboxPromptView} from './interface';
+import type {InboxPromptView} from './interface';
 
 const displayDescription =
     'The structure is organized like shell\'s `tree` command, the first line is always `.` indicating current project root, nested directories can be merged into a single line containing `/`  directories end with `/`.';

@@ -1,4 +1,5 @@
-import {Disposable, Event} from 'vscode';
+import {Disposable} from 'vscode';
+import type {Event} from 'vscode';
 
 export function promisifyEvent<T>(event: Event<T>): Promise<T> & Disposable {
     const disposable: Disposable = {dispose: () => {}};

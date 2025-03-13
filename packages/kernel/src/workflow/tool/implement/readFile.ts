@@ -1,7 +1,8 @@
 import path from 'node:path';
-import {ReadFileParameter} from '@oniichan/shared/tool';
+import type {ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 
 export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> {

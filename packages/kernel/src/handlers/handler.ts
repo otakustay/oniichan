@@ -1,9 +1,11 @@
-import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@otakustay/ipc';
-import {LogEntry, Logger, LoggerScope} from '@oniichan/shared/logger';
-import {MessageThreadData} from '@oniichan/shared/inbox';
+import {RequestHandler as BaseRequestHandler} from '@otakustay/ipc';
+import type {ExecutionRequest, Port} from '@otakustay/ipc';
+import {Logger} from '@oniichan/shared/logger';
+import type {LogEntry, LoggerScope} from '@oniichan/shared/logger';
+import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {CommandExecutor} from '../core/command';
-import {EditorHost} from '../core/editor';
+import type {EditorHost} from '../core/editor';
 import {ThreadStore} from '../inbox';
 
 type SendNotice = (action: string, payload?: any) => void;

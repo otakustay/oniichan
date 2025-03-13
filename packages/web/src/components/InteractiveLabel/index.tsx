@@ -1,4 +1,4 @@
-import {ElementType, HTMLAttributes} from 'react';
+import type {ElementType, HTMLAttributes} from 'react';
 import styled from '@emotion/styled';
 
 const Layout = styled.span`

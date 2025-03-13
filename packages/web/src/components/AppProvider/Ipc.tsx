@@ -1,6 +1,8 @@
-import {createContext, ReactNode, use} from 'react';
+import {createContext, use} from 'react';
+import type {ReactNode} from 'react';
 import {Client, DirectPort} from '@otakustay/ipc';
-import {Ipc, useIpcValue} from '@oniichan/web-host/atoms/ipc';
+import {useIpcValue} from '@oniichan/web-host/atoms/ipc';
+import type {Ipc} from '@oniichan/web-host/atoms/ipc';
 
 const emptyClient = new Client(new DirectPort());
 

@@ -1,5 +1,5 @@
 import dedent from 'dedent';
-import {InboxPromptView} from './interface';
+import type {InboxPromptView} from './interface';
 
 const DEFAULT_RULE =
     'You are an intelligent programmer. You are happy to help answer any questions that the user has (usually they will be about coding)';

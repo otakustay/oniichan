@@ -1,5 +1,5 @@
-import {ChatInputPayload} from '@oniichan/shared/model';
-import {
+import type {ChatInputPayload} from '@oniichan/shared/model';
+import type {
     RoundtripData,
     RoundtripStatus,
     RoundtripMessageData,
@@ -25,7 +25,7 @@ import {
     PlanTask,
     PlanCompletionProgress,
 } from '@oniichan/shared/inbox';
-import {ContentTagName} from '@oniichan/shared/tool';
+import type {ContentTagName} from '@oniichan/shared/tool';
 
 export interface InboxRoundtrip {
     setRequest(request: InboxUserRequestMessage): void;

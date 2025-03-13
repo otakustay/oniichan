@@ -1,4 +1,4 @@
-import {ExtensionContext} from 'vscode';
+import type {ExtensionContext} from 'vscode';
 import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {LoadingManager} from '../ui/loading';

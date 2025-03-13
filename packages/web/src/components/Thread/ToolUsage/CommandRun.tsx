@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import {IoTerminalOutline, IoCheckmarkSharp, IoClose} from 'react-icons/io5';
-import {WorkflowSourceChunkStatus, WorkflowChunkStatus} from '@oniichan/shared/inbox';
+import type {WorkflowSourceChunkStatus, WorkflowChunkStatus} from '@oniichan/shared/inbox';
 import {useApproveTool} from '@oniichan/web-host/atoms/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 import Button from '@/components/Button';

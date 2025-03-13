@@ -1,6 +1,6 @@
-import {MessageThreadData, MessageThreadPersistData} from '@oniichan/shared/inbox';
+import type {MessageThreadData, MessageThreadPersistData} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import {InboxMessageThread, InboxRoundtrip} from './interface';
+import type {InboxMessageThread, InboxRoundtrip} from './interface';
 import {Roundtrip} from './roundtrip';
 
 /**

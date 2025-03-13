@@ -1,7 +1,8 @@
 import path from 'node:path';
 import {Uri, workspace} from 'vscode';
-import {RequestHandler as BaseRequestHandler, ExecutionRequest, Port} from '@otakustay/ipc';
-import {Context} from '../interface';
+import {RequestHandler as BaseRequestHandler} from '@otakustay/ipc';
+import type {ExecutionRequest, Port} from '@otakustay/ipc';
+import type {Context} from '../interface';
 
 export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Context> {
     constructor(port: Port, request: ExecutionRequest, context: Context) {

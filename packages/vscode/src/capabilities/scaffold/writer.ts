@@ -1,4 +1,5 @@
-import {Position, TextEditor} from 'vscode';
+import {Position} from 'vscode';
+import type {TextEditor} from 'vscode';
 import {Logger} from '@oniichan/shared/logger';
 
 export async function* trim(iterable: AsyncIterable<string>): AsyncIterable<string> {

@@ -1,7 +1,14 @@
 import {assertHasValue, assertNever} from '@oniichan/shared/error';
-import {ChatInputPayload} from '@oniichan/shared/model';
+import type {ChatInputPayload} from '@oniichan/shared/model';
 import {now} from '@oniichan/shared/string';
 import {
+    assertToolCallChunk,
+    chunkToString,
+    assertTaggedChunk,
+    isContentfulChunk,
+    assertPlanChunk,
+} from '@oniichan/shared/inbox';
+import type {
     MessageType,
     MessageData,
     UserRequestMessageData,
@@ -10,27 +17,22 @@ import {
     ToolCallMessageChunk,
     ToolUseMessageData,
     MessageDataBase,
-    assertToolCallChunk,
-    chunkToString,
     MessageInputChunk,
     WorkflowSourceChunkStatus,
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
     ParsedToolCallMessageChunk,
     WorkflowChunkStatus,
-    assertTaggedChunk,
-    isContentfulChunk,
     TaggedMessageChunk,
     MessageViewChunk,
     PlanMessageData,
     PlanMessageContentChunk,
     AssistantMessageType,
     PlanMessageChunk,
-    assertPlanChunk,
     PlanTask,
     PlanCompletionProgress,
 } from '@oniichan/shared/inbox';
-import {
+import type {
     InboxAssistantTextMessage,
     InboxMessageBase,
     InboxPlanMessage,
@@ -40,7 +42,7 @@ import {
     InboxUserRequestMessage,
     PlanState,
 } from './interface';
-import {ContentTagName} from '@oniichan/shared/tool';
+import type {ContentTagName} from '@oniichan/shared/tool';
 
 abstract class MessageBase<T extends MessageType> implements InboxMessageBase<T> {
     readonly uuid: string;

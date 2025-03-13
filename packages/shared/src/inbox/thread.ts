@@ -1,5 +1,5 @@
-import {AssistantMessageData, UserRequestMessageData} from './message';
-import {RoundtripData, RoundtripStatus} from './roundtrip';
+import type {AssistantMessageData, UserRequestMessageData} from './message';
+import type {RoundtripData, RoundtripStatus} from './roundtrip';
 
 export interface RoundtripMessageData {
     status: RoundtripStatus;

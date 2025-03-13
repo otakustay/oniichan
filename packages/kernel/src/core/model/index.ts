@@ -1,16 +1,10 @@
-import {
-    createModelClient,
-    isModelConfigValid,
-    ModelConfiguration,
-    ModelFeature,
-    ModelResponse,
-    ModelTextResponse,
-} from '@oniichan/shared/model';
-import {ModelAccess, ModelChatOptions} from './interface';
-import {EditorHost} from '../editor';
+import {createModelClient, isModelConfigValid} from '@oniichan/shared/model';
+import type {ModelConfiguration, ModelFeature, ModelResponse, ModelTextResponse} from '@oniichan/shared/model';
+import type {ModelAccess, ModelChatOptions} from './interface';
+import type {EditorHost} from '../editor';
 import {NamedModelAccess} from './named';
 
-export {ModelChatOptions};
+export type {ModelChatOptions};
 
 export class ModelAccessHost implements ModelAccess {
     private readonly editorHost: EditorHost;

@@ -1,8 +1,8 @@
 import {assertHasValue, assertNever} from '@oniichan/shared/error';
-import {RoundtripData, RoundtripMessageData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
+import type {RoundtripData, RoundtripMessageData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
 import {AssistantTextMessage, UserRequestMessage} from './message';
 import {Workflow} from './workflow';
-import {
+import type {
     InboxAssistantTextMessage,
     InboxMessage,
     InboxRoundtrip,

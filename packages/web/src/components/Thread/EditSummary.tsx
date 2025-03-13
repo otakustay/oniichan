@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import {VscFile, VscNewFile, VscDiffSingle, VscTrash, VscReport} from 'react-icons/vsc';
 import {IoCheckmarkSharp, IoCloseSharp, IoEyeOutline} from 'react-icons/io5';
 import {stringifyError} from '@oniichan/shared/error';
-import {FileEditData, FileEditResult} from '@oniichan/shared/patch';
+import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';

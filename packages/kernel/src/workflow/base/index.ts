@@ -1,6 +1,7 @@
 export {WorkflowDetector} from './detector';
 export {WorkflowValidator} from './validator';
-export {WorkflowExecuteResult, WorkflowExecutor} from './executor';
+export {WorkflowExecutor} from './executor';
+export type {WorkflowExecuteResult} from './executor';
 export {WorkflowInitializer} from './initializer';
 export {WorkflowRunner} from './runner';
-export {WorkflowStepInit} from './step';
+export type {WorkflowStepInit} from './step';

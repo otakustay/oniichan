@@ -1,8 +1,8 @@
-import {FormEvent} from 'react';
+import type {FormEvent} from 'react';
 import styled from '@emotion/styled';
 import {useHover} from 'huse';
 import {IoAlertCircleOutline, IoEyeOutline, IoGitMergeOutline} from 'react-icons/io5';
-import {InboxRollbackCheckItem} from '@oniichan/kernel/protocol';
+import type {InboxRollbackCheckItem} from '@oniichan/kernel/protocol';
 import {stringifyError} from '@oniichan/shared/error';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import Modal from '@/components/Modal';

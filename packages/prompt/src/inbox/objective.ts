@@ -1,5 +1,5 @@
 import dedent from 'dedent';
-import {InboxPromptView} from './interface';
+import type {InboxPromptView} from './interface';
 
 function renderCommonObjective() {
     return dedent`

@@ -1,7 +1,8 @@
 import {Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {FileEditData, FileEditResult, revertFileEdit} from '@oniichan/shared/patch';
+import {revertFileEdit} from '@oniichan/shared/patch';
+import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
 export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';

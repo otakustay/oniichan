@@ -1,4 +1,5 @@
-import {ReactElement, ReactNode, useState} from 'react';
+import {useState} from 'react';
+import type {ReactElement, ReactNode} from 'react';
 import styled from '@emotion/styled';
 import {css} from '@emotion/react';
 import Toggle from '@/components/Toggle';

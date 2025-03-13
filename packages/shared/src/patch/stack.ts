@@ -1,7 +1,9 @@
 import {stringifyError} from '../error';
-import {PatchAction, patchContent, PatchResult} from './patch';
+import {patchContent} from './patch';
+import type {PatchAction, PatchResult} from './patch';
 import {PatchParseError} from './parse';
-import {diffCount, FileEditAction, FileEditData} from './utils';
+import {diffCount} from './utils';
+import type {FileEditAction, FileEditData} from './utils';
 
 function applyEdit(action: PatchAction, oldContent: string, patch: string): PatchResult {
     switch (action) {

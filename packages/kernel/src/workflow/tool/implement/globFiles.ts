@@ -1,7 +1,8 @@
 import path from 'node:path';
-import {FindFilesByGlobParameter} from '@oniichan/shared/tool';
+import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {

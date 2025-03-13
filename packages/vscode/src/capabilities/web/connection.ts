@@ -1,5 +1,5 @@
 import {Disposable, EventEmitter} from 'vscode';
-import {Port} from '@otakustay/ipc';
+import type {Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
 import {WebHostClient} from '@oniichan/web-host/client';
 import {Logger} from '@oniichan/shared/logger';

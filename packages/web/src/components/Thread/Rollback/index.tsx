@@ -2,11 +2,10 @@ import {useRef, useState} from 'react';
 import styled from '@emotion/styled';
 import {VscDiscard} from 'react-icons/vsc';
 import {countNounSimple} from '@oniichan/shared/string';
-import {InboxRollbackCheckItem} from '@oniichan/kernel/protocol';
+import type {InboxRollbackCheckItem, InboxCheckRollbackResponse} from '@oniichan/kernel/protocol';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';
 import Confirm from './Confirm';
-import {InboxCheckRollbackResponse} from 'node_modules/@oniichan/kernel/dist/handlers/inbox';
 import {stringifyError} from '@oniichan/shared/error';
 
 function renderToastMessage(fileCount: number, roundtripCount: number) {

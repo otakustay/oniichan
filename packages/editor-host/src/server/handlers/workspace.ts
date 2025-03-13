@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {Uri, workspace} from 'vscode';
 import {stringifyError} from '@oniichan/shared/error';
-import {TreeifyResult} from '@oniichan/shared/dir';
+import type {TreeifyResult} from '@oniichan/shared/dir';
 import {RequestHandler} from './handler';
 
 export interface FindFilesRequest {

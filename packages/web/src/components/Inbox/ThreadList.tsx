@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
-import {MessageData, MessageThreadData} from '@oniichan/shared/inbox';
+import type {MessageData, MessageThreadData} from '@oniichan/shared/inbox';
 import {
     useMessageThreadListValue,
     useSetActiveMessageThread,

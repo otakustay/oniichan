@@ -1,5 +1,6 @@
-import {commands, InputBoxOptions, window, workspace} from 'vscode';
-import {ModelConfiguration} from '@oniichan/shared/model';
+import {commands, window, workspace} from 'vscode';
+import type {InputBoxOptions} from 'vscode';
+import type {ModelConfiguration} from '@oniichan/shared/model';
 import {assertHasValue} from '@oniichan/shared/error';
 import {getModelConfig} from '../../utils/config';
 import {RequestHandler} from './handler';

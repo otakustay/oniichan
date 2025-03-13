@@ -1,6 +1,7 @@
-import {DeleteFileParameter} from '@oniichan/shared/tool';
-import {DeleteFileToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import type {DeleteFileParameter} from '@oniichan/shared/tool';
+import type {DeleteFileToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 
 function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is DeleteFileToolCallMessageChunk {
     if (chunk.toolName !== 'delete_file') {

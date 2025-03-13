@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {ModelUsageRecord} from '@oniichan/storage/telemetry';
+import type {ModelUsageRecord} from '@oniichan/storage/telemetry';
 import {useIpc} from '@/components/AppProvider';
 
 const Card = styled.div`

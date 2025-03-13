@@ -1,10 +1,11 @@
-export {trimPathString, joinToMaxLength, JoinToMaxLengthResult} from './trim';
+export {trimPathString, joinToMaxLength} from './trim';
+export type {JoinToMaxLengthResult} from './trim';
 export {now, countNounSimple} from './format';
-export {
+export {StreamXmlParser} from './xml';
+export type {
     XmlParseTagEndChunk,
     XmlParseTagStartChunk,
     XmlParseTextChunk,
     XmlParsedChunk,
-    StreamXmlParser,
 } from './xml';
 export {toLines} from './stream';

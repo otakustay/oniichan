@@ -1,7 +1,8 @@
 import dedent from 'dedent';
-import {PatchFileParameter} from '@oniichan/shared/tool';
-import {ParsedToolCallMessageChunk, PatchFileToolCallMessageChunk} from '@oniichan/shared/inbox';
-import {ToolImplementBase, ToolExecuteResult} from './base';
+import type {PatchFileParameter} from '@oniichan/shared/tool';
+import type {ParsedToolCallMessageChunk, PatchFileToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 
 function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is PatchFileToolCallMessageChunk {

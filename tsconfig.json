@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
     "target": "ES2023",
     "lib": [
       "ES2023"
@@ -11,6 +12,8 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "declaration": true
+    "declaration": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
   }
 }

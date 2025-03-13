@@ -1,4 +1,5 @@
-import {Client, Port} from '@otakustay/ipc';
+import {Client} from '@otakustay/ipc';
+import type {Port} from '@otakustay/ipc';
 import type {EditorHostProtocol} from './protocol';
 
 export class EditorHostClient extends Client<EditorHostProtocol> {

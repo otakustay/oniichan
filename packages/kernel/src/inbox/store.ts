@@ -1,6 +1,6 @@
-import {MessageThreadPersistData, MessageThreadData} from '@oniichan/shared/inbox';
+import type {MessageThreadPersistData, MessageThreadData} from '@oniichan/shared/inbox';
 import {MessageThread} from './thread';
-import {InboxMessageThread} from './interface';
+import type {InboxMessageThread} from './interface';
 
 export class ThreadStore {
     static readonly containerKey = 'ThreadStore';

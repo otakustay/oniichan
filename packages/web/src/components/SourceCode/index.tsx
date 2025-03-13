@@ -1,12 +1,7 @@
 import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
-import {
-    BundledHighlighterOptions,
-    BundledLanguage,
-    BundledTheme,
-    getSingletonHighlighter,
-    HighlighterGeneric,
-} from 'shiki';
+import {getSingletonHighlighter} from 'shiki';
+import type {BundledHighlighterOptions, BundledLanguage, BundledTheme, HighlighterGeneric} from 'shiki';
 import {useColorScheme} from '@/components/AppProvider';
 
 const Layout = styled.div`

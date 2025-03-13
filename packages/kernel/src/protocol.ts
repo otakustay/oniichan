@@ -25,6 +25,7 @@ export type {
     InboxMessageResponse,
     InboxRoundtripIdentity,
     InboxApproveToolRequest,
+    InboxCheckRollbackResponse,
 } from './handlers/inbox';
 export type {SemanticRewriteRequest, SemanticRewriteResponse} from './handlers/semanticRewrite';
 export type {ScaffoldRequest, ScaffoldResponse} from './handlers/scaffold';

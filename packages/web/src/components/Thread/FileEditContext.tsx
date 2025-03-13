@@ -1,6 +1,9 @@
-import {createContext, ReactNode, use} from 'react';
-import {RoundtripMessageData, extractFileEdits} from '@oniichan/shared/inbox';
-import {FileEditData, mergeFileEdits} from '@oniichan/shared/patch';
+import {createContext, use} from 'react';
+import type {ReactNode} from 'react';
+import {extractFileEdits} from '@oniichan/shared/inbox';
+import type {RoundtripMessageData} from '@oniichan/shared/inbox';
+import {mergeFileEdits} from '@oniichan/shared/patch';
+import type {FileEditData} from '@oniichan/shared/patch';
 
 interface ContextValue {
     edits: Record<string, FileEditData[] | undefined>;

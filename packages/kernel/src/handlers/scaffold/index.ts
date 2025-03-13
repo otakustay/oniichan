@@ -1,6 +1,6 @@
 import path from 'node:path';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {FileEntry} from '@oniichan/editor-host/protocol';
+import type {FileEntry} from '@oniichan/editor-host/protocol';
 import {RequestHandler} from '../handler';
 import {ScaffoldApi} from './api';
 

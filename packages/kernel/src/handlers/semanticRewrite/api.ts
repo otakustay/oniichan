@@ -1,8 +1,9 @@
-import {ChatUserMessagePayload} from '@oniichan/shared/model';
+import type {ChatUserMessagePayload} from '@oniichan/shared/model';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {renderSemanticRewritePrompt, SemanticRewriteView} from '@oniichan/prompt';
+import {renderSemanticRewritePrompt} from '@oniichan/prompt';
+import type {SemanticRewriteView} from '@oniichan/prompt';
 import {ModelAccessHost} from '../../core/model';
-import {EditorHost} from '../../core/editor';
+import type {EditorHost} from '../../core/editor';
 
 export interface EnhancedContextSnippet {
     label: string;

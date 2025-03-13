@@ -1,7 +1,7 @@
 import {Server} from '@otakustay/ipc';
 import {ComposeNewMessageHandler} from './handlers/compose';
 import {UpdateThreadListHandler} from './handlers/thread';
-import {WebHostProtocol} from './protocol';
+import type {WebHostProtocol} from './protocol';
 import {UpdateWorkspaceStateHandler} from './handlers/workspace';
 
 export class WebHostServer extends Server<WebHostProtocol> {

@@ -1,14 +1,5 @@
-import {
-    commands,
-    CompletionItem,
-    CompletionItemKind,
-    CompletionItemProvider,
-    DocumentSymbol,
-    Position,
-    Range,
-    SymbolKind,
-    TextDocument,
-} from 'vscode';
+import {commands, CompletionItem, CompletionItemKind, DocumentSymbol, Position, Range, SymbolKind} from 'vscode';
+import type {CompletionItemProvider, TextDocument} from 'vscode';
 import {getLanguageConfig} from '@oniichan/shared/language';
 
 function mapKind(kind: SymbolKind): CompletionItemKind {

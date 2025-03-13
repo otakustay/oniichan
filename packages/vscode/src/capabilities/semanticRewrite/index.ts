@@ -1,4 +1,5 @@
-import {window, Disposable, TextEditor, commands, workspace, TextDocumentChangeEvent} from 'vscode';
+import {window, Disposable, commands, workspace} from 'vscode';
+import type {TextEditor, TextDocumentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {newUuid} from '@oniichan/shared/id';

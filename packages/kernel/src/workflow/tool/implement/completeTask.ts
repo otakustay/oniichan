@@ -1,7 +1,8 @@
-import {CompleteTaskParameter} from '@oniichan/shared/tool';
+import type {CompleteTaskParameter} from '@oniichan/shared/tool';
+import type {CompleteTaskToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
 import {assertPlanMessage} from '../../../inbox';
-import {ToolImplementBase, ToolExecuteResult} from './base';
-import {CompleteTaskToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ToolImplementBase} from './base';
+import type {ToolExecuteResult} from './base';
 
 function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is CompleteTaskToolCallMessageChunk {
     if (chunk.toolName !== 'complete_task') {

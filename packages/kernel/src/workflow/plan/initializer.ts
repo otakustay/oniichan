@@ -1,4 +1,5 @@
-import {assertAssistantTextMessage, InboxWorkflowOriginMessage, transferToPlanMessage} from '../../inbox';
+import {assertAssistantTextMessage, transferToPlanMessage} from '../../inbox';
+import type {InboxWorkflowOriginMessage} from '../../inbox';
 import {WorkflowInitializer} from '../base';
 
 export class PlanWorkflowInitializer extends WorkflowInitializer {
