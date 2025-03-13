@@ -3,12 +3,12 @@ import type {TextEditor, TextDocumentChangeEvent} from 'vscode';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {getLanguageConfig} from '@oniichan/shared/language';
 import {newUuid} from '@oniichan/shared/id';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {getSemanticRewriteConfiguration} from '@oniichan/editor-host/utils/config';
 import {Logger} from '@oniichan/shared/logger';
-import {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskContext, TaskManager} from '@oniichan/editor-host/utils/task';
-import {KernelClient} from '../../kernel';
+import type {KernelClient} from '../../kernel';
 import {LineWorker} from './worker';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {

@@ -1,5 +1,5 @@
 import type {ChatUserMessagePayload} from '@oniichan/shared/model';
-import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderSemanticRewritePrompt} from '@oniichan/prompt';
 import type {SemanticRewriteView} from '@oniichan/prompt';
 import {ModelAccessHost} from '../../core/model';

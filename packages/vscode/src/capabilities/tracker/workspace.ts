@@ -1,10 +1,11 @@
 import path from 'node:path';
-import {Disposable, FileType, Uri, workspace, window} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {Disposable, Uri} from 'vscode';
+import { FileType, workspace, window} from 'vscode';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
 import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';
-import {WebHostClient} from '@oniichan/web-host/client';
+import type {WebHostClient} from '@oniichan/web-host/client';
 import type {WorkspaceState} from '@oniichan/web-host/atoms/workspace';
 import {streamingListEntries, WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {WebConnection} from '../web';

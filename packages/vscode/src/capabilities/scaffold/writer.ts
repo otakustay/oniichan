@@ -1,6 +1,6 @@
 import {Position} from 'vscode';
 import type {TextEditor} from 'vscode';
-import {Logger} from '@oniichan/shared/logger';
+import type {Logger} from '@oniichan/shared/logger';
 
 export async function* trim(iterable: AsyncIterable<string>): AsyncIterable<string> {
     const state = {

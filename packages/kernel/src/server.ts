@@ -2,7 +2,7 @@ import {Server} from '@otakustay/ipc';
 import type {ExecutionRequest} from '@otakustay/ipc';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {Logger} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import type {Context} from './handlers/handler';
 import type {KernelProtocol} from './protocol';
 import {CommandExecutor} from './core/command';

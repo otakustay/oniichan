@@ -4,9 +4,9 @@ import {Logger} from '@oniichan/shared/logger';
 import type {LogEntry, LoggerScope} from '@oniichan/shared/logger';
 import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {CommandExecutor} from '../core/command';
+import type {CommandExecutor} from '../core/command';
 import type {EditorHost} from '../core/editor';
-import {ThreadStore} from '../inbox';
+import type {ThreadStore} from '../inbox';
 
 type SendNotice = (action: string, payload?: any) => void;
 

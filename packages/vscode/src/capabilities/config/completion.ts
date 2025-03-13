@@ -1,6 +1,6 @@
-import {CompletionItem, CompletionItemKind, Disposable, languages, Position} from 'vscode';
-import type {CompletionItemProvider, ProviderResult, TextDocument} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import { CompletionItemKind, languages} from 'vscode';
+import type {CompletionItemProvider, ProviderResult, TextDocument,CompletionItem, Disposable, Position} from 'vscode';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 
 interface Dependency {

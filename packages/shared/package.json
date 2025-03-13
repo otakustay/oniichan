@@ -28,10 +28,10 @@
     "dist"
   ],
   "dependencies": {
-    "@openrouter/ai-sdk-provider": "^0.2.2",
+    "@openrouter/ai-sdk-provider": "^0.4.3",
     "@otakustay/async-iterator": "^1.1.1",
     "@types/json-schema": "^7.0.15",
-    "ai": "^4.1.44",
+    "ai": "^4.1.58",
     "dedent": "^1.5.3",
     "diff": "^7.0.0",
     "globby": "^14.1.0",
@@ -41,7 +41,7 @@
     "@types/diff": "^7.0.1",
     "@types/ignore-by-default": "^0.0.0",
     "@types/node": "20.x",
-    "vite": "^6.1.1",
-    "vitest": "^3.0.6"
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8"
   }
 }

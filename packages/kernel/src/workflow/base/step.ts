@@ -1,10 +1,10 @@
-import {Logger} from '@oniichan/shared/logger';
-import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import type {Logger} from '@oniichan/shared/logger';
+import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import {createEmptyAssistantTextMessage} from '../../inbox';
-import * as inbox from '../../inbox';
-import {CommandExecutor} from '../../core/command';
-import {ModelAccessHost} from '../../core/model';
+import type * as inbox from '../../inbox';
+import type {CommandExecutor} from '../../core/command';
+import type {ModelAccessHost} from '../../core/model';
 import type {ModelChatOptions} from '../../core/model';
 import type {EditorHost} from '../../core/editor';
 import type {InboxMessage, InboxMessageThread} from '../../inbox';

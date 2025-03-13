@@ -3,7 +3,7 @@ import type {ToolName} from '@oniichan/shared/tool';
 import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
 import {AttemptCompletionToolImplement} from './attemptCompletion';
 import type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError} from './base';
-import * as base from './base';
+import type * as base from './base';
 import {ToolImplementBase} from './base';
 import {BrowserPreviewToolImplement} from './browserPreview';
 import {DeleteFileToolImplement} from './deleteFile';

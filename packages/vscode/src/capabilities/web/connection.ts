@@ -3,7 +3,7 @@ import type {Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
 import {WebHostClient} from '@oniichan/web-host/client';
 import {Logger} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 
 interface Dependency {
     [Logger.containerKey]: Logger;

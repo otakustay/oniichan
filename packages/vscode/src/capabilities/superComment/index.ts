@@ -1,8 +1,9 @@
-import {Disposable, languages} from 'vscode';
-import {TaskManager} from '@oniichan/editor-host/utils/task';
-import {Logger} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
-import {KernelClient} from '../../kernel';
+import type {Disposable} from 'vscode';
+import { languages} from 'vscode';
+import type {TaskManager} from '@oniichan/editor-host/utils/task';
+import type {Logger} from '@oniichan/shared/logger';
+import type {DependencyContainer} from '@oniichan/shared/container';
+import type {KernelClient} from '../../kernel';
 import {SuperCommentCompletionProvider} from './completion';
 import {SendToInboxCommand} from './command';
 

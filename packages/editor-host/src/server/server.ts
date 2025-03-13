@@ -1,6 +1,6 @@
 import type {ExtensionContext} from 'vscode';
 import {Server} from '@otakustay/ipc';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {LoadingManager} from '../ui/loading';

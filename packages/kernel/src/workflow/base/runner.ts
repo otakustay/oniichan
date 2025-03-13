@@ -1,9 +1,9 @@
 import {WorkflowStep} from './step';
 import type {WorkflowStepInit} from './step';
-import {WorkflowDetector} from './detector';
-import {WorkflowValidator} from './validator';
-import {WorkflowInitializer} from './initializer';
-import {WorkflowExecutor} from './executor';
+import type {WorkflowDetector} from './detector';
+import type {WorkflowValidator} from './validator';
+import type {WorkflowInitializer} from './initializer';
+import type {WorkflowExecutor} from './executor';
 import {stringifyError} from '@oniichan/shared/error';
 
 interface WorkflowRunnerChildren {

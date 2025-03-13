@@ -1,5 +1,5 @@
 import {Disposable} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {stringifyError} from '@oniichan/shared/error';
 import {Logger} from '@oniichan/shared/logger';
 

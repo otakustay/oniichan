@@ -1,4 +1,5 @@
-import {Diagnostic, DiagnosticSeverity, languages, Uri, window} from 'vscode';
+import type {Diagnostic} from 'vscode';
+import { DiagnosticSeverity, languages, Uri, window} from 'vscode';
 import {RequestHandler} from './handler';
 
 export class GetDocumentTextHandler extends RequestHandler<string, string> {

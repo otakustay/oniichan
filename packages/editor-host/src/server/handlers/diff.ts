@@ -1,4 +1,5 @@
-import {Position, Range, Uri, window, workspace, WorkspaceEdit} from 'vscode';
+import type { Uri} from 'vscode';
+import {Position, Range, window, workspace, WorkspaceEdit} from 'vscode';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
 import {revertFileEdit} from '@oniichan/shared/patch';

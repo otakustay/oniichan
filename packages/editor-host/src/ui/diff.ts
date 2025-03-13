@@ -1,6 +1,7 @@
 import path from 'node:path';
-import {commands, Uri, window, workspace, Disposable} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type { Disposable} from 'vscode';
+import {commands, Uri, window, workspace} from 'vscode';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {Logger} from '@oniichan/shared/logger';
 import {stringifyError} from '@oniichan/shared/error';

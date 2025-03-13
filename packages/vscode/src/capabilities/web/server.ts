@@ -5,19 +5,19 @@ import type {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';
 import serveStatic from '@fastify/static';
 import proxy from '@fastify/http-proxy';
-import {WebSocket} from 'ws';
+import type {WebSocket} from 'ws';
 import detectPort from 'detect-port';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
-import {DependencyContainer} from '@oniichan/shared/container';
-import {LoadingManager} from '@oniichan/editor-host/ui/loading';
-import {Logger} from '@oniichan/shared/logger';
-import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
-import {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import {KernelClient} from '../../kernel';
+import type {DependencyContainer} from '@oniichan/shared/container';
+import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import type {Logger} from '@oniichan/shared/logger';
+import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
+import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
+import type {KernelClient} from '../../kernel';
 import {establishIpc} from './ipc';
-import {WebConnection} from './connection';
+import type {WebConnection} from './connection';
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;

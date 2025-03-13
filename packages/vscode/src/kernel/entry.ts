@@ -1,4 +1,5 @@
-import {MessagePort, parentPort, workerData} from 'node:worker_threads';
+import type {MessagePort} from 'node:worker_threads';
+import { parentPort, workerData} from 'node:worker_threads';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';

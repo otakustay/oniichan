@@ -1,8 +1,8 @@
-import {Disposable, window} from 'vscode';
-import type {OutputChannel} from 'vscode';
+import { window} from 'vscode';
+import type {OutputChannel,Disposable} from 'vscode';
 import {ConsoleLogger, Logger} from '@oniichan/shared/logger';
 import type {LogEntry, LoggerScope} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 
 export class OutputChannelProvider implements Disposable {
     static containerKey = 'OutputChannelProvider' as const;

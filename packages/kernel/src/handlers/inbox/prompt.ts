@@ -4,7 +4,7 @@ import type {InboxPromptReference, InboxPromptView, InboxPromptMode} from '@onii
 import {stringifyError} from '@oniichan/shared/error';
 import type {ModelFeature} from '@oniichan/shared/model';
 import {uniqueBy} from '@oniichan/shared/array';
-import {Logger} from '@oniichan/shared/logger';
+import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
 import type {EditorHost} from '../../core/editor';
 

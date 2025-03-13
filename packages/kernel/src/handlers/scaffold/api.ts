@@ -1,5 +1,5 @@
 import type {ChatUserMessagePayload} from '@oniichan/shared/model';
-import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
+import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
 import {over} from '@otakustay/async-iterator';
 import {ModelAccessHost} from '../../core/model';

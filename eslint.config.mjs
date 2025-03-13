@@ -42,6 +42,8 @@ export default ts.config(
                 },
             ],
             '@typescript-eslint/no-unnecessary-condition': 'off',
+            '@typescript-eslint/consistent-type-exports': 'error',
+            '@typescript-eslint/consistent-type-imports': 'error',
         },
     },
     {

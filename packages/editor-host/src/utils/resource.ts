@@ -1,6 +1,6 @@
-import {Disposable} from 'vscode';
+import type {Disposable} from 'vscode';
 import {Logger} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 
 interface Dependency {
     [Logger.containerKey]: Logger;

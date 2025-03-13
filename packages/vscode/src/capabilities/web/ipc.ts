@@ -1,14 +1,14 @@
 import type {ExtensionContext} from 'vscode';
-import {Client, RequestHandler, Server} from '@otakustay/ipc';
-import type {ExecutionRequest, Port, ServerInit} from '@otakustay/ipc';
-import {DependencyContainer} from '@oniichan/shared/container';
+import { RequestHandler, Server} from '@otakustay/ipc';
+import type {ExecutionRequest, Port, ServerInit,Client} from '@otakustay/ipc';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {KernelClient} from '../../kernel';
 import {EditorHostServer} from '@oniichan/editor-host/server';
-import {LoadingManager} from '@oniichan/editor-host/ui/loading';
-import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
-import {Logger} from '@oniichan/shared/logger';
-import {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import {WebConnection} from './connection';
+import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
+import type {Logger} from '@oniichan/shared/logger';
+import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
+import type {WebConnection} from './connection';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
     private readonly upstream: Client<any>;

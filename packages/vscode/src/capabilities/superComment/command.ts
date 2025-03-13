@@ -1,7 +1,7 @@
 import path from 'node:path';
-import {commands, Disposable, Range, Position, window, workspace} from 'vscode';
-import type {TextEditor} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import {commands, Range, Position, window, workspace} from 'vscode';
+import type {TextEditor, Disposable} from 'vscode';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
 import {getLanguageConfig} from '@oniichan/shared/language';

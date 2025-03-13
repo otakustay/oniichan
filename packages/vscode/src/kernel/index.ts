@@ -1,13 +1,14 @@
 import path from 'node:path';
 import {existsSync} from 'node:fs';
 import {Worker} from 'node:worker_threads';
-import {Disposable, env, window} from 'vscode';
+import type {Disposable} from 'vscode';
+import { env, window} from 'vscode';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, ExecutionNotice, Port} from '@otakustay/ipc';
 import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
 import {EditorHostServer} from '@oniichan/editor-host/server';
 import type {EditorHostDependency} from '@oniichan/editor-host/server';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import type {LogEntry} from '@oniichan/shared/logger';
 import type {MessageThreadData} from '@oniichan/shared/inbox';

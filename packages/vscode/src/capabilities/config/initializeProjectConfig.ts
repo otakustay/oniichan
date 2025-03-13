@@ -1,5 +1,6 @@
-import {commands, Disposable, window} from 'vscode';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type { Disposable} from 'vscode';
+import {commands, window} from 'vscode';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
 import {KernelClient} from '../../kernel';
 

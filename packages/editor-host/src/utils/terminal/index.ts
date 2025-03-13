@@ -1,8 +1,8 @@
-import {Disposable, window} from 'vscode';
-import type {Terminal} from 'vscode';
+import { window} from 'vscode';
+import type {Terminal,Disposable} from 'vscode';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 import {Logger} from '@oniichan/shared/logger';
-import {DependencyContainer} from '@oniichan/shared/container';
+import type {DependencyContainer} from '@oniichan/shared/container';
 import {defer} from '@oniichan/shared/promise';
 import {isLongRunningCommand} from './detection';
 

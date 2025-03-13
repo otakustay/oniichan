@@ -226,7 +226,7 @@
     "url": "https://github.com/otakustay/oniichan"
   },
   "devDependencies": {
-    "@fastify/http-proxy": "^11.0.1",
+    "@fastify/http-proxy": "^11.1.2",
     "@fastify/static": "^8.1.1",
     "@fastify/websocket": "^11.0.2",
     "@oniichan/editor-host": "workspace:*",
@@ -240,11 +240,10 @@
     "@types/node": "20.x",
     "@types/vscode": "1.95.x",
     "@types/vscode-webview": "^1.57.5",
-    "@types/ws": "^8.5.14",
+    "@types/ws": "^8.18.0",
     "detect-port": "^2.1.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.25.1",
     "fastify": "^5.2.1",
-    "open": "^10.1.0",
-    "ws": "^8.18.1"
+    "open": "^10.1.0"
   }
 }
