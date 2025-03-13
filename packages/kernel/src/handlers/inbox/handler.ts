@@ -55,12 +55,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private inboxConfig: InboxConfig = {
         automaticRunCommand: false,
         exceptionCommandList: [],
-        ringRingMode: {
-            enabled: false,
-            plannerModel: '',
-            actorModel: '',
-            coderModel: '',
-        },
+        enableRingRingMode: false,
+        plannerModel: '',
+        actorModel: '',
+        coderModel: null,
     };
 
     private modelAccess = new ModelAccessHost(this.context.editorHost);
@@ -221,7 +219,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         }
 
         if (this.workingMode !== 'standalone') {
-            const {plannerModel, actorModel, coderModel} = this.inboxConfig.ringRingMode;
+            const {plannerModel, actorModel, coderModel} = this.inboxConfig;
             options.overrideModelName = this.workingMode === 'plan'
                 ? plannerModel
                 : (this.workingMode === 'code' ? coderModel || actorModel : actorModel);
@@ -238,7 +236,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private prepareWorkingMode() {
         const {logger} = this.context;
 
-        if (!this.inboxConfig.ringRingMode.enabled) {
+        if (!this.inboxConfig.enableRingRingMode) {
             this.workingMode = 'standalone';
             return;
         }

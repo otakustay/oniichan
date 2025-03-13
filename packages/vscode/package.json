@@ -141,7 +141,7 @@
             },
             "description": "Exceptional commands which is allowed or denied to run automatically according to default mode"
           },
-          "oniichan.inbox.ringRingMode.enabled": {
+          "oniichan.inbox.enableRingRingMode": {
             "order": 3,
             "type": "boolean",
             "default": false,
@@ -150,28 +150,28 @@
               "experimental"
             ]
           },
-          "oniichan.inbox.ringRingMode.plannerModel": {
+          "oniichan.inbox.plannerModel": {
             "order": 4,
             "type": "string",
             "default": "deepseek/deepseek-r1",
-            "description": "The model used as planner in ring-ring mode",
+            "description": "The model used as planner, only works in ring-ring mode",
             "tags": [
               "experimental"
             ]
           },
-          "oniichan.inbox.ringRingMode.actorModel": {
+          "oniichan.inbox.actorModel": {
             "order": 5,
             "type": "string",
             "default": "qwen/qwen-plus",
-            "description": "The model used as task actor in ring-ring mode",
+            "description": "The model used as task actor, only works in ring-ring mode",
             "tags": [
               "experimental"
             ]
           },
-          "oniichan.inbox.ringRingMode.coderModel": {
+          "oniichan.inbox.coderModel": {
             "order": 6,
             "type": "string",
-            "description": "The model used as coder in ring-ring mode, default to the same as actor model",
+            "description": "The model used as coder, only works in ring-ring mode, default to the same as actor model",
             "tags": [
               "experimental"
             ]

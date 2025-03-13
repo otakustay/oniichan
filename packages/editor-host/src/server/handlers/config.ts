@@ -85,17 +85,13 @@ const DEFAULT_DENIED_COMMAND_LIST = [
     'safari',
 ];
 
-export interface InboxRingRingModeConfig {
-    enabled: boolean;
-    plannerModel: string;
-    actorModel: string;
-    coderModel: string | null;
-}
-
 export interface InboxConfig {
     automaticRunCommand: boolean;
     exceptionCommandList: string[];
-    ringRingMode: InboxRingRingModeConfig;
+    enableRingRingMode: boolean;
+    plannerModel: string;
+    actorModel: string;
+    coderModel: string | null;
 }
 
 export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
@@ -108,21 +104,19 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const config = workspace.getConfiguration('oniichan.inbox');
         const automaticRunCommand = config.get<boolean>('automaticRunCommand');
         const exceptionCommandList = config.get<string[]>('exceptionCommandList');
-        const ringRingModeEnabled = config.get<boolean>('ringRingMode.enabled') ?? false;
-        const ringRingModePlannerModel = config.get<string>('ringRingMode.plannerModel');
-        const ringRingModeActorModel = config.get<string>('ringRingMode.actorModel');
-        const ringRingModeCoderModel = config.get<string>('ringRingMode.coderModel');
+        const enableRingRingMode = config.get<boolean>('enableRingRingMode') ?? false;
+        const plannerModel = config.get<string>('plannerModel');
+        const actorModel = config.get<string>('actorModel');
+        const coderModel = config.get<string>('coderModel');
         const result: InboxConfig = {
             automaticRunCommand: automaticRunCommand ?? false,
             exceptionCommandList: exceptionCommandList?.length
                 ? exceptionCommandList
                 : (automaticRunCommand ? DEFAULT_DENIED_COMMAND_LIST : []),
-            ringRingMode: {
-                enabled: ringRingModeEnabled,
-                plannerModel: ringRingModePlannerModel ?? '',
-                actorModel: ringRingModeActorModel ?? '',
-                coderModel: ringRingModeCoderModel ?? null,
-            },
+            enableRingRingMode: enableRingRingMode ?? false,
+            plannerModel: plannerModel ?? '',
+            actorModel: actorModel ?? '',
+            coderModel: coderModel ?? null,
         };
         this.validate(result);
         yield result;
@@ -131,9 +125,9 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
     }
 
     private validate(config: InboxConfig) {
-        if (config.ringRingMode.enabled) {
-            assertHasValue(config.ringRingMode.plannerModel, 'Planner model is not configured');
-            assertHasValue(config.ringRingMode.actorModel, 'Actor model is not configured');
+        if (config.enableRingRingMode) {
+            assertHasValue(config.plannerModel, 'Planner model is not configured');
+            assertHasValue(config.actorModel, 'Actor model is not configured');
         }
     }
 }
