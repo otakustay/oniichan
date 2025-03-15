@@ -1,7 +1,6 @@
 import {commands, window, workspace} from 'vscode';
 import type {InputBoxOptions} from 'vscode';
 import type {ModelConfiguration} from '@oniichan/shared/model';
-import {assertHasValue} from '@oniichan/shared/error';
 import {getModelConfig} from '../../utils/config';
 import {RequestHandler} from './handler';
 
@@ -88,7 +87,6 @@ const DEFAULT_DENIED_COMMAND_LIST = [
 export interface InboxConfig {
     automaticRunCommand: boolean;
     exceptionCommandList: string[];
-    enableRingRingMode: boolean;
     plannerModel: string;
     actorModel: string;
     coderModel: string | null;
@@ -104,7 +102,6 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const config = workspace.getConfiguration('oniichan.inbox');
         const automaticRunCommand = config.get<boolean>('automaticRunCommand');
         const exceptionCommandList = config.get<string[]>('exceptionCommandList');
-        const enableRingRingMode = config.get<boolean>('enableRingRingMode') ?? false;
         const plannerModel = config.get<string>('plannerModel');
         const actorModel = config.get<string>('actorModel');
         const coderModel = config.get<string>('coderModel');
@@ -113,22 +110,13 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
             exceptionCommandList: exceptionCommandList?.length
                 ? exceptionCommandList
                 : (automaticRunCommand ? DEFAULT_DENIED_COMMAND_LIST : []),
-            enableRingRingMode: enableRingRingMode ?? false,
             plannerModel: plannerModel ?? '',
             actorModel: actorModel ?? '',
             coderModel: coderModel ?? null,
         };
-        this.validate(result);
         yield result;
 
         logger.info('Finish');
-    }
-
-    private validate(config: InboxConfig) {
-        if (config.enableRingRingMode) {
-            assertHasValue(config.plannerModel, 'Planner model is not configured');
-            assertHasValue(config.actorModel, 'Actor model is not configured');
-        }
     }
 }
 

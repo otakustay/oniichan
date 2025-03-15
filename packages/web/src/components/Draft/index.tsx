@@ -1,16 +1,16 @@
+import {useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import {motion} from 'motion/react';
 import {useEditingValue, useSetEditing, useSubmitableDraftContent} from '@oniichan/web-host/atoms/draft';
 import type {EditingValue} from '@oniichan/web-host/atoms/draft';
 import {useMessageThreadValueByUuid, useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
 import Modal from '@/components/Modal';
-import Avatar from '@/components/Avatar';
 import {useIpc, useIsWideScreen} from '@/components/AppProvider';
 import {Alert} from '@/components/Alert';
 import {mediaWideScreen} from '@/styles';
 import MessageEditor from './Editor';
 import SendTrigger from './SendTrigger';
-import {useEffect, useState} from 'react';
+import {Receiver} from './Receiver';
 
 function warning(count: number) {
     return `${count} ${count > 1 ? 'files' : 'file'} pending review, replying will discard edits`;
@@ -45,15 +45,6 @@ const Header = styled.div`
     justify-content: space-between;
     align-items: center;
     font-weight: bold;
-`;
-
-const Receiver = styled.div`
-    display: flex;
-    gap: .4em;
-    align-items: center;
-    color: #aaa;
-    padding-bottom: 1em;
-    border-bottom: 1px solid var(--color-default-border);
 `;
 
 const Editor = styled(MessageEditor)`
@@ -100,9 +91,7 @@ function Content({threadUuid, mode}: EditingValue) {
                 {mode === 'reply' ? 'Reply Message' : 'New Message'}
                 <SendTrigger disabled={!content.trim()} onClick={send} />
             </Header>
-            <Receiver>
-                To: <Avatar.Assistant size="1em" />Oniichan
-            </Receiver>
+            <Receiver />
             {!!discardingEditCount && <Warning type="warn" message={warning(discardingEditCount)} />}
             <Editor onSend={send} />
         </>

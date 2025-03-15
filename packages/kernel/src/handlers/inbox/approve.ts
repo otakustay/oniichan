@@ -37,7 +37,7 @@ export class InboxApproveToolHandler extends InboxRequestHandler<InboxApproveToo
         await this.prepareEnvironment();
 
         logger.trace('EnsureRoundtrip');
-        this.thread = store.ensureThread(payload.threadUuid);
+        this.thread = store.findThreadByUuidStrict(payload.threadUuid);
 
         logger.trace('PrepareOriginMessage');
         this.roundtrip = this.thread.findRoundtripByMessageUuidStrict(payload.requestMessageUuid);

@@ -17,14 +17,17 @@ import type {
     RoundtripMessageData,
     AssistantMessageData,
     PlanTask,
+    MessageThreadWorkingMode,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc';
-import {useSetDraftContent, useSetEditing} from './draft';
+import {useEditingValue, useSetDraftContent, useSetEditing} from './draft';
 
 export const messageThreadListAtom = atom<MessageThreadData[]>([]);
 
 export const activeTheadUuidAtom = atom<string | null>(null);
+
+export const workingModeAtom = atom<MessageThreadWorkingMode>('normal');
 
 export function useSetActiveMessageThread() {
     return useSetAtom(activeTheadUuidAtom);
@@ -48,6 +51,22 @@ export function useActiveMessageThreadValue() {
     const uuid = useAtomValue(activeTheadUuidAtom);
     const threads = useMessageThreadListValue();
     return uuid ? threads.find(v => v.uuid === uuid) : null;
+}
+
+export function useSetWorkingMode() {
+    return useSetAtom(workingModeAtom);
+}
+
+export function useWorkingModeSubmitValue() {
+    const workingMode = useAtomValue(workingModeAtom);
+    const editing = useEditingValue();
+    const threads = useMessageThreadListValue();
+
+    if (editing?.mode === 'reply' && editing.threadUuid) {
+        return threads.find(v => v.uuid === editing.threadUuid)?.workingMode ?? 'normal';
+    }
+
+    return workingMode;
 }
 
 export function useMarkMessageStatus(threadUuid: string, messageUuid: string) {
@@ -383,12 +402,14 @@ export function useSendMessageToThread(threadUuid: string) {
     const setMessageThreadList = useSetMessagelThreadList();
     const setEditing = useSetEditing();
     const setDraftContent = useSetDraftContent();
+    const workingMode = useWorkingModeSubmitValue();
     return async (uuid: string, content: string) => {
         setEditing(null);
         setDraftContent('');
         const request: InboxSendMessageRequest = {
             threadUuid,
             uuid,
+            workingMode,
             body: {
                 type: 'text',
                 content: content,

@@ -26,6 +26,7 @@
     "@oniichan/storage": "workspace:*",
     "@oniichan/web-host": "workspace:*",
     "@otakustay/ipc": "^2.5.0",
+    "@popperjs/core": "^2.11.8",
     "@rspack/cli": "^1.2.8",
     "@rspack/core": "^1.2.8",
     "@rspack/plugin-react-refresh": "^1.0.1",
@@ -48,6 +49,7 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-mentions": "^4.4.10",
+    "react-popper": "^2.3.0",
     "react-refresh": "^0.16.0",
     "react-spinners": "^0.15.0",
     "shiki": "^3.2.1"

@@ -24,6 +24,7 @@ import type {
     PlanMessageChunk,
     PlanTask,
     PlanCompletionProgress,
+    MessageThreadWorkingMode,
 } from '@oniichan/shared/inbox';
 import type {ContentTagName} from '@oniichan/shared/tool';
 
@@ -137,6 +138,7 @@ export interface InboxWorkflow {
 
 export interface InboxMessageThread {
     readonly uuid: string;
+    getWorkingMode(): MessageThreadWorkingMode;
     addRoundtrip(roundtrip: InboxRoundtrip): void;
     hasMessage(messageUuid: string): boolean;
     findMessageByUuidStrict(messageUuid: string): InboxMessage; // Assuming InboxMessage is the return type

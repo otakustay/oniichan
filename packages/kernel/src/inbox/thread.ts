@@ -1,4 +1,4 @@
-import type {MessageThreadData, MessageThreadPersistData} from '@oniichan/shared/inbox';
+import type {MessageThreadData, MessageThreadPersistData, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
 import type {InboxMessageThread, InboxRoundtrip} from './interface';
 import {Roundtrip} from './roundtrip';
@@ -8,7 +8,7 @@ import {Roundtrip} from './roundtrip';
  */
 export class MessageThread implements InboxMessageThread {
     static from(data: MessageThreadPersistData) {
-        const thread = new MessageThread(data.uuid);
+        const thread = new MessageThread(data.uuid, data.workingMode);
         for (const roundtripData of data.roundtrips) {
             thread.addRoundtrip(Roundtrip.from(roundtripData));
         }
@@ -17,10 +17,17 @@ export class MessageThread implements InboxMessageThread {
 
     public readonly uuid: string;
 
+    private readonly workingMode: MessageThreadWorkingMode;
+
     private readonly roundtrips: InboxRoundtrip[] = [];
 
-    constructor(uuid: string) {
+    constructor(uuid: string, workingMode: MessageThreadWorkingMode) {
         this.uuid = uuid;
+        this.workingMode = workingMode;
+    }
+
+    getWorkingMode(): MessageThreadWorkingMode {
+        return this.workingMode;
     }
 
     addRoundtrip(roundtrip: InboxRoundtrip) {
@@ -65,6 +72,7 @@ export class MessageThread implements InboxMessageThread {
     toThreadData(): MessageThreadData {
         return {
             uuid: this.uuid,
+            workingMode: this.workingMode,
             roundtrips: this.roundtrips.map(v => v.toRoundtripMessageData()),
         };
     }
@@ -72,6 +80,7 @@ export class MessageThread implements InboxMessageThread {
     toPersistData(): MessageThreadPersistData {
         return {
             uuid: this.uuid,
+            workingMode: this.workingMode,
             roundtrips: this.roundtrips.map(v => v.toRoundtripData()),
         };
     }

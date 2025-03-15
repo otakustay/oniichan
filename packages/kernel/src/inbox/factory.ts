@@ -75,5 +75,5 @@ export function createEmptyRoundtrip(): InboxRoundtrip {
 }
 
 export function createEmptyMessageThread(): InboxMessageThread {
-    return new MessageThread(newUuid());
+    return new MessageThread(newUuid(), 'normal');
 }

@@ -4,6 +4,7 @@ import type {InboxPromptReference} from '@oniichan/prompt';
 import {setRoundtripRequest} from '../../inbox';
 import {InboxRequestHandler} from './handler';
 import type {InboxMessageResponse} from './handler';
+import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 
 interface TextMessageBody {
     type: 'text';
@@ -15,6 +16,7 @@ type MessageBody = TextMessageBody;
 export interface InboxSendMessageRequest {
     threadUuid: string;
     uuid: string;
+    workingMode: MessageThreadWorkingMode;
     body: MessageBody;
     references?: InboxPromptReference[];
 }
@@ -46,7 +48,7 @@ export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessag
         await this.prepareEnvironment();
 
         logger.trace('EnsureRoundtrip');
-        this.thread = store.ensureThread(payload.threadUuid);
+        this.thread = store.ensureThread(payload.threadUuid, payload.workingMode);
         setRoundtripRequest(this.roundtrip, payload.uuid, payload.body.content);
         this.thread.addRoundtrip(this.roundtrip);
         this.addReference(payload.references ?? []);

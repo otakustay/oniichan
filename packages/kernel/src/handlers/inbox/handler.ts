@@ -55,7 +55,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private inboxConfig: InboxConfig = {
         automaticRunCommand: false,
         exceptionCommandList: [],
-        enableRingRingMode: false,
         plannerModel: '',
         actorModel: '',
         coderModel: null,
@@ -65,7 +64,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     private systemPrompt = '';
 
-    private workingMode: InboxPromptMode = 'standalone';
+    private promptMode: InboxPromptMode = 'standalone';
 
     protected addReference(references: InboxPromptReference[]) {
         this.references.push(...references);
@@ -194,8 +193,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const {logger} = this.context;
         logger.trace('PrepareSystemPromptStart');
 
-        this.prepareWorkingMode();
-        this.systemPromptGenerator.setMode(this.workingMode);
+        this.preparePromptMode();
+        this.systemPromptGenerator.setMode(this.promptMode);
         const modelFeature = await this.modelAccess.getModelFeature();
         this.systemPromptGenerator.addReference(this.references);
         this.systemPromptGenerator.setModelFeature(modelFeature);
@@ -214,15 +213,15 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             systemPrompt: this.systemPrompt,
         };
 
-        if (this.workingMode === 'act') {
+        if (this.promptMode === 'act') {
             options.messages[0].content = '(User request is hidden currently)';
         }
 
-        if (this.workingMode !== 'standalone') {
+        if (this.promptMode !== 'standalone') {
             const {plannerModel, actorModel, coderModel} = this.inboxConfig;
-            options.overrideModelName = this.workingMode === 'plan'
+            options.overrideModelName = this.promptMode === 'plan'
                 ? plannerModel
-                : (this.workingMode === 'code' ? coderModel || actorModel : actorModel);
+                : (this.promptMode === 'code' ? coderModel || actorModel : actorModel);
         }
 
         return options;
@@ -233,23 +232,23 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     }
 
     // TODO: Split ring ring mode and standalone mode into different implement
-    private prepareWorkingMode() {
+    private preparePromptMode() {
         const {logger} = this.context;
 
-        if (!this.inboxConfig.enableRingRingMode) {
-            this.workingMode = 'standalone';
+        if (this.thread.getWorkingMode() === 'normal') {
+            this.promptMode = 'standalone';
             return;
         }
 
-        const mode = this.getRingRingWorkingMode();
-        this.workingMode = mode ?? 'standalone';
+        const mode = this.getRingRingPromptMode();
+        this.promptMode = mode ?? 'standalone';
 
         if (!mode) {
             logger.warn('UnexpectedWorkingMode', {mode: 'standalone'});
         }
     }
 
-    private getRingRingWorkingMode(): InboxPromptMode | null {
+    private getRingRingPromptMode(): InboxPromptMode | null {
         const messages = this.thread.toMessages();
 
         // Only user request message, the first reply should be in plan mode

@@ -9,12 +9,12 @@ import mentionStyle from './mentionStyle';
 const EditArea = styled(MentionsInput)`
     width: 100%;
     height: 100%;
-    padding: .5em;
 
     textarea {
         resize: none;
         border: none;
         background-color: transparent;
+        padding: .5em;
 
         &:focus {
             outline: none;

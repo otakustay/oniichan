@@ -56,5 +56,10 @@ export type {
     CompleteTaskToolCallMessageChunk,
 } from './tool';
 export type {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
-export type {MessageThreadData, MessageThreadPersistData, RoundtripMessageData} from './thread';
+export type {
+    MessageThreadData,
+    MessageThreadPersistData,
+    RoundtripMessageData,
+    MessageThreadWorkingMode,
+} from './thread';
 export type {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow';

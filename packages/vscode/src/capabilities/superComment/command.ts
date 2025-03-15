@@ -54,6 +54,7 @@ export class SendToInboxCommand implements Disposable {
         const payload: InboxSendMessageRequest = {
             threadUuid: newUuid(),
             uuid: newUuid(),
+            workingMode: 'normal',
             body: {
                 type: 'text',
                 content: messageText,

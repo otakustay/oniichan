@@ -1,4 +1,4 @@
-import type {MessageThreadPersistData, MessageThreadData} from '@oniichan/shared/inbox';
+import type {MessageThreadPersistData, MessageThreadData, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {MessageThread} from './thread';
 import type {InboxMessageThread} from './interface';
 
@@ -11,16 +11,20 @@ export class ThreadStore {
         this.threads = initialThreads.map(v => MessageThread.from(v));
     }
 
-    ensureThread(threadUuid: string) {
+    ensureThread(threadUuid: string, workingMode: MessageThreadWorkingMode) {
         const thread = this.threads.find(v => v.uuid === threadUuid);
 
-        if (thread) {
-            return thread;
+        if (!thread) {
+            const newThread = new MessageThread(threadUuid, workingMode);
+            this.threads.unshift(newThread);
+            return newThread;
         }
 
-        const newThread = new MessageThread(threadUuid);
-        this.threads.unshift(newThread);
-        return newThread;
+        if (thread.getWorkingMode() !== workingMode) {
+            throw new Error(`Thread ${threadUuid} has unexpected working mode ${thread.getWorkingMode()}`);
+        }
+
+        return thread;
     }
 
     moveThreadToTop(threadUuid: string) {
