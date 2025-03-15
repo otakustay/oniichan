@@ -15,6 +15,7 @@ import {ReadFileToolImplement} from './readFile';
 import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
 import {CompleteTaskToolImplement} from './completeTask';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 
 export {ToolImplementBase};
 export type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError};
@@ -74,7 +75,7 @@ export class ToolImplement {
         return implement.executeReject();
     }
 
-    extractArguments(toolName: ToolName, generated: Record<string, string | undefined>): Record<string, unknown> {
+    extractArguments(toolName: ToolName, generated: Record<string, RawToolCallParameter>): Record<string, unknown> {
         const implement = this.getImplement(toolName);
         return implement.extractParameters(generated);
     }
@@ -105,6 +106,9 @@ export class ToolImplement {
                 return this.askFollowupQuestion;
             case 'complete_task':
                 return this.completeTask;
+            // TODO: This is not enabled
+            case 'create_plan':
+                throw new Error('Not supported');
             default:
                 assertNever<string>(name, v => `Unknown tool ${v}`);
         }

@@ -1,5 +1,6 @@
 import dedent from 'dedent';
 import type {JSONSchema7} from 'json-schema';
+import type {PlanTask, RawToolCallParameter} from '../inbox';
 
 export interface ParameterInfo {
     type: 'object';
@@ -20,7 +21,8 @@ export type ToolName =
     | 'browser_preview'
     | 'attempt_completion'
     | 'ask_followup_question'
-    | 'complete_task';
+    | 'complete_task'
+    | 'create_plan';
 
 export interface ToolDescription {
     name: ToolName;
@@ -259,6 +261,37 @@ export interface CompleteTaskParameter {
     confidence: number;
 }
 
+export const createPlanParameters = {
+    type: 'object',
+    properties: {
+        read: {
+            type: 'array',
+            description:
+                'One or more tasks related to plan envolving gathering information from project, including reading files, directories and searching for specific patterns',
+            items: {
+                type: 'string',
+            },
+        },
+        coding: {
+            type: 'array',
+            description:
+                'One or more tasks related to plan envolving editing project, including creating, modifying, deleteing files and running terminal commands',
+            items: {
+                type: 'string',
+            },
+        },
+    },
+    required: [],
+} as const satisfies ParameterInfo;
+
+export interface CreatePlanParameter {
+    tasks: PlanTask[];
+}
+
+export interface CreatePlanParameter {
+    plan: string;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -402,6 +435,20 @@ export const builtinTools: ToolDescription[] = [
             </complete_task>
         `,
     },
+    {
+        name: 'create_plan',
+        description: 'Create a plan containing one or more tasks, tasks will be picked and executed afterwards.',
+        parameters: createPlanParameters,
+        usage: dedent`
+            <create_plan>
+            <read>Search for usage of debounce function</read>
+            <read>Read package.json to see if lodash is installed</read>
+            <coding>Delete file debounce.ts</coding>
+            <coding>Remove import of debounce from index.ts</coding>
+            <coding>Uninstall lodash</coding>
+            </create_plan>
+        `,
+    },
 ];
 
 export function isToolName(name: string): name is ToolName {
@@ -414,7 +461,7 @@ export function isEditToolName(name: ToolName) {
 
 export interface ModelToolCallInput {
     name: ToolName;
-    arguments: Record<string, string | undefined>;
+    arguments: Record<string, RawToolCallParameter>;
 }
 
 export interface ModelToolCallInputWithSource extends ModelToolCallInput {

@@ -2,6 +2,7 @@ import {test, expect} from 'vitest';
 import dedent from 'dedent';
 import {StreamingToolParser} from '../parse';
 import type {PlanTaskType} from '../parse';
+import type {RawToolCallParameter} from '../../inbox';
 
 async function* tokenize(content: string): AsyncIterable<string> {
     const tokens = content.split(/([^a-zA-Z0-9]+)/);
@@ -14,7 +15,7 @@ async function* tokenize(content: string): AsyncIterable<string> {
 interface ToolCall {
     type: 'tool';
     toolName: string;
-    args: Record<string, string>;
+    args: Record<string, RawToolCallParameter>;
     closed: boolean;
 }
 
@@ -72,15 +73,34 @@ async function consume(content: string) {
             throw new Error(`Unexpected plan chunk`);
         }
 
+        if (chunk.type === 'toolParameterStart') {
+            const call = chunks.at(-1);
+            if (call?.type === 'tool') {
+                const parameterValue = call.args[chunk.parameter];
+                if (parameterValue === undefined) {
+                    call.args[chunk.parameter] = '';
+                }
+                else if (typeof parameterValue === 'string') {
+                    call.args[chunk.parameter] = [parameterValue, ''];
+                }
+                else {
+                    parameterValue.push('');
+                }
+            }
+        }
         if (chunk.type === 'toolDelta') {
             const call = chunks.at(-1);
             if (call?.type === 'tool') {
                 for (const [key, value] of Object.entries(chunk.arguments)) {
-                    if (call.args[key] === undefined) {
-                        call.args[key] = value;
+                    const parameterValue = call.args[key];
+                    if (parameterValue === undefined) {
+                        throw new Error('Tool delta without parameter start');
+                    }
+                    else if (typeof parameterValue === 'string') {
+                        call.args[key] = parameterValue + value;
                     }
                     else {
-                        call.args[key] += value;
+                        parameterValue[parameterValue.length - 1] += value;
                     }
                 }
             }
@@ -213,6 +233,37 @@ test('cross line parameters', async () => {
         type: 'tool',
         toolName: 'read_directory',
         args: {path: 'src/\nmain.ts', recursive: 'true'},
+        closed: true,
+    };
+    expect(chunks.at(0)).toEqual(expected);
+});
+
+test('array parameters', async () => {
+    const message = dedent`
+        <create_plan>
+        <read>Search for usage of debounce function</read>
+        <read>Read package.json to see if lodash is installed</read>
+        <coding>Delete file debounce.ts</coding>
+        <coding>Remove import of debounce from index.ts</coding>
+        <coding>Uninstall lodash</coding>
+        </create_plan>
+    `;
+    const chunks = await consume(message);
+    expect(chunks.length).toBe(1);
+    const expected = {
+        type: 'tool',
+        toolName: 'create_plan',
+        args: {
+            read: [
+                'Search for usage of debounce function',
+                'Read package.json to see if lodash is installed',
+            ],
+            coding: [
+                'Delete file debounce.ts',
+                'Remove import of debounce from index.ts',
+                'Uninstall lodash',
+            ],
+        },
         closed: true,
     };
     expect(chunks.at(0)).toEqual(expected);

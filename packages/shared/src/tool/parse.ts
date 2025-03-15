@@ -81,6 +81,12 @@ interface ToolDeltaChunk {
     source: string;
 }
 
+interface ToolParameterStartChunk {
+    type: 'toolParameterStart';
+    parameter: string;
+    source: string;
+}
+
 interface ToolEndChunk {
     type: 'toolEnd';
     source: string;
@@ -99,6 +105,7 @@ export type ToolParsedChunk =
     | ContentEndChunk
     | TextInToolChunk
     | ToolStartChunk
+    | ToolParameterStartChunk
     | ToolDeltaChunk
     | ToolEndChunk;
 
@@ -234,7 +241,7 @@ export class StreamingToolParser {
             yield {type: 'planTaskDelta', taskType: structure.taskType, source: chunk.source};
         }
         else if (structure.state === 'insideTool') {
-            yield {type: 'toolDelta', arguments: {[chunk.tagName]: ''}, source: chunk.source};
+            yield {type: 'toolParameterStart', parameter: chunk.tagName, source: chunk.source};
             this.tagStack.push(chunk.tagName);
         }
         else if (structure.state === 'insideToolParameter') {

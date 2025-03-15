@@ -10,3 +10,7 @@ export function countNounSimple(count: number, noun: string) {
         return `${count} ${noun}s`;
     }
 }
+
+export function ensureString(value: string | string[] | undefined) {
+    return value === undefined ? '' : (typeof value === 'string' ? value : value.join(''));
+}

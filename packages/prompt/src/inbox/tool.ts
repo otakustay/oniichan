@@ -25,6 +25,13 @@ const prefix = dedent`
     </read_file>
 
     Always adhere to this format for the tool use to ensure proper parsing and execution.
+
+    If a parameter is defined as an array, it's name is provided as \`param[]\`, then you can include multiple parameter child tags inside the tool tag, such as:
+
+    <create_plan>
+    <read>Read main.js</read>
+    <read>Read package.json</read>
+    </create_plan>
 `;
 
 const guideline = dedent`
@@ -57,7 +64,7 @@ function renderParameter(description: ToolDescription, name: string) {
     const required = description.parameters.required.includes(name);
 
     return dedent`
-        - ${name}: (${required ? 'required' : 'optional'}) ${info.description}
+        - ${name}${info.type === 'array' ? '[]' : ''}: (${required ? 'required' : 'optional'}) ${info.description}
     `;
 }
 
@@ -80,6 +87,8 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const excludsTools: ToolName[] = [];
+    // TODO: This is not implemented for now
+    excludsTools.push('create_plan');
     switch (view.mode) {
         case 'act':
             excludsTools.push(

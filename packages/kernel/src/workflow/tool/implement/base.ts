@@ -3,7 +3,7 @@ import type {Logger} from '@oniichan/shared/logger';
 import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, PatchAction} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
+import {isFileEditToolCallChunk, type RawToolCallParameter} from '@oniichan/shared/inbox';
 import type {CommandExecutor} from '../../../core/command';
 import type {EditorHost} from '../../../core/editor';
 import {assertToolCallMessage} from '../../../inbox';
@@ -59,7 +59,7 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     abstract executeApprove(args: A): Promise<ToolExecuteResult>;
 
-    abstract extractParameters(generated: Record<string, string | undefined>): Partial<A>;
+    abstract extractParameters(generated: Record<string, RawToolCallParameter>): Partial<A>;
 
     protected getToolCallChunkStrict() {
         const origin = this.roundtrip.getLatestWorkflowStrict().getOriginMessage();

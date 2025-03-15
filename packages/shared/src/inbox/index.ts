@@ -54,6 +54,7 @@ export type {
     AskFollowupQuestionToolCallMessageChunk,
     PlanCompletionProgress,
     CompleteTaskToolCallMessageChunk,
+    RawToolCallParameter,
 } from './tool';
 export type {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
 export type {

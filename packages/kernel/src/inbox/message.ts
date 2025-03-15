@@ -320,12 +320,31 @@ export class AssistantTextMessage extends AssistantMessage<'assistantText'> impl
             assertTaggedChunk(lastChunk, 'Unexpected thinking end chunk coming without a start chunk');
             lastChunk.status = 'completed';
         }
+        else if (chunk.type === 'toolParameterStart') {
+            assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
+            lastChunk.source += chunk.source;
+            const previousValue = lastChunk.arguments[chunk.parameter];
+            if (previousValue === undefined) {
+                lastChunk.arguments[chunk.parameter] = '';
+            }
+            else if (typeof previousValue === 'string') {
+                lastChunk.arguments[chunk.parameter] = [previousValue, ''];
+            }
+            else {
+                previousValue.push('');
+            }
+        }
         else if (chunk.type === 'toolDelta') {
             assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
             lastChunk.source += chunk.source;
             for (const [key, value] of Object.entries(chunk.arguments)) {
                 const previousValue = lastChunk.arguments[key] ?? '';
-                lastChunk.arguments[key] = previousValue + value;
+                if (typeof previousValue === 'string') {
+                    lastChunk.arguments[key] = previousValue + value;
+                }
+                else {
+                    previousValue[previousValue.length - 1] += value;
+                }
             }
         }
         else if (chunk.type === 'toolEnd') {

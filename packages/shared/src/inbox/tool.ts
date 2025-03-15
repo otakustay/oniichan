@@ -29,10 +29,12 @@ export type WorkflowChunkStatus =
     | 'completed'
     | 'failed';
 
+export type RawToolCallParameter = string | string[] | undefined;
+
 export interface ToolCallMessageChunk {
     type: 'toolCall';
     toolName: ToolName;
-    arguments: Record<string, string | undefined>;
+    arguments: Record<string, RawToolCallParameter>;
     status: WorkflowSourceChunkStatus;
     source: string;
 }

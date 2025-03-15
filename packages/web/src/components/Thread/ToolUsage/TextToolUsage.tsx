@@ -2,7 +2,7 @@ import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {isEditToolName} from '@oniichan/shared/tool';
-import {trimPathString} from '@oniichan/shared/string';
+import {ensureString, trimPathString} from '@oniichan/shared/string';
 import type {ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
 import ActBar from '@/components/ActBar';
@@ -31,20 +31,20 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
             return [
                 IoDocumentTextOutline,
                 'Read file',
-                trimPathString(input.arguments.path ?? ''),
-                input.arguments.path ?? '',
+                trimPathString(ensureString(input.arguments.path)),
+                ensureString(input.arguments.path),
             ];
         case 'read_directory':
             return [
                 IoFolderOpenOutline,
                 'Read directory',
-                trimPathString(input.arguments.path ?? ''),
-                input.arguments.path ?? '',
+                trimPathString(ensureString(input.arguments.path)),
+                ensureString(input.arguments.path),
             ];
         case 'find_files_by_glob':
-            return [IoSearchOutline, 'Find files', input.arguments.glob ?? '', ''];
+            return [IoSearchOutline, 'Find files', ensureString(input.arguments.glob), ''];
         case 'find_files_by_regex':
-            return [IoSearchOutline, 'Grep', input.arguments.regex ?? '', ''];
+            return [IoSearchOutline, 'Grep', ensureString(input.arguments.regex), ''];
         default:
             throw new Error(`Unknown reference type`);
     }
@@ -62,30 +62,30 @@ export default function TextToolUsage({input}: Props) {
     if (input.toolName === 'attempt_completion') {
         // Not neccessary to show command when tool is not validated
         const {result} = input.arguments;
-        return result ? <Markdown content={result} /> : null;
+        return result ? <Markdown content={ensureString(result)} /> : null;
     }
 
     if (input.toolName === 'ask_followup_question') {
-        return input.arguments.question ? <Markdown content={input.arguments.question} /> : null;
+        return input.arguments.question ? <Markdown content={ensureString(input.arguments.question)} /> : null;
     }
 
     if (isEditToolName(input.toolName)) {
         return (
             <FileEdit
-                file={input.arguments.path ?? ''}
+                file={ensureString(input.arguments.path)}
                 // `patch` for `patch_file`, `content` for `write_file`
-                patch={input.arguments.patch ?? input.arguments.content ?? ''}
+                patch={ensureString(input.arguments.patch ?? input.arguments.content)}
                 edit={null}
             />
         );
     }
 
     if (input.toolName === 'run_command') {
-        return <CommandRun command={input.arguments.command ?? ''} status={input.status} />;
+        return <CommandRun command={ensureString(input.arguments.command)} status={input.status} />;
     }
 
     if (input.toolName === 'browser_preview') {
-        return <PreviewUrl url={input.arguments.url ?? ''} closed={false} />;
+        return <PreviewUrl url={ensureString(input.arguments.url)} closed={false} />;
     }
 
     const [Icon, action, parameter, title] = renderLabelContent(input);

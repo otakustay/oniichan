@@ -263,12 +263,38 @@ function handleChunkToAssistantMessage<T extends AssistantMessageData>(message: 
             ],
         };
     }
+    else if (chunk.type === 'toolParameterStart') {
+        assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
+        const args = {...lastChunk.arguments};
+        const previousValue = args[chunk.parameter];
+        if (previousValue === undefined) {
+            args[chunk.parameter] = '';
+        }
+        else if (typeof previousValue === 'string') {
+            args[chunk.parameter] = [previousValue, ''];
+        }
+        else {
+            args[chunk.parameter] = [...previousValue, ''];
+        }
+        return {
+            ...message,
+            chunks: [
+                ...message.chunks.slice(0, -1),
+                {
+                    ...lastChunk,
+                    arguments: args,
+                },
+            ],
+        };
+    }
     else if (chunk.type === 'toolDelta') {
         assertToolCallChunk(lastChunk, 'Unexpected tool delta chunk coming without a start chunk');
         const args = {...lastChunk.arguments};
         for (const [key, value] of Object.entries(chunk.arguments)) {
             const previousValue = args[key] ?? '';
-            args[key] = previousValue + value;
+            args[key] = typeof previousValue === 'string'
+                ? previousValue + value
+                : [...previousValue.slice(0, -1), previousValue[previousValue.length - 1] + value];
         }
         return {
             ...message,
