@@ -13,20 +13,16 @@ import type {
     WorkflowStatus,
     WorkflowData,
     UserRequestMessageData,
-    ParsedToolCallMessageChunk,
     MessageInputChunk,
     ToolCallMessageChunk,
     ToolUseMessageData,
     MessageThreadData,
     MessageThreadPersistData,
     TaggedMessageChunk,
-    PlanMessageData,
-    PlanMessageChunk,
-    PlanTask,
-    PlanCompletionProgress,
     MessageThreadWorkingMode,
+    ParsedToolCallMessageChunkOf,
 } from '@oniichan/shared/inbox';
-import type {ContentTagName} from '@oniichan/shared/tool';
+import type {ContentTagName, ToolName} from '@oniichan/shared/tool';
 
 export interface InboxRoundtrip {
     setRequest(request: InboxUserRequestMessage): void;
@@ -41,6 +37,8 @@ export interface InboxRoundtrip {
     getLatestWorkflow(): InboxWorkflow | null;
     getLatestTextMessageStrict(): InboxAssistantTextMessage;
     getLatestWorkflowStrict(): InboxWorkflow;
+    findLastToolCallMessageByToolNameStrict<N extends ToolName>(toolName: N): InboxToolCallMessage<N>;
+    findLastToolCallChunkByToolNameStrict<N extends ToolName>(toolName: N): ParsedToolCallMessageChunkOf<N>;
     addWarning(message: string): void;
     toMessages(): InboxMessage[];
     toRoundtripData(): RoundtripData;
@@ -56,8 +54,13 @@ export interface InboxMessageBase<T extends MessageType = MessageType> {
     toChatInputPayload(): ChatInputPayload;
 }
 
+export interface UserRequestMessageToChatInpytPayloadOptions {
+    hideUserRequest: boolean;
+}
+
 export interface InboxUserRequestMessage extends InboxMessageBase<'userRequest'> {
     toMessageData(): UserRequestMessageData;
+    toChatInputPayload(options?: UserRequestMessageToChatInpytPayloadOptions): ChatInputPayload;
 }
 
 interface InboxWorkflowSourceMessageBase extends InboxMessageBase<'assistantText'> {
@@ -69,8 +72,6 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessageBas
     toMessageData(): AssistantTextMessageData;
     getTextContent(): string;
     addChunk(chunk: MessageInputChunk): void;
-    findPlanChunk(): PlanMessageChunk | null;
-    findPlanChunkStrict(): PlanMessageChunk;
     findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null;
     findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk;
     findToolCallChunk(): ToolCallMessageChunk | null;
@@ -78,7 +79,7 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessageBas
     replaceToolCallChunk(newChunk: ToolCallMessageChunk): void;
 }
 
-type OriginType = 'toolCall' | 'plan';
+type OriginType = 'toolCall';
 
 interface InboxOriginMessageBase<T extends OriginType = OriginType> extends InboxMessageBase<T> {
     getWorkflowOriginStatus(): WorkflowChunkStatus;
@@ -86,37 +87,31 @@ interface InboxOriginMessageBase<T extends OriginType = OriginType> extends Inbo
     toMessageData(): WorkflowOriginMessageData;
 }
 
-export type PlanState = 'plan' | 'conclusion';
-
-export interface InboxPlanMessage extends InboxOriginMessageBase<'plan'> {
-    toMessageData(): PlanMessageData;
-    pickFirstPendingTask(): PlanTask | null;
-    getExecutingTask(): PlanTask | null;
-    completeExecutingTask(): void;
-    getProgress(): PlanCompletionProgress;
-    getPlanState(): PlanState;
+export interface ToolCallMessageToChatInpytPayloadOptions {
+    hidePlanDetail: boolean;
 }
 
-export interface InboxToolCallMessage extends InboxOriginMessageBase<'toolCall'> {
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+export interface InboxToolCallMessage<N extends ToolName = ToolName> extends InboxOriginMessageBase<'toolCall'> {
     toMessageData(): ToolCallMessageData;
-    findToolCallChunkStrict(): ParsedToolCallMessageChunk;
+    findToolCallChunkStrict(): ParsedToolCallMessageChunkOf<N>;
+    toChatInputPayload(options?: ToolCallMessageToChatInpytPayloadOptions): ChatInputPayload;
 }
 
 export interface InboxToolUseMessage extends InboxMessageBase<'toolUse'> {
     toMessageData(): ToolUseMessageData;
 }
 
-export type InboxAssistantMessage = InboxAssistantTextMessage | InboxToolCallMessage | InboxPlanMessage;
+export type InboxAssistantMessage = InboxAssistantTextMessage | InboxToolCallMessage;
 
 export type InboxWorkflowSourceMessage = InboxAssistantTextMessage;
 
-export type InboxWorkflowOriginMessage = InboxPlanMessage | InboxToolCallMessage;
+export type InboxWorkflowOriginMessage = InboxToolCallMessage;
 
 export type InboxMessage =
     | InboxUserRequestMessage
     | InboxAssistantTextMessage
     | InboxToolCallMessage
-    | InboxPlanMessage
     | InboxToolUseMessage;
 
 export interface InboxWorkflow {

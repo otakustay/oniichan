@@ -11,6 +11,7 @@ export {
     attemptCompletionParameters,
     askFollowupQuestionParameters,
     completeTaskParameters,
+    createPlanParameters,
     builtinTools,
     isToolName,
     isEditToolName,
@@ -29,10 +30,14 @@ export type {
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
     CompleteTaskParameter,
+    PlanTaskType,
+    PlanTaskStatus,
+    PlanTask,
+    CreatePlanParameter,
     ModelToolCallInput,
     ModelToolCallInputWithSource,
     ToolDescription,
     ToolName,
 } from './definition';
 export {StreamingToolParser} from './parse';
-export type {ToolParsedChunk, ContentTagName, PlanTaskType} from './parse';
+export type {ToolParsedChunk, ContentTagName} from './parse';

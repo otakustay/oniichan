@@ -5,7 +5,6 @@ import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import Thinking from './Thinking';
 import Reasoning from './Reasoning';
-import {Plan} from './Plan';
 
 const Layout = styled.div`
     & :where(code) {
@@ -47,17 +46,13 @@ export default function MessageContent({className, chunks, reasoning}: Props) {
             case 'text':
                 return chunk.content.trim() ? <Markdown key={`text-chunk-${index}`} content={chunk.content} /> : null;
             case 'content':
-                return chunk.tagName === 'conclusion'
-                    ? <Markdown key={`conclusion-chunk-${index}`} content={chunk.content} />
-                    : (
-                        <Thinking
-                            key={`content-chunk-${index}`}
-                            content={chunk.content}
-                            active={index !== dataSource.length - 1}
-                        />
-                    );
-            case 'plan':
-                return <Plan key={`plan-chunk-${index}`} tasks={chunk.tasks} closed={chunk.status === 'completed'} />;
+                return (
+                    <Thinking
+                        key={`content-chunk-${index}`}
+                        content={chunk.content}
+                        active={index !== dataSource.length - 1}
+                    />
+                );
             case 'toolCall':
             case 'parsedToolCall':
                 return <ToolUsage key={`tool-chunk-${index}`} input={chunk} />;

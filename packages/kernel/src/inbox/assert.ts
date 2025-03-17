@@ -1,38 +1,41 @@
 import type {ToolName} from '@oniichan/shared/tool';
-import type {
-    InboxAssistantMessage,
-    InboxAssistantTextMessage,
-    InboxMessage,
-    InboxPlanMessage,
-    InboxToolCallMessage,
-} from './interface';
+import type {InboxAssistantMessage, InboxAssistantTextMessage, InboxMessage, InboxToolCallMessage} from './interface';
+import type {ParsedToolCallMessageChunk, ParsedToolCallMessageChunkOf} from '@oniichan/shared/inbox';
 
-export function assertAssistantTextMessage(message: InboxMessage): asserts message is InboxAssistantTextMessage {
+// Shorten some types to ensure all declaration can be placed in one line
+type Message = InboxMessage;
+type AssistantMessage = InboxAssistantMessage;
+type AssistantTextMessage = InboxAssistantTextMessage;
+type ToolCallMessage<N extends ToolName = ToolName> = InboxToolCallMessage<N>;
+type AnyChunk = ParsedToolCallMessageChunk;
+type ChunkOf<N extends ToolName> = ParsedToolCallMessageChunkOf<N>;
+
+export function assertAssistantTextMessage(message: Message): asserts message is AssistantTextMessage {
     if (message.type !== 'assistantText') {
         throw new Error('Message is not assistant text');
     }
 }
 
-export function assertToolCallMessage(message: InboxMessage): asserts message is InboxToolCallMessage {
+export function assertToolCallMessage(message: Message): asserts message is ToolCallMessage {
     if (message.type !== 'toolCall') {
         throw new Error('Message is not tool call');
     }
 }
 
-export function assertPlanMessage(message: InboxMessage): asserts message is InboxPlanMessage {
-    if (message.type !== 'plan') {
-        throw new Error('Message is not plan');
+export function assertToolCallType<N extends ToolName>(chunk: AnyChunk, tool: N): asserts chunk is ChunkOf<N> {
+    if (chunk.toolName !== tool) {
+        throw new Error(`Unexpected tool call chunk in message with type ${tool}`);
     }
 }
 
-export function isAssistantMessage(message: InboxMessage): message is InboxAssistantMessage {
-    return message.type === 'assistantText' || message.type === 'toolCall' || message.type === 'plan';
+export function isAssistantMessage(message: Message): message is AssistantMessage {
+    return message.type === 'assistantText' || message.type === 'toolCall';
 }
 
-export function isToolCallMessage(message: InboxMessage): message is InboxToolCallMessage {
+export function isToolCallMessage(message: Message): message is ToolCallMessage {
     return message.type === 'toolCall';
 }
 
-export function isToolCallMessageOf(message: InboxMessage, tool: ToolName): message is InboxToolCallMessage {
+export function isToolCallMessageOf<N extends ToolName>(message: Message, tool: N): message is ToolCallMessage<N> {
     return isToolCallMessage(message) && message.findToolCallChunkStrict().toolName === tool;
 }

@@ -1,6 +1,8 @@
 import type {AttemptCompletionParameter} from '@oniichan/shared/tool';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
+import {asString} from './utils';
 
 export class AttemptCompletionToolImplement extends ToolImplementBase<AttemptCompletionParameter> {
     async executeApprove(): Promise<ToolExecuteResult> {
@@ -11,10 +13,10 @@ export class AttemptCompletionToolImplement extends ToolImplementBase<AttemptCom
         };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<AttemptCompletionParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<AttemptCompletionParameter> {
         return {
-            result: generated.result?.trim(),
-            command: generated.command?.trim(),
+            result: asString(generated.result),
+            command: asString(generated.command),
         };
     }
 }

@@ -1,19 +1,12 @@
 import type {DeleteFileParameter} from '@oniichan/shared/tool';
-import type {DeleteFileToolCallMessageChunk, ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
-
-function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is DeleteFileToolCallMessageChunk {
-    if (chunk.toolName !== 'delete_file') {
-        throw new Error('Invalid tool call message chunk');
-    }
-}
+import {asString} from './utils';
 
 export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParameter> {
     async executeApprove(args: DeleteFileParameter): Promise<ToolExecuteResult> {
-        const chunk = this.getToolCallChunkStrict();
-        assertChunk(chunk);
-
+        const chunk = this.getToolCallChunkStrict('delete_file');
         // It's a redundant check, but doesn't hit performance much
         const exists = await this.editorHost.call('checkFileExists', args.path);
         const fileEdit = await this.applyFileEdit(args.path, 'delete', '');
@@ -35,9 +28,9 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
         };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<DeleteFileParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<DeleteFileParameter> {
         return {
-            path: generated.path?.trim(),
+            path: asString(generated.path),
         };
     }
 }

@@ -1,19 +1,12 @@
 import type {WriteFileParameter} from '@oniichan/shared/tool';
-import type {ParsedToolCallMessageChunk, WriteFileToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
-
-function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is WriteFileToolCallMessageChunk {
-    if (chunk.toolName !== 'write_file') {
-        throw new Error('Invalid tool call message chunk');
-    }
-}
+import {asString} from './utils';
 
 export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter> {
     async executeApprove(args: WriteFileParameter): Promise<ToolExecuteResult> {
-        const chunk = this.getToolCallChunkStrict();
-        assertChunk(chunk);
-
+        const chunk = this.getToolCallChunkStrict('write_file');
         const fileEdit = await this.applyFileEdit(args.path, 'write', args.content);
         chunk.executionData = fileEdit;
 
@@ -30,10 +23,10 @@ export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter
             };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<WriteFileParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<WriteFileParameter> {
         return {
-            path: generated.path?.trim(),
-            content: generated.content?.trim(),
+            path: asString(generated.path),
+            content: asString(generated.content),
         };
     }
 }

@@ -1,21 +1,14 @@
 import dedent from 'dedent';
 import type {PatchFileParameter} from '@oniichan/shared/tool';
-import type {ParsedToolCallMessageChunk, PatchFileToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
-
-function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is PatchFileToolCallMessageChunk {
-    if (chunk.toolName !== 'patch_file') {
-        throw new Error('Invalid tool call message chunk');
-    }
-}
+import {asString} from './utils';
 
 export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
     async executeApprove(args: PatchFileParameter): Promise<ToolExecuteResult> {
-        const chunk = this.getToolCallChunkStrict();
-        assertChunk(chunk);
-
+        const chunk = this.getToolCallChunkStrict('patch_file');
         const fileEdit = await this.applyFileEdit(args.path, 'patch', args.patch);
         chunk.executionData = fileEdit;
 
@@ -52,10 +45,10 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<PatchFileParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<PatchFileParameter> {
         return {
-            path: generated.path?.trim(),
-            patch: generated.patch?.trim(),
+            path: asString(generated.path),
+            patch: asString(generated.patch),
         };
     }
 }

@@ -1,6 +1,7 @@
 import dedent from 'dedent';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import type {InboxPromptView} from './interface';
+import {IncludeExclude} from '@oniichan/shared/array';
 
 const prefix = dedent`
     # Tool
@@ -86,41 +87,45 @@ function renderItem(item: ToolDescription) {
 }
 
 export function renderToolSection(view: InboxPromptView) {
-    const excludsTools: ToolName[] = [];
-    // TODO: This is not implemented for now
-    excludsTools.push('create_plan');
+    const available = new IncludeExclude<ToolName>();
     switch (view.mode) {
+        case 'plan':
+            available.include('create_plan');
+            available.include('attempt_completion');
+            break;
         case 'act':
-            excludsTools.push(
-                'ask_followup_question',
-                'attempt_completion',
-                'delete_file',
-                'patch_file',
-                'write_file',
-                'browser_preview'
-            );
+            available.include('read_file');
+            available.include('read_directory');
+            available.include('find_files_by_glob');
+            available.include('find_files_by_regex');
+            available.include('complete_task');
             break;
         case 'code':
-            excludsTools.push(
-                'ask_followup_question',
-                'attempt_completion'
-            );
+            available.exclude('ask_followup_question');
+            available.exclude('attempt_completion');
+            available.exclude('create_plan');
             break;
         case 'standalone':
-            excludsTools.push('complete_task');
+            available.exclude('complete_task');
+            available.exclude('create_plan');
             break;
     }
 
     if (!view.projectStructure) {
-        excludsTools.push('browser_preview');
+        available.exclude('browser_preview');
     }
 
-    const tools = view.tools.filter(v => !excludsTools.includes(v.name));
-    const parts = [
-        prefix,
-        '## Available tools',
-        ...tools.map(renderItem),
-        guideline,
-    ];
-    return parts.join('\n\n');
+    const tools = view.tools.filter(v => available.allow(v.name));
+
+    if (tools.length) {
+        const parts = [
+            prefix,
+            '## Available tools',
+            ...tools.map(renderItem),
+            guideline,
+        ];
+        return parts.join('\n\n');
+    }
+
+    return '';
 }

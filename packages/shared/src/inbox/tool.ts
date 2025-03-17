@@ -13,6 +13,7 @@ import type {
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
     CompleteTaskParameter,
+    CreatePlanParameter,
 } from '../tool';
 
 export type WorkflowSourceChunkStatus =
@@ -103,15 +104,14 @@ export interface AskFollowupQuestionToolCallMessageChunk extends ParsedToolCallM
     arguments: AskFollowupQuestionParameter;
 }
 
-export interface PlanCompletionProgress {
-    totalTasks: number;
-    completedTasks: number;
-}
-
 export interface CompleteTaskToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
     toolName: 'complete_task';
     arguments: CompleteTaskParameter;
-    executionData: PlanCompletionProgress | null;
+}
+
+export interface CreatePlanToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
+    toolName: 'create_plan';
+    arguments: CreatePlanParameter;
 }
 
 export type ParsedToolCallMessageChunk =
@@ -126,7 +126,12 @@ export type ParsedToolCallMessageChunk =
     | BrowserPreviewToolCallMessageChunk
     | AttemptCompletionToolCallMessageChunk
     | AskFollowupQuestionToolCallMessageChunk
-    | CompleteTaskToolCallMessageChunk;
+    | CompleteTaskToolCallMessageChunk
+    | CreatePlanToolCallMessageChunk;
+
+type ParsedToolCallMessageChunkMap = { [K in ParsedToolCallMessageChunk as K['toolName']]: K };
+
+export type ParsedToolCallMessageChunkOf<N extends ToolName> = ParsedToolCallMessageChunkMap[N];
 
 export type FileEditToolCallMessageChunk =
     | WriteFileToolCallMessageChunk

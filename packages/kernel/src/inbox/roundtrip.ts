@@ -1,15 +1,23 @@
 import {assertHasValue, assertNever} from '@oniichan/shared/error';
-import type {RoundtripData, RoundtripMessageData, RoundtripResponseData, RoundtripStatus} from '@oniichan/shared/inbox';
+import type {
+    ParsedToolCallMessageChunkOf,
+    RoundtripData,
+    RoundtripMessageData,
+    RoundtripResponseData,
+    RoundtripStatus,
+} from '@oniichan/shared/inbox';
 import {AssistantTextMessage, UserRequestMessage} from './message';
 import {Workflow} from './workflow';
 import type {
     InboxAssistantTextMessage,
     InboxMessage,
     InboxRoundtrip,
+    InboxToolCallMessage,
     InboxWorkflow,
     InboxWorkflowOriginMessage,
 } from './interface';
-import {isAssistantMessage} from './assert';
+import {isAssistantMessage, isToolCallMessageOf} from './assert';
+import type {ToolName} from '@oniichan/shared/tool';
 
 interface RoundtripMessageResponse {
     type: 'message';
@@ -154,6 +162,19 @@ export class Roundtrip implements InboxRoundtrip {
 
     addWarning(message: string) {
         this.getRequest().setError(message);
+    }
+
+    findLastToolCallMessageByToolNameStrict<N extends ToolName>(toolName: N): InboxToolCallMessage<N> {
+        const responses = this.getResponseMessages();
+        const message = responses.findLast(v => isToolCallMessageOf(v, toolName));
+        assertHasValue(message, `Roundtrip does not have a message containing tool call of ${toolName}`);
+        return message;
+    }
+
+    findLastToolCallChunkByToolNameStrict<N extends ToolName>(toolName: N): ParsedToolCallMessageChunkOf<N> {
+        const message = this.findLastToolCallMessageByToolNameStrict(toolName);
+        const chunk = message.findToolCallChunkStrict();
+        return chunk;
     }
 
     toMessages() {

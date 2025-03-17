@@ -9,6 +9,7 @@ import ActBar from '@/components/ActBar';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
 import CommandRun from './CommandRun';
+import {Plan} from './Plan';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);
@@ -98,6 +99,10 @@ export default function ParsedToolUsage({input}: Props) {
 
     if (input.toolName === 'browser_preview') {
         return <PreviewUrl closed url={input.arguments.url} />;
+    }
+
+    if (input.toolName === 'create_plan') {
+        return <Plan closed tasks={input.arguments.tasks} />;
     }
 
     const [Icon, action, parameter, title] = renderLabelContent(input);

@@ -1,9 +1,6 @@
 export type {
     ReasoningMessageChunk,
     TextMessageChunk,
-    PlanTaskStatus,
-    PlanTask,
-    PlanMessageChunk,
     TaggedMessageChunk,
     MessageInputChunk,
     MessageViewChunk,
@@ -20,18 +17,15 @@ export type {
     MessageViewType,
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
-    PlanMessageData,
-    PlanMessageContentChunk,
-    AssistantMessageType,
 } from './message';
 export {
     assertTaggedChunk,
     assertToolCallChunk,
-    assertPlanChunk,
     chunkToString,
     normalizeArguments,
     extractFileEdits,
     isContentfulChunk,
+    isParsedToolCallChunk,
 } from './utils';
 export {
     isFileEditToolCallChunk,
@@ -41,6 +35,7 @@ export type {
     WorkflowChunkStatus,
     ToolCallMessageChunk,
     ParsedToolCallMessageChunk,
+    ParsedToolCallMessageChunkOf,
     ReadFileToolCallMessageChunk,
     ReadDirectoryToolCallMessageChunk,
     FindFilesByGlobToolCallMessageChunk,
@@ -52,7 +47,6 @@ export type {
     BrowserPreviewToolCallMessageChunk,
     AttemptCompletionToolCallMessageChunk,
     AskFollowupQuestionToolCallMessageChunk,
-    PlanCompletionProgress,
     CompleteTaskToolCallMessageChunk,
     RawToolCallParameter,
 } from './tool';

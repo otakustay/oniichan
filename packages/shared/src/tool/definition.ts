@@ -1,6 +1,6 @@
 import dedent from 'dedent';
 import type {JSONSchema7} from 'json-schema';
-import type {PlanTask, RawToolCallParameter} from '../inbox';
+import type {RawToolCallParameter} from '../inbox';
 
 export interface ParameterInfo {
     type: 'object';
@@ -284,12 +284,18 @@ export const createPlanParameters = {
     required: [],
 } as const satisfies ParameterInfo;
 
-export interface CreatePlanParameter {
-    tasks: PlanTask[];
+export type PlanTaskType = 'read' | 'coding';
+
+export type PlanTaskStatus = 'generating' | 'pending' | 'executing' | 'completed';
+
+export interface PlanTask {
+    taskType: PlanTaskType;
+    text: string;
+    status: PlanTaskStatus;
 }
 
 export interface CreatePlanParameter {
-    plan: string;
+    tasks: PlanTask[];
 }
 
 export const builtinTools: ToolDescription[] = [

@@ -25,6 +25,8 @@ const Code = styled.pre`
     margin: 0;
     background-color: var(--color-contrast-background);
     border-radius: .5em;
+    white-space: pre-wrap;
+    word-break: break-all;
 `;
 
 const Body = styled.div`

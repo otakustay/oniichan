@@ -1,10 +1,10 @@
 import {assertNever} from '@oniichan/shared/error';
 import type {ToolName} from '@oniichan/shared/tool';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
 import {AttemptCompletionToolImplement} from './attemptCompletion';
 import type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError} from './base';
-import type * as base from './base';
-import {ToolImplementBase} from './base';
+import type {ToolImplementBase} from './base';
 import {BrowserPreviewToolImplement} from './browserPreview';
 import {DeleteFileToolImplement} from './deleteFile';
 import {GlobFilesToolImplement} from './globFiles';
@@ -15,35 +15,36 @@ import {ReadFileToolImplement} from './readFile';
 import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
 import {CompleteTaskToolImplement} from './completeTask';
-import type {RawToolCallParameter} from '@oniichan/shared/inbox';
+import {CreatePlanToolImplement} from './createPlan';
 
-export {ToolImplementBase};
 export type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError};
 
 export class ToolImplement {
-    private readonly readFile: base.ToolImplementBase;
+    private readonly readFile: ToolImplementBase;
 
-    private readonly readDirectory: base.ToolImplementBase;
+    private readonly readDirectory: ToolImplementBase;
 
-    private readonly globFiles: base.ToolImplementBase;
+    private readonly globFiles: ToolImplementBase;
 
-    private readonly grepFiles: base.ToolImplementBase;
+    private readonly grepFiles: ToolImplementBase;
 
-    private readonly writeFile: base.ToolImplementBase;
+    private readonly writeFile: ToolImplementBase;
 
-    private readonly patchFile: base.ToolImplementBase;
+    private readonly patchFile: ToolImplementBase;
 
-    private readonly deleteFile: base.ToolImplementBase;
+    private readonly deleteFile: ToolImplementBase;
 
-    private readonly runCommand: base.ToolImplementBase;
+    private readonly runCommand: ToolImplementBase;
 
-    private readonly browserPreview: base.ToolImplementBase;
+    private readonly browserPreview: ToolImplementBase;
 
-    private readonly attemptCompletion: base.ToolImplementBase;
+    private readonly attemptCompletion: ToolImplementBase;
 
-    private readonly askFollowupQuestion: base.ToolImplementBase;
+    private readonly askFollowupQuestion: ToolImplementBase;
 
-    private readonly completeTask: base.ToolImplementBase;
+    private readonly completeTask: ToolImplementBase;
+
+    private readonly createPlan: ToolImplementBase;
 
     constructor(init: ToolImplementInit) {
         this.readFile = new ReadFileToolImplement(init);
@@ -58,6 +59,7 @@ export class ToolImplement {
         this.attemptCompletion = new AttemptCompletionToolImplement(init);
         this.askFollowupQuestion = new AskFollowupQuestionToolImplement(init);
         this.completeTask = new CompleteTaskToolImplement(init);
+        this.createPlan = new CreatePlanToolImplement(init);
     }
 
     requireUserApprove(toolName: ToolName): boolean {
@@ -106,9 +108,8 @@ export class ToolImplement {
                 return this.askFollowupQuestion;
             case 'complete_task':
                 return this.completeTask;
-            // TODO: This is not enabled
             case 'create_plan':
-                throw new Error('Not supported');
+                return this.createPlan;
             default:
                 assertNever<string>(name, v => `Unknown tool ${v}`);
         }

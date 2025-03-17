@@ -3,10 +3,12 @@ import type {Logger} from '@oniichan/shared/logger';
 import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, PatchAction} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {isFileEditToolCallChunk, type RawToolCallParameter} from '@oniichan/shared/inbox';
+import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
+import type {ParsedToolCallMessageChunkOf, RawToolCallParameter} from '@oniichan/shared/inbox';
+import type {ToolName} from '@oniichan/shared/tool';
 import type {CommandExecutor} from '../../../core/command';
 import type {EditorHost} from '../../../core/editor';
-import {assertToolCallMessage} from '../../../inbox';
+import {assertToolCallMessage, assertToolCallType} from '../../../inbox';
 import type {InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
 
 export interface ToolImplementInit {
@@ -61,10 +63,12 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     abstract extractParameters(generated: Record<string, RawToolCallParameter>): Partial<A>;
 
-    protected getToolCallChunkStrict() {
+    protected getToolCallChunkStrict<N extends ToolName>(toolName: N): ParsedToolCallMessageChunkOf<N> {
         const origin = this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
         assertToolCallMessage(origin);
-        return origin.findToolCallChunkStrict();
+        const chunk = origin.findToolCallChunkStrict();
+        assertToolCallType(chunk, toolName);
+        return chunk;
     }
 
     protected async applyFileEdit(file: string, patchAction: PatchAction, patch: string): Promise<FileEditData> {

@@ -1,14 +1,16 @@
 import path from 'node:path';
 import type {ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
+import {asString} from './utils';
 
 export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> {
-    extractParameters(generated: Record<string, string | undefined>): Partial<ReadFileParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<ReadFileParameter> {
         return {
-            path: generated.path?.trim(),
+            path: asString(generated.path),
         };
     }
 

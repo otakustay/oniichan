@@ -1,9 +1,11 @@
 import unixify from 'unixify';
 import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
+import {asString} from './utils';
 
 // For each match, its a `begin - context - match - context - end` sequence,
 // so a maximum of 1000 lines contains 200 search results
@@ -117,11 +119,11 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
         }
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<FindFilesByRegExpParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<FindFilesByRegExpParameter> {
         return {
-            path: generated.path?.trim(),
-            glob: generated.glob?.trim(),
-            regex: generated.regex?.trim(),
+            path: asString(generated.path),
+            glob: asString(generated.glob),
+            regex: asString(generated.regex),
         };
     }
 

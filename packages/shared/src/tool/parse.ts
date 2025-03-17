@@ -9,42 +9,7 @@ interface TextChunk {
     content: string;
 }
 
-export type ContentTagName = 'thinking' | 'conclusion';
-
-export type PlanTaskType = 'read' | 'coding';
-
-interface PlanStartChunk {
-    type: 'planStart';
-    source: string;
-}
-
-interface PlanEndChunk {
-    type: 'planEnd';
-    source: string;
-}
-
-interface PlanTaskStartChunk {
-    type: 'planTaskStart';
-    taskType: PlanTaskType;
-    source: string;
-}
-
-interface PlanTaskDeltaChunk {
-    type: 'planTaskDelta';
-    taskType: PlanTaskType;
-    source: string;
-}
-
-interface PlanTaskEndChunk {
-    type: 'planTaskEnd';
-    taskType: PlanTaskType;
-    source: string;
-}
-
-interface TextInPlanChunk {
-    type: 'textInPlan';
-    source: string;
-}
+export type ContentTagName = 'thinking';
 
 interface ContentStartChunk {
     type: 'contentStart';
@@ -94,12 +59,6 @@ interface ToolEndChunk {
 
 export type ToolParsedChunk =
     | TextChunk
-    | PlanStartChunk
-    | PlanEndChunk
-    | PlanTaskStartChunk
-    | PlanTaskDeltaChunk
-    | PlanTaskEndChunk
-    | TextInPlanChunk
     | ContentStartChunk
     | ContentDeltaChunk
     | ContentEndChunk
@@ -109,18 +68,10 @@ export type ToolParsedChunk =
     | ToolDeltaChunk
     | ToolEndChunk;
 
-const CONTENT_TAGS: string[] = ['thinking', 'conclusion'] satisfies ContentTagName[];
+const CONTENT_TAGS: string[] = ['thinking'] satisfies ContentTagName[];
 
 function isContentTag(tag: string | null): tag is ContentTagName {
     return !!tag && CONTENT_TAGS.includes(tag);
-}
-
-function isPlanTaskTag(tag: string | null): tag is PlanTaskType {
-    return tag === 'read' || tag === 'coding';
-}
-
-function isPlanTag(tag: string | null): tag is 'plan' {
-    return tag === 'plan';
 }
 
 interface RootState {
@@ -130,15 +81,6 @@ interface RootState {
 interface InsideContentState {
     state: 'insideContent';
     tagName: ContentTagName;
-}
-
-interface InsidePlanState {
-    state: 'insidePlan';
-}
-
-interface InsidePlanTaskState {
-    state: 'insidePlanTask';
-    taskType: PlanTaskType;
 }
 
 interface InsideToolState {
@@ -155,8 +97,6 @@ interface InsideToolParameterState {
 type TagNestingStructure =
     | RootState
     | InsideContentState
-    | InsidePlanState
-    | InsidePlanTaskState
     | InsideToolState
     | InsideToolParameterState;
 
@@ -189,12 +129,6 @@ export class StreamingToolParser {
             case 'insideContent':
                 yield {type: 'contentDelta', tagName: structure.tagName, source: chunk.content};
                 break;
-            case 'insidePlan':
-                yield {type: 'textInPlan', source: chunk.content};
-                break;
-            case 'insidePlanTask':
-                yield {type: 'planTaskDelta', taskType: structure.taskType, source: chunk.content};
-                break;
             case 'insideTool':
                 yield {type: 'textInTool', source: chunk.content};
                 break;
@@ -213,10 +147,6 @@ export class StreamingToolParser {
                 yield {type: 'contentStart', tagName: chunk.tagName, source: chunk.source};
                 this.tagStack.push(chunk.tagName);
             }
-            else if (isPlanTag(chunk.tagName)) {
-                yield {type: 'planStart', source: chunk.source};
-                this.tagStack.push('plan');
-            }
             else if (isToolName(chunk.tagName)) {
                 yield {type: 'toolStart', toolName: chunk.tagName, source: chunk.source};
                 this.tagStack.push(chunk.tagName);
@@ -227,18 +157,6 @@ export class StreamingToolParser {
         }
         else if (structure.state === 'insideContent') {
             yield {type: 'contentDelta', tagName: structure.tagName, source: chunk.source};
-        }
-        else if (structure.state === 'insidePlan') {
-            if (isPlanTaskTag(chunk.tagName)) {
-                yield {type: 'planTaskStart', taskType: chunk.tagName, source: chunk.source};
-                this.tagStack.push(chunk.tagName);
-            }
-            else {
-                yield {type: 'textInPlan', source: chunk.source};
-            }
-        }
-        else if (structure.state === 'insidePlanTask') {
-            yield {type: 'planTaskDelta', taskType: structure.taskType, source: chunk.source};
         }
         else if (structure.state === 'insideTool') {
             yield {type: 'toolParameterStart', parameter: chunk.tagName, source: chunk.source};
@@ -264,24 +182,6 @@ export class StreamingToolParser {
             }
             else {
                 yield {type: 'contentDelta', tagName: structure.tagName, source: chunk.source};
-            }
-        }
-        else if (structure.state === 'insidePlan') {
-            if (isPlanTag(chunk.tagName)) {
-                yield {type: 'planEnd', source: chunk.source};
-                this.tagStack.pop();
-            }
-            else {
-                yield {type: 'textInPlan', source: chunk.source};
-            }
-        }
-        else if (structure.state === 'insidePlanTask') {
-            if (chunk.tagName === structure.taskType) {
-                yield {type: 'planTaskEnd', taskType: structure.taskType, source: chunk.source};
-                this.tagStack.pop();
-            }
-            else {
-                yield {type: 'planTaskDelta', taskType: structure.taskType, source: chunk.source};
             }
         }
         else if (structure.state === 'insideTool') {
@@ -321,15 +221,9 @@ export class StreamingToolParser {
             if (isToolName(parentTag)) {
                 return {state: 'insideToolParameter', toolName: parentTag, parameterName: activeTag};
             }
-            if (isPlanTag(parentTag) && isPlanTaskTag(activeTag)) {
-                return {state: 'insidePlanTask', taskType: activeTag};
-            }
         }
         else if (isToolName(activeTag)) {
             return {state: 'insideTool', toolName: activeTag};
-        }
-        else if (isPlanTag(activeTag)) {
-            return {state: 'insidePlan'};
         }
 
         throw new Error(`Unexpected XML parsing state (${parentTag} > ${activeTag})`);

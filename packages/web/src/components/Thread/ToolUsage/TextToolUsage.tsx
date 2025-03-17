@@ -2,13 +2,16 @@ import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
 import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
 import {isEditToolName} from '@oniichan/shared/tool';
+import type {PlanTask, PlanTaskType} from '@oniichan/shared/tool';
 import {ensureString, trimPathString} from '@oniichan/shared/string';
-import type {ToolCallMessageChunk} from '@oniichan/shared/inbox';
+import {ensureArray} from '@oniichan/shared/array';
+import type {RawToolCallParameter, ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import Markdown from '@/components//Markdown';
 import ActBar from '@/components/ActBar';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
 import CommandRun from './CommandRun';
+import {Plan} from './Plan';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);
@@ -50,6 +53,17 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
     }
 }
 
+function consumeTaskArray(content: RawToolCallParameter, taskType: PlanTaskType, closed: boolean) {
+    const transform = (text: string, index: number, dataSource: string[]): PlanTask => {
+        return {
+            taskType,
+            text,
+            status: (closed || index < dataSource.length - 1) ? 'generating' : 'pending',
+        };
+    };
+    return ensureArray(content).map(transform);
+}
+
 interface Props {
     input: ToolCallMessageChunk;
 }
@@ -86,6 +100,14 @@ export default function TextToolUsage({input}: Props) {
 
     if (input.toolName === 'browser_preview') {
         return <PreviewUrl url={ensureString(input.arguments.url)} closed={false} />;
+    }
+
+    if (input.toolName === 'create_plan') {
+        const task: PlanTask[] = [
+            ...consumeTaskArray(input.arguments.read, 'read', input.status !== 'generating'),
+            ...consumeTaskArray(input.arguments.coding, 'coding', input.status !== 'generating'),
+        ];
+        return <Plan tasks={task} closed={input.status !== 'generating'} />;
     }
 
     const [Icon, action, parameter, title] = renderLabelContent(input);

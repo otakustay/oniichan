@@ -1,8 +1,8 @@
-import type {MessageData, PlanMessageData, ToolCallMessageData} from './message';
+import type {MessageData, ToolCallMessageData} from './message';
 
 export type WorkflowStatus = 'running' | 'completed' | 'failed';
 
-export type WorkflowOriginMessageData = ToolCallMessageData | PlanMessageData;
+export type WorkflowOriginMessageData = ToolCallMessageData;
 
 export interface WorkflowData {
     status: WorkflowStatus;

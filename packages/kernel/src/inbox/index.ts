@@ -4,13 +4,11 @@ export type {
     InboxWorkflowOriginMessage,
     InboxWorkflowSourceMessage,
     InboxAssistantTextMessage,
-    InboxPlanMessage,
     InboxToolCallMessage,
     InboxToolUseMessage,
     InboxUserRequestMessage,
     InboxWorkflow,
     InboxMessageThread,
-    PlanState,
 } from './interface';
 export {
     createEmptyAssistantTextMessage,
@@ -18,7 +16,6 @@ export {
     createEmptyRoundtrip,
     createToolUseMessage,
     transferToToolCallMessage,
-    transferToPlanMessage,
     createDetachedUserRequestMessage,
     setRoundtripRequest,
 } from './factory';
@@ -26,8 +23,8 @@ export {ThreadStore} from './store';
 export {
     assertAssistantTextMessage,
     assertToolCallMessage,
-    assertPlanMessage,
     isAssistantMessage,
     isToolCallMessage,
     isToolCallMessageOf,
+    assertToolCallType,
 } from './assert';

@@ -12,7 +12,7 @@ export async function renderInboxSystemPrompt(view: InboxPromptView) {
     const parts = [
         renderRuleSection(view),
         renderFormatSection(),
-        view.mode !== 'plan' && renderToolSection(view),
+        renderToolSection(view),
         '# Context',
         'This section provides some already known information for user\'s request.',
         view.projectStructure ? renderStructureSection(view) : '',

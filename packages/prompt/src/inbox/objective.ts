@@ -102,40 +102,39 @@ function renderPlanObject() {
         1. Try to retrieve context and information required for the task, like readind a file, finding code snippets or searching for files.
         2. To take side effectful tasks to implement the task, like write code, running command or attempt to open a webpage in browser.
 
-        You may also be given information from previous tasks, they are represented by standalone messages, in this case, you are required to determine if user's request is satisfied and completed and take one of these format:
+        You may also be given information from previous tasks, they are represented by standalone messages, in this case, you are required to determine if user's request is satisfied and completed and call one of these tool:
 
-        1. To create a new plan, output the plan inside a <plan> XML tag with one or more <read> or <coding> tags.
-        2. Each XML tag, including <plan>, <read> and <coding> must be started at a new line, no preceding characters are allowed before the tag in the same line.
-        2. Once the user's request is completely fulfilled, make a conclusion inside a <conclusion> XML tag  with markdown format.
+        1. To create a new plan, call \`create_plan\` tool with one or more \`read\` and \`coding\` parameters.
+        2. Once the user's request is completely fulfilled, call \`attempt_completion\` tool with a markdown format conclusion.
 
         You should only create the plan or make a conclusion in text, you are not allowed to take any action before the plan is created.
 
-        A plan can include one or more todo tasks, each being a <read> or <coding> tag with its content as one of these types.
+        A plan can include one or more todo tasks, each being a \`read\` or \`coding\` parameter with its content as one of these types.
 
-        A <read> tag is used to describe a task that requires reading or searching for files, place a description of the task inside this tag, it can be either:
+        A \`read\` task is used to describe a task that requires reading or searching for files, describe the purpose of task in parameter's value, it can be either:
 
         1. To read a file, including the accurate filename based on project root, and the reason for requiring this file.
         2. To search file with a regexp and an optional file name glob to narrow the search scope, you are supposed to just clarify what you are searching for, the regexp and glob are optional.
         3. To look into a directory for certain files or code snippets, include the accurate directory path based on project root in this task, and a detailed explantion of the targeting file or code is required, this task can break down into more steps like recursively walk a directory or read multiple files in future.
         4. To run a terminal command and get the output of the command, you should at least provide a description of your gathering information, such as "install dependencies" or "find out the docker version", the actual command can be generated when this task is started.
 
-        A <coding> tag is used to describe a task that requires writing code in files, place a description of the task inside this tag, it can be either:
+        A \`coding\` task is used to describe a task that requires writing code in files, describe the purpose of task in parameter's value, it can be either:
 
         1. To write some code to a file, the accurate filename based on project root is required, the file can be either exists or non-exists. A detailed explanation on the purpose of this code is also required, keep the explanation as detailed as possible to prevent misunderstanding and incorrectly code. Do not include this task in plan if you don't know how the code should be implemented.
         2. To modify an existing file, it also required the accurate filename based on project root and detailed purpose of a modification. Do not include this task in plan if you don't know the exact filename and its content.
         2. To delete an existing file, keep the accurate filename based on project root in this task, a description of the task is also welcome. Do not include this task in plan if you don't know the exact filename and its content.
 
-        All <plan>, <read> and <coding> start tag must be placed at the start of a line, no preceding characters are allowed. A typical plan may looks like this, be sure you understand the XML structure, there is no extra text out of <read> or <coding> tag inside a <plan> tag:
+        A typical response with a \`create_plan\` tool may looks like this:
 
         \`\`\`
-        <plan>
         To accomplish ..., we need to:
 
+        <create_plan>
         <read>Read \`package.json\` to find if lodash is installed</read>
         <read>Run \`npm list lodash\` to check if it's installed</read>
         <coding>Modify \`src/main.ts\` to delete the import of \`xxx\`</coding>
         <coding>Delete imported file \`xxx.ts\`</coding>
-        </plan>
+        </create_plan>
 
         You are encourage to plan multiple tasks at a time, do not hesitate to gather information aggressively, but side effectful tasks like writing code or running command should always be taken cautiously.
 
@@ -145,23 +144,17 @@ function renderPlanObject() {
 
         To emphasize again, if your are not confident enough to start implementing the task with coding, you should always focus on gathering information through retrieval tasks.
 
-        The text inside <plan> tag must starts with a simple paragraph like "to accomplish ...", it usually consists of a simple one-level-deep ordered list or several paragraph with more thoughts, the list contains one task per line. DO NOT use any markdown heading syntax in the plan, and don't repeat the tasks in plan.
-
         If the user's request uses a foreign language, your plan should also be written in that language.
 
-        Be aware that your plan is going to be executed, but not already completed, the <conclusion> tag is never allowed if a plan is exists in your response.
-
-        Also, you should be very serious about the plan, if you use a <conclusion> tag before all user's original request is completely fulfilled, user will have no chance to enjoy the result, they are not happy if they need to handle some steps by themselves, please carefully consider these aspects:
+        Also, you should be very serious about the plan, if you decide to call \`attempt_completion\` tool before all user's original request is completely fulfilled, user will have no chance to enjoy the result, they are not happy if they need to handle some steps by themselves, please carefully consider these aspects:
 
         1. Is the question from user clearly understood?
         2. Is all neccessary files are created, modified or deleted?
         3. Is the result of code edits validated via command lines or other means?
         4. Are all aspects of the original request solved?
 
-        If one of these answer is NO, use a <plan> tag to iterate a new plan.
+        If one of these answer is NO, use a \`create_plan\` tool to iterate a new plan.
     `;
-
-    // Before you create the plan, you must first do some analysis within <thinking></thinking> tags, inside the <thinking> tag you can review the previous gathered information, the uncompleted tasks or further required steps, once you find yourself in a state to generate a detailed and meaningful plan, close the <thinking> tag and then write the entire plan in markdown format.
 }
 
 export function renderActObjective() {

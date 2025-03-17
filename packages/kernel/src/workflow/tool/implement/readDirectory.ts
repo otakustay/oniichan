@@ -2,9 +2,11 @@ import path from 'node:path';
 import type {ReadDirectoryParameter} from '@oniichan/shared/tool';
 import type {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
+import {asString} from './utils';
 
 export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
     async executeApprove(args: ReadDirectoryParameter): Promise<ToolExecuteResult> {
@@ -68,9 +70,9 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
         }
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<ReadDirectoryParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<ReadDirectoryParameter> {
         return {
-            path: generated.path?.trim(),
+            path: asString(generated.path),
             recursive: generated.recursive === 'true',
         };
     }

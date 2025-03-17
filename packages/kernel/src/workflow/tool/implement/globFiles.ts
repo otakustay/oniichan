@@ -1,9 +1,11 @@
 import path from 'node:path';
 import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
+import {asString} from './utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {
     async executeApprove(args: FindFilesByGlobParameter): Promise<ToolExecuteResult> {
@@ -45,9 +47,9 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
         }
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<FindFilesByGlobParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<FindFilesByGlobParameter> {
         return {
-            glob: generated.glob?.trim(),
+            glob: asString(generated.glob),
         };
     }
 }

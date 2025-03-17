@@ -38,3 +38,37 @@ export function uniqueBy<T>(array: T[], getKey: (item: T) => unknown): T[] {
     }
     return results;
 }
+
+export class IncludeExclude<T> {
+    private readonly includes = new Set<T>();
+
+    private readonly excludes = new Set<T>();
+
+    include(item: T) {
+        this.includes.add(item);
+        this.excludes.delete(item);
+    }
+
+    exclude(item: T) {
+        this.excludes.add(item);
+        this.includes.delete(item);
+    }
+
+    filter(items: T[]): T[] {
+        return items.filter(v => this.allow(v));
+    }
+
+    allow(item: T) {
+        if (this.excludes.has(item)) {
+            return false;
+        }
+        if (this.includes.size) {
+            return this.includes.has(item);
+        }
+        return true;
+    }
+}
+
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+    return value === undefined ? [] : (Array.isArray(value) ? value : [value]);
+}

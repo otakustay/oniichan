@@ -1,7 +1,6 @@
 import {test, expect} from 'vitest';
 import dedent from 'dedent';
 import {StreamingToolParser} from '../parse';
-import type {PlanTaskType} from '../parse';
 import type {RawToolCallParameter} from '../../inbox';
 
 async function* tokenize(content: string): AsyncIterable<string> {
@@ -26,19 +25,8 @@ interface ContentTag {
     closed: boolean;
 }
 
-interface PlanTask {
-    type: PlanTaskType;
-    text: string;
-}
-
-interface Plan {
-    type: 'plan';
-    tasks: PlanTask[];
-    closed: boolean;
-}
-
 async function consume(content: string) {
-    const chunks: Array<ToolCall | ContentTag | Plan> = [];
+    const chunks: Array<ToolCall | ContentTag> = [];
     const parser = new StreamingToolParser();
     for await (const chunk of parser.parse(tokenize(content))) {
         if (chunk.type === 'text') {
@@ -50,10 +38,6 @@ async function consume(content: string) {
         }
         if (chunk.type === 'contentStart') {
             chunks.push({type: 'content', tagName: chunk.tagName, content: '', closed: false});
-            continue;
-        }
-        if (chunk.type === 'planStart') {
-            chunks.push({type: 'plan', tasks: [], closed: false});
             continue;
         }
 
@@ -68,9 +52,6 @@ async function consume(content: string) {
         }
         if (/content/i.test(chunk.type) && lastChunk?.type !== 'content') {
             throw new Error(`Unexpected content chunk`);
-        }
-        if (/plan/i.test(chunk.type) && lastChunk?.type !== 'plan') {
-            throw new Error(`Unexpected plan chunk`);
         }
 
         if (chunk.type === 'toolParameterStart') {
@@ -111,22 +92,6 @@ async function consume(content: string) {
                 call.content += chunk.source;
             }
         }
-        if (chunk.type === 'planTaskStart') {
-            const plan = chunks.at(-1);
-            if (plan?.type === 'plan') {
-                plan.tasks.push({type: chunk.taskType, text: ''});
-            }
-        }
-        if (chunk.type === 'planTaskDelta') {
-            const plan = chunks.at(-1);
-            if (plan?.type === 'plan') {
-                const task = plan.tasks.at(-1);
-                if (!task) {
-                    throw new Error('No task in plan');
-                }
-                task.text += chunk.source;
-            }
-        }
 
         if (chunk.type === 'toolEnd') {
             const call = chunks.at(-1);
@@ -138,12 +103,6 @@ async function consume(content: string) {
             const call = chunks.at(-1);
             if (call?.type === 'content') {
                 call.closed = true;
-            }
-        }
-        if (chunk.type === 'planEnd') {
-            const plan = chunks.at(-1);
-            if (plan?.type === 'plan') {
-                plan.closed = true;
             }
         }
     }
@@ -354,46 +313,15 @@ test('nested xml tags inside parameter', async () => {
     expect(chunks.at(0)).toEqual(expected);
 });
 
-test('conclusion tag', async () => {
+test('mixed nested content tag', async () => {
     const message = dedent`
-        <conclusion>
-            Task is finished
-        </conclusion>
-    `;
-    const chunks = await consume(message);
-    expect(chunks.length).toBe(1);
-    expect(chunks.at(0)).toMatchObject({type: 'content', tagName: 'conclusion', closed: true});
-});
-
-test('mixed nestecontent tag', async () => {
-    const message = dedent`
-        <conclusion>
+        <thinking>
             <plan>
                 Task is finished
             </plan>
-        </conclusion>
+        </thinking>
     `;
     const chunks = await consume(message);
     expect(chunks.length).toBe(1);
-    expect(chunks.at(0)).toMatchObject({type: 'content', tagName: 'conclusion', closed: true});
-});
-
-test('plan tag', async () => {
-    const message = dedent`
-        <plan>
-            <read>A read task</read>
-            <coding>A coding task</coding>
-        </plan>
-    `;
-    const chunks = await consume(message);
-    expect(chunks.length).toBe(1);
-    const expected: Plan = {
-        type: 'plan',
-        closed: true,
-        tasks: [
-            {type: 'read', text: 'A read task'},
-            {type: 'coding', text: 'A coding task'},
-        ],
-    };
-    expect(chunks.at(0)).toEqual(expected);
+    expect(chunks.at(0)).toMatchObject({type: 'content', tagName: 'thinking', closed: true});
 });

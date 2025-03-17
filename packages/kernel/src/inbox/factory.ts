@@ -4,7 +4,6 @@ import type {
     ToolCallMessageContentChunk,
     ParsedToolCallMessageChunk,
     ToolCallMessageData,
-    PlanMessageData,
 } from '@oniichan/shared/inbox';
 import type {
     InboxRoundtrip,
@@ -13,9 +12,8 @@ import type {
     InboxToolCallMessage,
     InboxMessageThread,
     InboxUserRequestMessage,
-    InboxPlanMessage,
 } from './interface';
-import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage, PlanMessage} from './message';
+import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage} from './message';
 import {Roundtrip} from './roundtrip';
 import {MessageThread} from './thread';
 
@@ -49,9 +47,6 @@ export function transferToToolCallMessage(source: InboxAssistantTextMessage, arg
                 arguments: args,
             } as unknown as ParsedToolCallMessageChunk;
         }
-        if (chunk.type === 'plan') {
-            return [];
-        }
         return chunk;
     };
     const toolCallMessageData: ToolCallMessageData = {
@@ -60,14 +55,6 @@ export function transferToToolCallMessage(source: InboxAssistantTextMessage, arg
         chunks: textMessageData.chunks.flatMap(transformChunk),
     };
     return new ToolCallMessage(source.getRoundtrip(), toolCallMessageData);
-}
-
-export function transferToPlanMessage(source: InboxAssistantTextMessage): InboxPlanMessage {
-    const planMessageData: PlanMessageData = {
-        ...source.toMessageData(),
-        type: 'plan',
-    };
-    return new PlanMessage(source.getRoundtrip(), planMessageData);
 }
 
 export function createEmptyRoundtrip(): InboxRoundtrip {

@@ -1,17 +1,12 @@
 import type {RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import type {ParsedToolCallMessageChunk, RunCommandToolCallMessageChunk} from '@oniichan/shared/inbox';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
+import {asString} from './utils';
 
 const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
-
-function assertChunk(chunk: ParsedToolCallMessageChunk): asserts chunk is RunCommandToolCallMessageChunk {
-    if (chunk.toolName !== 'run_command') {
-        throw new Error('Invalid tool call message chunk');
-    }
-}
 
 function findCommandNames(script: string): string[] {
     // This is a very simple implement, using `bash-parser` introduce too many complexity
@@ -97,17 +92,15 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
         }
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<RunCommandParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<RunCommandParameter> {
         return {
-            command: generated.command?.trim(),
+            command: asString(generated.command),
         };
     }
 
     requireUserApprove(): boolean {
-        const chunk = this.getToolCallChunkStrict();
-        assertChunk(chunk);
+        const chunk = this.getToolCallChunkStrict('run_command');
         const commands = findCommandNames(chunk.arguments.command);
-
         const hasExceptionCommand = commands.some(v => this.inboxConfig.exceptionCommandList.includes(v));
         return this.inboxConfig.automaticRunCommand ? hasExceptionCommand : !hasExceptionCommand;
     }

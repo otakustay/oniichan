@@ -1,16 +1,16 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {InboxPromptMode, InboxPromptReference} from '@oniichan/prompt';
-import type {ModelResponse} from '@oniichan/shared/model';
+import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
-import {assertHasValue, stringifyError} from '@oniichan/shared/error';
+import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost} from '../../core/model';
 import type {ModelChatOptions} from '../../core/model';
-import {createEmptyMessageThread, createEmptyRoundtrip, isToolCallMessageOf} from '../../inbox';
-import type {InboxRoundtrip} from '../../inbox';
+import {createEmptyMessageThread, createEmptyRoundtrip} from '../../inbox';
+import type {InboxMessage, InboxRoundtrip} from '../../inbox';
 import {WorkflowDetector} from '../../workflow';
 import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
 import type {InboxMessageThread} from '../../inbox';
@@ -21,10 +21,8 @@ function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
     // For every type that "will stream very freauently", we don't flush them immediately
     return chunk.type !== 'text'
         && chunk.type !== 'contentDelta'
-        && chunk.type !== 'planTaskDelta'
         && chunk.type !== 'toolDelta'
         && chunk.type !== 'reasoning'
-        && chunk.type !== 'textInPlan'
         && chunk.type !== 'textInTool';
 }
 
@@ -208,14 +206,10 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const messages = this.thread.toMessages();
         const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
-            messages: messages.map(v => v.toChatInputPayload()),
+            messages: messages.map(v => this.messageToChatInputPayload(v)),
             telemetry: modelTelemetry,
             systemPrompt: this.systemPrompt,
         };
-
-        if (this.promptMode === 'act') {
-            options.messages[0].content = '(User request is hidden currently)';
-        }
 
         if (this.promptMode !== 'standalone') {
             const {plannerModel, actorModel, coderModel} = this.inboxConfig;
@@ -225,6 +219,18 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         }
 
         return options;
+    }
+
+    private messageToChatInputPayload(message: InboxMessage): ChatInputPayload {
+        const isPlanExecutor = this.promptMode === 'act' || this.promptMode === 'code';
+        switch (message.type) {
+            case 'userRequest':
+                return message.toChatInputPayload({hideUserRequest: isPlanExecutor});
+            case 'toolCall':
+                return message.toChatInputPayload({hidePlanDetail: isPlanExecutor});
+            default:
+                return message.toChatInputPayload();
+        }
     }
 
     private getReplyMessage() {
@@ -256,37 +262,9 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             return 'plan';
         }
 
-        const reply = this.getReplyMessage();
-
-        // The plan tool executor moves the first task into `executing` state
-        if (reply.type === 'plan') {
-            const task = reply.getExecutingTask();
-            return task ? (task.taskType === 'coding' ? 'code' : 'act') : 'plan';
-        }
-
-        // The `complete_task` tool forwards the next pending task to `executing` state, or completes the entire plan
-        if (isToolCallMessageOf(reply, 'complete_task')) {
-            const chunk = reply.findToolCallChunkStrict();
-            const progress = chunk.toolName === 'complete_task' ? chunk.executionData : null;
-
-            // If a `complete_task` indicates all tasks are finished, back to plan mode
-            if (progress && progress.completedTasks === progress.totalTasks) {
-                return 'plan';
-            }
-
-            const lastPlan = messages.findLast(v => v.type === 'plan');
-            assertHasValue(lastPlan, 'A complete task message must be preceded by a plan message');
-            const task = lastPlan.getExecutingTask();
-
-            return task ? (task.taskType === 'coding' ? 'code' : 'act') : 'plan';
-        }
-
-        // Go act mode if plan exists in previous messages
-        if (messages.some(v => v.type === 'plan')) {
-            return 'act';
-        }
-
-        return null;
+        const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
+        const executingTask = plan.arguments.tasks.find(v => v.status === 'executing');
+        return executingTask ? (executingTask.taskType === 'coding' ? 'code' : 'act') : 'plan';
     }
 
     private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {

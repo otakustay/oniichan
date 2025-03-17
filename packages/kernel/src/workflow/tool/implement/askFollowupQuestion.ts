@@ -1,6 +1,8 @@
 import type {AskFollowupQuestionParameter} from '@oniichan/shared/tool';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
+import {asString} from './utils';
 
 export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollowupQuestionParameter> {
     async executeApprove(): Promise<ToolExecuteResult> {
@@ -11,9 +13,9 @@ export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollo
         };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<AskFollowupQuestionParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<AskFollowupQuestionParameter> {
         return {
-            question: generated.question?.trim(),
+            question: asString(generated.question),
         };
     }
 }

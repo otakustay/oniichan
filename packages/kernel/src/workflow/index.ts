@@ -1,5 +1,4 @@
 import {ToolWorkflowRunner} from './tool';
-import {PlanWorkflowRunner} from './plan';
 import {WorkflowRunner} from './base';
 import type {WorkflowStepInit} from './base';
 
@@ -25,7 +24,6 @@ export class WorkflowDetector {
     private initializeWorkflowRunners(): WorkflowRunner[] {
         return [
             new ToolWorkflowRunner(this.context),
-            new PlanWorkflowRunner(this.context),
         ];
     }
 }

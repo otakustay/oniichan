@@ -1,6 +1,6 @@
 import type {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import {AssistantTextMessage, deserializeMessage, PlanMessage, ToolCallMessage, UserRequestMessage} from './message';
+import {AssistantTextMessage, deserializeMessage, ToolCallMessage, UserRequestMessage} from './message';
 import type {Message} from './message';
 import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
 import {newUuid} from '@oniichan/shared/id';
@@ -9,9 +9,7 @@ export type WorkflowOriginMessage = AssistantTextMessage | ToolCallMessage;
 
 export class Workflow implements InboxWorkflow {
     static from(data: WorkflowData, roundtrip: InboxRoundtrip): Workflow {
-        const origin = data.origin.type === 'plan'
-            ? PlanMessage.from(data.origin, roundtrip)
-            : ToolCallMessage.from(data.origin, roundtrip);
+        const origin = ToolCallMessage.from(data.origin, roundtrip);
         const workflow = new Workflow(origin, roundtrip);
         workflow.markStatus(data.status);
         for (const reaction of data.reactions) {

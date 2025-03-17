@@ -1,6 +1,8 @@
 import type {BrowserPreviewParameter} from '@oniichan/shared/tool';
+import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
+import {asString} from './utils';
 
 export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
     async executeApprove(args: BrowserPreviewParameter): Promise<ToolExecuteResult> {
@@ -21,9 +23,9 @@ export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPrevie
         };
     }
 
-    extractParameters(generated: Record<string, string | undefined>): Partial<BrowserPreviewParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<BrowserPreviewParameter> {
         return {
-            url: generated.url?.trim(),
+            url: asString(generated.url),
         };
     }
 }
