@@ -89,18 +89,18 @@ function renderItem(item: ToolDescription) {
 export function renderToolSection(view: InboxPromptView) {
     const available = new IncludeExclude<ToolName>();
     switch (view.mode) {
-        case 'plan':
+        case 'planner':
             available.include('create_plan');
             available.include('attempt_completion');
             break;
-        case 'act':
+        case 'actor':
             available.include('read_file');
             available.include('read_directory');
             available.include('find_files_by_glob');
             available.include('find_files_by_regex');
             available.include('complete_task');
             break;
-        case 'code':
+        case 'coder':
             available.exclude('ask_followup_question');
             available.exclude('attempt_completion');
             available.exclude('create_plan');

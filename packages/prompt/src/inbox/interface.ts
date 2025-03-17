@@ -7,10 +7,10 @@ export interface InboxPromptReference {
     content: string;
 }
 
-export type InboxPromptMode = 'standalone' | 'plan' | 'act' | 'code';
+export type InboxPromptRole = 'standalone' | 'planner' | 'actor' | 'coder';
 
 export interface InboxPromptView {
-    mode: InboxPromptMode;
+    mode: InboxPromptRole;
     tools: ToolDescription[];
     projectStructure: string;
     projectStructureTruncated: boolean;

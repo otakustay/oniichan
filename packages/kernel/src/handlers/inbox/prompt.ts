@@ -1,6 +1,6 @@
 import {builtinTools} from '@oniichan/shared/tool';
 import {renderInboxSystemPrompt} from '@oniichan/prompt';
-import type {InboxPromptReference, InboxPromptView, InboxPromptMode} from '@oniichan/prompt';
+import type {InboxPromptReference, InboxPromptView, InboxPromptRole} from '@oniichan/prompt';
 import {stringifyError} from '@oniichan/shared/error';
 import type {ModelFeature} from '@oniichan/shared/model';
 import {uniqueBy} from '@oniichan/shared/array';
@@ -15,7 +15,7 @@ export class SystemPromptGenerator {
 
     private readonly references: InboxPromptReference[] = [];
 
-    private mode: InboxPromptMode = 'standalone';
+    private mode: InboxPromptRole = 'standalone';
 
     private modelFeature: ModelFeature = {
         supportReasoning: false,
@@ -28,7 +28,7 @@ export class SystemPromptGenerator {
         this.logger = logger.with({source: 'SystemPromptGenerator'});
     }
 
-    setMode(mode: InboxPromptMode) {
+    setMode(mode: InboxPromptRole) {
         this.mode = mode;
     }
 

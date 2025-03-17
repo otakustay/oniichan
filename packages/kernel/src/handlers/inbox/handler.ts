@@ -1,5 +1,5 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
-import type {InboxPromptMode, InboxPromptReference} from '@oniichan/prompt';
+import type {InboxPromptRole, InboxPromptReference} from '@oniichan/prompt';
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
@@ -62,7 +62,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     private systemPrompt = '';
 
-    private promptMode: InboxPromptMode = 'standalone';
+    private promptMode: InboxPromptRole = 'standalone';
 
     protected addReference(references: InboxPromptReference[]) {
         this.references.push(...references);
@@ -213,16 +213,16 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
         if (this.promptMode !== 'standalone') {
             const {plannerModel, actorModel, coderModel} = this.inboxConfig;
-            options.overrideModelName = this.promptMode === 'plan'
+            options.overrideModelName = this.promptMode === 'planner'
                 ? plannerModel
-                : (this.promptMode === 'code' ? coderModel || actorModel : actorModel);
+                : (this.promptMode === 'coder' ? coderModel || actorModel : actorModel);
         }
 
         return options;
     }
 
     private messageToChatInputPayload(message: InboxMessage): ChatInputPayload {
-        const isPlanExecutor = this.promptMode === 'act' || this.promptMode === 'code';
+        const isPlanExecutor = this.promptMode === 'actor' || this.promptMode === 'coder';
         switch (message.type) {
             case 'userRequest':
                 return message.toChatInputPayload({hideUserRequest: isPlanExecutor});
@@ -254,17 +254,17 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         }
     }
 
-    private getRingRingPromptMode(): InboxPromptMode | null {
+    private getRingRingPromptMode(): InboxPromptRole | null {
         const messages = this.thread.toMessages();
 
         // Only user request message, the first reply should be in plan mode
         if (messages.length <= 1) {
-            return 'plan';
+            return 'planner';
         }
 
         const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
         const executingTask = plan.arguments.tasks.find(v => v.status === 'executing');
-        return executingTask ? (executingTask.taskType === 'coding' ? 'code' : 'act') : 'plan';
+        return executingTask ? (executingTask.taskType === 'coding' ? 'coder' : 'actor') : 'planner';
     }
 
     private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {

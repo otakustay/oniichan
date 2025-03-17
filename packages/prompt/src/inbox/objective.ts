@@ -199,9 +199,9 @@ export function renderActObjective() {
 
 export function renderObjectiveSection(view: InboxPromptView) {
     switch (view.mode) {
-        case 'plan':
+        case 'planner':
             return renderPlanObject();
-        case 'act':
+        case 'actor':
             return renderActObjective();
         case 'standalone':
             return view.modelFeature.requireToolThinking ? renderObjectiveWithThinking() : renderCommonObjective();
