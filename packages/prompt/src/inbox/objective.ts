@@ -70,7 +70,7 @@ function renderObjectiveWithThinking() {
     `;
 }
 
-function renderPlanObject() {
+function renderPlannerObject() {
     return dedent`
         # Objective
 
@@ -157,7 +157,7 @@ function renderPlanObject() {
     `;
 }
 
-export function renderActObjective() {
+export function renderActorObjective() {
     return dedent`
         # Objective
 
@@ -200,9 +200,10 @@ export function renderActObjective() {
 export function renderObjectiveSection(view: InboxPromptView) {
     switch (view.mode) {
         case 'planner':
-            return renderPlanObject();
+            return renderPlannerObject();
         case 'actor':
-            return renderActObjective();
+            return renderActorObjective();
+        case 'coder':
         case 'standalone':
             return view.modelFeature.requireToolThinking ? renderObjectiveWithThinking() : renderCommonObjective();
     }
