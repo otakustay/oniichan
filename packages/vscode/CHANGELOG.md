@@ -1,10 +1,10 @@
 # Change Log
 
-[UNRELEASED]
+[3.4.0] - 2025-03-18
 
 ### Added
 
-- 邮件系统增加一个Ring Ring模式，将任务分为规划、行动、编程三部分处理，这个模式在成本上有极大的优势。
+- 邮件系统增加一个Ring Ring模式，将任务分为规划、行动、编程三部分处理，这个模式在成本上有极大的优势，参考[Announcing RingRing Mode](https://github.com/otakustay/oniichan/discussions/39)了解详细情况。
 
 ### Removed
 
