@@ -6,26 +6,27 @@ import type {
     AssistantTextMessageContentChunk,
     MessageInputChunk,
     WorkflowSourceChunkStatus,
-    TaggedMessageChunk,
-    MessageViewChunk,
     ToolCallMessageChunk,
+    AssistantRole,
 } from '@oniichan/shared/inbox';
 import type {InboxRoundtrip, InboxAssistantTextMessage} from '../interface';
-import type {ContentTagName} from '@oniichan/shared/tool';
 import {MessageBase} from './base';
 import {chunksToModelText} from './utils';
 
 export class AssistantTextMessage extends MessageBase<'assistantText'> implements InboxAssistantTextMessage {
     private readonly chunks: AssistantTextMessageContentChunk[] = [];
 
+    private readonly role: AssistantRole = 'standalone';
+
     static from(data: AssistantTextMessageData, roundtrip: InboxRoundtrip) {
-        const message = new AssistantTextMessage(data.uuid, roundtrip);
+        const message = new AssistantTextMessage(data.uuid, data.role, roundtrip);
         message.restore(data);
         return message;
     }
 
-    constructor(uuid: string, roundtrip: InboxRoundtrip) {
+    constructor(uuid: string, role: AssistantRole, roundtrip: InboxRoundtrip) {
         super(uuid, 'assistantText', roundtrip);
+        this.role = role;
     }
 
     addChunk(chunk: MessageInputChunk) {
@@ -129,6 +130,7 @@ export class AssistantTextMessage extends MessageBase<'assistantText'> implement
     toMessageData(): AssistantTextMessageData {
         return {
             ...this.toMessageDataBase(),
+            role: this.role,
             type: this.type,
             chunks: this.chunks,
         };
@@ -149,19 +151,6 @@ export class AssistantTextMessage extends MessageBase<'assistantText'> implement
         if (chunk) {
             chunk.status = status;
         }
-    }
-
-    findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null {
-        const isTaggedChunk = (chunk: MessageViewChunk, tagName: string): chunk is TaggedMessageChunk => {
-            return chunk.type === 'content' && chunk.tagName === tagName;
-        };
-        return this.chunks.find(v => isTaggedChunk(v, tagName)) ?? null;
-    }
-
-    findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk {
-        const chunk = this.findTaggedChunk(tagName);
-        assertHasValue(chunk, `Message does not contain content chunk tagged as ${tagName}`);
-        return chunk;
     }
 
     findToolCallChunk() {

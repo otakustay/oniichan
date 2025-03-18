@@ -198,7 +198,7 @@ export function renderActorObjective() {
 }
 
 export function renderObjectiveSection(view: InboxPromptView) {
-    switch (view.mode) {
+    switch (view.role) {
         case 'planner':
             return renderPlannerObject();
         case 'actor':

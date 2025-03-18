@@ -33,7 +33,7 @@ export function createToolUseMessage(roundtrip: InboxRoundtrip, content: string)
 }
 
 export function createEmptyAssistantTextMessage(roundtrip: InboxRoundtrip): InboxAssistantTextMessage {
-    return new AssistantTextMessage(newUuid(), roundtrip);
+    return new AssistantTextMessage(newUuid(), 'standalone', roundtrip);
 }
 
 export function transferToToolCallMessage(source: InboxAssistantTextMessage, args: unknown): InboxToolCallMessage {

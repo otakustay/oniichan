@@ -1,11 +1,11 @@
-import {builtinTools} from '@oniichan/shared/tool';
 import {renderInboxSystemPrompt} from '@oniichan/prompt';
-import type {InboxPromptReference, InboxPromptView, InboxPromptRole} from '@oniichan/prompt';
+import type {InboxPromptReference, InboxPromptView} from '@oniichan/prompt';
 import {stringifyError} from '@oniichan/shared/error';
 import type {ModelFeature} from '@oniichan/shared/model';
 import {uniqueBy} from '@oniichan/shared/array';
 import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
+import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import type {EditorHost} from '../../core/editor';
 
 export class SystemPromptGenerator {
@@ -15,7 +15,9 @@ export class SystemPromptGenerator {
 
     private readonly references: InboxPromptReference[] = [];
 
-    private mode: InboxPromptRole = 'standalone';
+    private role: AssistantRole = 'standalone';
+
+    private workingMode: MessageThreadWorkingMode = 'normal';
 
     private modelFeature: ModelFeature = {
         supportReasoning: false,
@@ -28,8 +30,12 @@ export class SystemPromptGenerator {
         this.logger = logger.with({source: 'SystemPromptGenerator'});
     }
 
-    setMode(mode: InboxPromptRole) {
-        this.mode = mode;
+    setAssistantRole(role: AssistantRole) {
+        this.role = role;
+    }
+
+    setWorkingMode(mode: MessageThreadWorkingMode) {
+        this.workingMode = mode;
     }
 
     setModelFeature(feature: ModelFeature) {
@@ -42,17 +48,14 @@ export class SystemPromptGenerator {
 
     async renderSystemPrompt(): Promise<string> {
         const view: InboxPromptView = {
-            mode: this.mode,
-            tools: [],
+            role: this.role,
+            mode: this.workingMode,
             projectStructure: '',
             projectStructureTruncated: false,
             modelFeature: this.modelFeature,
             customRules: '',
             references: [],
         };
-
-        const toolsView = this.createToolsView();
-        Object.assign(view, toolsView);
 
         try {
             const rootEntriesView = await this.createProjectStructureView();
@@ -74,10 +77,6 @@ export class SystemPromptGenerator {
 
         const systemPrompt = await renderInboxSystemPrompt(view);
         return systemPrompt;
-    }
-
-    private createToolsView(): Partial<InboxPromptView> {
-        return {tools: builtinTools};
     }
 
     private async createProjectStructureView(): Promise<Partial<InboxPromptView>> {

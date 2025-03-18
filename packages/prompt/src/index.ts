@@ -1,5 +1,5 @@
 export {renderInboxSystemPrompt} from './inbox';
-export type {InboxPromptView, InboxPromptReference, InboxPromptRole} from './inbox';
+export type {InboxPromptView, InboxPromptReference} from './inbox';
 export {renderFixToolCallPrompt} from './fixToolCall';
 export type {FixToolCallView} from './fixToolCall';
 export {renderScaffoldPrompt} from './scaffold';

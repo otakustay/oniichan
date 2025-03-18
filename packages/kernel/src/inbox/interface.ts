@@ -18,24 +18,24 @@ import type {
     ToolUseMessageData,
     MessageThreadData,
     MessageThreadPersistData,
-    TaggedMessageChunk,
     MessageThreadWorkingMode,
     ParsedToolCallMessageChunkOf,
+    AssistantRole,
 } from '@oniichan/shared/inbox';
-import type {ContentTagName, ToolName} from '@oniichan/shared/tool';
+import type {ToolName} from '@oniichan/shared/tool';
 
 export interface InboxRoundtrip {
     setRequest(request: InboxUserRequestMessage): void;
     getRequestText(): string;
     getStatus(): RoundtripStatus;
     markStatus(status: RoundtripStatus): void;
-    startTextResponse(messageUuid: string): InboxAssistantTextMessage;
+    startTextResponse(messageUuid: string, role: AssistantRole): InboxAssistantTextMessage;
     startWorkflowResponse(origin: InboxOriginMessageBase): InboxWorkflow;
     hasMessage(messageUuid: string): boolean;
     findMessageByUuid(messageUuid: string): InboxMessage | null;
     getLatestTextMessage(): InboxAssistantTextMessage | null;
-    getLatestWorkflow(): InboxWorkflow | null;
     getLatestTextMessageStrict(): InboxAssistantTextMessage;
+    getLatestWorkflow(): InboxWorkflow | null;
     getLatestWorkflowStrict(): InboxWorkflow;
     findLastToolCallMessageByToolNameStrict<N extends ToolName>(toolName: N): InboxToolCallMessage<N>;
     findLastToolCallChunkByToolNameStrict<N extends ToolName>(toolName: N): ParsedToolCallMessageChunkOf<N>;
@@ -72,8 +72,6 @@ export interface InboxAssistantTextMessage extends InboxWorkflowSourceMessageBas
     toMessageData(): AssistantTextMessageData;
     getTextContent(): string;
     addChunk(chunk: MessageInputChunk): void;
-    findTaggedChunk(tagName: ContentTagName): TaggedMessageChunk | null;
-    findTaggedChunkStrict(tagName: ContentTagName): TaggedMessageChunk;
     findToolCallChunk(): ToolCallMessageChunk | null;
     findToolCallChunkStrict(): ToolCallMessageChunk;
     replaceToolCallChunk(newChunk: ToolCallMessageChunk): void;
@@ -120,11 +118,9 @@ export interface InboxWorkflow {
     shouldContinueRoundtrip(): boolean;
     setContinueRoundtrip(shouldContinue: boolean): void;
     markStatus(status: WorkflowStatus): void;
-    startReaction(uuid: string): InboxAssistantTextMessage;
     exposeMessage(messageUuid: string): void;
     addTextReaction(text: string, exposed: boolean): void;
     addReaction(message: InboxMessage, exposed: boolean): void;
-    isOriginatedBy(uuid: string): boolean;
     hasMessage(messageUuid: string): boolean;
     findMessage(messageUuid: string): InboxMessage | null;
     toMessages(): InboxMessage[];

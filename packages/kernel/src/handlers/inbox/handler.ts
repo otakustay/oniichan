@@ -1,7 +1,7 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
-import type {InboxPromptRole, InboxPromptReference} from '@oniichan/prompt';
+import type {InboxPromptReference} from '@oniichan/prompt';
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
-import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
+import type {AssistantRole, MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
@@ -62,7 +62,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     private systemPrompt = '';
 
-    private promptMode: InboxPromptRole = 'standalone';
+    private assistantRole: AssistantRole = 'standalone';
 
     protected addReference(references: InboxPromptReference[]) {
         this.references.push(...references);
@@ -83,7 +83,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         await this.prepareChatContext();
         const options = this.getModelOptions();
 
-        const reply = this.roundtrip.startTextResponse(newUuid());
+        const reply = this.roundtrip.startTextResponse(newUuid(), this.assistantRole);
         this.pushStoreUpdate();
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages: options.messages});
@@ -192,7 +192,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         logger.trace('PrepareSystemPromptStart');
 
         this.preparePromptMode();
-        this.systemPromptGenerator.setMode(this.promptMode);
+        this.systemPromptGenerator.setAssistantRole(this.assistantRole);
+        this.systemPromptGenerator.setWorkingMode(this.thread.getWorkingMode());
         const modelFeature = await this.modelAccess.getModelFeature();
         this.systemPromptGenerator.addReference(this.references);
         this.systemPromptGenerator.setModelFeature(modelFeature);
@@ -211,18 +212,18 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             systemPrompt: this.systemPrompt,
         };
 
-        if (this.promptMode !== 'standalone') {
+        if (this.assistantRole !== 'standalone') {
             const {plannerModel, actorModel, coderModel} = this.inboxConfig;
-            options.overrideModelName = this.promptMode === 'planner'
+            options.overrideModelName = this.assistantRole === 'planner'
                 ? plannerModel
-                : (this.promptMode === 'coder' ? coderModel || actorModel : actorModel);
+                : (this.assistantRole === 'coder' ? coderModel || actorModel : actorModel);
         }
 
         return options;
     }
 
     private messageToChatInputPayload(message: InboxMessage): ChatInputPayload {
-        const isPlanExecutor = this.promptMode === 'actor' || this.promptMode === 'coder';
+        const isPlanExecutor = this.assistantRole === 'actor' || this.assistantRole === 'coder';
         switch (message.type) {
             case 'userRequest':
                 return message.toChatInputPayload({hideUserRequest: isPlanExecutor});
@@ -242,19 +243,19 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const {logger} = this.context;
 
         if (this.thread.getWorkingMode() === 'normal') {
-            this.promptMode = 'standalone';
+            this.assistantRole = 'standalone';
             return;
         }
 
-        const mode = this.getRingRingPromptMode();
-        this.promptMode = mode ?? 'standalone';
+        const mode = this.getRingRingAssistantRole();
+        this.assistantRole = mode ?? 'standalone';
 
         if (!mode) {
             logger.warn('UnexpectedWorkingMode', {mode: 'standalone'});
         }
     }
 
-    private getRingRingPromptMode(): InboxPromptRole | null {
+    private getRingRingAssistantRole(): AssistantRole | null {
         const messages = this.thread.toMessages();
 
         // Only user request message, the first reply should be in plan mode

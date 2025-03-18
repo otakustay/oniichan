@@ -1,5 +1,6 @@
 import dedent from 'dedent';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
+import {builtinTools} from '@oniichan/shared/tool';
 import type {InboxPromptView} from './interface';
 import {IncludeExclude} from '@oniichan/shared/array';
 
@@ -88,34 +89,17 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const available = new IncludeExclude<ToolName>();
-    switch (view.mode) {
-        case 'planner':
-            available.include('create_plan');
-            available.include('attempt_completion');
-            break;
-        case 'actor':
-            available.include('read_file');
-            available.include('read_directory');
-            available.include('find_files_by_glob');
-            available.include('find_files_by_regex');
-            available.include('complete_task');
-            break;
-        case 'coder':
-            available.exclude('ask_followup_question');
-            available.exclude('attempt_completion');
-            available.exclude('create_plan');
-            break;
-        case 'standalone':
-            available.exclude('complete_task');
-            available.exclude('create_plan');
-            break;
+    for (const tool of builtinTools) {
+        if (tool.role.includes(view.role) && (!tool.mode || tool.mode.includes(view.mode))) {
+            available.include(tool.name);
+        }
     }
 
-    if (!view.projectStructure) {
+    if (view.projectStructure) {
         available.exclude('browser_preview');
     }
 
-    const tools = view.tools.filter(v => available.allow(v.name));
+    const tools = builtinTools.filter(v => available.allow(v.name));
 
     if (tools.length) {
         const parts = [

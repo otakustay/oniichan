@@ -1,7 +1,7 @@
 import type {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import {AssistantTextMessage, deserializeMessage, ToolCallMessage, UserRequestMessage} from './message';
-import type {Message} from './message';
+import {deserializeMessage, ToolCallMessage, UserRequestMessage} from './message';
+import type {Message, AssistantTextMessage} from './message';
 import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
 import {newUuid} from '@oniichan/shared/id';
 
@@ -54,12 +54,6 @@ export class Workflow implements InboxWorkflow {
         this.continueRoundtrip = shouldContinue;
     }
 
-    startReaction(uuid: string) {
-        const message = new AssistantTextMessage(uuid, this.roundtrip);
-        this.reactions.push(message);
-        return message;
-    }
-
     exposeMessage(messageUuid: string) {
         const message = this.findMessageStrict(messageUuid);
         this.exposed.push(message.uuid);
@@ -75,10 +69,6 @@ export class Workflow implements InboxWorkflow {
     addTextReaction(text: string, exposed: boolean): void {
         const message = new UserRequestMessage(newUuid(), this.roundtrip, text);
         this.addReaction(message, exposed);
-    }
-
-    isOriginatedBy(uuid: string) {
-        return this.origin.uuid === uuid;
     }
 
     hasMessage(messageUuid: string) {

@@ -324,6 +324,7 @@ function appendResponseMessageBy(threadUuid: string, messageUuid: string, chunk:
                 const message: AssistantTextMessageData = {
                     uuid: messageUuid,
                     type: 'assistantText',
+                    role: 'standalone',
                     chunks: [],
                     createdAt: now(),
                 };

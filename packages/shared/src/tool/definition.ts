@@ -1,6 +1,6 @@
 import dedent from 'dedent';
 import type {JSONSchema7} from 'json-schema';
-import type {RawToolCallParameter} from '../inbox';
+import type {RawToolCallParameter, AssistantRole, MessageThreadWorkingMode} from '../inbox';
 
 export interface ParameterInfo {
     type: 'object';
@@ -29,6 +29,8 @@ export interface ToolDescription {
     description: string;
     parameters: ParameterInfo;
     usage: string;
+    role: AssistantRole[];
+    mode?: MessageThreadWorkingMode[];
 }
 
 export const readFileParameters = {
@@ -304,10 +306,11 @@ export const builtinTools: ToolDescription[] = [
         description: `Read the content of a file`,
         parameters: readFileParameters,
         usage: dedent`
-                <read_file>
-                    <path>src/utils/index.ts</path>
-                </read_file>
-            `,
+            <read_file>
+                <path>src/utils/index.ts</path>
+            </read_file>
+        `,
+        role: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'read_directory',
@@ -319,6 +322,7 @@ export const builtinTools: ToolDescription[] = [
                 <recursive>true</recursive>
             </read_directory>
         `,
+        role: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'find_files_by_glob',
@@ -329,6 +333,7 @@ export const builtinTools: ToolDescription[] = [
                 <glob>src/common/**/*.{ts,tsx}</glob>
             </find_files_by_glob>
         `,
+        role: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'find_files_by_regex',
@@ -340,6 +345,7 @@ export const builtinTools: ToolDescription[] = [
                 <path>src/common</path>
             </find_files_by_regex>
         `,
+        role: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'write_file',
@@ -355,6 +361,7 @@ export const builtinTools: ToolDescription[] = [
                 </content>
             </write_file>
         `,
+        role: ['standalone', 'coder'],
     },
     {
         name: 'patch_file',
@@ -374,16 +381,18 @@ export const builtinTools: ToolDescription[] = [
                 </patch>
             </patch_file>
         `,
+        role: ['standalone', 'coder'],
     },
     {
         name: 'delete_file',
         description: 'Delete a file from the workspace',
         parameters: deleteFileParameters,
         usage: dedent`
-                <delete_file>
-                    <path>src/old-file.ts</path>
-                </delete_file>
-            `,
+            <delete_file>
+                <path>src/old-file.ts</path>
+            </delete_file>
+        `,
+        role: ['standalone', 'coder'],
     },
     {
         name: 'browser_preview',
@@ -395,6 +404,7 @@ export const builtinTools: ToolDescription[] = [
                 <url>https://example.com</url>
             </browser_preview>
         `,
+        role: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'run_command',
@@ -406,6 +416,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>ls -la</command>
             </run_command>
         `,
+        role: ['standalone', 'coder'],
     },
     {
         name: 'attempt_completion',
@@ -418,6 +429,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>The command you used to demonstrate the result</command>
             </attempt_completion>
         `,
+        role: ['standalone', 'planner'],
     },
     {
         name: 'ask_followup_question',
@@ -429,6 +441,8 @@ export const builtinTools: ToolDescription[] = [
                 <question>Your question</question>
             </ask_followup_question>
         `,
+        role: ['standalone'],
+        mode: ['normal'],
     },
     {
         name: 'complete_task',
@@ -440,6 +454,8 @@ export const builtinTools: ToolDescription[] = [
                 <confidence>87</confidence>
             </complete_task>
         `,
+        role: ['actor', 'coder'],
+        mode: ['ringRing'],
     },
     {
         name: 'create_plan',
@@ -454,6 +470,8 @@ export const builtinTools: ToolDescription[] = [
             <coding>Uninstall lodash</coding>
             </create_plan>
         `,
+        role: ['planner'],
+        mode: ['ringRing'],
     },
 ];
 

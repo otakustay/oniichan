@@ -1,4 +1,5 @@
 export type {
+    AssistantRole,
     ReasoningMessageChunk,
     TextMessageChunk,
     TaggedMessageChunk,

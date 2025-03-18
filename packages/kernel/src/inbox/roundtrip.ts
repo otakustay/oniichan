@@ -1,11 +1,13 @@
 import {assertHasValue, assertNever} from '@oniichan/shared/error';
 import type {
+    AssistantRole,
     ParsedToolCallMessageChunkOf,
     RoundtripData,
     RoundtripMessageData,
     RoundtripResponseData,
     RoundtripStatus,
 } from '@oniichan/shared/inbox';
+import type {ToolName} from '@oniichan/shared/tool';
 import {AssistantTextMessage, UserRequestMessage} from './message';
 import {Workflow} from './workflow';
 import type {
@@ -17,7 +19,6 @@ import type {
     InboxWorkflowOriginMessage,
 } from './interface';
 import {isAssistantMessage, isToolCallMessageOf} from './assert';
-import type {ToolName} from '@oniichan/shared/tool';
 
 interface RoundtripMessageResponse {
     type: 'message';
@@ -81,10 +82,10 @@ export class Roundtrip implements InboxRoundtrip {
         }
     }
 
-    startTextResponse(messageUuid: string) {
+    startTextResponse(messageUuid: string, role: AssistantRole) {
         const response: RoundtripMessageResponse = {
             type: 'message',
-            message: new AssistantTextMessage(messageUuid, this),
+            message: new AssistantTextMessage(messageUuid, role, this),
         };
         this.responses.push(response);
         return response.message;
