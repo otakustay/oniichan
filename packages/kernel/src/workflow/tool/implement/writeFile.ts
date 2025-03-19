@@ -25,8 +25,15 @@ export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<WriteFileParameter> {
         return {
-            path: asString(generated.path),
+            path: asString(generated.path, true),
             content: asString(generated.content),
+        };
+    }
+
+    parseParameters(extracted: Partial<WriteFileParameter>): WriteFileParameter {
+        return {
+            path: extracted.path ?? '',
+            content: extracted.content ?? '',
         };
     }
 }

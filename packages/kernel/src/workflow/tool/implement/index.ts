@@ -77,9 +77,15 @@ export class ToolImplement {
         return implement.executeReject();
     }
 
-    extractArguments(toolName: ToolName, generated: Record<string, RawToolCallParameter>): Record<string, unknown> {
+    extractArguments(toolName: ToolName, generated: Record<string, RawToolCallParameter>): Record<string, any> {
         const implement = this.getImplement(toolName);
         return implement.extractParameters(generated);
+    }
+
+    parseArguments(toolName: ToolName, generated: Record<string, any>): any {
+        const implement = this.getImplement(toolName);
+        const extracted = implement.extractParameters(generated);
+        return implement.parseParameters(extracted);
     }
 
     private getImplement(name: ToolName) {

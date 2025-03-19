@@ -2,58 +2,59 @@ import path from 'node:path';
 import type {ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
+import {ensureArray} from '@oniichan/shared/array';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
-import {asString} from './utils';
 
-export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter> {
-    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<ReadFileParameter> {
+interface Extracted {
+    path: string[];
+}
+
+export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter, Extracted> {
+    async executeApprove(args: ReadFileParameter): Promise<ToolExecuteResult> {
+        const contents = await Promise.all(args.paths.map(v => this.read(v)));
         return {
-            path: asString(generated.path),
+            type: 'success',
+            finished: false,
+            output: contents.join('\n\n'),
         };
     }
 
-    async executeApprove(args: ReadFileParameter): Promise<ToolExecuteResult> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
+        return {
+            // This is named `path` in model generated XML, but `paths` in type definition
+            path: ensureArray(generated.path),
+        };
+    }
+
+    parseParameters(extracted: Extracted): ReadFileParameter {
+        return {
+            paths: extracted.path,
+        };
+    }
+
+    private async read(file: string) {
         try {
-            const content = await this.editorHost.call('readWorkspaceFile', args.path);
+            const content = await this.editorHost.call('readWorkspaceFile', file);
 
             if (content === null) {
-                return {
-                    type: 'success',
-                    finished: false,
-                    output: `Unable to read file ${args.path}: file not exists.`,
-                };
+                return `Unable to read file ${file}: file not exists.`;
             }
 
             if (content === '') {
-                return {
-                    type: 'success',
-                    finished: false,
-                    output: `File ${args.path} is an empty file.`,
-                };
+                return `File ${file} is an empty file.`;
             }
 
             if (content.length > 30000) {
-                return {
-                    type: 'success',
-                    finished: false,
-                    output: `Unable to read file ${args.path}: This file is too large.`,
-                };
+                return `Unable to read file ${file} becaure the file is too large.`;
             }
 
-            const language = path.extname(args.path).slice(1);
-            return {
-                type: 'success',
-                finished: false,
-                output: resultMarkdown(`Content of file ${args.path}:`, content, language),
-            };
+            const language = path.extname(file).slice(1);
+            return resultMarkdown(`Content of file ${file}:`, content, language);
         }
         catch (ex) {
-            return {
-                type: 'executeError',
-                output: `Unable to read file ${args.path}: ${stringifyError(ex)}`,
-            };
+            return `Unable to read file ${file}: ${stringifyError(ex)}`;
         }
     }
 }

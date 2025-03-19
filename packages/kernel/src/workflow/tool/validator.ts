@@ -85,9 +85,8 @@ export class ToolWorkflowValidator extends WorkflowValidator {
         assertAssistantTextMessage(source);
         const tool = this.getToolDefinition();
         const chunk = source.findToolCallChunkStrict();
-        // All values in source arguments are `string | string[]`, `extractArguments` can transformed it to correct type
-        const args = this.implement.extractArguments(tool.name, chunk.arguments);
-        const validateResult = this.validateArguments(tool.parameters, args);
+        const extracted = this.implement.extractArguments(tool.name, chunk.arguments);
+        const validateResult = this.validateArguments(tool.parameters, extracted);
 
         if (validateResult.type === 'valid') {
             return true;

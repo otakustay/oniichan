@@ -4,18 +4,12 @@ import {ensureArray} from '@oniichan/shared/array';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 
-function consumeTaskArray(content: RawToolCallParameter, taskType: PlanTaskType) {
-    const transform = (text: string): PlanTask => {
-        return {
-            taskType,
-            text,
-            status: 'pending',
-        };
-    };
-    return ensureArray(content).map(transform);
+interface Extracted {
+    read: string[];
+    coding: string[];
 }
 
-export class CreatePlanToolImplement extends ToolImplementBase<CreatePlanParameter> {
+export class CreatePlanToolImplement extends ToolImplementBase<CreatePlanParameter, Extracted> {
     async executeApprove(args: CreatePlanParameter): Promise<ToolExecuteResult> {
         const firstTask = args.tasks.at(0);
 
@@ -38,11 +32,28 @@ export class CreatePlanToolImplement extends ToolImplementBase<CreatePlanParamet
         };
     }
 
-    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<CreatePlanParameter> {
+    // TODO： This loses original order of tasks
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
+        return {
+            read: ensureArray(generated.read),
+            coding: ensureArray(generated.coding),
+        };
+    }
+
+    parseParameters(extracted: Extracted): CreatePlanParameter {
+        const transformWith = (taskType: PlanTaskType) => {
+            return (text: string): PlanTask => {
+                return {
+                    taskType,
+                    text,
+                    status: 'pending',
+                };
+            };
+        };
         return {
             tasks: [
-                ...consumeTaskArray(generated.read, 'read'),
-                ...consumeTaskArray(generated.coding, 'coding'),
+                ...extracted.read.map(transformWith('read')),
+                ...extracted.coding.map(transformWith('coding')),
             ],
         };
     }

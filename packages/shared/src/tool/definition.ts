@@ -37,15 +37,18 @@ export const readFileParameters = {
     type: 'object',
     properties: {
         path: {
-            type: 'string',
-            description: 'The path to the file you want to read, must be a relative path',
+            type: 'array',
+            description: 'The paths to the files you want to read, must be a relative path',
+            items: {
+                type: 'string',
+            },
         },
     },
     required: ['path'],
 } as const satisfies ParameterInfo;
 
 export interface ReadFileParameter {
-    path: string;
+    paths: string[];
 }
 
 export const readDirectoryParameters = {

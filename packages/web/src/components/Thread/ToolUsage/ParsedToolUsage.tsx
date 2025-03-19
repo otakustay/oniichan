@@ -26,15 +26,51 @@ const ActionLabel = styled.span`
     white-space: nowrap;
 `;
 
+const FileList = styled.ul`
+    margin: 0;
+    padding: .5em 0 0 1.5em;
+`;
+
+interface ReadFileProps {
+    files: string[];
+}
+
+function ReadFile({files}: ReadFileProps) {
+    if (files.length === 1) {
+        const [file] = files;
+        return (
+            <ActBar
+                icon={<IoDocumentTextOutline />}
+                content={
+                    <>
+                        <ActionLabel>Read File</ActionLabel>
+                        <ParameterLabel title={file}>{file}</ParameterLabel>
+                    </>
+                }
+            />
+        );
+    }
+
+    return (
+        <ActBar
+            icon={<IoDocumentTextOutline />}
+            content={
+                <>
+                    <ActionLabel>Read File</ActionLabel>
+                    <ParameterLabel>{files.length} files</ParameterLabel>
+                </>
+            }
+            richContent={
+                <FileList>
+                    {files.map(v => <li key={v} title={v}>{v}</li>)}
+                </FileList>
+            }
+        />
+    );
+}
+
 function renderLabelContent(input: ParsedToolCallMessageChunk): [ComponentType, string, string, string] {
     switch (input.toolName) {
-        case 'read_file':
-            return [
-                IoDocumentTextOutline,
-                'Read file',
-                trimPathString(input.arguments.path ?? ''),
-                input.arguments.path,
-            ];
         case 'read_directory':
             return [
                 IoFolderOpenOutline,
@@ -58,6 +94,10 @@ interface Props {
 export default function ParsedToolUsage({input}: Props) {
     if (input.toolName === 'complete_task') {
         return null;
+    }
+
+    if (input.toolName === 'read_file') {
+        return <ReadFile files={input.arguments.paths} />;
     }
 
     if (input.toolName === 'attempt_completion') {

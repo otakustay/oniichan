@@ -18,4 +18,10 @@ export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollo
             question: asString(generated.question),
         };
     }
+
+    parseParameters(extracted: Partial<AskFollowupQuestionParameter>): AskFollowupQuestionParameter {
+        return {
+            question: extracted.question ?? '',
+        };
+    }
 }

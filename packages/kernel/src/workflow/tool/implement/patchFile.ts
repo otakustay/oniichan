@@ -47,8 +47,15 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<PatchFileParameter> {
         return {
-            path: asString(generated.path),
+            path: asString(generated.path, true),
             patch: asString(generated.patch),
+        };
+    }
+
+    parseParameters(extracted: Partial<PatchFileParameter>): PatchFileParameter {
+        return {
+            path: extracted.path ?? '',
+            patch: extracted.patch ?? '',
         };
     }
 }

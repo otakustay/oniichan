@@ -15,8 +15,15 @@ export class AttemptCompletionToolImplement extends ToolImplementBase<AttemptCom
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<AttemptCompletionParameter> {
         return {
-            result: asString(generated.result),
-            command: asString(generated.command),
+            result: asString(generated.result, true),
+            command: asString(generated.command, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<AttemptCompletionParameter>): AttemptCompletionParameter {
+        return {
+            result: extracted.result ?? '',
+            command: extracted.command ?? '',
         };
     }
 }

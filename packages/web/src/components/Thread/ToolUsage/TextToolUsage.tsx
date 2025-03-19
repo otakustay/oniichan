@@ -28,15 +28,19 @@ const ActionLabel = styled.span`
     width: fit-content;
 `;
 
+function renderFilesLabel(files: string[]) {
+    switch (files.length) {
+        case 0:
+            return '';
+        case 1:
+            return files[0];
+        default:
+            return `${files.length} files`;
+    }
+}
+
 function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string, string, string] {
     switch (input.toolName) {
-        case 'read_file':
-            return [
-                IoDocumentTextOutline,
-                'Read file',
-                trimPathString(ensureString(input.arguments.path)),
-                ensureString(input.arguments.path),
-            ];
         case 'read_directory':
             return [
                 IoFolderOpenOutline,
@@ -71,6 +75,20 @@ interface Props {
 export default function TextToolUsage({input}: Props) {
     if (input.toolName === 'complete_task') {
         return null;
+    }
+
+    if (input.toolName === 'read_file') {
+        return (
+            <ActBar
+                icon={<IoDocumentTextOutline />}
+                content={
+                    <>
+                        <ActionLabel>Read File</ActionLabel>
+                        <ParameterLabel>{renderFilesLabel(ensureArray(input.arguments.path))}</ParameterLabel>
+                    </>
+                }
+            />
+        );
     }
 
     if (input.toolName === 'attempt_completion') {

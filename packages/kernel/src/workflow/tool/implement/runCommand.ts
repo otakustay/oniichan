@@ -94,7 +94,13 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<RunCommandParameter> {
         return {
-            command: asString(generated.command),
+            command: asString(generated.command, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<RunCommandParameter>): RunCommandParameter {
+        return {
+            command: extracted.command ?? '',
         };
     }
 

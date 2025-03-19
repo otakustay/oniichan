@@ -4,7 +4,11 @@ import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskParameter> {
+interface Extracted {
+    confidence: number | undefined;
+}
+
+export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskParameter, Extracted> {
     async executeApprove(): Promise<ToolExecuteResult> {
         const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
         const executingIndex = plan.arguments.tasks.findIndex(v => v.status === 'executing');
@@ -38,10 +42,16 @@ export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskPar
         };
     }
 
-    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<CompleteTaskParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
         const confidence = parseInt(asString(generated.confidence) ?? '', 10);
         return {
             confidence: isNaN(confidence) ? undefined : confidence,
+        };
+    }
+
+    parseParameters(extracted: Extracted): CompleteTaskParameter {
+        return {
+            confidence: extracted.confidence ?? 0,
         };
     }
 }

@@ -72,8 +72,15 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<ReadDirectoryParameter> {
         return {
-            path: asString(generated.path),
+            path: asString(generated.path, true),
             recursive: generated.recursive === 'true',
+        };
+    }
+
+    parseParameters(extracted: Partial<ReadDirectoryParameter>): ReadDirectoryParameter {
+        return {
+            path: extracted.path ?? '',
+            recursive: extracted.recursive,
         };
     }
 }

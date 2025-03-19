@@ -121,9 +121,17 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<FindFilesByRegExpParameter> {
         return {
-            path: asString(generated.path),
-            glob: asString(generated.glob),
-            regex: asString(generated.regex),
+            path: asString(generated.path, true),
+            glob: asString(generated.glob, true),
+            regex: asString(generated.regex, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<FindFilesByRegExpParameter>): FindFilesByRegExpParameter {
+        return {
+            path: extracted.path ?? '',
+            regex: extracted.regex ?? '',
+            glob: extracted.glob,
         };
     }
 

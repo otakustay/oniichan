@@ -32,7 +32,7 @@ export interface ExecuteError {
 
 export type ToolExecuteResult = Success | ExecuteError;
 
-export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> = Record<string, any>> {
+export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
     protected readonly roundtrip: InboxRoundtrip;
 
     protected readonly editorHost: EditorHost;
@@ -61,7 +61,9 @@ export abstract class ToolImplementBase<A extends Partial<Record<keyof A, any>> 
 
     abstract executeApprove(args: A): Promise<ToolExecuteResult>;
 
-    abstract extractParameters(generated: Record<string, RawToolCallParameter>): Partial<A>;
+    abstract extractParameters(generated: Record<string, RawToolCallParameter>): E;
+
+    abstract parseParameters(extracted: E): A;
 
     protected getToolCallChunkStrict<N extends ToolName>(toolName: N): ParsedToolCallMessageChunkOf<N> {
         const origin = this.roundtrip.getLatestWorkflowStrict().getOriginMessage();

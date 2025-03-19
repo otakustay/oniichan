@@ -25,8 +25,8 @@ export class ToolWorkflowInitializer extends WorkflowInitializer {
         assertAssistantTextMessage(source);
 
         const chunk = source.findToolCallChunkStrict();
-        // It's already validated, so `extractArguments` is guaranteed to return a valid object
-        const args = this.implement.extractArguments(chunk.toolName, chunk.arguments);
+        // Raw parameters are already validated, it will result a parsed strong typed object
+        const args = this.implement.parseArguments(chunk.toolName, chunk.arguments);
         return transferToToolCallMessage(source, args);
     }
 }

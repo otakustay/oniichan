@@ -49,7 +49,13 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<FindFilesByGlobParameter> {
         return {
-            glob: asString(generated.glob),
+            glob: asString(generated.glob, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<FindFilesByGlobParameter>): FindFilesByGlobParameter {
+        return {
+            glob: extracted.glob ?? '',
         };
     }
 }

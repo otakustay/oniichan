@@ -25,7 +25,13 @@ export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPrevie
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<BrowserPreviewParameter> {
         return {
-            url: asString(generated.url),
+            url: asString(generated.url, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<BrowserPreviewParameter>): BrowserPreviewParameter {
+        return {
+            url: extracted.url ?? '',
         };
     }
 }

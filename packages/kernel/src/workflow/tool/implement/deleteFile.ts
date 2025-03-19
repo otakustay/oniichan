@@ -30,7 +30,13 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
 
     extractParameters(generated: Record<string, RawToolCallParameter>): Partial<DeleteFileParameter> {
         return {
-            path: asString(generated.path),
+            path: asString(generated.path, true),
+        };
+    }
+
+    parseParameters(extracted: Partial<DeleteFileParameter>): DeleteFileParameter {
+        return {
+            path: extracted.path ?? '',
         };
     }
 }
