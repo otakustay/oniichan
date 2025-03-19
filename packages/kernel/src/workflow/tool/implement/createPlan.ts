@@ -1,12 +1,16 @@
-import type {CreatePlanParameter, PlanTask, PlanTaskType} from '@oniichan/shared/tool';
-import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ensureArray} from '@oniichan/shared/array';
+import type {CreatePlanParameter, PlanTask} from '@oniichan/shared/tool';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 
 interface Extracted {
     read: string[];
     coding: string[];
+}
+
+interface ParseResult {
+    readTasks: string[];
+    codingTasks: string[];
+    tasks: PlanTask[];
 }
 
 export class CreatePlanToolImplement extends ToolImplementBase<CreatePlanParameter, Extracted> {
@@ -32,29 +36,60 @@ export class CreatePlanToolImplement extends ToolImplementBase<CreatePlanParamet
         };
     }
 
-    // TODO： This loses original order of tasks
-    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
+    extractParameters(): Extracted {
+        const parsed = this.parseSource();
+
         return {
-            read: ensureArray(generated.read),
-            coding: ensureArray(generated.coding),
+            read: parsed.readTasks,
+            coding: parsed.codingTasks,
         };
     }
 
-    parseParameters(extracted: Extracted): CreatePlanParameter {
-        const transformWith = (taskType: PlanTaskType) => {
-            return (text: string): PlanTask => {
-                return {
-                    taskType,
-                    text,
-                    status: 'pending',
-                };
-            };
-        };
+    parseParameters(): CreatePlanParameter {
+        const parsed = this.parseSource();
         return {
-            tasks: [
-                ...extracted.read.map(transformWith('read')),
-                ...extracted.coding.map(transformWith('coding')),
-            ],
+            tasks: parsed.tasks,
         };
+    }
+
+    private getChunkSource(): string {
+        const message = this.roundtrip.getLatestWorkflow()?.getOriginMessage() ?? this.roundtrip.getLatestTextMessage();
+
+        if (message) {
+            return message.findToolCallChunkStrict().source;
+        }
+
+        throw new Error('No plan tool message found');
+    }
+
+    private parseSource(): ParseResult {
+        // `<read>` and `<coding>` tags can be interleaved in order,
+        // to keep their original order, we have to parse from source text
+        const source = this.getChunkSource();
+        const result: ParseResult = {
+            readTasks: [],
+            codingTasks: [],
+            tasks: [],
+        };
+
+        for (const match of source.matchAll(/<{1,2}(read|coding)>(.*)<\/(read|coding)>/g)) {
+            const type = match.at(1);
+            const text = match.at(2);
+
+            if (!type || !text) {
+                continue;
+            }
+
+            if (type === 'read') {
+                result.readTasks.push(text);
+                result.tasks.push({taskType: 'read', status: 'pending', text});
+            }
+            else {
+                result.codingTasks.push(text);
+                result.tasks.push({taskType: 'coding', status: 'pending', text});
+            }
+        }
+
+        return result;
     }
 }
