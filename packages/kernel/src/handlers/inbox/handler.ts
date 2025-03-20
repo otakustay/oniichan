@@ -1,21 +1,21 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {InboxPromptReference} from '@oniichan/prompt';
-import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
-import type {AssistantRole, MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
+import type {ModelResponse} from '@oniichan/shared/model';
+import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost} from '../../core/model';
-import type {ModelChatOptions} from '../../core/model';
 import {createEmptyMessageThread, createEmptyRoundtrip} from '../../inbox';
-import type {InboxMessage, InboxRoundtrip} from '../../inbox';
+import type {InboxRoundtrip} from '../../inbox';
 import {WorkflowDetector} from '../../workflow';
 import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
 import type {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
-import {SystemPromptGenerator} from './prompt';
+import {RingRingChatContextProvider, StandaloneChatContextProvider} from './mode';
+import type {ChatContextProvider, ChatContextProviderInit} from './mode';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
     // For every type that "will stream very freauently", we don't flush them immediately
@@ -46,8 +46,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     protected roundtrip: InboxRoundtrip = createEmptyRoundtrip();
 
-    private readonly systemPromptGenerator = new SystemPromptGenerator(this.context.editorHost, this.context.logger);
-
     private readonly references: InboxPromptReference[] = [];
 
     private inboxConfig: InboxConfig = {
@@ -59,10 +57,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     };
 
     private modelAccess = new ModelAccessHost(this.context.editorHost);
-
-    private systemPrompt = '';
-
-    private assistantRole: AssistantRole = 'standalone';
 
     protected addReference(references: InboxPromptReference[]) {
         this.references.push(...references);
@@ -80,14 +74,14 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     protected async *requestModelChat(): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
-        await this.prepareChatContext();
-        const options = this.getModelOptions();
+        const provider = this.createContextProvider();
+        const role = await provider.provideAssistantRole();
 
-        const reply = this.roundtrip.startTextResponse(newUuid(), this.assistantRole);
+        const reply = this.roundtrip.startTextResponse(newUuid(), role);
         this.pushStoreUpdate();
 
-        logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, messages: options.messages});
-        const chatStream = this.modelAccess.chatStreaming(options);
+        logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, replyMessageUuid: reply.uuid});
+        const chatStream = provider.provideChatStream();
         const state = {
             toolCallOccured: false,
         };
@@ -140,7 +134,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const detectorInit: WorkflowStepInit = {
             thread: this.thread,
             taskId: this.getTaskId(),
-            systemPrompt: this.systemPrompt,
             telemetry: this.telemetry,
             modelAccess: this.modelAccess,
             roundtrip: this.roundtrip,
@@ -187,85 +180,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         this.updateInboxThreadList(store.dump());
     }
 
-    private async prepareChatContext() {
-        const {logger} = this.context;
-        logger.trace('PrepareSystemPromptStart');
-
-        this.preparePromptMode();
-        this.systemPromptGenerator.setAssistantRole(this.assistantRole);
-        this.systemPromptGenerator.setWorkingMode(this.thread.getWorkingMode());
-        const modelFeature = await this.modelAccess.getModelFeature();
-        this.systemPromptGenerator.addReference(this.references);
-        this.systemPromptGenerator.setModelFeature(modelFeature);
-        this.systemPrompt = await this.systemPromptGenerator.renderSystemPrompt();
-
-        logger.trace('PrepareSystemPromptFinish', {systemPrompt: this.systemPrompt});
-    }
-
-    private getModelOptions(): ModelChatOptions {
-        // TODO: Keep less messages in act mode
-        const messages = this.thread.toMessages();
-        const modelTelemetry = this.telemetry.createModelTelemetry();
-        const options: ModelChatOptions = {
-            messages: messages.map(v => this.messageToChatInputPayload(v)),
-            telemetry: modelTelemetry,
-            systemPrompt: this.systemPrompt,
-        };
-
-        if (this.assistantRole !== 'standalone') {
-            const {plannerModel, actorModel, coderModel} = this.inboxConfig;
-            options.overrideModelName = this.assistantRole === 'planner'
-                ? plannerModel
-                : (this.assistantRole === 'coder' ? coderModel || actorModel : actorModel);
-        }
-
-        return options;
-    }
-
-    private messageToChatInputPayload(message: InboxMessage): ChatInputPayload {
-        const isPlanExecutor = this.assistantRole === 'actor' || this.assistantRole === 'coder';
-        switch (message.type) {
-            case 'userRequest':
-                return message.toChatInputPayload({hideUserRequest: isPlanExecutor});
-            case 'toolCall':
-                return message.toChatInputPayload({hidePlanDetail: isPlanExecutor});
-            default:
-                return message.toChatInputPayload();
-        }
-    }
-
     private getReplyMessage() {
         return this.roundtrip.getLatestTextMessage() ?? this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
-    }
-
-    // TODO: Split ring ring mode and standalone mode into different implement
-    private preparePromptMode() {
-        const {logger} = this.context;
-
-        if (this.thread.getWorkingMode() === 'normal') {
-            this.assistantRole = 'standalone';
-            return;
-        }
-
-        const mode = this.getRingRingAssistantRole();
-        this.assistantRole = mode ?? 'standalone';
-
-        if (!mode) {
-            logger.warn('UnexpectedWorkingMode', {mode: 'standalone'});
-        }
-    }
-
-    private getRingRingAssistantRole(): AssistantRole | null {
-        const messages = this.thread.toMessages();
-
-        // Only user request message, the first reply should be in plan mode
-        if (messages.length <= 1) {
-            return 'planner';
-        }
-
-        const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
-        const executingTask = plan.arguments.tasks.find(v => v.status === 'executing');
-        return executingTask ? (executingTask.taskType === 'coding' ? 'coder' : 'actor') : 'planner';
     }
 
     private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {
@@ -276,5 +192,22 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             .map((v: ModelResponse): ReasoningMessageChunk => ({type: 'reasoning', content: v.content}));
         const textStream = over(textFork).filter(v => v.type === 'text').map(v => v.content);
         return merge(reasoningStream, parser.parse(textStream));
+    }
+
+    private createContextProvider(): ChatContextProvider {
+        const providerInit: ChatContextProviderInit = {
+            logger: this.context.logger,
+            editorHost: this.context.editorHost,
+            references: this.references,
+            modelAccess: this.modelAccess,
+            thread: this.thread,
+            roundtrip: this.roundtrip,
+            config: this.inboxConfig,
+            telemetry: this.telemetry,
+        };
+        const workingMode = this.thread.getWorkingMode();
+        return workingMode === 'normal'
+            ? new StandaloneChatContextProvider(providerInit)
+            : new RingRingChatContextProvider(providerInit);
     }
 }

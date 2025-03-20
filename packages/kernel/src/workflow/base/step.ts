@@ -14,18 +14,12 @@ async function* iterable(content: string): AsyncIterable<string> {
     yield content;
 }
 
-export interface StepModelChatOptions {
-    includeSystemPrompt: boolean;
-    includeBaseMessages: boolean;
-}
-
 export interface WorkflowStepInit {
     // context
     taskId: string;
     thread: InboxMessageThread;
     roundtrip: inbox.InboxRoundtrip;
     inboxConfig: InboxConfig;
-    systemPrompt: string;
     // tool
     commandExecutor: CommandExecutor;
     telemetry: FunctionUsageTelemetry;
@@ -49,8 +43,6 @@ export abstract class WorkflowStep {
 
     private readonly taskId: string;
 
-    private readonly systemPrompt: string;
-
     private readonly modelAccess: ModelAccessHost;
 
     private readonly onUpdateThread: () => void;
@@ -59,7 +51,6 @@ export abstract class WorkflowStep {
         this.thread = init.thread;
         this.roundtrip = init.roundtrip;
         this.taskId = init.taskId;
-        this.systemPrompt = init.systemPrompt;
         this.telemetry = init.telemetry;
         this.modelAccess = init.modelAccess;
         this.editorHost = init.editorHost;
@@ -87,12 +78,10 @@ export abstract class WorkflowStep {
         return !!this.roundtrip.getLatestWorkflow();
     }
 
-    protected async requestNewAssistantTextMessage(message: InboxMessage, options: StepModelChatOptions) {
-        const base = options?.includeBaseMessages ? this.getBaseMessages() : [];
+    protected async requestNewAssistantTextMessage(message: InboxMessage) {
         const chatOptions: ModelChatOptions = {
-            messages: [...base, message.toChatInputPayload()],
+            messages: [message.toChatInputPayload()],
             telemetry: this.telemetry.createModelTelemetry(),
-            systemPrompt: options.includeSystemPrompt ? this.systemPrompt : undefined,
         };
         const response = await this.modelAccess.chat(chatOptions);
         return this.parseAssistantText(response.content);
@@ -102,11 +91,6 @@ export abstract class WorkflowStep {
         this.onUpdateThread();
     }
 
-    private getBaseMessages() {
-        const current = this.getWorkflowSourceMessage() ?? this.getWorkflowOriginMessage();
-        const messages = this.thread.toMessages();
-        return messages.filter(v => v !== current).map(v => v.toChatInputPayload());
-    }
     private async parseAssistantText(content: string) {
         const parser = new StreamingToolParser();
         const message = createEmptyAssistantTextMessage(this.roundtrip);

@@ -143,10 +143,7 @@ export class ToolWorkflowValidator extends WorkflowValidator {
             errorMessage: formatErrorMessage(error),
         };
         const prompt = renderFixToolCallPrompt(view);
-        const newMessage = await this.requestNewAssistantTextMessage(
-            createDetachedUserRequestMessage(prompt),
-            {includeBaseMessages: false, includeSystemPrompt: false}
-        );
+        const newMessage = await this.requestNewAssistantTextMessage(createDetachedUserRequestMessage(prompt));
         const newChunk = newMessage.findToolCallChunk();
 
         if (!newChunk) {

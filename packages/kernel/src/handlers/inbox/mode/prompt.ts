@@ -6,44 +6,37 @@ import {uniqueBy} from '@oniichan/shared/array';
 import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import type {EditorHost} from '../../core/editor';
+import type {EditorHost} from '../../../core/editor';
+
+export interface SystemPromptGeneratorInit {
+    role: AssistantRole;
+    workingMode: MessageThreadWorkingMode;
+    modelFeature: ModelFeature;
+    logger: Logger;
+    references: InboxPromptReference[];
+    editorHost: EditorHost;
+}
 
 export class SystemPromptGenerator {
-    private readonly logger: Logger;
+    private role: AssistantRole;
 
-    private readonly editorHost: EditorHost;
+    private workingMode: MessageThreadWorkingMode;
 
-    private readonly references: InboxPromptReference[] = [];
+    private modelFeature: ModelFeature;
 
-    private role: AssistantRole = 'standalone';
+    private logger: Logger;
 
-    private workingMode: MessageThreadWorkingMode = 'normal';
+    private references: InboxPromptReference[];
 
-    private modelFeature: ModelFeature = {
-        supportReasoning: false,
-        requireToolThinking: false,
-        shouldAvoidSystemPrompt: false,
-    };
+    private editorHost: EditorHost;
 
-    constructor(editorHost: EditorHost, logger: Logger) {
-        this.editorHost = editorHost;
-        this.logger = logger.with({source: 'SystemPromptGenerator'});
-    }
-
-    setAssistantRole(role: AssistantRole) {
-        this.role = role;
-    }
-
-    setWorkingMode(mode: MessageThreadWorkingMode) {
-        this.workingMode = mode;
-    }
-
-    setModelFeature(feature: ModelFeature) {
-        this.modelFeature = feature;
-    }
-
-    addReference(reference: InboxPromptReference[]) {
-        this.references.push(...reference);
+    constructor(init: SystemPromptGeneratorInit) {
+        this.logger = init.logger.with({source: 'SystemPromptGenerator'});
+        this.role = init.role;
+        this.workingMode = init.workingMode;
+        this.modelFeature = init.modelFeature;
+        this.references = init.references;
+        this.editorHost = init.editorHost;
     }
 
     async renderSystemPrompt(): Promise<string> {
