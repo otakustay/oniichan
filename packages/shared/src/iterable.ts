@@ -40,3 +40,13 @@ export function duplicate<T>(iterable: AsyncIterable<T>): [AsyncIterable<T>, Asy
     })();
     return [first.toIterable(), second.toIterable()];
 }
+
+export async function discard(input: AsyncIterable<unknown>) {
+    const iterator = input[Symbol.asyncIterator]();
+    while (true) {
+        const {done} = await iterator.next();
+        if (done) {
+            break;
+        }
+    }
+}

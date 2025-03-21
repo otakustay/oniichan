@@ -52,5 +52,6 @@ export interface ModelChatOptions {
 export interface ModelClient {
     chat(options: ModelChatOptions): Promise<[ModelTextResponse, ModelMetaResponse]>;
     chatStreaming(options: ModelChatOptions): AsyncIterable<ModelStreamingResponse>;
+    getModelName(): string;
     getModelFeature(): ModelFeature;
 }

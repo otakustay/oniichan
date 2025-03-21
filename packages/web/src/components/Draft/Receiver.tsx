@@ -1,5 +1,6 @@
 import {useState, type ReactElement} from 'react';
 import {SiCircle} from 'react-icons/si';
+import {RiHeartsLine} from 'react-icons/ri';
 import styled from '@emotion/styled';
 import {usePopper} from 'react-popper';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
@@ -14,6 +15,8 @@ function stringifyWorkingMode(mode: MessageThreadWorkingMode) {
             return 'Oniichan';
         case 'ringRing':
             return 'Oniichan (Ring Ring Mode)';
+        case 'couple':
+            return 'Oniichan (Couple Mode)';
         default:
             assertNever<string>(mode, v => `Unknown working mode ${v}`);
     }
@@ -147,6 +150,7 @@ export function Receiver() {
                     {...attributes.popper}
                 >
                     <Item icon={<Avatar.Assistant />} workingMode="normal" onSelect={select} />
+                    <Item icon={<RiHeartsLine />} workingMode="couple" onSelect={select} />
                     <Item icon={<SiCircle />} workingMode="ringRing" onSelect={select} />
                 </Popover>
             </Name>

@@ -14,7 +14,7 @@ export class StandaloneChatContextProvider extends ChatContextProvider {
     }
 
     protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        return this.thread.toMessages().map(v => v.toChatInputPayload());
+        return this.getInboxMessages().map(v => v.toChatInputPayload());
     }
 
     protected async provideSystemPrompt(): Promise<string> {

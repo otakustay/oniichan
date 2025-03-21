@@ -23,7 +23,7 @@ export class RingRingChatContextProvider extends ChatContextProvider {
     }
 
     protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        const messages = this.thread.toMessages();
+        const messages = this.getInboxMessages();
         const role = this.getRingRingRole();
         const isPlanExecutor = role === 'actor' || role === 'coder';
         const messageToChatInputPayload = (message: InboxMessage): ChatInputPayload => {

@@ -123,7 +123,7 @@ export default function ParsedToolUsage({input}: Props) {
     if (isFileEditToolCallChunk(input)) {
         const patch = input.toolName === 'write_file'
             ? input.arguments.content
-            : (input.toolName === 'patch_file' ? input.arguments.patch : '');
+            : (input.toolName === 'patch_file' ? input.arguments.patches.join('\n') : '');
         return (
             <FileEdit
                 file={input.arguments.path ?? ''}

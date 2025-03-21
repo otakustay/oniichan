@@ -4,6 +4,7 @@
 
 ### Added
 
+- 邮件系统新增了Couple模式，这是一个以成本为核心但依然保持代码生成质量的模式，参考[Use Couple Mode To Dramatically Reduce Cost](https://github.com/otakustay/oniichan/discussions/41)了解详细情况。
 - 模型具备一次读取多个文件的能力，继续省钱～
 
 ### Fixed

@@ -41,6 +41,12 @@ export class ModelUsageTelemetry {
         this.parentUuid = parentUuid;
     }
 
+    setModelName(modelName: string) {
+        if (modelName) {
+            this.modelName = modelName;
+        }
+    }
+
     setRequest(input: ChatInputPayload[]) {
         this.input = input;
         this.startTime = new Date();

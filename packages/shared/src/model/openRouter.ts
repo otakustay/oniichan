@@ -78,6 +78,10 @@ export class OpenRouterModelClient implements ModelClient {
         };
     }
 
+    getModelName(): string {
+        return this.defaultModel.modelId;
+    }
+
     getModelFeature(): ModelFeature {
         return getModelFeature(this.defaultModel.modelId);
     }

@@ -5,11 +5,17 @@ import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {resultMarkdown} from '../utils';
 import {asString} from './utils';
+import {ensureArray} from '@oniichan/shared/array';
 
-export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter> {
+interface Extracted {
+    path: string | undefined;
+    patch: string[];
+}
+
+export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter, Extracted> {
     async executeApprove(args: PatchFileParameter): Promise<ToolExecuteResult> {
         const chunk = this.getToolCallChunkStrict('patch_file');
-        const fileEdit = await this.applyFileEdit(args.path, 'patch', args.patch);
+        const fileEdit = await this.applyFileEdit(args.path, 'patch', args.patches.join('\n'));
         chunk.executionData = fileEdit;
 
         if (fileEdit.type === 'error') {
@@ -45,17 +51,17 @@ export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParamete
         };
     }
 
-    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<PatchFileParameter> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
         return {
             path: asString(generated.path, true),
-            patch: asString(generated.patch),
+            patch: ensureArray(generated.patch),
         };
     }
 
-    parseParameters(extracted: Partial<PatchFileParameter>): PatchFileParameter {
+    parseParameters(extracted: Extracted): PatchFileParameter {
         return {
             path: extracted.path ?? '',
-            patch: extracted.patch ?? '',
+            patches: extracted.patch,
         };
     }
 }

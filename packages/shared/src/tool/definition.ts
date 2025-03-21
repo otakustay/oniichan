@@ -24,13 +24,14 @@ export type ToolName =
     | 'complete_task'
     | 'create_plan';
 
+export type ToolSupportTarget = AssistantRole | [mode: MessageThreadWorkingMode, role: AssistantRole];
+
 export interface ToolDescription {
     name: ToolName;
     description: string;
     parameters: ParameterInfo;
     usage: string;
-    role: AssistantRole[];
-    mode?: MessageThreadWorkingMode[];
+    supported: ToolSupportTarget[];
 }
 
 export const readFileParameters = {
@@ -42,6 +43,7 @@ export const readFileParameters = {
             items: {
                 type: 'string',
             },
+            minItems: 1,
         },
     },
     required: ['path'],
@@ -141,7 +143,11 @@ export const patchFileParameters = {
             description: 'The path to the file you want to patch, must be a relative path',
         },
         patch: {
-            type: 'string',
+            type: 'array',
+            items: {
+                type: 'string',
+            },
+            minItems: 1,
             description: dedent`
                 One or more patch blocks exactly in the format illustrated below:
                 \`\`\`
@@ -166,7 +172,7 @@ export const patchFileParameters = {
 
 export interface PatchFileParameter {
     path: string;
-    patch: string;
+    patches: string[];
 }
 
 export const deleteFileParameters = {
@@ -313,7 +319,7 @@ export const builtinTools: ToolDescription[] = [
                 <path>src/utils/index.ts</path>
             </read_file>
         `,
-        role: ['standalone', 'actor', 'coder'],
+        supported: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'read_directory',
@@ -325,7 +331,7 @@ export const builtinTools: ToolDescription[] = [
                 <recursive>true</recursive>
             </read_directory>
         `,
-        role: ['standalone', 'actor', 'coder'],
+        supported: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'find_files_by_glob',
@@ -336,7 +342,7 @@ export const builtinTools: ToolDescription[] = [
                 <glob>src/common/**/*.{ts,tsx}</glob>
             </find_files_by_glob>
         `,
-        role: ['standalone', 'actor', 'coder'],
+        supported: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'find_files_by_regex',
@@ -348,7 +354,7 @@ export const builtinTools: ToolDescription[] = [
                 <path>src/common</path>
             </find_files_by_regex>
         `,
-        role: ['standalone', 'actor', 'coder'],
+        supported: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'write_file',
@@ -364,7 +370,7 @@ export const builtinTools: ToolDescription[] = [
                 </content>
             </write_file>
         `,
-        role: ['standalone', 'coder'],
+        supported: ['standalone', 'coder'],
     },
     {
         name: 'patch_file',
@@ -384,7 +390,7 @@ export const builtinTools: ToolDescription[] = [
                 </patch>
             </patch_file>
         `,
-        role: ['standalone', 'coder'],
+        supported: ['standalone', 'coder'],
     },
     {
         name: 'delete_file',
@@ -395,7 +401,7 @@ export const builtinTools: ToolDescription[] = [
                 <path>src/old-file.ts</path>
             </delete_file>
         `,
-        role: ['standalone', 'coder'],
+        supported: ['standalone', 'coder'],
     },
     {
         name: 'browser_preview',
@@ -407,7 +413,7 @@ export const builtinTools: ToolDescription[] = [
                 <url>https://example.com</url>
             </browser_preview>
         `,
-        role: ['standalone', 'actor', 'coder'],
+        supported: ['standalone', 'actor', 'coder'],
     },
     {
         name: 'run_command',
@@ -419,7 +425,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>ls -la</command>
             </run_command>
         `,
-        role: ['standalone', 'coder'],
+        supported: ['standalone', 'coder'],
     },
     {
         name: 'attempt_completion',
@@ -432,7 +438,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>The command you used to demonstrate the result</command>
             </attempt_completion>
         `,
-        role: ['standalone', 'planner'],
+        supported: ['standalone', 'planner'],
     },
     {
         name: 'ask_followup_question',
@@ -444,8 +450,7 @@ export const builtinTools: ToolDescription[] = [
                 <question>Your question</question>
             </ask_followup_question>
         `,
-        role: ['standalone'],
-        mode: ['normal'],
+        supported: [['normal', 'standalone']],
     },
     {
         name: 'complete_task',
@@ -457,8 +462,7 @@ export const builtinTools: ToolDescription[] = [
                 <confidence>87</confidence>
             </complete_task>
         `,
-        role: ['actor', 'coder'],
-        mode: ['ringRing'],
+        supported: [['ringRing', 'actor'], ['ringRing', 'coder']],
     },
     {
         name: 'create_plan',
@@ -473,8 +477,7 @@ export const builtinTools: ToolDescription[] = [
             <coding>Uninstall lodash</coding>
             </create_plan>
         `,
-        role: ['planner'],
-        mode: ['ringRing'],
+        supported: [['ringRing', 'planner']],
     },
 ];
 

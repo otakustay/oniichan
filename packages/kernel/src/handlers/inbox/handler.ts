@@ -1,11 +1,7 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {InboxPromptReference} from '@oniichan/prompt';
-import type {ModelResponse} from '@oniichan/shared/model';
-import type {MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
-import {StreamingToolParser} from '@oniichan/shared/tool';
-import {duplicate, merge} from '@oniichan/shared/iterable';
-import {over} from '@otakustay/async-iterator';
-import {stringifyError} from '@oniichan/shared/error';
+import type {MessageInputChunk} from '@oniichan/shared/inbox';
+import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import {ModelAccessHost} from '../../core/model';
 import {createEmptyMessageThread, createEmptyRoundtrip} from '../../inbox';
@@ -14,7 +10,7 @@ import {WorkflowDetector} from '../../workflow';
 import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
 import type {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
-import {RingRingChatContextProvider, StandaloneChatContextProvider} from './mode';
+import {CoupleChatContextProvider, RingRingChatContextProvider, StandaloneChatContextProvider} from './mode';
 import type {ChatContextProvider, ChatContextProviderInit} from './mode';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
@@ -81,14 +77,13 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         this.pushStoreUpdate();
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, replyMessageUuid: reply.uuid});
-        const chatStream = provider.provideChatStream();
         const state = {
             toolCallOccured: false,
         };
 
         // NOTE: We are not using `AbortSignal` to abort stream after tool call because this loses usage data
         try {
-            for await (const chunk of this.consumeChatStream(chatStream)) {
+            for await (const chunk of provider.provideChatStream()) {
                 if (state.toolCallOccured) {
                     logger.trace('ChunkAfterToolCall', {chunk});
                     continue;
@@ -184,16 +179,6 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         return this.roundtrip.getLatestTextMessage() ?? this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
     }
 
-    private consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {
-        const parser = new StreamingToolParser();
-        const [reasoningFork, textFork] = duplicate(chatStream);
-        const reasoningStream = over(reasoningFork)
-            .filter(v => v.type === 'reasoning')
-            .map((v: ModelResponse): ReasoningMessageChunk => ({type: 'reasoning', content: v.content}));
-        const textStream = over(textFork).filter(v => v.type === 'text').map(v => v.content);
-        return merge(reasoningStream, parser.parse(textStream));
-    }
-
     private createContextProvider(): ChatContextProvider {
         const providerInit: ChatContextProviderInit = {
             logger: this.context.logger,
@@ -206,8 +191,15 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
             telemetry: this.telemetry,
         };
         const workingMode = this.thread.getWorkingMode();
-        return workingMode === 'normal'
-            ? new StandaloneChatContextProvider(providerInit)
-            : new RingRingChatContextProvider(providerInit);
+        switch (workingMode) {
+            case 'normal':
+                return new StandaloneChatContextProvider(providerInit);
+            case 'ringRing':
+                return new RingRingChatContextProvider(providerInit);
+            case 'couple':
+                return new CoupleChatContextProvider(providerInit);
+            default:
+                assertNever<string>(workingMode, v => `Unknown working mode ${v}`);
+        }
     }
 }

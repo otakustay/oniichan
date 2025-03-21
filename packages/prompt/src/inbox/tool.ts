@@ -1,5 +1,5 @@
 import dedent from 'dedent';
-import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
+import type {ToolDescription, ToolName, ToolSupportTarget} from '@oniichan/shared/tool';
 import {builtinTools} from '@oniichan/shared/tool';
 import type {InboxPromptView} from './interface';
 import {IncludeExclude} from '@oniichan/shared/array';
@@ -34,6 +34,8 @@ const prefix = dedent`
     <read>Read main.js</read>
     <read>Read package.json</read>
     </create_plan>
+
+    For all params without a \`[]\` after their names, only one parameter child tag is allowed in tool XML tag.
 `;
 
 const guideline = dedent`
@@ -89,8 +91,17 @@ function renderItem(item: ToolDescription) {
 
 export function renderToolSection(view: InboxPromptView) {
     const available = new IncludeExclude<ToolName>();
+    const isSupported = (target: ToolSupportTarget) => {
+        if (typeof target === 'string') {
+            return target === view.role;
+        }
+        else {
+            const [mode, role] = target;
+            return mode === view.mode && role === view.role;
+        }
+    };
     for (const tool of builtinTools) {
-        if (tool.role.includes(view.role) && (!tool.mode || tool.mode.includes(view.mode))) {
+        if (tool.supported.some(isSupported)) {
             available.include(tool.name);
         }
     }
