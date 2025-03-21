@@ -11,7 +11,7 @@ import type {ModelAccessHost, ModelChatOptions} from '../../../core/model';
 import type {EditorHost} from '../../../core/editor';
 import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../../../inbox';
 
-export interface ChatContextProviderInit {
+export interface ChatCapabilityProviderInit {
     logger: Logger;
     references: InboxPromptReference[];
     modelAccess: ModelAccessHost;
@@ -22,7 +22,7 @@ export interface ChatContextProviderInit {
     telemetry: FunctionUsageTelemetry;
 }
 
-export abstract class ChatContextProvider {
+export abstract class ChatCapabilityProvider {
     protected readonly logger: Logger;
 
     protected readonly references: InboxPromptReference[];
@@ -39,7 +39,7 @@ export abstract class ChatContextProvider {
 
     private readonly telemetry: FunctionUsageTelemetry;
 
-    constructor(init: ChatContextProviderInit) {
+    constructor(init: ChatCapabilityProviderInit) {
         this.logger = init.logger.with({source: this.constructor.name});
         this.references = init.references;
         this.modelAccess = init.modelAccess;

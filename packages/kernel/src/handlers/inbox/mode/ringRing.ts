@@ -1,11 +1,11 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole} from '@oniichan/shared/inbox';
 import type {InboxMessage} from '../../../inbox';
-import {ChatContextProvider} from './base';
+import {ChatCapabilityProvider} from './base';
 import {SystemPromptGenerator} from './prompt';
 import type {SystemPromptGeneratorInit} from './prompt';
 
-export class RingRingChatContextProvider extends ChatContextProvider {
+export class RingRingChatCapabilityProvider extends ChatCapabilityProvider {
     async provideAssistantRole(): Promise<AssistantRole> {
         return this.getRingRingRole();
     }

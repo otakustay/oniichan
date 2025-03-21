@@ -1,10 +1,10 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
-import {ChatContextProvider} from './base';
+import {ChatCapabilityProvider} from './base';
 import {SystemPromptGenerator} from './prompt';
 import type {SystemPromptGeneratorInit} from './prompt';
 import type {AssistantRole} from '@oniichan/shared/inbox';
 
-export class StandaloneChatContextProvider extends ChatContextProvider {
+export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
     async provideAssistantRole(): Promise<AssistantRole> {
         return 'standalone';
     }

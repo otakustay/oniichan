@@ -4,7 +4,7 @@ import {StreamingToolParser, type ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
 import {isAbortError} from '@oniichan/shared/error';
-import {ChatContextProvider} from './base';
+import {ChatCapabilityProvider} from './base';
 import {SystemPromptGenerator} from './prompt';
 import type {SystemPromptGeneratorInit} from './prompt';
 
@@ -16,7 +16,7 @@ async function* iterable(text: string): AsyncIterable<string> {
     yield text;
 }
 
-export class CoupleChatContextProvider extends ChatContextProvider {
+export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
     private useCoderModel = false;
 
     async provideAssistantRole(): Promise<AssistantRole> {

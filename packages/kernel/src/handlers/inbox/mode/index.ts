@@ -1,4 +1,4 @@
-export type {ChatContextProvider, ChatContextProviderInit} from './base';
-export {StandaloneChatContextProvider} from './standalone';
-export {RingRingChatContextProvider} from './ringRing';
-export {CoupleChatContextProvider} from './couple';
+export type {ChatCapabilityProvider, ChatCapabilityProviderInit} from './base';
+export {StandaloneChatCapabilityProvider} from './standalone';
+export {RingRingChatCapabilityProvider} from './ringRing';
+export {CoupleChatCapabilityProvider} from './couple';

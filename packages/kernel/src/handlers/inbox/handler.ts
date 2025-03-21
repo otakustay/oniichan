@@ -10,8 +10,8 @@ import {WorkflowDetector} from '../../workflow';
 import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
 import type {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
-import {CoupleChatContextProvider, RingRingChatContextProvider, StandaloneChatContextProvider} from './mode';
-import type {ChatContextProvider, ChatContextProviderInit} from './mode';
+import {CoupleChatCapabilityProvider, RingRingChatCapabilityProvider, StandaloneChatCapabilityProvider} from './mode';
+import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from './mode';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
     // For every type that "will stream very freauently", we don't flush them immediately
@@ -179,8 +179,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         return this.roundtrip.getLatestTextMessage() ?? this.roundtrip.getLatestWorkflowStrict().getOriginMessage();
     }
 
-    private createContextProvider(): ChatContextProvider {
-        const providerInit: ChatContextProviderInit = {
+    private createContextProvider(): ChatCapabilityProvider {
+        const providerInit: ChatCapabilityProviderInit = {
             logger: this.context.logger,
             editorHost: this.context.editorHost,
             references: this.references,
@@ -193,11 +193,11 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         const workingMode = this.thread.getWorkingMode();
         switch (workingMode) {
             case 'normal':
-                return new StandaloneChatContextProvider(providerInit);
+                return new StandaloneChatCapabilityProvider(providerInit);
             case 'ringRing':
-                return new RingRingChatContextProvider(providerInit);
+                return new RingRingChatCapabilityProvider(providerInit);
             case 'couple':
-                return new CoupleChatContextProvider(providerInit);
+                return new CoupleChatCapabilityProvider(providerInit);
             default:
                 assertNever<string>(workingMode, v => `Unknown working mode ${v}`);
         }
