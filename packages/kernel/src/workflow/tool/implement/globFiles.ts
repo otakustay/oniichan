@@ -2,9 +2,9 @@ import path from 'node:path';
 import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
+import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
-import {resultMarkdown} from '../utils';
 import {asString} from './utils';
 
 export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {

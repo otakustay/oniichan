@@ -4,12 +4,12 @@ import {useHover} from 'huse';
 import {IoAlertCircleOutline, IoEyeOutline, IoGitMergeOutline} from 'react-icons/io5';
 import type {InboxRollbackCheckItem} from '@oniichan/kernel/protocol';
 import {stringifyError} from '@oniichan/shared/error';
+import {Description} from './Description';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import Modal from '@/components/Modal';
 import Button from '@/components/Button';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';
-import {Description} from './Description';
 
 const ConflictSign = styled(IoGitMergeOutline)`
     color: var(--color-error);

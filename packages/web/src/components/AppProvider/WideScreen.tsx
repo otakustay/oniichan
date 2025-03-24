@@ -1,7 +1,7 @@
 import {createContext, use} from 'react';
 import type {ReactNode} from 'react';
-import {mediaWideScreen} from '@/styles';
 import {useMedia} from 'huse';
+import {mediaWideScreen} from '@/styles';
 
 const Context = createContext(false);
 Context.displayName = 'WideScreenContext';

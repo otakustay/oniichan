@@ -1,6 +1,6 @@
 import type {ToolName} from '@oniichan/shared/tool';
-import type {InboxAssistantMessage, InboxAssistantTextMessage, InboxMessage, InboxToolCallMessage} from './interface';
 import type {ParsedToolCallMessageChunk, ParsedToolCallMessageChunkOf} from '@oniichan/shared/inbox';
+import type {InboxAssistantMessage, InboxAssistantTextMessage, InboxMessage, InboxToolCallMessage} from './interface';
 
 // Shorten some types to ensure all declaration can be placed in one line
 type Message = InboxMessage;

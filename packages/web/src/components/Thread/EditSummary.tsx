@@ -3,14 +3,14 @@ import {VscFile, VscNewFile, VscDiffSingle, VscTrash, VscReport} from 'react-ico
 import {IoCheckmarkSharp, IoCloseSharp, IoEyeOutline} from 'react-icons/io5';
 import {stringifyError} from '@oniichan/shared/error';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
+import {useAllMergedFileEdits} from './FileEditContext';
+import CountLabel from './CountLabel';
+import Message from './Message';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';
 import Avatar from '@/components/Avatar';
 import Button from '@/components/Button';
-import {useAllMergedFileEdits} from './FileEditContext';
-import CountLabel from './CountLabel';
-import Message from './Message';
 
 const ErrorSign = styled(VscReport)`
     color: var(--color-error);

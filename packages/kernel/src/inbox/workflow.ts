@@ -1,9 +1,9 @@
 import type {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
+import {newUuid} from '@oniichan/shared/id';
 import {deserializeMessage, ToolCallMessage, UserRequestMessage} from './message';
 import type {Message, AssistantTextMessage} from './message';
 import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
-import {newUuid} from '@oniichan/shared/id';
 
 export type WorkflowOriginMessage = AssistantTextMessage | ToolCallMessage;
 

@@ -2,9 +2,9 @@ import unixify from 'unixify';
 import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
+import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
-import {resultMarkdown} from '../utils';
 import {asString} from './utils';
 
 // For each match, its a `begin - context - match - context - end` sequence,

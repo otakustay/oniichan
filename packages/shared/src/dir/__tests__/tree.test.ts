@@ -1,6 +1,6 @@
 import {expect, test} from 'vitest';
-import {WorkspaceFileStructure} from '../tree';
 import dedent from 'dedent';
+import {WorkspaceFileStructure} from '../tree';
 
 test('one file', () => {
     const structure = new WorkspaceFileStructure();

@@ -7,12 +7,12 @@ import {
     useSetActiveMessageThread,
     useSetMessagelThreadList,
 } from '@oniichan/web-host/atoms/inbox';
+import {useSetEditing} from '@oniichan/web-host/atoms/draft';
+import {assertNever} from '@oniichan/shared/error';
+import MessageStatusIcon from '../MessageStatusIcon';
 import {mediaWideScreen} from '@/styles';
 import {TimeAgo} from '@/components/TimeAgo';
 import {useIpc} from '@/components/AppProvider';
-import {useSetEditing} from '@oniichan/web-host/atoms/draft';
-import MessageStatusIcon from '../MessageStatusIcon';
-import {assertNever} from '@oniichan/shared/error';
 
 const ItemLayout = styled(motion.div)`
     padding: 1em;

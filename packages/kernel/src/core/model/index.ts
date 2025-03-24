@@ -1,7 +1,7 @@
 import {createModelClient, isModelConfigValid} from '@oniichan/shared/model';
 import type {ModelConfiguration, ModelFeature, ModelResponse, ModelTextResponse} from '@oniichan/shared/model';
-import type {ModelAccess, ModelChatOptions} from './interface';
 import type {EditorHost} from '../editor';
+import type {ModelAccess, ModelChatOptions} from './interface';
 import {NamedModelAccess} from './named';
 
 export type {ModelChatOptions};

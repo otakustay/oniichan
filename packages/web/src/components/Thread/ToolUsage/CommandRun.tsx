@@ -3,11 +3,11 @@ import {IoTerminalOutline, IoCheckmarkSharp, IoClose} from 'react-icons/io5';
 import type {WorkflowSourceChunkStatus, WorkflowChunkStatus} from '@oniichan/shared/inbox';
 import {useApproveTool} from '@oniichan/web-host/atoms/inbox';
 import {stringifyError} from '@oniichan/shared/error';
+import {useMessageIdentity} from '../MessageContext';
 import Button from '@/components/Button';
 import {showToast} from '@/components/Toast';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import LoadingIcon from '@/components/LoadingIcon';
-import {useMessageIdentity} from '../MessageContext';
 
 const Header = styled.div`
     display: grid;

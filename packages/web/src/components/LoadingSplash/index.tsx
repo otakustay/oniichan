@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
-import Inbox from '@/components/Inbox';
 import {HashLoader} from 'react-spinners';
+import Inbox from '@/components/Inbox';
 
 export default function LoadingSplash() {
     const [render, setRender] = useState(false);

@@ -4,13 +4,13 @@ import {motion} from 'motion/react';
 import {useEditingValue, useSetEditing, useSubmitableDraftContent} from '@oniichan/web-host/atoms/draft';
 import type {EditingValue} from '@oniichan/web-host/atoms/draft';
 import {useMessageThreadValueByUuid, useSendMessageToThread} from '@oniichan/web-host/atoms/inbox';
+import MessageEditor from './Editor';
+import SendTrigger from './SendTrigger';
+import {Receiver} from './Receiver';
 import Modal from '@/components/Modal';
 import {useIpc, useIsWideScreen} from '@/components/AppProvider';
 import {Alert} from '@/components/Alert';
 import {mediaWideScreen} from '@/styles';
-import MessageEditor from './Editor';
-import SendTrigger from './SendTrigger';
-import {Receiver} from './Receiver';
 
 function warning(count: number) {
     return `${count} ${count > 1 ? 'files' : 'file'} pending review, replying will discard edits`;

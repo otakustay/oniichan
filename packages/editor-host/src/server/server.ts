@@ -5,6 +5,8 @@ import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {LoadingManager} from '../ui/loading';
 import {DiffViewManager} from '../ui/diff';
+import {ResourceManager} from '../utils/resource';
+import {TerminalManager} from '../utils/terminal';
 import type {Context} from './interface';
 import {
     GetDocumentDiagnosticAtLineHandler,
@@ -24,8 +26,6 @@ import {
     WriteWorkspaceFileHandler,
 } from './handlers/workspace';
 import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
-import {ResourceManager} from '../utils/resource';
-import {TerminalManager} from '../utils/terminal';
 import {ExecuteTerminalHandler} from './handlers/terminal';
 import {OpenUrlHandler} from './handlers/external';
 

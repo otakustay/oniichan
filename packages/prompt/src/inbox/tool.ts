@@ -1,8 +1,8 @@
 import dedent from 'dedent';
 import type {ToolDescription, ToolName, ToolSupportTarget} from '@oniichan/shared/tool';
 import {builtinTools} from '@oniichan/shared/tool';
-import type {InboxPromptView} from './interface';
 import {IncludeExclude} from '@oniichan/shared/array';
+import type {InboxPromptView} from './interface';
 
 const prefix = dedent`
     # Tool

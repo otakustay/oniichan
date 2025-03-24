@@ -1,11 +1,11 @@
 import dedent from 'dedent';
 import type {PatchFileParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
+import {ensureArray} from '@oniichan/shared/array';
+import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
-import {resultMarkdown} from '../utils';
 import {asString} from './utils';
-import {ensureArray} from '@oniichan/shared/array';
 
 interface Extracted {
     path: string | undefined;

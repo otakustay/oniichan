@@ -1,5 +1,5 @@
-import dedent from 'dedent';
 import path from 'node:path';
+import dedent from 'dedent';
 
 export interface SemanticRewriteSnippetView {
     title: string;

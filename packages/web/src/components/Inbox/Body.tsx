@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import {mediaWideScreen} from '@/styles';
 import ThreadList from './ThreadList';
 import MainContent from './MainContent';
+import {mediaWideScreen} from '@/styles';
 
 const Layout = styled.div`
     height: calc(100vh - 4em);

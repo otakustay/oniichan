@@ -1,5 +1,5 @@
-import type {ExtensionContext} from 'vscode';
 import EventEmitter from 'node:events';
+import type {ExtensionContext} from 'vscode';
 import fastify from 'fastify';
 import type {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';

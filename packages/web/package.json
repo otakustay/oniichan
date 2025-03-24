@@ -32,7 +32,7 @@
     "@rspack/plugin-react-refresh": "^1.0.1",
     "@swc/plugin-emotion": "^9.0.0",
     "@types/mustache": "^4.2.5",
-    "@types/react": "^19.0.10",
+    "@types/react": "^19.0.12",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "^19.0.4",
     "@types/react-mentions": "^4.4.1",

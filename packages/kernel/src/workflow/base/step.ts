@@ -1,6 +1,7 @@
 import type {Logger} from '@oniichan/shared/logger';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
+import {StreamingToolParser} from '@oniichan/shared/tool';
 import {createEmptyAssistantTextMessage} from '../../inbox';
 import type * as inbox from '../../inbox';
 import type {CommandExecutor} from '../../core/command';
@@ -8,7 +9,6 @@ import type {ModelAccessHost} from '../../core/model';
 import type {ModelChatOptions} from '../../core/model';
 import type {EditorHost} from '../../core/editor';
 import type {InboxMessage, InboxMessageThread} from '../../inbox';
-import {StreamingToolParser} from '@oniichan/shared/tool';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;

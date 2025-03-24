@@ -1,10 +1,10 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import type {InboxPromptReference} from '@oniichan/prompt';
+import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {setRoundtripRequest} from '../../inbox';
 import {InboxRequestHandler} from './handler';
 import type {InboxMessageResponse} from './handler';
-import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 
 interface TextMessageBody {
     type: 'text';

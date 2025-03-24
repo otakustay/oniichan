@@ -1,5 +1,5 @@
-import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
 import type {ToolParsedChunk, ContentTagName} from '../tool';
+import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
 
 export type AssistantRole = 'standalone' | 'planner' | 'actor' | 'coder';
 

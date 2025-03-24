@@ -1,4 +1,5 @@
-import {useState, type ReactElement} from 'react';
+import {useState } from 'react';
+import type {ReactElement} from 'react';
 import {SiCircle} from 'react-icons/si';
 import {RiHeartsLine} from 'react-icons/ri';
 import styled from '@emotion/styled';

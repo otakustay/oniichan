@@ -1,7 +1,7 @@
 import {now} from '@oniichan/shared/string';
 import type {MessageType, MessageData, MessageDataBase} from '@oniichan/shared/inbox';
-import type {InboxMessageBase, InboxRoundtrip} from '../interface';
 import type {ChatInputPayload} from '@oniichan/shared/model';
+import type {InboxMessageBase, InboxRoundtrip} from '../interface';
 
 export abstract class MessageBase<T extends MessageType> implements InboxMessageBase<T> {
     readonly uuid: string;

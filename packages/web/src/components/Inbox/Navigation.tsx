@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import {FaAngleLeft, FaReply, FaTimes, FaPen} from 'react-icons/fa';
-import HeadNavigation from '@/components/HeadNavigation';
-import InteractiveLabel from '@/components/InteractiveLabel';
 import {useActiveMessageThreadValue, useSetActiveMessageThread} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
+import HeadNavigation from '@/components/HeadNavigation';
+import InteractiveLabel from '@/components/InteractiveLabel';
 
 const Back = styled(InteractiveLabel)`
     display: flex;

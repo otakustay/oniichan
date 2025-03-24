@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
+import imports from 'eslint-plugin-import';
 
 export default ts.config(
     js.configs.recommended,
@@ -44,6 +45,32 @@ export default ts.config(
             '@typescript-eslint/no-unnecessary-condition': 'off',
             '@typescript-eslint/consistent-type-exports': 'error',
             '@typescript-eslint/consistent-type-imports': 'error',
+        },
+    },
+    {
+        plugins: {
+            import: imports,
+        },
+        rules: {
+            'import/no-empty-named-blocks': 'error',
+            'import/no-amd': 'error',
+            'import/no-commonjs': 'error',
+            'import/no-absolute-path': 'error',
+            'import/no-relative-packages': 'error',
+            'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+            'import/order': [
+                'error',
+                {
+                    groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+                    pathGroups: [
+                        {
+                            pattern: '@oniichan/**',
+                            group: 'internal',
+                            position: 'before',
+                        },
+                    ],
+                },
+            ],
         },
     },
     {
