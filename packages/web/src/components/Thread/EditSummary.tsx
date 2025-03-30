@@ -3,6 +3,7 @@ import {VscFile, VscNewFile, VscDiffSingle, VscTrash, VscReport} from 'react-ico
 import {IoCheckmarkSharp, IoCloseSharp, IoEyeOutline} from 'react-icons/io5';
 import {stringifyError} from '@oniichan/shared/error';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
+import type {MouseEvent} from 'react';
 import {useAllMergedFileEdits} from './FileEditContext';
 import CountLabel from './CountLabel';
 import Message from './Message';
@@ -71,7 +72,7 @@ const ItemLayout = styled.div`
     padding: 0 .5em;
     line-height: 1;
     border-radius: .5em;
-    cursor: default;
+    cursor: pointer;
 
     &:hover {
         background-color: var(--color-contrast-background);
@@ -88,19 +89,13 @@ const ItemLayout = styled.div`
 
 interface EditResultViewProps {
     edit: FileEditResult;
+    onReview: (event: MouseEvent) => void;
 }
 
-function EditResultView({edit}: EditResultViewProps) {
+function EditResultView({edit, onReview}: EditResultViewProps) {
     const ipc = useIpc();
-    const openDiffView = async () => {
-        try {
-            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', edit);
-        }
-        catch (ex) {
-            showToast('error', stringifyError(ex), {timeout: 3000});
-        }
-    };
-    const requestAccept = async (revert: boolean) => {
+    const requestAccept = async (event: MouseEvent, revert: boolean) => {
+        event.stopPropagation();
         try {
             await ipc.editor.call(crypto.randomUUID(), 'acceptFileEdit', {edit, revert});
         }
@@ -116,13 +111,13 @@ function EditResultView({edit}: EditResultViewProps) {
                 <CountLabel type="deletion" count={edit.deletedCount} />
             </CountSection>
             <ActionSection>
-                <Action title="Reject" onClick={() => requestAccept(true)}>
+                <Action title="Reject" onClick={e => requestAccept(e, true)}>
                     <IoCloseSharp />
                 </Action>
-                <Action title="Accept" onClick={() => requestAccept(false)}>
+                <Action title="Accept" onClick={e => requestAccept(e, false)}>
                     <IoCheckmarkSharp />
                 </Action>
-                <Action title="Review" onClick={openDiffView}>
+                <Action title="Review" onClick={onReview}>
                     <IoEyeOutline />
                 </Action>
             </ActionSection>
@@ -135,6 +130,7 @@ interface ItemProps {
 }
 
 function Item({edit}: ItemProps) {
+    const ipc = useIpc();
     const renderTypeLabel = () => {
         switch (edit?.type) {
             case 'error':
@@ -149,13 +145,27 @@ function Item({edit}: ItemProps) {
                 return <VscFile />;
         }
     };
+    const openDiffView = async (event: MouseEvent) => {
+        event.stopPropagation();
+
+        if (!edit || edit.type === 'error') {
+            return;
+        }
+
+        try {
+            await ipc.editor.call(crypto.randomUUID(), 'renderDiffView', edit);
+        }
+        catch (ex) {
+            showToast('error', stringifyError(ex), {timeout: 3000});
+        }
+    };
 
     return (
-        <ItemLayout>
+        <ItemLayout onClick={openDiffView}>
             {renderTypeLabel()}
             <FileNameLabel>{edit.file.split(/\/|\\/).pop() ?? 'unknown file'}</FileNameLabel>
             <FilePathLabel title={edit.file}>{edit.file}</FilePathLabel>
-            {edit && edit.type !== 'error' && <EditResultView edit={edit} />}
+            {edit && edit.type !== 'error' && <EditResultView edit={edit} onReview={openDiffView} />}
         </ItemLayout>
     );
 }
