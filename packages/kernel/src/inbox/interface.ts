@@ -119,7 +119,6 @@ export interface InboxWorkflow {
     setContinueRoundtrip(shouldContinue: boolean): void;
     markStatus(status: WorkflowStatus): void;
     exposeMessage(messageUuid: string): void;
-    addTextReaction(text: string, exposed: boolean): void;
     addReaction(message: InboxMessage, exposed: boolean): void;
     hasMessage(messageUuid: string): boolean;
     findMessage(messageUuid: string): InboxMessage | null;
@@ -132,11 +131,11 @@ export interface InboxMessageThread {
     getWorkingMode(): MessageThreadWorkingMode;
     addRoundtrip(roundtrip: InboxRoundtrip): void;
     hasMessage(messageUuid: string): boolean;
-    findMessageByUuidStrict(messageUuid: string): InboxMessage; // Assuming InboxMessage is the return type
+    findMessageByUuidStrict(messageUuid: string): InboxMessage;
     findRoundtripByMessageUuidStrict(messageUuid: string): InboxRoundtrip;
     sliceRoundtripAfter(messageUuid: string): InboxRoundtrip[];
     rollbackRoundtripTo(messageUuid: string): void;
-    toMessages(): InboxMessage[]; // Assuming InboxMessage is the return type
+    toMessages(): InboxMessage[];
     toThreadData(): MessageThreadData;
     toPersistData(): MessageThreadPersistData;
 }

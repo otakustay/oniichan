@@ -7,13 +7,8 @@ import {ToolCallMessage} from './toolCall';
 import {ToolUseMessage} from './toolUse';
 import {UserRequestMessage} from './userRequest';
 
-interface ChunkToModelTextOptions {
-    chunkToString: (chunk: MessageViewChunk) => string;
-}
-
-export function chunksToModelText(chunks: MessageViewChunk[], options?: ChunkToModelTextOptions) {
-    const toString = options?.chunkToString ?? chunkToString;
-    return chunks.filter(isContentfulChunk).map(toString).join('');
+export function chunksToModelText(chunks: MessageViewChunk[]) {
+    return chunks.filter(isContentfulChunk).map(chunkToString).join('');
 }
 
 export type Message = UserRequestMessage | AssistantTextMessage | ToolCallMessage | ToolUseMessage;

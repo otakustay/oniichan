@@ -1,8 +1,8 @@
 import {assertNever} from '../error';
 import {StreamXmlParser} from '../string';
 import type {XmlParseTagEndChunk, XmlParseTagStartChunk, XmlParseTextChunk} from '../string';
-import {isToolName} from '../tool';
-import type {ToolName} from '../tool';
+import {isToolName} from './definition';
+import type {ToolName} from './definition';
 
 interface TextChunk {
     type: 'text';

@@ -1,4 +1,4 @@
-export function codeBlock(code: string, language = '') {
+function codeBlock(code: string, language = '') {
     return '```' + language + '\n' + code + '\n' + '```';
 }
 

@@ -23,6 +23,7 @@ const ParameterLabel = styled.span`
 
 const ActionLabel = styled.span`
     color: var(--color-secondary-foreground);
+    width: fit-content;
     white-space: nowrap;
 `;
 

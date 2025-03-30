@@ -19,27 +19,3 @@ export function trimPathString(path: string) {
     const last = segments.slice(-PATH_TRIM_SEGMENT_TAIL).join('');
     return `${before}...${last}`;
 }
-
-export interface JoinToMaxLengthResult {
-    value: string;
-    includedItems: number;
-}
-
-export function joinToMaxLength(array: string[], separator: string, maxLength: number) {
-    const output: JoinToMaxLengthResult = {
-        value: '',
-        includedItems: 0,
-    };
-    for (const item of array) {
-        const next = output.includedItems === 0 ? item : output.value + separator + item;
-
-        if (next.length > maxLength) {
-            return output;
-        }
-
-        output.value = next;
-        output.includedItems++;
-    }
-
-    return output;
-}

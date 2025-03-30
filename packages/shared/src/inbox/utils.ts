@@ -46,33 +46,6 @@ export function isContentfulChunk(chunk: MessageViewChunk) {
     return (chunk.type !== 'content' || chunk.tagName !== 'thinking') && chunk.type !== 'reasoning';
 }
 
-export function normalizeArguments(input: Record<string, string | undefined>) {
-    // A parameter's value can have heading and trailing newlines, these forms are identical:
-    //
-    // ```
-    // <path>
-    // src/main.ts
-    // </path>
-    // ```
-
-    // ```
-    // <path>
-    //   src/main.ts
-    // </path>
-    // ```
-    //
-    // ```
-    // <path>src/main.ts</path>
-    // ```
-    const output: Record<string, string | undefined> = {};
-    for (const [key, value] of Object.entries(input)) {
-        if (value) {
-            output[key] = value.replaceAll(/^\n\s*|\n$/g, '');
-        }
-    }
-    return output;
-}
-
 function getFileEditFromMessage(message: MessageData): FileEditData[] {
     if (message.type !== 'toolCall') {
         return [];

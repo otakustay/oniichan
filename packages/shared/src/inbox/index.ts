@@ -23,7 +23,6 @@ export {
     assertTaggedChunk,
     assertToolCallChunk,
     chunkToString,
-    normalizeArguments,
     extractFileEdits,
     isContentfulChunk,
     isParsedToolCallChunk,
