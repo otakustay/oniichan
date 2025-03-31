@@ -39,7 +39,7 @@ export class LoadingManager implements Disposable {
         const editor = editorReference.getTextEditorWhenActive();
 
         if (!editor) {
-            return new DisposableAbortSignal(AbortSignal.abort('Editor not open'), () => {});
+            return new DisposableAbortSignal(AbortSignal.abort(), () => {});
         }
 
         const map = this.getStateSet(editor.document.uri.toString());
@@ -76,7 +76,7 @@ export class LoadingManager implements Disposable {
     dispose() {
         for (const stateSet of this.state.values()) {
             for (const state of stateSet) {
-                state.controller.abort('Loading state disposed');
+                state.controller.abort();
             }
         }
         this.state.clear();
@@ -92,7 +92,7 @@ export class LoadingManager implements Disposable {
         }
         const deleted = set.delete(state);
         if (deleted) {
-            state.controller.abort('Line is modified');
+            state.controller.abort();
         }
     }
 

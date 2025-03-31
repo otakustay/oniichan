@@ -2,6 +2,7 @@ import {over} from '@otakustay/async-iterator';
 import type {InboxPromptReference} from '@oniichan/prompt';
 import type {Logger} from '@oniichan/shared/logger';
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
+import {isAbortError} from '@oniichan/shared/error';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {AssistantRole, MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
@@ -63,6 +64,8 @@ export abstract class ChatCapabilityProvider {
             this.provideChatMessages(),
         ] as const;
         const [overrideModelName, systemPrompt, messages] = await Promise.all(tasks);
+        const controller = new AbortController();
+        overrides?.abortSignal?.addEventListener('abort', () => controller.abort());
         const modelTelemetry = this.telemetry.createModelTelemetry();
         const options: ModelChatOptions = {
             messages,
@@ -70,8 +73,34 @@ export abstract class ChatCapabilityProvider {
             overrideModelName,
             telemetry: modelTelemetry,
             ...overrides,
+            abortSignal: controller.signal,
         };
-        yield* this.consumeChatStream(this.modelAccess.chatStreaming(options));
+        const state = {
+            toolCallOccured: false,
+        };
+
+        try {
+            for await (const chunk of this.consumeChatStream(this.modelAccess.chatStreaming(options))) {
+                // All stream finished after a tool call
+                if (state.toolCallOccured) {
+                    this.logger.trace('AbortOnToolEnd', {chunk});
+                    controller.abort();
+                    continue;
+                }
+
+                yield chunk;
+
+                // Force at most one tool is used per response
+                if (chunk.type === 'toolEnd') {
+                    state.toolCallOccured = true;
+                }
+            }
+        }
+        catch (ex) {
+            if (!isAbortError(ex)) {
+                throw ex;
+            }
+        }
     }
 
     protected abstract provideModelName(): Promise<string | undefined>;

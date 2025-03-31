@@ -1,11 +1,10 @@
-import {createModelClient  } from '@oniichan/shared/model';
+import {createModelClient} from '@oniichan/shared/model';
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import type {AssistantRole, MessageInputChunk} from '@oniichan/shared/inbox';
-import {StreamingToolParser } from '@oniichan/shared/tool';
+import {StreamingToolParser} from '@oniichan/shared/tool';
 import type {ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
-import {isAbortError} from '@oniichan/shared/error';
 import {ChatCapabilityProvider} from './base';
 import {SystemPromptGenerator} from './prompt';
 import type {SystemPromptGeneratorInit} from './prompt';
@@ -27,22 +26,16 @@ export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
 
     async *provideChatStream(): AsyncIterable<MessageInputChunk> {
         const controller = new AbortController();
-        try {
-            for await (const chunk of super.chat({abortSignal: controller.signal})) {
-                yield chunk;
+        for await (const chunk of super.chat({abortSignal: controller.signal})) {
+            yield chunk;
 
-                if (!this.useCoderModel && chunk.type === 'toolStart' && toolRequireCoder(chunk.toolName)) {
-                    // This makes the next `provideChatStream` call switching to coder model
-                    this.useCoderModel = true;
-                    controller.abort('Switch to coder model');
-                    yield* this.provideChatStream();
-                    return;
-                }
-            }
-        }
-        catch (ex) {
-            if (!isAbortError(ex)) {
-                throw ex;
+            if (!this.useCoderModel && chunk.type === 'toolStart' && toolRequireCoder(chunk.toolName)) {
+                // This makes the next `provideChatStream` call switching to coder model
+                this.logger.trace('CoupleSwitchToCoderModel');
+                this.useCoderModel = true;
+                controller.abort();
+                yield* this.provideChatStream();
+                return;
             }
         }
     }

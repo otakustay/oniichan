@@ -7,8 +7,10 @@ export function stringifyError(error: unknown) {
     return error instanceof Error ? error.message : `${error}`;
 }
 
-export function isAbortError(error: unknown): error is DOMException {
-    return error instanceof DOMException && error.name === 'AbortError';
+export function isAbortError(error: unknown): boolean {
+    // NodeJS throws a simple `Error` object on `abortSignal.abort()`, not a `DOMException`.
+    // Also note if `abortSignal.abort()` is called with `reason` argument, there is no way to check a abort error.
+    return error instanceof Error && error.name === 'AbortError';
 }
 
 export function assertHasValue<T>(value: T | null | undefined, errorMessage: string): asserts value is T {

@@ -77,29 +77,15 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
         this.pushStoreUpdate();
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, replyMessageUuid: reply.uuid});
-        const state = {
-            toolCallOccured: false,
-        };
 
-        // NOTE: We are not using `AbortSignal` to abort stream after tool call because this loses usage data
         try {
             for await (const chunk of provider.provideChatStream()) {
-                if (state.toolCallOccured) {
-                    logger.trace('ChunkAfterToolCall', {chunk});
-                    continue;
-                }
-
                 // We update the store but don't broadcast to all views on streaming
                 reply.addChunk(chunk);
                 yield {replyUuid: reply.uuid, value: chunk};
 
                 if (isChunkAbleToFlushImmediately(chunk)) {
                     this.pushStoreUpdate();
-                }
-
-                // Force at most one tool is used per response
-                if (chunk.type === 'toolEnd') {
-                    state.toolCallOccured = true;
                 }
             }
 
