@@ -1,40 +1,39 @@
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import type {ChatInputPayload, ModelStreamingResponse} from '@oniichan/shared/model';
+import type {ChatInputPayload, ModelRequestDetail, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
 import {createJsonlStore} from './jsonl';
-
-function add(x: number | null, y: number | null) {
-    if (x === null && y === null) {
-        return null;
-    }
-
-    return (x ?? 0) + (y ?? 0);
-}
 
 export interface ModelUsageRecord {
     uuid: string;
     parentUuid: string;
+    providerRequestId: string;
     startTime: string;
     endTime: string;
     modelName: string;
     input: ChatInputPayload[];
     reasoning: string;
     output: string;
+    finishReason: string;
     inputTokens: number | null;
+    reasoningTokens: number | null;
     outputTokens: number | null;
 }
 
 export class ModelUsageTelemetry {
     private readonly uuid: string;
     private readonly parentUuid: string;
+    private providerRequestId = '';
     private modelName = 'unknown';
     private input: ChatInputPayload[] = [];
     private reasoning = '';
     private output = '';
     private inputTokens: number | null = null;
+    private reasoningTokens: number | null = null;
     private outputTokens: number | null = null;
+    private finishReason = 'unknown';
     private startTime = new Date();
     private endTime = new Date();
+    private waitRequestDetail: (() => Promise<void>) | null = null;
 
     constructor(uuid: string, parentUuid: string) {
         this.uuid = uuid;
@@ -61,27 +60,42 @@ export class ModelUsageTelemetry {
                 this.reasoning += chunk.content;
                 break;
             case 'meta':
-                this.modelName = chunk.model;
-                this.inputTokens = add(this.inputTokens, chunk.usage.inputTokens);
-                this.outputTokens = add(chunk.usage.outputTokens, chunk.usage.outputTokens);
                 this.endTime = new Date();
+                this.providerRequestId = chunk.providerRequestId;
+                this.waitRequestDetail = this.recordRequestDetail(chunk.requestDetail);
                 break;
             default:
                 assertNever<{type: string}>(chunk, v => `Unknown chunk type ${v.type} from model chat`);
         }
     }
 
+    private recordRequestDetail(fetch: () => Promise<ModelRequestDetail>) {
+        const recording = (async () => {
+            const detail = await fetch();
+            this.setModelName(detail.model);
+            this.inputTokens = detail.inputTokens;
+            this.reasoningTokens = detail.reasoningTokens;
+            this.outputTokens = detail.outputTokens;
+            this.finishReason = detail.finishReason;
+        })();
+        return () => recording.catch(() => {});
+    }
+
     async record() {
+        await this.waitRequestDetail?.();
         const data: ModelUsageRecord = {
             uuid: this.uuid,
             parentUuid: this.parentUuid,
+            providerRequestId: this.providerRequestId,
             modelName: this.modelName,
             input: this.input,
             reasoning: this.reasoning,
             output: this.output,
+            finishReason: this.finishReason,
             startTime: this.startTime.toISOString(),
             endTime: this.endTime.toISOString(),
             inputTokens: this.inputTokens,
+            reasoningTokens: this.reasoningTokens,
             outputTokens: this.outputTokens,
         };
 

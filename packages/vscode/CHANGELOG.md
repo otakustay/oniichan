@@ -1,5 +1,12 @@
 # Change Log
 
+[UNRELEASED]
+
+### Added
+
+- 在邮件系统中，变更的文件汇总区域有更大的点击范围来查看文件变更。
+- 使用OpenRouter接口获取准确的模型用量等数据，通过“Open Oniichan Data Folder”命令并打开`model-usage.jsonl`可以看到详情。
+
 [3.5.0] - 2025-03-21
 
 ### Added

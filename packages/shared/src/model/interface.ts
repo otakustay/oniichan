@@ -31,14 +31,17 @@ export type ModelResponse = ModelTextResponse | ModelReasoningResponse;
 
 export interface ModelMetaResponse {
     type: 'meta';
-    model: string;
-    usage: ModelUsage;
+    providerRequestId: string;
+    requestDetail: () => Promise<ModelRequestDetail>;
 }
 
 export type ModelStreamingResponse = ModelResponse | ModelMetaResponse;
 
-export interface ModelUsage {
+export interface ModelRequestDetail {
+    model: string;
+    finishReason: string;
     inputTokens: number | null;
+    reasoningTokens: number | null;
     outputTokens: number | null;
 }
 

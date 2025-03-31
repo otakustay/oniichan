@@ -13,18 +13,55 @@ import type {
     ModelMetaResponse,
     ModelStreamingResponse,
     ModelTextResponse,
+    ModelRequestDetail,
 } from './interface';
 import {getModelFeature} from './feature';
 import type {ModelFeature} from './feature';
 
+interface OpenRouterGeneration {
+    id: string;
+    total_cost: number;
+    created_at: string;
+    model: string;
+    origin: string;
+    usage: number;
+    is_byok: true;
+    upstream_id: string;
+    cache_discount: number;
+    app_id: number;
+    streamed: true;
+    cancelled: true;
+    provider_name: string;
+    latency: number;
+    moderation_latency: number;
+    generation_time: number;
+    finish_reason: string;
+    native_finish_reason: string;
+    tokens_prompt: number;
+    tokens_completion: number;
+    native_tokens_prompt: number;
+    native_tokens_completion: number;
+    native_tokens_reasoning: number;
+    num_media_prompt: number;
+    num_media_completion: number;
+    num_search_results: number;
+}
+
+interface OpenRouterGenerationResponse {
+    data: OpenRouterGeneration;
+}
+
 type AiChatRequest = Parameters<typeof streamText>[0];
 
 export class OpenRouterModelClient implements ModelClient {
+    private readonly apiKey: string;
+
     private readonly provider: OpenRouterProvider;
 
     private readonly defaultModel: OpenRouterLanguageModel;
 
     constructor(config: ModelConfiguration) {
+        this.apiKey = config.apiKey;
         const providerSettings: OpenRouterProviderSettings = {
             apiKey: config.apiKey,
             compatibility: 'strict',
@@ -45,11 +82,8 @@ export class OpenRouterModelClient implements ModelClient {
             {type: 'text', content: result.text},
             {
                 type: 'meta',
-                model: this.defaultModel.modelId,
-                usage: {
-                    inputTokens: result.usage.promptTokens,
-                    outputTokens: result.usage.completionTokens,
-                },
+                providerRequestId: result.response.id,
+                requestDetail: () => this.fetchGeneration(result.response.id),
             },
         ];
     }
@@ -67,14 +101,11 @@ export class OpenRouterModelClient implements ModelClient {
                     break;
             }
         }
-        const usage = await result.usage;
+        const response = await result.response;
         yield {
             type: 'meta',
-            model: request.model.modelId,
-            usage: {
-                inputTokens: usage.promptTokens,
-                outputTokens: usage.completionTokens,
-            },
+            providerRequestId: response.id,
+            requestDetail: () => this.fetchGeneration(response.id),
         };
     }
 
@@ -132,5 +163,29 @@ export class OpenRouterModelClient implements ModelClient {
 
         const modelFeature = getModelFeature(modelName);
         return this.provider.chat(modelName, {includeReasoning: modelFeature.supportReasoning});
+    }
+
+    private async fetchGeneration(id: string): Promise<ModelRequestDetail> {
+        const response = await fetch(
+            `https://openrouter.ai/api/v1/generation?id=${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${this.apiKey}`,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch generation with status ${response.status}`);
+        }
+
+        const {data} = await response.json() as OpenRouterGenerationResponse;
+        return {
+            model: data.model,
+            finishReason: data.finish_reason,
+            inputTokens: data.native_tokens_prompt ?? null,
+            reasoningTokens: data.native_tokens_reasoning ?? null,
+            outputTokens: data.native_tokens_completion ?? null,
+        };
     }
 }

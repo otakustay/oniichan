@@ -8,7 +8,7 @@ export type {
     ModelClient,
     ModelConfiguration,
     ModelMetaResponse,
-    ModelUsage,
+    ModelRequestDetail,
     ModelTextResponse,
     ModelResponse,
     ModelStreamingResponse,
