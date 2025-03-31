@@ -1,3 +1,4 @@
+import pRetry from 'p-retry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import type {ChatInputPayload, ModelRequestDetail, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
@@ -71,7 +72,7 @@ export class ModelUsageTelemetry {
 
     private recordRequestDetail(fetch: () => Promise<ModelRequestDetail>) {
         const recording = (async () => {
-            const detail = await fetch();
+            const detail = await pRetry(fetch, {retries: 5});
             this.setModelName(detail.model);
             this.inputTokens = detail.inputTokens;
             this.reasoningTokens = detail.reasoningTokens;

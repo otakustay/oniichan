@@ -171,6 +171,9 @@ importers:
       '@oniichan/shared':
         specifier: workspace:*
         version: link:../shared
+      p-retry:
+        specifier: ^6.2.1
+        version: 6.2.1
     devDependencies:
       '@types/node':
         specifier: 20.x

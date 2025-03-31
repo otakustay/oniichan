@@ -15,7 +15,8 @@
     "dist"
   ],
   "dependencies": {
-    "@oniichan/shared": "workspace:*"
+    "@oniichan/shared": "workspace:*",
+    "p-retry": "^6.2.1"
   },
   "devDependencies": {
     "@types/node": "20.x"
