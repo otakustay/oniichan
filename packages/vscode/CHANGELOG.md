@@ -8,6 +8,10 @@
 - 使用OpenRouter接口获取准确的模型用量等数据，通过“Open Oniichan Data Folder”命令并打开`model-usage.jsonl`可以看到详情。
 - 通过尽早地中断无用的模型响应流，节约更多的模型花费。
 
+### Fixed
+
+- 暗色主题下邮件输入框的文字颜色错误。
+
 [3.5.0] - 2025-03-21
 
 ### Added

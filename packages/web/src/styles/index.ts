@@ -17,6 +17,11 @@ injectGlobal`
         font-size: 14px;
     }
 
+    input,
+    textarea {
+        color: var(--color-root-foreground);
+    }
+
     code {
         font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     }
