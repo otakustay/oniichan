@@ -33,6 +33,11 @@ export class WebSocketPort implements Port {
 export class VscodeMessagePort implements Port {
     private readonly vscode = acquireVsCodeApi();
 
+    constructor() {
+        // This is like DOMContentLoaded event, to notify VSCode that the webview is ready
+        this.vscode.postMessage('WebReady');
+    }
+
     send(message: ExecutionMessage): void {
         this.vscode.postMessage(message);
     }

@@ -45,7 +45,7 @@ export function waitCondition(test: () => boolean, options: WaitConditionOptions
     return deferred.promise;
 }
 
-export function wait(ms: number) {
+export function wait(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 

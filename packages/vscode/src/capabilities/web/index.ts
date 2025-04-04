@@ -6,7 +6,7 @@ import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
-import {waitCondition} from '@oniichan/shared/promise';
+import {wait, waitCondition} from '@oniichan/shared/promise';
 import {WebHostClient} from '@oniichan/web-host/client';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
@@ -24,12 +24,24 @@ class WebviewPort implements Port, Disposable {
 
     private readonly disposables: Disposable[] = [];
 
+    private readonly waitWebReady: () => Promise<void>;
+
     constructor(webview: Webview) {
         this.webview = webview;
+        this.waitWebReady = () => {
+            const executor = (resolve: () => void) => {
+                webview.onDidReceiveMessage(e => console.log('message', e));
+                webview.onDidReceiveMessage(e => e === 'WebReady' && resolve());
+            };
+            // We believe there is a chance that web won't send "WebReady" to IDE,
+            // but the message channel is also available in this condition,
+            // so we suppose it is ready after 1 second
+            return Promise.race([new Promise<void>(executor), wait(1000)]);
+        };
     }
 
     send(message: ExecutionMessage): void {
-        this.webview.postMessage(message);
+        void this.waitWebReady().then(() => this.webview.postMessage(message));
     }
 
     listen(callback: (message: ExecutionMessage) => void): void {
