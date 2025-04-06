@@ -4,12 +4,12 @@ import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react
 import {trimPathString} from '@oniichan/shared/string';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import type {ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
+import ActBar from '@/components/ActBar';
+import Markdown from '@/components//Markdown';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
 import CommandRun from './CommandRun';
 import {Plan} from './Plan';
-import ActBar from '@/components/ActBar';
-import Markdown from '@/components//Markdown';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);

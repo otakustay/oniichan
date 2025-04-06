@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 import type {MessageViewChunk} from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
+import Markdown from '@/components/Markdown';
 import ToolUsage from './ToolUsage';
 import Thinking from './Thinking';
 import Reasoning from './Reasoning';
-import Markdown from '@/components/Markdown';
 
 const Layout = styled.div`
     & :where(code) {

@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import type {RoundtripMessageData} from '@oniichan/shared/inbox';
 import {useMessageThreadValueByUuid} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue, useSetEditing} from '@oniichan/web-host/atoms/draft';
-import Draft from '../Draft';
-import Roundtrip from './Roundtrip';
 import {mediaWideScreen} from '@/styles';
 import {useKeyboardShortcut} from '@/hooks/keyboard';
+import Draft from '../Draft';
+import Roundtrip from './Roundtrip';
 
 const Layout = styled.div`
     display: flex;

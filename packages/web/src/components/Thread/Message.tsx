@@ -6,13 +6,13 @@ import {BiErrorAlt} from 'react-icons/bi';
 import {useMarkMessageStatus} from '@oniichan/web-host/atoms/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import type {MessageViewChunk, RoundtripStatus, MessageViewData} from '@oniichan/shared/inbox';
+import MessageStatusIcon from '@/components/MessageStatusIcon';
+import Avatar from '@/components/Avatar';
+import {TimeAgo} from '@/components/TimeAgo';
 import {MessageContextProvider} from './MessageContext';
 import MessageContent from './MessageContent';
 import Indicator from './Indicator';
 import Rollback from './Rollback';
-import MessageStatusIcon from '@/components/MessageStatusIcon';
-import Avatar from '@/components/Avatar';
-import {TimeAgo} from '@/components/TimeAgo';
 
 function resolveSenderName(message: MessageViewData) {
     switch (message.type) {

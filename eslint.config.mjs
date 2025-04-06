@@ -68,6 +68,11 @@ export default ts.config(
                             group: 'internal',
                             position: 'before',
                         },
+                        {
+                            pattern: '@/**',
+                            group: 'internal',
+                            position: 'after',
+                        },
                     ],
                 },
             ],

@@ -1,8 +1,8 @@
 import {Suspense} from 'react';
 import styled from '@emotion/styled';
-import {CopyCode} from './CopyCode';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
+import {CopyCode} from './CopyCode';
 
 const Header = styled.div`
     display: grid;

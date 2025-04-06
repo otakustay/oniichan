@@ -2,10 +2,10 @@ import {useState} from 'react';
 import type {ReactElement, ReactNode} from 'react';
 import styled from '@emotion/styled';
 import {css} from '@emotion/react';
-import TitledActBar from './Titled';
 import Toggle from '@/components/Toggle';
 import Button from '@/components/Button';
 import LoadingIcon from '@/components/LoadingIcon';
+import TitledActBar from './Titled';
 
 interface ModeProps {
     mode?: 'default' | 'contrast';

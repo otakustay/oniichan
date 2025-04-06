@@ -6,12 +6,12 @@ import type {PlanTask, PlanTaskType} from '@oniichan/shared/tool';
 import {ensureString, trimPathString} from '@oniichan/shared/string';
 import {ensureArray} from '@oniichan/shared/array';
 import type {RawToolCallParameter, ToolCallMessageChunk} from '@oniichan/shared/inbox';
+import ActBar from '@/components/ActBar';
+import Markdown from '@/components//Markdown';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
 import CommandRun from './CommandRun';
 import {Plan} from './Plan';
-import ActBar from '@/components/ActBar';
-import Markdown from '@/components//Markdown';
 
 const ParameterLabel = styled.span`
     background-color: var(--color-contrast-background);

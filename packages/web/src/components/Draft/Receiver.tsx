@@ -1,27 +1,11 @@
-import {useState } from 'react';
-import type {ReactElement} from 'react';
-import {SiCircle} from 'react-icons/si';
-import {RiHeartsLine} from 'react-icons/ri';
+import {useState} from 'react';
 import styled from '@emotion/styled';
 import {usePopper} from 'react-popper';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {assertNever} from '@oniichan/shared/error';
 import {useSetWorkingMode, useWorkingModeSubmitValue} from '@oniichan/web-host/atoms/inbox';
 import {useEditingValue} from '@oniichan/web-host/atoms/draft';
-import Avatar from '@/components/Avatar';
-
-function stringifyWorkingMode(mode: MessageThreadWorkingMode) {
-    switch (mode) {
-        case 'normal':
-            return 'Oniichan';
-        case 'ringRing':
-            return 'Oniichan (Ring Ring Mode)';
-        case 'couple':
-            return 'Oniichan (Couple Mode)';
-        default:
-            assertNever<string>(mode, v => `Unknown working mode ${v}`);
-    }
-}
+import {stringifyWorkingMode} from './utils';
+import ModeSelect from './ModeSelect';
 
 const Name = styled.span`
     appearance: none;
@@ -49,33 +33,8 @@ const Name = styled.span`
     }
 `;
 
-const PopoverItem = styled.li`
-    width: 100%;
-    display: flex;
-    height: 1.5em;
-    align-items: center;
-    gap: .5em;
-    padding: 0 .5em;
-    color: var(--color-default-foreground);
-    cursor: pointer;
-
-    &:hover {
-        background-color: var(--color-interactive-background-hover);
-        color: var(--color-interactive-foreground);
-    }
-
-    &:active {
-        background-color: var(--color-interactive-background-active);
-        color: var(--color-interactive-foreground);
-    }
-`;
-
-const Popover = styled.ul`
+const Popover = styled.div`
     background-color: var(--color-default-background);
-    padding: .5em 0;
-    margin: 0;
-    list-style: none;
-    width: 15em;
     z-index: 1;
 `;
 
@@ -88,28 +47,13 @@ const Layout = styled.div`
     border-bottom: 1px solid var(--color-default-border);
 `;
 
-interface ItemProps {
-    icon: ReactElement;
-    workingMode: MessageThreadWorkingMode;
-    onSelect: (value: MessageThreadWorkingMode) => void;
-}
-
-function Item({icon, workingMode, onSelect}: ItemProps) {
-    return (
-        <PopoverItem onClick={() => onSelect(workingMode)}>
-            {icon}
-            {stringifyWorkingMode(workingMode)}
-        </PopoverItem>
-    );
-}
-
 export function Receiver() {
     const editing = useEditingValue();
     const workingMode = useWorkingModeSubmitValue();
     const setWorkingMode = useSetWorkingMode();
     const [open, setOpen] = useState(false);
     const [nameElement, setNameElement] = useState<HTMLSpanElement | null>(null);
-    const [popperElement, setPopperElement] = useState<HTMLUListElement | null>(null);
+    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
     const {styles, attributes, update} = usePopper(
         nameElement,
         popperElement,
@@ -150,9 +94,7 @@ export function Receiver() {
                     style={{...styles.popper, display: open ? 'block' : 'none'}}
                     {...attributes.popper}
                 >
-                    <Item icon={<Avatar.Assistant />} workingMode="normal" onSelect={select} />
-                    <Item icon={<RiHeartsLine />} workingMode="couple" onSelect={select} />
-                    <Item icon={<SiCircle />} workingMode="ringRing" onSelect={select} />
+                    <ModeSelect onSelect={select} />
                 </Popover>
             </Name>
         </Layout>

@@ -4,14 +4,14 @@ import {trimPathString} from '@oniichan/shared/string';
 import {useViewModeValue} from '@oniichan/web-host/atoms/view';
 import {stringifyError} from '@oniichan/shared/error';
 import type {FileEditData} from '@oniichan/shared/patch';
-import CountLabel from '../CountLabel';
-import {useIsEditInteractive} from '../FileEditContext';
 import {useIpc} from '@/components/AppProvider';
 import ActBar from '@/components/ActBar';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
 import {showToast} from '@/components/Toast';
+import {useIsEditInteractive} from '../FileEditContext';
+import CountLabel from '../CountLabel';
 
 const ErrorLabel = styled.div`
     color: var(--color-error);

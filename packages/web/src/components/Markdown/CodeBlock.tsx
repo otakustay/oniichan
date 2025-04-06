@@ -1,10 +1,10 @@
 import {Suspense} from 'react';
 import type {ReactElement} from 'react';
 import styled from '@emotion/styled';
-import {useMarkdownContent} from './ContentProvider';
-import {CopyCode} from './CopyCode';
 import SourceCode from '@/components/SourceCode';
 import LanguageIcon from '@/components/LanguageIcon';
+import {useMarkdownContent} from './ContentProvider';
+import {CopyCode} from './CopyCode';
 
 interface Position {
     line: number;

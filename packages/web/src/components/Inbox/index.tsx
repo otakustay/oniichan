@@ -1,8 +1,8 @@
 import {useSetEditing} from '@oniichan/web-host/atoms/draft';
+import {useKeyboardShortcut} from '@/hooks/keyboard';
 import ThreadList from './ThreadList';
 import Body from './Body';
 import Navigation from './Navigation';
-import {useKeyboardShortcut} from '@/hooks/keyboard';
 
 function Inbox() {
     const setEditing = useSetEditing();

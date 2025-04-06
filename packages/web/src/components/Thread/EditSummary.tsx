@@ -4,14 +4,14 @@ import {IoCheckmarkSharp, IoCloseSharp, IoEyeOutline} from 'react-icons/io5';
 import {stringifyError} from '@oniichan/shared/error';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import type {MouseEvent} from 'react';
-import {useAllMergedFileEdits} from './FileEditContext';
-import CountLabel from './CountLabel';
-import Message from './Message';
 import InteractiveLabel from '@/components/InteractiveLabel';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';
 import Avatar from '@/components/Avatar';
 import Button from '@/components/Button';
+import Message from './Message';
+import CountLabel from './CountLabel';
+import {useAllMergedFileEdits} from './FileEditContext';
 
 const ErrorSign = styled(VscReport)`
     color: var(--color-error);

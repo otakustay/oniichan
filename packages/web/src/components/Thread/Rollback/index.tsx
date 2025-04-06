@@ -4,9 +4,9 @@ import {VscDiscard} from 'react-icons/vsc';
 import {countNounSimple} from '@oniichan/shared/string';
 import type {InboxRollbackCheckItem, InboxCheckRollbackResponse} from '@oniichan/kernel/protocol';
 import {stringifyError} from '@oniichan/shared/error';
-import Confirm from './Confirm';
 import {useIpc} from '@/components/AppProvider';
 import {showToast} from '@/components/Toast';
+import Confirm from './Confirm';
 
 function renderToastMessage(fileCount: number, roundtripCount: number) {
     if (fileCount && roundtripCount) {
