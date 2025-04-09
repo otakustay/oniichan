@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/web",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Web app for Oniichan Coding Assistant",
   "scripts": {
     "build": "NODE_ENV=production rspack build && tsc",
