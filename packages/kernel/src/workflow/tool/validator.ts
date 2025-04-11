@@ -71,6 +71,7 @@ export class ToolWorkflowValidator extends WorkflowValidator {
     constructor(init: WorkflowStepInit) {
         super(init);
         const implementInit: ToolImplementInit = {
+            thread: this.thread,
             roundtrip: this.roundtrip,
             editorHost: init.editorHost,
             logger: init.logger,

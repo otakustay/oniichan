@@ -1,3 +1,4 @@
+import dedent from 'dedent';
 import type {CompleteTaskParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolImplementBase} from './base';
@@ -10,6 +11,27 @@ interface Extracted {
 
 export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskParameter, Extracted> {
     async executeApprove(): Promise<ToolExecuteResult> {
+        if (this.thread.getWorkingMode() === 'ringRing') {
+            return this.executeRingRingMode();
+        }
+
+        return this.executeUniversal();
+    }
+
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
+        const confidence = parseInt(asString(generated.confidence) ?? '', 10);
+        return {
+            confidence: isNaN(confidence) ? undefined : confidence,
+        };
+    }
+
+    parseParameters(extracted: Extracted): CompleteTaskParameter {
+        return {
+            confidence: extracted.confidence ?? 0,
+        };
+    }
+
+    private async executeRingRingMode(): Promise<ToolExecuteResult> {
         const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
         const executingIndex = plan.arguments.tasks.findIndex(v => v.status === 'executing');
         plan.arguments.tasks[executingIndex].status = 'completed';
@@ -42,16 +64,15 @@ export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskPar
         };
     }
 
-    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
-        const confidence = parseInt(asString(generated.confidence) ?? '', 10);
+    private async executeUniversal(): Promise<ToolExecuteResult> {
         return {
-            confidence: isNaN(confidence) ? undefined : confidence,
-        };
-    }
+            type: 'success',
+            finished: false,
+            output: dedent`
+                Now you should examine the changes made in assigned task, and determine if the user's request is fully satisfied.
 
-    parseParameters(extracted: Extracted): CompleteTaskParameter {
-        return {
-            confidence: extracted.confidence ?? 0,
+                If the original request is not fully completed, you should continue working on it, otherwise you can finish by using the "attempt_completion" tool.
+            `,
         };
     }
 }

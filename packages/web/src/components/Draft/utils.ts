@@ -9,6 +9,8 @@ export function stringifyWorkingMode(mode: MessageThreadWorkingMode) {
             return 'Oniichan (Ring Ring Mode)';
         case 'couple':
             return 'Oniichan (Couple Mode)';
+        case 'henshin':
+            return 'Oniichan (Henshin Mode)';
         default:
             assertNever<string>(mode, v => `Unknown working mode ${v}`);
     }

@@ -14,6 +14,7 @@ import type {
     AskFollowupQuestionParameter,
     CompleteTaskParameter,
     CreatePlanParameter,
+    SemanticEditCodeParameter,
 } from '../tool';
 
 export type WorkflowSourceChunkStatus =
@@ -114,6 +115,11 @@ export interface CreatePlanToolCallMessageChunk extends ParsedToolCallMessageChu
     arguments: CreatePlanParameter;
 }
 
+export interface SemanticEditCodeToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
+    toolName: 'semantic_edit_code';
+    arguments: SemanticEditCodeParameter;
+}
+
 export type ParsedToolCallMessageChunk =
     | ReadFileToolCallMessageChunk
     | ReadDirectoryToolCallMessageChunk
@@ -127,7 +133,8 @@ export type ParsedToolCallMessageChunk =
     | AttemptCompletionToolCallMessageChunk
     | AskFollowupQuestionToolCallMessageChunk
     | CompleteTaskToolCallMessageChunk
-    | CreatePlanToolCallMessageChunk;
+    | CreatePlanToolCallMessageChunk
+    | SemanticEditCodeToolCallMessageChunk;
 
 type ParsedToolCallMessageChunkMap = { [K in ParsedToolCallMessageChunk as K['toolName']]: K };
 

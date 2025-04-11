@@ -30,7 +30,6 @@ class WebviewPort implements Port, Disposable {
         this.webview = webview;
         this.waitWebReady = () => {
             const executor = (resolve: () => void) => {
-                webview.onDidReceiveMessage(e => console.log('message', e));
                 webview.onDidReceiveMessage(e => e === 'WebReady' && resolve());
             };
             // We believe there is a chance that web won't send "WebReady" to IDE,

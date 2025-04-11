@@ -6,6 +6,7 @@ import Toggle from '@/components/Toggle';
 import Button from '@/components/Button';
 import LoadingIcon from '@/components/LoadingIcon';
 import TitledActBar from './Titled';
+import SecondaryActBar from './Secondary';
 
 interface ModeProps {
     mode?: 'default' | 'contrast';
@@ -101,4 +102,4 @@ function ActBar({icon, content, actions, richContent, mode}: Props) {
     );
 }
 
-export default Object.assign(ActBar, {Layout, ActionButton, Loading, Titled: TitledActBar});
+export default Object.assign(ActBar, {Layout, ActionButton, Loading, Titled: TitledActBar, Secondary: SecondaryActBar});

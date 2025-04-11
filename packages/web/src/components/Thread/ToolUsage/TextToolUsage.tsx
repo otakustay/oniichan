@@ -1,6 +1,6 @@
 import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
-import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
+import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline, IoExitOutline} from 'react-icons/io5';
 import {isEditToolName} from '@oniichan/shared/tool';
 import type {PlanTask, PlanTaskType} from '@oniichan/shared/tool';
 import {ensureString, trimPathString} from '@oniichan/shared/string';
@@ -53,6 +53,8 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
             return [IoSearchOutline, 'Find files', ensureString(input.arguments.glob), ''];
         case 'find_files_by_regex':
             return [IoSearchOutline, 'Grep', ensureString(input.arguments.regex), ''];
+        case 'complete_task':
+            return [IoExitOutline, 'Finish', `Confidence ${input.arguments.confidence}`, ''];
         default:
             throw new Error(`Unknown reference type`);
     }
@@ -74,8 +76,14 @@ interface Props {
 }
 
 export default function TextToolUsage({input}: Props) {
-    if (input.toolName === 'complete_task') {
-        return null;
+    if (input.toolName === 'semantic_edit_code') {
+        return (
+            <ActBar.Secondary
+                icon={<ActBar.Loading />}
+                title="Oniichan is writing out a coding receipt"
+                content={ensureString(input.arguments.requirement) ?? ''}
+            />
+        );
     }
 
     if (input.toolName === 'read_file') {

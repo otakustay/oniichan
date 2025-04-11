@@ -9,9 +9,10 @@ import type {ToolName} from '@oniichan/shared/tool';
 import type {CommandExecutor} from '../../../core/command';
 import type {EditorHost} from '../../../core/editor';
 import {assertToolCallMessage, assertToolCallType} from '../../../inbox';
-import type {InboxMessage, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
+import type {InboxMessage, InboxMessageThread, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
 
 export interface ToolImplementInit {
+    thread: InboxMessageThread;
     roundtrip: InboxRoundtrip;
     editorHost: EditorHost;
     logger: Logger;
@@ -33,6 +34,8 @@ export interface ExecuteError {
 export type ToolExecuteResult = Success | ExecuteError;
 
 export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
+    protected readonly thread: InboxMessageThread;
+
     protected readonly roundtrip: InboxRoundtrip;
 
     protected readonly editorHost: EditorHost;
@@ -44,6 +47,7 @@ export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
     protected readonly inboxConfig: InboxConfig;
 
     constructor(init: ToolImplementInit) {
+        this.thread = init.thread;
         this.roundtrip = init.roundtrip;
         this.editorHost = init.editorHost;
         this.logger = init.logger.with({source: new.target.name});

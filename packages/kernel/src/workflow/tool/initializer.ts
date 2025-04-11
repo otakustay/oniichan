@@ -11,6 +11,7 @@ export class ToolWorkflowInitializer extends WorkflowInitializer {
     constructor(init: WorkflowStepInit) {
         super(init);
         const implementInit: ToolImplementInit = {
+            thread: this.thread,
             roundtrip: this.roundtrip,
             editorHost: init.editorHost,
             logger: init.logger,

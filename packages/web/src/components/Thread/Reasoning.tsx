@@ -1,8 +1,7 @@
 import {useEffect, useState} from 'react';
-import styled from '@emotion/styled';
 import {IoChatbubbleEllipsesOutline, IoCheckmarkCircleOutline} from 'react-icons/io5';
 import {motion} from 'motion/react';
-import Toggle from '../Toggle';
+import ActBar from '../ActBar';
 
 function countToken(content: string) {
     const tokens = content.split(/([^a-zA-Z0-9_-]+)/).filter(v => v.length > 1);
@@ -44,25 +43,6 @@ function CompleteIcon() {
     );
 }
 
-const Bar = styled.div`
-    display: flex;
-    align-items: center;
-    gap: .5em;
-`;
-
-const Content = styled.div`
-    white-space: pre-wrap;
-    color: var(--color-secondary-foreground);
-    border-left: 2px solid var(--color-default-border);
-    padding-left: .5em;
-    margin-top: .5em;
-    margin-left: .5em;
-`;
-
-const Layout = styled.div`
-    font-size: .8em;
-`;
-
 interface Props {
     content: string;
     running: boolean;
@@ -70,7 +50,6 @@ interface Props {
 
 export default function Reasoning({content, running}: Props) {
     const [pendingMessage, setPendingMessage] = useState('Oniichan is glancing over the problem...');
-    const [collapsed, setCollapsed] = useState(true);
     useEffect(
         () => {
             if (!running) {
@@ -95,13 +74,10 @@ export default function Reasoning({content, running}: Props) {
     );
 
     return (
-        <Layout>
-            <Bar>
-                {running ? <PendingIcon /> : <CompleteIcon />}
-                {running ? pendingMessage : resolveCompleteMessage(content)}
-                <Toggle collapsed={collapsed} onChange={setCollapsed} />
-            </Bar>
-            {!collapsed && <Content>{content.trim()}</Content>}
-        </Layout>
+        <ActBar.Secondary
+            icon={running ? <PendingIcon /> : <CompleteIcon />}
+            title={running ? pendingMessage : resolveCompleteMessage(content)}
+            content={content.trim()}
+        />
     );
 }

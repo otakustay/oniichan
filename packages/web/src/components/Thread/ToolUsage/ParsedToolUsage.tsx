@@ -1,6 +1,12 @@
 import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
-import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline} from 'react-icons/io5';
+import {
+    IoDocumentTextOutline,
+    IoExitOutline,
+    IoFolderOpenOutline,
+    IoCodeSlashOutline,
+    IoSearchOutline,
+} from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import type {ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
@@ -83,6 +89,8 @@ function renderLabelContent(input: ParsedToolCallMessageChunk): [ComponentType, 
             return [IoSearchOutline, 'Find files', input.arguments.glob ?? '', ''];
         case 'find_files_by_regex':
             return [IoSearchOutline, 'Grep', input.arguments.regex ?? '', ''];
+        case 'complete_task':
+            return [IoExitOutline, 'Finish', `Confidence ${input.arguments.confidence}`, ''];
         default:
             throw new Error(`Unknown reference type`);
     }
@@ -93,8 +101,14 @@ interface Props {
 }
 
 export default function ParsedToolUsage({input}: Props) {
-    if (input.toolName === 'complete_task') {
-        return null;
+    if (input.toolName === 'semantic_edit_code') {
+        return (
+            <ActBar.Secondary
+                icon={<IoCodeSlashOutline />}
+                title="It's time for coding"
+                content={input.arguments.requirement}
+            />
+        );
     }
 
     if (input.toolName === 'read_file') {

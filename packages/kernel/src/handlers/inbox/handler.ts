@@ -10,7 +10,12 @@ import {WorkflowDetector} from '../../workflow';
 import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
 import type {InboxMessageThread} from '../../inbox';
 import {RequestHandler} from '../handler';
-import {CoupleChatCapabilityProvider, RingRingChatCapabilityProvider, StandaloneChatCapabilityProvider} from './mode';
+import {
+    CoupleChatCapabilityProvider,
+    HenshinChatCapabilityProvider,
+    RingRingChatCapabilityProvider,
+    StandaloneChatCapabilityProvider,
+} from './mode';
 import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from './mode';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
@@ -184,6 +189,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
                 return new RingRingChatCapabilityProvider(providerInit);
             case 'couple':
                 return new CoupleChatCapabilityProvider(providerInit);
+            case 'henshin':
+                return new HenshinChatCapabilityProvider(providerInit);
             default:
                 assertNever<string>(workingMode, v => `Unknown working mode ${v}`);
         }

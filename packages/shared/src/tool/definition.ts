@@ -22,7 +22,8 @@ export type ToolName =
     | 'attempt_completion'
     | 'ask_followup_question'
     | 'complete_task'
-    | 'create_plan';
+    | 'create_plan'
+    | 'semantic_edit_code';
 
 export type ToolSupportTarget = AssistantRole | [mode: MessageThreadWorkingMode, role: AssistantRole];
 
@@ -309,6 +310,22 @@ export interface CreatePlanParameter {
     tasks: PlanTask[];
 }
 
+export const semanticEditCodeParameters = {
+    type: 'object',
+    properties: {
+        requirement: {
+            type: 'string',
+            description:
+                'Coding requirement represented in natural language, all coding tasks should go through this tool, including file creationg, modification and deletion.',
+        },
+    },
+    required: ['requirement'],
+} as const satisfies ParameterInfo;
+
+export interface SemanticEditCodeParameter {
+    requirement: string;
+}
+
 export const builtinTools: ToolDescription[] = [
     {
         name: 'read_file',
@@ -425,7 +442,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>ls -la</command>
             </run_command>
         `,
-        supported: ['standalone', 'coder'],
+        supported: ['standalone', 'coder', ['henshin', 'actor']],
     },
     {
         name: 'attempt_completion',
@@ -438,7 +455,7 @@ export const builtinTools: ToolDescription[] = [
                 <command>The command you used to demonstrate the result</command>
             </attempt_completion>
         `,
-        supported: ['standalone', 'planner'],
+        supported: ['standalone', 'planner', ['henshin', 'actor']],
     },
     {
         name: 'ask_followup_question',
@@ -450,7 +467,7 @@ export const builtinTools: ToolDescription[] = [
                 <question>Your question</question>
             </ask_followup_question>
         `,
-        supported: [['normal', 'standalone']],
+        supported: [['normal', 'standalone'], ['henshin', 'actor']],
     },
     {
         name: 'complete_task',
@@ -462,7 +479,7 @@ export const builtinTools: ToolDescription[] = [
                 <confidence>87</confidence>
             </complete_task>
         `,
-        supported: [['ringRing', 'actor'], ['ringRing', 'coder']],
+        supported: [['ringRing', 'actor'], 'coder'],
     },
     {
         name: 'create_plan',
@@ -478,6 +495,17 @@ export const builtinTools: ToolDescription[] = [
             </create_plan>
         `,
         supported: [['ringRing', 'planner']],
+    },
+    {
+        name: 'semantic_edit_code',
+        description: 'Involve a skilled coder to implement a coding requirement described in natural language.',
+        parameters: semanticEditCodeParameters,
+        usage: dedent`
+            <semantic_edit_code>
+                <requirements>Add argument bar to all calls to function foo</requirements>
+            </semantic_edit_code>
+        `,
+        supported: [['henshin', 'actor']],
     },
 ];
 

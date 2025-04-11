@@ -16,6 +16,7 @@ import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
 import {CompleteTaskToolImplement} from './completeTask';
 import {CreatePlanToolImplement} from './createPlan';
+import {SemanticEditCodeToolImplement} from './semanticEditCode';
 
 export type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError};
 
@@ -46,6 +47,8 @@ export class ToolImplement {
 
     private readonly createPlan: ToolImplementBase;
 
+    private readonly semanticEditCode: ToolImplementBase;
+
     constructor(init: ToolImplementInit) {
         this.readFile = new ReadFileToolImplement(init);
         this.readDirectory = new ReadDirectoryToolImplement(init);
@@ -60,6 +63,7 @@ export class ToolImplement {
         this.askFollowupQuestion = new AskFollowupQuestionToolImplement(init);
         this.completeTask = new CompleteTaskToolImplement(init);
         this.createPlan = new CreatePlanToolImplement(init);
+        this.semanticEditCode = new SemanticEditCodeToolImplement(init);
     }
 
     requireUserApprove(toolName: ToolName): boolean {
@@ -116,6 +120,8 @@ export class ToolImplement {
                 return this.completeTask;
             case 'create_plan':
                 return this.createPlan;
+            case 'semantic_edit_code':
+                return this.semanticEditCode;
             default:
                 assertNever<string>(name, v => `Unknown tool ${v}`);
         }

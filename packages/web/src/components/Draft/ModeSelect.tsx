@@ -3,6 +3,7 @@ import type {ReactElement} from 'react';
 import styled from '@emotion/styled';
 import {SiCircle} from 'react-icons/si';
 import {RiHeartsLine} from 'react-icons/ri';
+import {IoSwapHorizontalOutline} from 'react-icons/io5';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import Avatar from '@/components/Avatar';
 import Rating from '@/components/Rating';
@@ -37,6 +38,13 @@ const DESCRIPTION_BY_MODE: Record<MessageThreadWorkingMode, ModeDescription> = {
         cost: 2,
         standard: 'V3 (actor) + Claude (coder)',
         text: 'Only use coder model in file edit, cost friendly.',
+    },
+    henshin: {
+        speed: 3,
+        quality: 4,
+        cost: 3,
+        standard: 'V3 (actor) + Claude (coder)',
+        text: 'Actor transforms to coder when coding task appears, write better code than couple mode.',
     },
 };
 
@@ -151,6 +159,13 @@ export default function ModeSelect({onSelect}: Props) {
                 <Item
                     icon={<RiHeartsLine />}
                     workingMode="couple"
+                    onSelect={onSelect}
+                    onHover={setHover}
+                    onLeave={leave}
+                />
+                <Item
+                    icon={<IoSwapHorizontalOutline />}
+                    workingMode="henshin"
                     onSelect={onSelect}
                     onHover={setHover}
                     onLeave={leave}
