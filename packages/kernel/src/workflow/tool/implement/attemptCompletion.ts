@@ -9,7 +9,8 @@ export class AttemptCompletionToolImplement extends ToolImplementBase<AttemptCom
         return {
             type: 'success',
             finished: true,
-            output: '',
+            executionData: {},
+            template: '',
         };
     }
 

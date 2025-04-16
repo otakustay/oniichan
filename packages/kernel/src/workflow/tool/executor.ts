@@ -3,7 +3,7 @@ import {assertToolCallMessage, createToolUseMessage} from '../../inbox';
 import {WorkflowExecutor} from '../base';
 import type {WorkflowStepInit, WorkflowExecuteResult} from '../base';
 import {ToolImplement} from './implement';
-import type {ExecuteError, Success, ToolImplementInit} from './implement';
+import type {ToolExecuteResult, ToolImplementInit} from './implement';
 
 export class ToolWorkflowExecutor extends WorkflowExecutor {
     private readonly implement: ToolImplement;
@@ -79,7 +79,13 @@ export class ToolWorkflowExecutor extends WorkflowExecutor {
         try {
             const message = await this.implement.executeReject(chunk.toolName);
             origin.markWorkflowOriginStatus('userRejected');
-            return this.handleFinishAndContinue({type: 'success', finished: false, output: message});
+            const result: ToolExecuteResult = {
+                type: 'rejected',
+                finished: false,
+                executionData: {},
+                template: message,
+            };
+            return this.handleFinishAndContinue(result);
         }
         catch (ex) {
             origin.markWorkflowOriginStatus('failed');
@@ -91,13 +97,13 @@ export class ToolWorkflowExecutor extends WorkflowExecutor {
         }
     }
 
-    private handleFinishAndContinue(result: Success | ExecuteError) {
+    private handleFinishAndContinue(result: ToolExecuteResult) {
         const workflow = this.getWorkflow();
-        const responseMessage = createToolUseMessage(this.roundtrip, result.output);
+        const responseMessage = createToolUseMessage(this.roundtrip, result);
         workflow.markStatus('completed');
         workflow.addReaction(responseMessage, true);
         this.updateThread();
-        return {finished: result.type !== 'executeError' && result.finished};
+        return {finished: result.finished};
     }
 
     private getToolCallMessage() {

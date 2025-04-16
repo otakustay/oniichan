@@ -3,7 +3,7 @@ import type {ToolName} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
 import {AttemptCompletionToolImplement} from './attemptCompletion';
-import type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError} from './base';
+import type {ToolExecuteResult, ToolImplementInit} from './base';
 import type {ToolImplementBase} from './base';
 import {BrowserPreviewToolImplement} from './browserPreview';
 import {DeleteFileToolImplement} from './deleteFile';
@@ -18,7 +18,7 @@ import {CompleteTaskToolImplement} from './completeTask';
 import {CreatePlanToolImplement} from './createPlan';
 import {SemanticEditCodeToolImplement} from './semanticEditCode';
 
-export type {ToolExecuteResult, ToolImplementInit, Success, ExecuteError};
+export type {ToolExecuteResult, ToolImplementInit};
 
 export class ToolImplement {
     private readonly readFile: ToolImplementBase;

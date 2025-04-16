@@ -14,6 +14,7 @@ import type {
     InboxUserRequestMessage,
 } from './interface';
 import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage} from './message';
+import type {ToolUseInit} from './message';
 import {Roundtrip} from './roundtrip';
 import {MessageThread} from './thread';
 
@@ -28,8 +29,8 @@ export function createDetachedUserRequestMessage(content: string): InboxUserRequ
     return setRoundtripRequest(roundtrip, newUuid(), content);
 }
 
-export function createToolUseMessage(roundtrip: InboxRoundtrip, content: string): InboxToolUseMessage {
-    return new ToolUseMessage(newUuid(), roundtrip, content);
+export function createToolUseMessage(roundtrip: InboxRoundtrip, init: ToolUseInit): InboxToolUseMessage {
+    return new ToolUseMessage(newUuid(), roundtrip, init);
 }
 
 export function createEmptyAssistantTextMessage(roundtrip: InboxRoundtrip): InboxAssistantTextMessage {

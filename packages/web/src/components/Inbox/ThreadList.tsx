@@ -81,8 +81,10 @@ const Layout = styled.div`
 function resolveMessageContent(message: MessageData) {
     switch (message.type) {
         case 'userRequest':
-        case 'toolUse':
             return message.content;
+        case 'toolUse':
+            // This should never visible to user
+            return '';
         case 'assistantText':
         case 'toolCall':
             return message.chunks.map(v => (v.type === 'text' ? v.content : '')).join('\n\n');

@@ -9,7 +9,8 @@ export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollo
         return {
             type: 'success',
             finished: true,
-            output: '',
+            executionData: {},
+            template: '',
         };
     }
 

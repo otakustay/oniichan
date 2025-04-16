@@ -1,8 +1,8 @@
+import dedent from 'dedent';
 import unixify from 'unixify';
 import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
@@ -60,7 +60,8 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot read any file or directory now',
+                    executionData: {},
+                    template: 'No open workspace, you cannot read any file or directory now',
                 };
             }
 
@@ -68,8 +69,10 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
 
             if (!this.commandExecutor.has(binaryName)) {
                 return {
-                    type: 'executeError',
-                    output:
+                    type: 'error',
+                    finished: false,
+                    executionData: {},
+                    template:
                         'User\'s operating system does not have grep installed, it\'s impossible to search files by regexp, please try other methods to locate files, and do not use this tool again.',
                 };
             }
@@ -104,17 +107,15 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
                 }
             );
 
-            return {
-                type: 'success',
-                finished: false,
-                output: this.constructResponseText(),
-            };
+            return this.constructResponse();
         }
         catch (ex) {
             this.logger.error('ExecuteGrepFail', {reason: stringifyError(ex)});
             return {
-                type: 'executeError',
-                output: `Unable to find files with regex \`${args.regex}\`: ${stringifyError(ex)}`,
+                type: 'error',
+                finished: false,
+                executionData: {regex: args.regex, message: stringifyError(ex)},
+                template: 'Unable to find files with regex `{{args.regex}}`: {{message}}.',
             };
         }
     }
@@ -170,9 +171,14 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
         }
     }
 
-    private constructResponseText(): string {
+    private constructResponse(): ToolExecuteResult {
         if (!this.results.length) {
-            return 'There are no files matching this regex';
+            return {
+                type: 'success',
+                finished: false,
+                executionData: {},
+                template: 'There are no files matching this regex',
+            };
         }
 
         const title = this.linesCount >= MAX_LINES
@@ -216,6 +222,17 @@ export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpP
             }
             return lines.join('\n');
         };
-        return resultMarkdown(title, this.results.map(format).join('\n--\n'));
+        return {
+            type: 'success',
+            finished: false,
+            executionData: {output: this.results.map(format).join('\n--\n')},
+            template: dedent`
+                ${title}
+
+                \`\`\`
+                {{output}}
+                \`\`\`
+            `,
+        };
     }
 }

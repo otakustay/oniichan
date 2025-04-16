@@ -17,7 +17,8 @@ export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter, 
         return {
             type: 'success',
             finished: false,
-            output: contents.join('\n\n'),
+            executionData: {files: contents.join('\n\n')},
+            template: '{{files}}',
         };
     }
 

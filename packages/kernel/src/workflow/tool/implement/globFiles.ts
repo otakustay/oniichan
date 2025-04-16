@@ -1,8 +1,8 @@
 import path from 'node:path';
+import dedent from 'dedent';
 import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
@@ -16,7 +16,8 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot read any file or directory now.',
+                    executionData: {},
+                    template: 'No open workspace, you cannot read any file or directory now.',
                 };
             }
 
@@ -26,23 +27,30 @@ export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobPar
                 return {
                     type: 'success',
                     finished: false,
-                    output: resultMarkdown(
-                        `Files matching glob ${args.glob}:`,
-                        files.map(v => path.relative(root, v)).join('\n')
-                    ),
+                    executionData: {glob: args.glob, content: files.map(v => path.relative(root, v)).join('\n')},
+                    template: dedent`
+                        Files matching glob {{glob}}:
+
+                        \`\`\`
+                        {{content}}
+                        \`\`\`
+                    `,
                 };
             }
 
             return {
                 type: 'success',
                 finished: false,
-                output: `There are no files matching glob \`${args.glob}\`.`,
+                executionData: {glob: args.glob},
+                template: 'There are no files matching glob `{{glob}}`.',
             };
         }
         catch (ex) {
             return {
-                type: 'executeError',
-                output: `Unable to find files with pattern ${args.glob}: ${stringifyError(ex)}.`,
+                type: 'error',
+                finished: false,
+                executionData: {glob: args.glob, message: stringifyError(ex)},
+                template: 'Unable to find files with pattern {{glob}}: {{message}}.',
             };
         }
     }

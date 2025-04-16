@@ -1,34 +1,57 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
-import type {ToolUseMessageData} from '@oniichan/shared/inbox';
+import type {ToolUseMessageData, ToolUseResultType} from '@oniichan/shared/inbox';
+import {formatStringTemplate} from '@oniichan/shared/string';
 import type {InboxRoundtrip, InboxToolUseMessage} from '../interface';
 import {MessageBase} from './base';
 
+export interface ToolUseInit {
+    type: ToolUseResultType;
+    template: string;
+    executionData: Record<string, string | number | null>;
+}
+
 export class ToolUseMessage extends MessageBase<'toolUse'> implements InboxToolUseMessage {
     static from(data: ToolUseMessageData, roundtrip: InboxRoundtrip) {
-        const message = new ToolUseMessage(data.uuid, roundtrip, data.content);
+        const message = new ToolUseMessage(
+            data.uuid,
+            roundtrip,
+            {
+                type: data.result,
+                template: data.template,
+                executionData: data.executionData,
+            }
+        );
         message.restore(data);
         return message;
     }
 
-    readonly content: string;
+    private readonly result: ToolUseResultType;
 
-    constructor(uuid: string, roundtrip: InboxRoundtrip, content: string) {
+    private readonly template: string;
+
+    private readonly executionData: Record<string, string | number | null>;
+
+    constructor(uuid: string, roundtrip: InboxRoundtrip, init: ToolUseInit) {
         super(uuid, 'toolUse', roundtrip);
-        this.content = content;
+        this.result = init.type;
+        this.template = init.template;
+        this.executionData = init.executionData;
     }
 
     toMessageData(): ToolUseMessageData {
         return {
             ...this.toMessageDataBase(),
             type: this.type,
-            content: this.content,
+            result: this.result,
+            template: this.template,
+            executionData: this.executionData,
         };
     }
 
     toChatInputPayload(): ChatInputPayload {
         return {
             role: 'user',
-            content: this.content,
+            content: formatStringTemplate(this.template, this.executionData),
         };
     }
 }

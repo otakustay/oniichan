@@ -1,5 +1,5 @@
 export {trimPathString} from './trim';
-export {now, countNounSimple, ensureString} from './format';
+export {now, countNounSimple, ensureString, formatStringTemplate} from './format';
 export {StreamXmlParser} from './xml';
 export type {
     XmlParseTagEndChunk,

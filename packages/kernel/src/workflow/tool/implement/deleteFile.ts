@@ -14,17 +14,20 @@ export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParamet
 
         if (fileEdit.type === 'error') {
             return {
-                type: 'executeError',
-                output: `Delete file ${args.path} failed for this reason: ${fileEdit.message}`,
+                type: 'error',
+                finished: false,
+                executionData: {path: args.path, message: fileEdit.message},
+                template: 'Delete file {{path}} failed for this reason: {{message}}',
             };
         }
 
         return {
             type: 'success',
             finished: false,
-            output: exists
-                ? `File ${args.path} is deleted.`
-                : `You're deleting a non-existent file ${args.path}, this action take no effect, please continue your task.`,
+            executionData: {path: args.path},
+            template: exists
+                ? 'File {{path}} is deleted.'
+                : 'You\'re deleting a non-existent file {{path}}, this action take no effect, please continue your task.',
         };
     }
 

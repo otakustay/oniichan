@@ -1,7 +1,7 @@
+import dedent from 'dedent';
 import type {RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
@@ -27,7 +27,9 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot execute a command since we don\t have a working directory.',
+                    executionData: {},
+                    template:
+                        'No open workspace, you cannot execute a command since we don\'t have a working directory.',
                 };
             }
 
@@ -42,29 +44,40 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                     return {
                         type: 'success',
                         finished: false,
-                        output: result.output
-                            ? resultMarkdown(`Command executed, here is its output:`, result.output, 'shell')
-                            : `Command exited without any output`,
+                        executionData: {output: result.output},
+                        template: result.output
+                            ? dedent`
+                                Command executed, here is its output:
+
+                                \`\`\`shell
+                                {{output}}
+                                \`\`\`
+                            `
+                            : 'Command exited without any output',
                     };
                 case 'timeout':
                     this.logger.trace('RunCommandTimeout');
                     return {
                         type: 'success',
                         finished: false,
-                        output: result.output
-                            ? 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work.'
-                            : resultMarkdown(
-                                'This command is still running, here is its output so far:',
-                                result.output,
-                                'shell'
-                            ),
+                        executionData: {output: result.output},
+                        template: result.output
+                            ? dedent`
+                                This command is still running, here is its output so far:
+
+                                \`\`\`shell
+                                {{output}}
+                                \`\`\`
+                            `
+                            : 'This command is still running, it can be a long running session such as a dev server, unfortunately we can\'t retrieve any command output at this time, please continue your work.',
                     };
                 case 'noShellIntegration':
                     this.logger.trace('RunCommandNoShellIntegration');
                     return {
                         type: 'success',
                         finished: false,
-                        output:
+                        executionData: {},
+                        template:
                             'We have already start this command in terminal, unfortunately we are not able to determine whether its finished, and we cannot retrieve any command output at this time, please continue your work.',
                     };
                 case 'longRunning':
@@ -72,12 +85,15 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
                     return {
                         type: 'success',
                         finished: false,
+                        executionData: {output: result.output},
                         // It's quite impossible that a long running command has no output
-                        output: resultMarkdown(
-                            'This command is a long running one such as a dev server, this means it will not exit in forseeable future, here is its output so far:',
-                            result.output,
-                            'shell'
-                        ),
+                        template: dedent`
+                            This command is a long running one such as a dev server, this means it will not exit in forseeable future, here is its output so far:
+
+                            \`\`\`shell
+                            {{output}}
+                            \`\`\`
+                        `,
                     };
                 default:
                     assertNever<string>(result.status, v => `Unknown terminal run status ${v}`);
@@ -86,8 +102,10 @@ export class RunCommandToolImplement extends ToolImplementBase<RunCommandParamet
         catch (ex) {
             this.logger.error('RunCommandError', {command: args.command, reason: stringifyError(ex)});
             return {
-                type: 'executeError',
-                output: `Unable to execute command \`${args.command}\`: ${stringifyError(ex)}`,
+                type: 'error',
+                finished: false,
+                executionData: {command: args.command, message: stringifyError(ex)},
+                template: 'Unable to execute command `{{command}}`: {{message}}.',
             };
         }
     }

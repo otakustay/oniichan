@@ -14,3 +14,7 @@ export function countNounSimple(count: number, noun: string) {
 export function ensureString(value: string | string[] | undefined) {
     return value === undefined ? '' : (typeof value === 'string' ? value : value.join(''));
 }
+
+export function formatStringTemplate(template: string, data: Record<string, string | number | null>) {
+    return template.replaceAll(/{{([^}]+)}}/g, (match: string, key: string) => data[key]?.toString() ?? '');
+}

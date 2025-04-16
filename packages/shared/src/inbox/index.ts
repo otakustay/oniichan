@@ -18,6 +18,7 @@ export type {
     MessageViewType,
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
+    ToolUseResultType,
 } from './message';
 export {
     assertTaggedChunk,

@@ -4,7 +4,7 @@ import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, PatchAction} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
-import type {ParsedToolCallMessageChunkOf, RawToolCallParameter} from '@oniichan/shared/inbox';
+import type {ParsedToolCallMessageChunkOf, RawToolCallParameter, ToolUseResultType} from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
 import type {CommandExecutor} from '../../../core/command';
 import type {EditorHost} from '../../../core/editor';
@@ -20,18 +20,12 @@ export interface ToolImplementInit {
     inboxConfig: InboxConfig;
 }
 
-export interface Success {
-    type: 'success';
+export interface ToolExecuteResult {
+    type: ToolUseResultType;
     finished: boolean;
-    output: string;
+    template: string;
+    executionData: Record<string, string | number | null>;
 }
-
-export interface ExecuteError {
-    type: 'executeError';
-    output: string;
-}
-
-export type ToolExecuteResult = Success | ExecuteError;
 
 export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
     protected readonly thread: InboxMessageThread;

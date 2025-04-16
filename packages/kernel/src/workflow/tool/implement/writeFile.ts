@@ -12,14 +12,17 @@ export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter
 
         return fileEdit.type === 'error'
             ? {
-                type: 'executeError',
-                output: `Write file ${args.path} failed for this reason: ${fileEdit.message}`,
+                type: 'error',
+                finished: false,
+                executionData: {path: args.path, message: fileEdit.message},
+                template: 'Write file {{path}} failed for this reason: {{message}}.',
             }
             : {
                 type: 'success',
                 finished: false,
-                output:
-                    `File is written to ${args.path}, you can trust the file content, it's not neccessary to read this file again`,
+                executionData: {path: args.path},
+                template:
+                    'File is written to {{path}}, you can trust the file content, it\'s not neccessary to read this file again.',
             };
     }
 

@@ -1,9 +1,9 @@
 import path from 'node:path';
+import dedent from 'dedent';
 import type {ReadDirectoryParameter} from '@oniichan/shared/tool';
 import type {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {resultMarkdown} from '../utils';
 import {ToolImplementBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
@@ -17,7 +17,8 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return {
                     type: 'success',
                     finished: false,
-                    output: 'No open workspace, you cannot read any file or directory now.',
+                    executionData: {},
+                    template: 'No open workspace, you cannot read any file or directory now.',
                 };
             }
 
@@ -33,7 +34,8 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
                 return {
                     type: 'success',
                     finished: false,
-                    output: `There are no files in directory ${args.path}.`,
+                    executionData: {path: args.path},
+                    template: 'There are no files in directory {{path}}.',
                 };
             }
 
@@ -56,16 +58,22 @@ export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryP
             return {
                 type: 'success',
                 finished: false,
-                output: resultMarkdown(
-                    `Files in directory ${args.path}, directories are followed by \`/\`, once you need to read a child file or directory, do remember to prefix the path with current parent \`${args.path}\`:`,
-                    tree.join('\n')
-                ),
+                executionData: {path: args.path, tree: tree.join('\n')},
+                template: dedent`
+                    Files in directory {{path}}, directories are followed by \`/\`, once you need to read a child file or directory, do remember to prefix the path with current parent \`{{path}}\`:
+
+                    \`\`\`
+                    {{tree}}
+                    \`\`\`
+                `,
             };
         }
         catch (ex) {
             return {
-                type: 'executeError',
-                output: `Unable to read directory ${args.path}: ${stringifyError(ex)}`,
+                type: 'error',
+                finished: false,
+                executionData: {message: stringifyError(ex)},
+                template: 'Unable to read directory {{path}}: {{message}}.',
             };
         }
     }

@@ -64,9 +64,13 @@ export interface ToolCallMessageData extends MessageDataBase {
     chunks: ToolCallMessageContentChunk[];
 }
 
+export type ToolUseResultType = 'success' | 'error' | 'rejected';
+
 export interface ToolUseMessageData extends MessageDataBase {
     type: 'toolUse';
-    content: string;
+    result: ToolUseResultType;
+    template: string;
+    executionData: Record<string, string | number | null>;
 }
 
 export type AssistantMessageData = AssistantTextMessageData | ToolCallMessageData;
