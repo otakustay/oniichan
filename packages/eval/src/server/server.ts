@@ -1,12 +1,7 @@
 import {Server} from '@otakustay/ipc';
-import type {DependencyContainer} from '@oniichan/shared/container';
-import {Logger} from '@oniichan/shared/logger';
-import {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import {LoadingManager} from '../ui/loading';
-import {DiffViewManager} from '../ui/diff';
-import {ResourceManager} from '../utils/resource';
-import {TerminalManager} from '../utils/terminal';
-import type {Context} from './interface';
+import type {Logger} from '@oniichan/shared/logger';
+import type {EditorHostProtocol} from '@oniichan/editor-host/protocol';
+import type {Context, EvalConfig} from './interface';
 import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
@@ -15,7 +10,6 @@ import {
 } from './handlers/document';
 import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
 import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
-import type {EditorHostProtocol} from './protocol';
 import {
     DeleteWorkspaceFileHandler,
     FindFilesHandler,
@@ -28,37 +22,28 @@ import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler}
 import {ExecuteTerminalHandler} from './handlers/terminal';
 import {OpenUrlHandler} from './handlers/external';
 
-export interface EditorHostDependency {
-    [LoadingManager.containerKey]: LoadingManager;
-    [Logger.containerKey]: Logger;
-    [DiffViewManager.containerKey]: DiffViewManager;
-    [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
-    [ResourceManager.containerKey]: ResourceManager;
+export interface EvalEditorHostInit {
+    cwd: string;
+    logger: Logger;
+    config: EvalConfig;
 }
 
-export class EditorHostServer extends Server<EditorHostProtocol, Context> {
+export class EvalEditorHostServer extends Server<EditorHostProtocol, Context> {
     static readonly containerKey = 'EditorHostServer';
 
     static readonly namespace = '-> host';
 
-    private readonly container: DependencyContainer<EditorHostDependency>;
-
-    private readonly resourceManager;
-
-    private readonly terminalManager;
+    private readonly cwd: string;
 
     private readonly logger: Logger;
 
-    constructor(container: DependencyContainer<EditorHostDependency>) {
-        super({namespace: EditorHostServer.namespace});
-        this.container = container;
-        this.resourceManager = new ResourceManager(container);
-        this.terminalManager = new TerminalManager(container);
-        this.logger = this.container.get(Logger).with({source: 'EditorHostServer'});
+    private readonly config: EvalConfig;
 
-        const globalResourceManager = this.container.get(ResourceManager);
-        globalResourceManager.addResource(this.resourceManager);
-        globalResourceManager.addResource(this.terminalManager);
+    constructor(init: EvalEditorHostInit) {
+        super({namespace: EvalEditorHostServer.namespace});
+        this.cwd = init.cwd;
+        this.logger = init.logger.with({source: 'EvalEditorHostServer'});
+        this.config = init.config;
     }
 
     protected initializeHandlers() {
@@ -88,12 +73,9 @@ export class EditorHostServer extends Server<EditorHostProtocol, Context> {
 
     protected async createContext() {
         return {
-            loadingManager: this.container.get(LoadingManager),
-            diffViewManager: this.container.get(DiffViewManager),
-            workspaceStructure: this.container.get(WorkspaceFileStructure),
+            cwd: this.cwd,
             logger: this.logger,
-            resourceManager: this.resourceManager,
-            terminalManager: this.terminalManager,
+            config: this.config,
         };
     }
 }

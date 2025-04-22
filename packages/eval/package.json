@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "@oniichan/eval",
+  "version": "3.6.0",
+  "description": "Shared elements without any platform dependencies",
+  "scripts": {
+    "lint": "eslint --max-warnings=0 --fix src"
+  },
+  "dependencies": {
+    "@oniichan/kernel": "workspace:*",
+    "@oniichan/shared": "workspace:*",
+    "@otakustay/ipc": "^2.5.0",
+    "globby": "^14.1.0"
+  },
+  "devDependencies": {
+    "@oniichan/editor-host": "workspace:*",
+    "@types/node": "20.x",
+    "@vscode/ripgrep": "^1.15.11"
+  }
+}

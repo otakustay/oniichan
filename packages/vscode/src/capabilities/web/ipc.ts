@@ -1,12 +1,12 @@
-import type {ExtensionContext} from 'vscode';
-import { RequestHandler, Server} from '@otakustay/ipc';
-import type {ExecutionRequest, Port, ServerInit,Client} from '@otakustay/ipc';
+import {RequestHandler, Server} from '@otakustay/ipc';
+import type {ExecutionRequest, Port, ServerInit, Client} from '@otakustay/ipc';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {EditorHostServer} from '@oniichan/editor-host/server';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {Logger} from '@oniichan/shared/logger';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
+import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import {KernelClient} from '../../kernel';
 import type {WebConnection} from './connection';
 
@@ -52,13 +52,13 @@ class BridgeServer<P extends Record<keyof P, () => AsyncIterable<any>>> extends 
 }
 
 interface Dependency {
-    [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
-    [WebConnection.containerKey]: WebConnection;
     [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
-    ExtensionContext: ExtensionContext;
+    [ResourceManager.containerKey]: ResourceManager;
+    [KernelClient.containerKey]: KernelClient;
+    [WebConnection.containerKey]: WebConnection;
     Port: Port;
 }
 

@@ -2,16 +2,18 @@ import type {Disposable} from 'vscode';
 import {Logger} from '@oniichan/shared/logger';
 import type {DependencyContainer} from '@oniichan/shared/container';
 
-interface Dependency {
+export interface ResourceManagerDependency {
     [Logger.containerKey]: Logger;
 }
 
 export class ResourceManager implements Disposable {
+    static readonly containerKey: 'ResourceManager';
+
     private readonly resources = new Set<Disposable>();
 
     private readonly logger: Logger;
 
-    constructor(container: DependencyContainer<Dependency>) {
+    constructor(container: DependencyContainer<ResourceManagerDependency>) {
         this.logger = container.get(Logger).with({source: 'ResourceManager'});
     }
 

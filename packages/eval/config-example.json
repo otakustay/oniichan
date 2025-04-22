@@ -1,0 +1,7 @@
+{
+  "apiKey": "<OPEN ROUTER API KEY>",
+  "defaultModel": "anthropic/claude-3.5-sonnet",
+  "plannerModel": "deepseek/deepseek-r1",
+  "actorModel": "deepseek/deepseek-chat-v3-0324",
+  "coderModel": "anthropic/claude-3.5-sonnet"
+}

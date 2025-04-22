@@ -9,6 +9,7 @@ import {Logger} from '@oniichan/shared/logger';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 import {WebHostClient} from '@oniichan/web-host/client';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import {newUuid} from '@oniichan/shared/id';
 import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
@@ -63,12 +64,13 @@ class WebviewPort implements Port, Disposable {
 const OPEN_WEB_APP_COMMAND = 'oniichan.openWebAppInExternalBrowser';
 
 interface Dependency {
-    [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
-    [WebConnection.containerKey]: WebConnection;
     [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
+    [ResourceManager.containerKey]: ResourceManager;
+    [WebConnection.containerKey]: WebConnection;
+    [KernelClient.containerKey]: KernelClient;
     ExtensionContext: ExtensionContext;
 }
 

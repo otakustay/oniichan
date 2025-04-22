@@ -27,9 +27,10 @@ import type {OpenUrlHandler} from './handlers/external';
 export type {DocumentLine, LineDiagnostic} from './handlers/document';
 export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
 export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
-export type {AppliableState} from './handlers/diff';
+export type {AppliableState, AcceptFileEditRequest} from './handlers/diff';
 export type {InboxConfig} from './handlers/config';
 export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
+export type {ExecuteStatus} from '../utils/terminal';
 
 export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler

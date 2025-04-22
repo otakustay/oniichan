@@ -1,5 +1,4 @@
 import EventEmitter from 'node:events';
-import type {ExtensionContext} from 'vscode';
 import fastify from 'fastify';
 import type {FastifyInstance} from 'fastify';
 import webSocket from '@fastify/websocket';
@@ -12,6 +11,7 @@ import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {stringifyError} from '@oniichan/shared/error';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
+import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import type {Logger} from '@oniichan/shared/logger';
 import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
@@ -58,13 +58,13 @@ export interface ServerInit {
 }
 
 interface Dependency {
-    [KernelClient.containerKey]: KernelClient;
     [LoadingManager.containerKey]: LoadingManager;
     [Logger.containerKey]: Logger;
     [DiffViewManager.containerKey]: DiffViewManager;
-    [WebConnection.containerKey]: WebConnection;
     [WorkspaceFileStructure.containerKey]: WorkspaceFileStructure;
-    ExtensionContext: ExtensionContext;
+    [ResourceManager.containerKey]: ResourceManager;
+    [KernelClient.containerKey]: KernelClient;
+    [WebConnection.containerKey]: WebConnection;
 }
 
 export class WebAppServer extends EventEmitter<ServerEventMap> {

@@ -1,10 +1,12 @@
-import type {ExtensionContext} from 'vscode';
+import type {Disposable, ExtensionContext} from 'vscode';
 import {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
+import {ResourceManager} from '@oniichan/editor-host/utils/resource';
+import type {ResourceManagerDependency} from '@oniichan/editor-host/utils/resource';
 import {ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug';
 import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
 import {ScaffoldCommand} from './capabilities/scaffold';
@@ -15,6 +17,30 @@ import {InitializeProjectConfigCommand, OmdCompletion} from './capabilities/conf
 import {SuperComment} from './capabilities/superComment';
 import {startKernel} from './kernel';
 import {migrate} from './migration';
+
+class VscodeExtensionResourceManager extends ResourceManager {
+    private readonly extensionContext: ExtensionContext;
+
+    constructor(container: DependencyContainer<ResourceManagerDependency>, extensionContext: ExtensionContext) {
+        super(container);
+        this.extensionContext = extensionContext;
+    }
+
+    addResource(resource: Disposable): void {
+        this.extensionContext.subscriptions.push(resource);
+    }
+
+    removeResource(resource: Disposable): void {
+        const index = this.extensionContext.subscriptions.indexOf(resource);
+
+        if (index >= 0) {
+            this.extensionContext.subscriptions.splice(index, 1);
+        }
+    }
+
+    dispose(): void {
+    }
+}
 
 export async function activate(context: ExtensionContext) {
     void migrate();
@@ -29,6 +55,7 @@ export async function activate(context: ExtensionContext) {
         .bind(WebConnection, () => new WebConnection(loggerContainer), {singleton: true})
         .bind(LoadingManager, () => new LoadingManager(), {singleton: true})
         .bind(DiffViewManager, () => new DiffViewManager(loggerContainer), {singleton: true})
+        .bind(ResourceManager, () => new VscodeExtensionResourceManager(loggerContainer, context), {singleton: true})
         .bind('ExtensionContext', () => context, {singleton: true});
     const workspaceTracker = new WorkspaceTracker(serverHostContainer);
     const kernel = await startKernel(serverHostContainer);

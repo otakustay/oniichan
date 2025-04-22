@@ -2,7 +2,7 @@ import path from 'node:path';
 import {existsSync} from 'node:fs';
 import {Worker} from 'node:worker_threads';
 import type {Disposable} from 'vscode';
-import { env, window} from 'vscode';
+import {env, window} from 'vscode';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, ExecutionNotice, Port} from '@otakustay/ipc';
 import {KernelClient as BaseKernelClient} from '@oniichan/kernel/client';
