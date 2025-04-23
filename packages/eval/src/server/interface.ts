@@ -6,6 +6,7 @@ export interface EvalConfig {
     plannerModel: string;
     actorModel: string;
     coderModel: string;
+    evalDirectory: string;
 }
 
 export interface Context {
