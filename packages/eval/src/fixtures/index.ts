@@ -13,5 +13,19 @@ export const fixtures: FixtureConfig[] = [
         query: {
             text: '删除debounce函数',
         },
+        tests: [
+            {
+                name: 'git-diff',
+                minScore: 10,
+                type: 'git',
+                files: [
+                    {type: 'delete', path: 'src/helper/operators/debounce.ts', score: 5},
+                    {type: 'delete', path: 'src/helper/operators/__tests__/debounce.test.ts', score: 5},
+                    {type: 'modify', path: 'src/helper/index.ts', score: 1},
+                    {type: 'modify', path: 'src/helper/__tests__/index.test.ts', score: 1},
+                    {type: 'modify', path: 'README.md', score: 1},
+                ],
+            },
+        ],
     },
 ];

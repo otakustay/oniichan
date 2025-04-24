@@ -11,7 +11,8 @@
     "@oniichan/shared": "workspace:*",
     "@otakustay/ipc": "^2.5.0",
     "execa": "^9.5.2",
-    "globby": "^14.1.0"
+    "globby": "^14.1.0",
+    "ora": "^8.2.0"
   },
   "devDependencies": {
     "@oniichan/editor-host": "workspace:*",
