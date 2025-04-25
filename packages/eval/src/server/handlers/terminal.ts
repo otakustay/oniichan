@@ -8,17 +8,24 @@ export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalReques
 
     private process: ChildProcess | null = null;
 
+    private timeoutTick: NodeJS.Timeout | null = null;
+
     private output: string[] = [];
 
     async *handleRequest(payload: ExecuteTerminalRequest): AsyncIterable<ExecuteTerminalResponse> {
         const {cwd} = this.context;
 
         const tasks = [this.executeCommand(payload.command, payload.cwd ?? cwd), this.reportTimeout(payload.timeout)];
-        const status = await Promise.race(tasks);
-        yield {
-            status,
-            output: this.output.join(''),
-        };
+        try {
+            const status = await Promise.race(tasks);
+            yield {
+                status,
+                output: this.output.join(''),
+            };
+        }
+        finally {
+            this.cleanup();
+        }
     }
 
     private async executeCommand(command: string, cwd: string): Promise<ExecuteStatus> {
@@ -31,12 +38,14 @@ export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalReques
 
                 this.process.stdout?.on('data', (v: string | Buffer) => this.output.push(v.toString()));
                 this.process.stderr?.on('data', (v: string | Buffer) => this.output.push(v.toString()));
-                this.process.on('close', () => this.kill());
-                this.process.on('exit', () => this.kill());
-                this.process.on('error', () => this.kill());
+                const exit = () => {
+                    resolve('exit');
+                };
+                this.process.on('close', exit);
+                this.process.on('exit', exit);
+                this.process.on('error', exit);
             }
             catch {
-                this.kill();
                 resolve('exit');
             }
         };
@@ -44,12 +53,16 @@ export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalReques
     }
 
     private async reportTimeout(ms: number): Promise<ExecuteStatus> {
-        await new Promise(r => setTimeout(r, ms));
-        this.kill();
+        await new Promise(r => this.timeoutTick = setTimeout(r, ms));
         return 'timeout';
     }
 
-    private kill() {
+    private cleanup() {
+        if (this.timeoutTick) {
+            clearTimeout(this.timeoutTick);
+            this.timeoutTick = null;
+        }
+
         if (this.process) {
             try {
                 this.process.kill();
