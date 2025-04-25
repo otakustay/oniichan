@@ -1,71 +1,16 @@
-import type {
-    GitDiffFile,
-    GitDiffMatcherConfig,
-    FixtureMatcherConfig,
-    FixtureMatcher,
-    FixtureMatchResult,
-} from './interface';
+import type {FixtureMatcher} from './interface';
+import {GitDiffMatcher} from './gitDiff';
+import type {GitDiffMatcherConfig} from './gitDiff';
+import type {ShellMatcherConfig} from './shell';
+import ShellMatcher from './shell';
 
-export type {FixtureMatcherConfig};
-
-class GitDiffMatcher implements FixtureMatcher {
-    private readonly cwd: string;
-
-    private readonly config: GitDiffMatcherConfig;
-
-    constructor(cwd: string, config: GitDiffMatcherConfig) {
-        this.cwd = cwd;
-        this.config = config;
-    }
-
-    async runMatch(): Promise<FixtureMatchResult> {
-        const {execa} = await import('execa');
-        await execa('git', ['add', '.'], {cwd: this.cwd});
-
-        const result: FixtureMatchResult = {
-            totalScore: 0,
-            score: 0,
-            items: [],
-        };
-        const files = await this.getDiffStatus();
-        for (const target of this.config.files) {
-            result.totalScore += target.score;
-            const actual = files.find(v => v.path === target.path);
-            const pass = actual?.type === target.type;
-            result.score += pass ? target.score : 0;
-            result.items.push({pass, description: `${target.type} ${target.path}`});
-        }
-        return result;
-    }
-
-    private async getDiffStatus() {
-        const {execa} = await import('execa');
-        const {stdout: text} = await execa('git', ['status', '--short'], {cwd: this.cwd});
-        const files: GitDiffFile[] = [];
-        for (const line of text.trim().split('\n')) {
-            const status = line.charAt(0);
-            const path = line.slice(3);
-            files.push({type: this.shortStatusToDiffType(status), path, score: 0});
-        }
-        return files;
-    }
-
-    private shortStatusToDiffType(status: string): GitDiffFile['type'] {
-        switch (status) {
-            case 'M':
-                return 'modify';
-            case 'A':
-                return 'add';
-            case 'D':
-                return 'delete';
-            case 'R':
-                return 'rename';
-            default:
-                return 'unknown';
-        }
-    }
-}
+export type FixtureMatcherConfig = GitDiffMatcherConfig | ShellMatcherConfig;
 
 export function createFixtureMatcher(cwd: string, config: FixtureMatcherConfig): FixtureMatcher {
-    return new GitDiffMatcher(cwd, config);
+    switch (config.type) {
+        case 'git':
+            return new GitDiffMatcher(cwd, config);
+        case 'shell':
+            return new ShellMatcher(cwd, config);
+    }
 }

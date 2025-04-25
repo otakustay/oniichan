@@ -1,68 +1,16 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import {existsSync} from 'node:fs';
-import type {EvalSourceConfig, GitHubEvalSourceConfig} from './interface';
+import type {FixtureSource} from './interface';
+import {GitHubFixtureSource} from './github';
+import type {GitHubFixtureSourceConfig} from './github';
+import {ZipFixtureSource} from './zip';
+import type {ZipFixtureSourceConfig} from './zip';
 
-export type {EvalSourceConfig};
+export type FixtureSourceConfig = GitHubFixtureSourceConfig | ZipFixtureSourceConfig;
 
-class GitHubEvalSource {
-    private source: GitHubEvalSourceConfig;
-
-    constructor(source: GitHubEvalSourceConfig) {
-        this.source = source;
+export function createFixtureSource(source: FixtureSourceConfig): FixtureSource {
+    switch (source.type) {
+        case 'github':
+            return new GitHubFixtureSource(source);
+        case 'zip':
+            return new ZipFixtureSource(source);
     }
-
-    async setup(fixtureName: string, parentDirectory: string) {
-        const targetDirectory = path.join(parentDirectory, fixtureName);
-
-        if (existsSync(targetDirectory)) {
-            const ready = await this.setupExists(targetDirectory);
-            if (ready) {
-                return targetDirectory;
-            }
-        }
-
-        await fs.rm(targetDirectory, {recursive: true, force: true});
-        await this.setupEmpty(targetDirectory);
-
-        return targetDirectory;
-    }
-
-    private async setupExists(targetDirectory: string) {
-        const {execa} = await import('execa');
-        const {stdout: originUrl} = await execa(
-            'git',
-            ['remote', 'get-url', 'origin'],
-            {cwd: targetDirectory}
-        );
-
-        if (originUrl.trim() !== this.source.repo) {
-            return false;
-        }
-
-        await execa('git', ['reset'], {cwd: targetDirectory});
-        await execa('git', ['checkout', '.'], {cwd: targetDirectory});
-        await execa('git', ['clean', '-fd'], {cwd: targetDirectory});
-        try {
-            await execa('git', ['checkout', this.source.commit], {cwd: targetDirectory});
-        }
-        catch {
-            await execa('git', ['fetch', '--depth=1', 'origin', this.source.commit], {cwd: targetDirectory});
-            await execa('git', ['checkout', 'FETCH_HEAD'], {cwd: targetDirectory});
-        }
-        return true;
-    }
-
-    private async setupEmpty(targetDirectory: string) {
-        const {execa} = await import('execa');
-        await fs.mkdir(targetDirectory, {recursive: true});
-        await execa('git', ['init'], {cwd: targetDirectory});
-        await execa('git', ['remote', 'add', 'origin', this.source.repo], {cwd: targetDirectory});
-        await execa('git', ['fetch', '--depth=1', 'origin', this.source.commit], {cwd: targetDirectory});
-        await execa('git', ['checkout', 'FETCH_HEAD'], {cwd: targetDirectory});
-    }
-}
-
-export function createFixtureSource(source: EvalSourceConfig): GitHubEvalSource {
-    return new GitHubEvalSource(source);
 }

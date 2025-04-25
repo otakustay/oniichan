@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
 import {newUuid} from '@oniichan/shared/id';
-import type {FixtureConfig} from '../fixtures';
+import type {FixtureConfig, ShellSetup} from '../fixtures';
 import type {EvalConfig} from '../server';
 import {createFixtureSource} from '../source';
 import {createFixtureMatcher} from '../matcher';
@@ -42,11 +42,18 @@ export class FixtureRunner {
         const {default: ora} = await import('ora');
         const spinner = ora({text: this.fixture.name, hideCursor: false, discardStdin: false}).start();
 
+        spinner.text = `${this.fixture.name} (fetch)`;
         const config = await this.readConfiguration();
         const source = createFixtureSource(this.fixture.source);
-        const cwd = await source.setup(this.fixture.name, config.evalDirectory);
-        const kernel = await createKernel(cwd, config);
+        const cwd = await source.fetch(this.fixture.name, config.evalDirectory);
 
+        spinner.text = `${this.fixture.name} (setup)`;
+        for (const setupItem of this.fixture.setup ?? []) {
+            await this.runSetupScript(cwd, setupItem);
+        }
+
+        spinner.text = this.fixture.name;
+        const kernel = await createKernel(cwd, config);
         const state = {
             messages: new Set<string>(),
         };
@@ -68,6 +75,24 @@ export class FixtureRunner {
         }
         spinner.succeed(`${this.fixture.name} (${state.messages.size} messages)`);
         return cwd;
+    }
+
+    private async runSetupScript(cwd: string, item: string | string[] | ShellSetup) {
+        const {execa} = await import('execa');
+        if (typeof item === 'string') {
+            await execa(item, {cwd});
+        }
+        else if (Array.isArray(item)) {
+            const [command, ...args] = item;
+            await execa(command, args, {cwd});
+        }
+        else if (item.type === 'shell') {
+            const script = Array.isArray(item.script) ? item.script.join('\n') : item.script;
+            await execa(script, {cwd, shell: true});
+        }
+        else {
+            throw new Error(`Unknown setup type ${item.type}`);
+        }
     }
 
     private async runMatch(cwd: string, config: FixtureMatcherConfig) {

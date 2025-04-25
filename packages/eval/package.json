@@ -10,12 +10,14 @@
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
     "@otakustay/ipc": "^2.5.0",
+    "decompress": "^4.2.1",
     "execa": "^9.5.2",
     "globby": "^14.1.0",
     "ora": "^8.2.0"
   },
   "devDependencies": {
     "@oniichan/editor-host": "workspace:*",
+    "@types/decompress": "^4.2.7",
     "@types/node": "20.x",
     "@vscode/ripgrep": "^1.15.11"
   }
