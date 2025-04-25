@@ -8,6 +8,7 @@ import {createFixtureSource} from '../source';
 import {createFixtureMatcher} from '../matcher';
 import type {FixtureMatcherConfig} from '../matcher';
 import {createKernel} from './kernel';
+import {consumeChunkStream} from './utils';
 
 interface UserConfig extends Omit<EvalConfig, 'evalDirectory'> {
     evalDirectory: string;
@@ -54,9 +55,6 @@ export class FixtureRunner {
 
         spinner.text = this.fixture.name;
         const kernel = await createKernel(cwd, config);
-        const state = {
-            messages: new Set<string>(),
-        };
         const input: InboxSendMessageRequest = {
             threadUuid: newUuid(),
             uuid: newUuid(),
@@ -66,14 +64,22 @@ export class FixtureRunner {
                 content: this.fixture.query.text,
             },
         };
-        for await (const chunk of kernel.callStreaming(newUuid(), 'inboxSendMessage', input)) {
-            state.messages.add(chunk.replyUuid);
-
-            if (chunk.value.type === 'toolStart') {
-                spinner.text = `${this.fixture.name} (${chunk.value.toolName})`;
+        const chunkStream = kernel.callStreaming(newUuid(), 'inboxSendMessage', input);
+        for await (const {status, label} of consumeChunkStream(chunkStream)) {
+            const text = `${this.fixture.name} (${label})`;
+            switch (status) {
+                case 'spinning':
+                    spinner.text = text;
+                    break;
+                case 'success':
+                    spinner.succeed(text);
+                    break;
+                case 'fail':
+                    spinner.fail(text);
+                    break;
             }
         }
-        spinner.succeed(`${this.fixture.name} (${state.messages.size} messages)`);
+
         return cwd;
     }
 

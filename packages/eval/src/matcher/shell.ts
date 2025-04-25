@@ -51,6 +51,6 @@ export default class ShellMatcher implements FixtureMatcher {
     }
 
     private itemLabel(item: ShellMatchItem): string {
-        return item.text.length > 20 ? `${item.text.slice(0, 20)}...` : item.text;
+        return item.text.length > 40 ? `${item.text.slice(0, 40)}...` : item.text;
     }
 }
