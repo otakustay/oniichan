@@ -119,7 +119,7 @@ export class FixtureRunner {
             const input: InboxSendMessageRequest = {
                 threadUuid: newUuid(),
                 uuid: newUuid(),
-                workingMode: 'normal',
+                workingMode: this.config.mode,
                 body: {
                     type: 'text',
                     content: this.fixture.query.text,

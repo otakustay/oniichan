@@ -1,7 +1,9 @@
+import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import type {Logger} from '@oniichan/shared/logger';
 
 export interface EvalConfig {
     apiKey: string;
+    mode: MessageThreadWorkingMode;
     defaultModel: string;
     plannerModel: string;
     actorModel: string;
