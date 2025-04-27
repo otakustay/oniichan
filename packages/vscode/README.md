@@ -1,51 +1,51 @@
 # Oniichan Coding Assistant
 
-Oniichan (おにいちゃん，欧尼酱)是我个人完全按照自己的喜好开发的一款VSCode插件，我试图将我在使用大模型辅助开发领域的创意实现在插件中。
+Oniichan (おにいちゃん, 欧尼酱) is a very optionated coding assistant. I attempted to implement my creative ideas in the field of using large models to assist development within this plugin.
 
-本插件不打算提供代码续写之类的基础功能，这是一个其它AI编码插件的补充，而不是替代。对于续写、普通对话等功能有需求的，可以使[文心快码Comate](https://comate.baidu.com/)。
+This plugin is not intended to provide basic features like code completion. It is a supplement to other AI coding plugins, not a replacement. For needs such as code completion and regular chat, you can use [Baidu Comate](https://comate.baidu.com/).
 
-本插件的所有交互、功能都彻底地受我个人偏好控制，如果你有好的想法，我们可以一起讨论，但本作绝非商业化产品，也绝非追求更多用户的产物。
+All features and UX of this plugin are thoroughly controlled by my personal preferences. If you have good ideas, we can discuss them together, but this work is by no means a commercial product, nor is it aimed at attracting more users.
 
-本插件当前仅运行于本地，不会向网络发送任务数据。但**出于对生成质量的规划，后续会有采集部分数据用于模型训练的可能性**，但可以保证数据采集默认不会开启，开启时一定会有足够的提示与确认。
+Currently, this plugin only runs locally and will not send any telemetry data over the network. However, **for planning the quality of generation, there may be a possibility of collecting some data for model training in the future**, but it can be guaranteed that data collection will not be enabled by default, and there will be sufficient prompts and confirmations when it is enabled.
 
-话说回来，谁不爱写代码的时候有个可靠的欧尼酱陪着你呢。
+Speaking of which, who wouldn't love having a reliable Oniichan by their side while coding?
 
 ![Oniichan](https://raw.githubusercontent.com/otakustay/oniichan/master/assets/cover-character.jpg)
 
-## 配置
+## Configuration
 
-Oniichan使用大模型进行代码生成，使用[OpenRouter](https://openrouter.ai)服务。
+Oniichan uses large models for code generation and utilizes the [OpenRouter](https://openrouter.ai) service.
 
-在配置项中，你可以搜索`oniichan.model`并填入相关的配置，包括API Key和模型名称。
+In the configuration options, you can search for `oniichan.model` and fill in the relevant settings, including the API Key and model name.
 
-更多细节请参考[安装配置文档](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE)。
+For more details, please refer to the [installation configuration documentation](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE).
 
-## 功能
+## Features
 
-### 语义化改写
+### Semantic Rewrite
 
-语义化改写可以使你在代码中以非常简单、凌乱的文本表达自己的诉求，并通过大模型帮你改写成符合语义规范的代码（视频中我使用快捷键触发了改写）。
+Semantic rewrite allows you to express your intentions in code using very simple and messy text and have them rewritten into semantically correct code by LLM (in the video, I triggered the rewrite using a shortcut key).
 
 ![Semantic rewrite demo](https://raw.githubusercontent.com/otakustay/oniichan/master/assets/semantic-rewrite-styled.gif)
 
-从视频中你可以看到，只要能大致讲明白要什么样的CSS，语义化改写就能很快地帮你转换代码，在运行过程中你甚至可以继续去写其它的代码。
+As shown in the video, as long as you can roughly describe the kind of CSS you want, semantic rewrite can quickly help you convert the code. During the process, you can even continue writing other code.
 
-更多使用方法及相关配置请参考[语义化改写文档](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99)。
+For more usage and related configurations, please refer to the [semantic rewrite documentation](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99).
 
-### 骨架代码生成
+### Scaffold Code Generation
 
-参考周边文件的代码结构，生成一个新文件的`import`部分代码、各种类、函数、方法定义等，使你快速进入业务逻辑的开发。
+Referring to the code structure of surrounding files, generate the `import` section, declaration of classes, function, and method for a new file, allowing you to quickly dive into business logic development.
 
 ![Scaffold demo](https://raw.githubusercontent.com/otakustay/oniichan/master/assets/scaffold.gif)
 
-非常节制地只生成模块导入、方法定义，而不会擅自填写低准确率的具体的实现代码。
+It generates only module imports and method definitions, and does not arbitrarily fill in specific implementation code.
 
-更多使用方法及相关配置请参考[骨架代码生成文档](https://github.com/otakustay/oniichan/wiki/%E9%AA%A8%E6%9E%B6%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90)。
+For more usage and related configurations, please refer to the [scaffold code generation documentation](https://github.com/otakustay/oniichan/wiki/%E9%AA%A8%E6%9E%B6%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90).
 
-### 邮件系统
+### Inbox System
 
-一个以邮件收发为交互形态的大模型对话助手，可以让你在第一现场调用大模型。支持在侧边栏或更大的浏览器中打开。
+A LLM agentic assistant in the form of email interaction, allowing you to invoke LLM on the spot. It can be opened in the sidebar or in a larger browser.
 
 ![Mail system demo](https://raw.githubusercontent.com/otakustay/oniichan/master/assets/mail-system.gif)
 
-使用方法参考[邮件系统文档](https://github.com/otakustay/oniichan/wiki/%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F)。
+For usage, refer to the [mail system documentation](https://github.com/otakustay/oniichan/wiki/%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F).

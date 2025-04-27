@@ -1,30 +1,32 @@
 # Oniichan Coding Assistant
 
-此处为[Oniichan Coding Assistant](https://marketplace.visualstudio.com/items?itemName=otakustay.oniichan)扩展的主仓库。
+This is the main repository for the [Oniichan Coding Assistant](https://marketplace.visualstudio.com/items?itemName=otakustay.oniichan) extension.
 
-## 项目结构
+## Project Structure
 
-- `shared`：共享用的代码，包括模型访问、工具函数、共享类型等。
-- `vscode`：VSCode扩展的源码。
-- `kernel`：包含了解耦VSCode API后的核心逻辑，它被设计为可以工作在独立的环境（线程、进程、甚至远端）中。
-- `editor-host`：将核心逻辑需要的VSCode的能力暴露给`kernel`模块。
-- `storage`：在本地持久化数据的能力，只要和持久化有关的，必须使用这里面的功能，不得自己写文件、数据库。
-- `web`：一个React应用，打完包以后通过WebSocket和服务端通信，可以通过插件打开Web页面使用。
-- `web-host`：在Web系统中暴露出来给IDE、`kernel`等调用的能力，即由外部操控页面元素的服务。
+- `shared`: Code for shared use, including model access, utility functions, shared types, etc.
+- `prompt`: Manages prompt words for all features.
+- `kernel`: Contains the core logic decoupled from the VSCode API. It is designed to work in independent environments (threads, processes, or even remotely).
+- `editor-host`: Exposes the VSCode capabilities needed by the core logic to the `kernel` module.
+- `storage`: Provides the ability to persist data locally. Anything related to persistence must use the functions here; writing files or databases directly is not allowed.
+- `web`: A React application that communicates with the server via WebSocket after being packaged. You can open a web page through the plugin to use it.
+- `web-host`: Exposes capabilities in the web system for IDE, `kernel`, etc., essentially services for externally controlling page elements.
+- `vscode`: Source code for the VSCode extension.
+- `eval`: An independent CLI that reuses the `kernel` module for automated task evaluation, equivalent to a headless version of the actual IDE plugin.
 
-> 为什么要做这么复杂的结构？
+> Why such a complex structure?
 
-这个项目不仅仅是提供我自己觉得好用的功能，同时也是一种技术方案的验证：
+This project not only provides features I find useful but also serves as a validation of a technical solution:
 
-- 如果我的`kernel`可以跑在单独的进程中，我就能实现VSCode和JetBrains等多种IDE的逻辑复用。
-- 如果不仅跑在独立进程中，还能提供CLI的调用或者监听一个HTTP端口，那么它就能被更多非IDE的应用访问。
-- 那么就有可能实现一个类似ChatGPT Desktop的应用，且不绑定只能与VSCode对接。
-- 甚至我可以让IDE和`kernel`跑在远程，再用浏览器去访问`kernel`提供的服务，在代码托管的系统上做出来一个基于代码库的通用问答机器人。
+- If my `kernel` can run in a separate process, I can achieve logic reuse across multiple IDEs like VSCode and JetBrains.
+- If it can run in an independent process and also provide CLI calls or listen to an HTTP port, it can be accessed by more non-IDE applications.
+- This could lead to the creation of an application similar to ChatGPT Desktop that is not bound to only integrate with VSCode.
+- I could even run the IDE and `kernel` remotely and use a browser to access the services provided by the `kernel`, creating a general Q&A bot based on code repositories in a code hosting system.
 
-所以，这个项目天然通过`kernel`模块让与IDE解耦的逻辑跑在单独的环境中（虽然现在依然与VSCode同进程，但可以很方便地切换），用`host`实现VSCode与`kernel`的对接（如果要对接JetBrains，实现相同的接口即可）。
+Therefore, this project naturally allows the logic decoupled from the IDE to run in a separate environment through the `kernel` module (although it currently runs in the same process as VSCode, it can be easily switched), and uses `host` to connect VSCode with `kernel` (if connecting to JetBrains, just implement the same interface).
 
-## 发布流程
+## Release Process
 
-1. 更新`packages/vscode/CHANGELOG.md`手动维护更新日志。
-2. 运行`npm run release`自动更新版本号并生成提交与标签。
-3. 在`packages/vscode`目录下执行`vsce publish --no-dependencies`发布。
+1. Update `packages/vscode/CHANGELOG.md` to manually maintain the changelog.
+2. Run `npm run release` to automatically update the version number and generate commits and tags.
+3. Execute `vsce publish --no-dependencies` in the `packages/vscode` directory to publish.
