@@ -13,12 +13,17 @@
     "decompress": "^4.2.1",
     "execa": "^9.5.2",
     "globby": "^14.1.0",
-    "ora": "^8.2.0"
+    "ora": "^8.2.0",
+    "p-limit": "^6.2.0",
+    "spinnies": "^0.5.1",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@oniichan/editor-host": "workspace:*",
     "@types/decompress": "^4.2.7",
     "@types/node": "20.x",
+    "@types/spinnies": "^0.5.3",
+    "@types/yargs": "^17.0.33",
     "@vscode/ripgrep": "^1.15.11"
   }
 }

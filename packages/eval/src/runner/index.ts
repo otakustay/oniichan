@@ -1,86 +1,126 @@
 import path from 'node:path';
-import fs from 'node:fs/promises';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
+import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
 import type {FixtureConfig, ShellSetup} from '../fixtures';
 import type {EvalConfig} from '../server';
 import {createFixtureSource} from '../source';
 import {createFixtureMatcher} from '../matcher';
-import type {FixtureMatcherConfig} from '../matcher';
+import type {FixtureMatcherConfig, FixtureMatchResult} from '../matcher';
 import {createKernel} from './kernel';
 import {consumeChunkStream} from './utils';
+import type {EvalMessage} from './utils';
+import {ConcurrentSpinner, DefaultSpinner} from './spinner';
+import type {Spinner} from './spinner';
 
-interface UserConfig extends Omit<EvalConfig, 'evalDirectory'> {
-    evalDirectory: string;
+export interface RunnerInit {
+    concurrent: boolean;
+    config: EvalConfig;
+}
+
+export interface RunnerResult {
+    fixtureName: string;
+    messages: string[];
+    result: FixtureMatchResult;
 }
 
 export class FixtureRunner {
     private readonly fixture: FixtureConfig;
 
-    constructor(fixture: FixtureConfig) {
+    private readonly verbose: boolean;
+
+    private readonly config: EvalConfig;
+
+    private readonly spinner: Spinner;
+
+    private messages: EvalMessage[] = [];
+
+    constructor(fixture: FixtureConfig, init: RunnerInit) {
         this.fixture = fixture;
+        this.verbose = !init.concurrent;
+        this.spinner = init.concurrent ? new ConcurrentSpinner(fixture.name) : new DefaultSpinner();
+        this.config = {
+            ...init.config,
+            evalDirectory: init.config.evalDirectory ?? path.resolve(__dirname, 'fixtures', 'tmp'),
+        };
     }
 
     async run() {
-        const cwd = await this.runFixture();
+        try {
+            const cwd = await this.runFixture();
 
-        for (const matcher of this.fixture.tests) {
-            await this.runMatch(cwd, matcher);
+            const matchResult = {
+                passed: 0,
+                failed: 0,
+            };
+            for (const matcher of this.fixture.tests) {
+                const result = await this.runMatch(cwd, matcher);
+                if (result.score < matcher.minScore) {
+                    matchResult.failed++;
+                }
+                else {
+                    matchResult.passed++;
+                }
+            }
+
+            if (!this.verbose) {
+                const messageCount = `${this.messages.length} messages`;
+                const failedMatches = matchResult.failed
+                    ? `${matchResult.failed}/${matchResult.failed + matchResult.passed} failed`
+                    : '';
+                await this.spinner.update(
+                    matchResult.failed ? 'fail' : 'success',
+                    `${this.fixture.name} (${[messageCount, failedMatches].filter(v => !!v).join(' ')})`
+                );
+            }
         }
-    }
-
-    private async readConfiguration(): Promise<EvalConfig> {
-        const file = path.resolve(__dirname, '..', '..', 'config.json');
-        const content = await fs.readFile(file, {encoding: 'utf-8'});
-        const userConfig = JSON.parse(content) as UserConfig;
-        return {
-            ...userConfig,
-            evalDirectory: userConfig.evalDirectory ?? path.resolve(__dirname, 'fixtures', 'tmp'),
-        };
+        catch (ex) {
+            if (!this.verbose) {
+                await this.spinner.update('fail', `${this.fixture.name} (${stringifyError(ex)})`);
+            }
+        }
     }
 
     private async runFixture() {
-        const {default: ora} = await import('ora');
-        const spinner = ora({text: this.fixture.name, hideCursor: false, discardStdin: false}).start();
+        await this.spinner.update('running', `${this.fixture.name} (fetch)`);
 
-        spinner.text = `${this.fixture.name} (fetch)`;
-        const config = await this.readConfiguration();
-        const source = createFixtureSource(this.fixture.source);
-        const cwd = await source.fetch(this.fixture.name, config.evalDirectory);
+        try {
+            const source = createFixtureSource(this.fixture.source);
+            const cwd = await source.fetch(this.fixture.name, this.config.evalDirectory);
 
-        spinner.text = `${this.fixture.name} (setup)`;
-        for (const setupItem of this.fixture.setup ?? []) {
-            await this.runSetupScript(cwd, setupItem);
-        }
-
-        spinner.text = this.fixture.name;
-        const kernel = await createKernel(cwd, config);
-        const input: InboxSendMessageRequest = {
-            threadUuid: newUuid(),
-            uuid: newUuid(),
-            workingMode: 'normal',
-            body: {
-                type: 'text',
-                content: this.fixture.query.text,
-            },
-        };
-        const chunkStream = kernel.callStreaming(newUuid(), 'inboxSendMessage', input);
-        for await (const {status, label} of consumeChunkStream(chunkStream)) {
-            const text = `${this.fixture.name} (${label})`;
-            switch (status) {
-                case 'spinning':
-                    spinner.text = text;
-                    break;
-                case 'success':
-                    spinner.succeed(text);
-                    break;
-                case 'fail':
-                    spinner.fail(text);
-                    break;
+            await this.spinner.update('running', `${this.fixture.name} (setup)`);
+            for (const setupItem of this.fixture.setup ?? []) {
+                await this.runSetupScript(cwd, setupItem);
             }
-        }
 
-        return cwd;
+            await this.spinner.update('running', this.fixture.name);
+            const kernel = await createKernel(cwd, this.config);
+            const input: InboxSendMessageRequest = {
+                threadUuid: newUuid(),
+                uuid: newUuid(),
+                workingMode: 'normal',
+                body: {
+                    type: 'text',
+                    content: this.fixture.query.text,
+                },
+            };
+            const chunkStream = kernel.callStreaming(newUuid(), 'inboxSendMessage', input);
+            for await (const {content, messages} of consumeChunkStream(chunkStream)) {
+                this.messages = messages;
+                const text = `${this.fixture.name} (${content})`;
+                await this.spinner.update('running', text);
+            }
+
+            if (this.verbose) {
+                await this.spinner.update('success', `${this.fixture.name} (${this.messages.length} messages)`);
+            }
+
+            return cwd;
+        }
+        catch (ex) {
+            await this.spinner.update('fail', `${this.fixture.name} (${stringifyError(ex)})`);
+            throw ex;
+        }
     }
 
     private async runSetupScript(cwd: string, item: string | string[] | ShellSetup) {
@@ -102,28 +142,26 @@ export class FixtureRunner {
     }
 
     private async runMatch(cwd: string, config: FixtureMatcherConfig) {
-        const {default: ora} = await import('ora');
-
-        const spinner = ora({indent: 2, text: config.name, hideCursor: false, discardStdin: false}).start();
         const matcher = createFixtureMatcher(cwd, config);
-        const result = await matcher.runMatch();
-        const output = `${config.name} ${result.score}/${result.totalScore}`;
 
-        if (result.score >= config.minScore) {
-            spinner.succeed(output);
+        if (!this.verbose) {
+            await this.spinner.update('running', `${this.fixture.name} (check ${config.name})`);
+            const result = await matcher.runMatch();
+            return result;
         }
-        else {
-            spinner.fail(output);
-        }
+
+        const matchSpinner = await this.spinner.addChild(`check ${config.name}`, config.name);
+        const result = await matcher.runMatch();
+        await matchSpinner.update(
+            result.score >= config.minScore ? 'success' : 'fail',
+            `${config.name} ${result.score}/${result.totalScore}`
+        );
 
         for (const item of result.items) {
-            const spinner = ora({indent: 4, text: item.description});
-            if (item.pass) {
-                spinner.succeed();
-            }
-            else {
-                spinner.fail();
-            }
+            const itemSpinner = await matchSpinner.addChild(item.description, item.description);
+            await itemSpinner.update(item.pass ? 'success' : 'fail', item.description);
         }
+
+        return result;
     }
 }

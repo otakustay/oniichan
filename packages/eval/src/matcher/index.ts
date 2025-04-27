@@ -4,6 +4,8 @@ import type {GitDiffMatcherConfig} from './gitDiff';
 import type {ShellMatcherConfig} from './shell';
 import ShellMatcher from './shell';
 
+export type {FixtureMatchResult} from './interface';
+
 export type FixtureMatcherConfig = GitDiffMatcherConfig | ShellMatcherConfig;
 
 export function createFixtureMatcher(cwd: string, config: FixtureMatcherConfig): FixtureMatcher {

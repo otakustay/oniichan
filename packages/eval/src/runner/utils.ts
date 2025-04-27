@@ -1,5 +1,4 @@
 import type {InboxMessageResponse} from '@oniichan/kernel/protocol';
-import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
 
@@ -48,83 +47,84 @@ function stringifyToolCallParameters(name: ToolName, parameters: Record<string, 
 }
 
 interface ChunkStreamState {
-    messages: Set<string>;
+    messages: Map<string, EvalMessage>;
     toolName: ToolName | '';
     toolParameters: Record<string, RawToolCallParameter>;
 }
 
+export interface EvalMessage {
+    uuid: string;
+    reasoning: string;
+    content: string;
+}
+
 interface ConsumeResult {
-    status: 'spinning' | 'fail' | 'success';
-    label: string;
+    messages: EvalMessage[];
+    content: string;
 }
 
 export async function* consumeChunkStream(stream: AsyncIterable<InboxMessageResponse>): AsyncIterable<ConsumeResult> {
     const state: ChunkStreamState = {
-        messages: new Set<string>(),
+        messages: new Map(),
         toolName: '',
         toolParameters: {},
     };
 
-    try {
-        for await (const chunk of stream) {
-            state.messages.add(chunk.replyUuid);
+    for await (const chunk of stream) {
+        const message = state.messages.get(chunk.replyUuid) ?? {uuid: chunk.replyUuid, reasoning: '', content: ''};
+        state.messages.set(chunk.replyUuid, message);
+        switch (chunk.value.type) {
+            case 'reasoning':
+                message.reasoning = chunk.value.content;
+                break;
+            default:
+                message.content += 'source' in chunk.value ? chunk.value.source : chunk.value.content;
+        }
 
-            if (chunk.value.type === 'toolStart') {
-                state.toolName = chunk.value.toolName;
-                state.toolParameters = {};
-                yield {status: 'spinning', label: chunk.value.toolName};
+        if (chunk.value.type === 'toolStart') {
+            state.toolName = chunk.value.toolName;
+            state.toolParameters = {};
+            yield {content: chunk.value.toolName, messages: [...state.messages.values()]};
+        }
+        else if (chunk.value.type === 'toolParameterStart' && state.toolName) {
+            const parameterName = chunk.value.parameter;
+            const parameterValue = state.toolParameters[parameterName];
+            if (parameterValue === undefined) {
+                state.toolParameters[parameterName] = '';
             }
-            else if (chunk.value.type === 'toolParameterStart' && state.toolName) {
-                const parameterName = chunk.value.parameter;
-                const parameterValue = state.toolParameters[parameterName];
-                if (parameterValue === undefined) {
-                    state.toolParameters[parameterName] = '';
-                }
-                else if (typeof parameterValue === 'string') {
-                    state.toolParameters[parameterName] = [parameterValue, ''];
-                }
-                else {
-                    parameterValue.push('');
-                }
+            else if (typeof parameterValue === 'string') {
+                state.toolParameters[parameterName] = [parameterValue, ''];
             }
-            else if (chunk.value.type === 'toolDelta' && state.toolName) {
-                for (const [key, value] of Object.entries(chunk.value.arguments)) {
-                    const parameterValue = state.toolParameters[key];
-                    if (parameterValue === undefined) {
-                        state.toolParameters[key] = value;
-                    }
-                    else if (typeof parameterValue === 'string') {
-                        state.toolParameters[key] = parameterValue + value;
-                    }
-                    else {
-                        parameterValue[parameterValue.length - 1] += value;
-                    }
-                }
-
-                const parameters = stringifyToolCallParameters(state.toolName, state.toolParameters);
-                yield {
-                    status: 'spinning',
-                    label: parameters ? `${state.toolName} ${maxLength(parameters)}` : state.toolName,
-                };
-            }
-            else if (chunk.value.type === 'toolEnd' && state.toolName) {
-                const parameters = stringifyToolCallParameters(state.toolName, state.toolParameters);
-                yield {
-                    status: 'spinning',
-                    label: parameters ? `${state.toolName} ${maxLength(parameters)}` : state.toolName,
-                };
+            else {
+                parameterValue.push('');
             }
         }
-    }
-    catch (ex) {
-        yield {
-            status: 'fail',
-            label: maxLength(stringifyError(ex)),
-        };
-    }
+        else if (chunk.value.type === 'toolDelta' && state.toolName) {
+            for (const [key, value] of Object.entries(chunk.value.arguments)) {
+                const parameterValue = state.toolParameters[key];
+                if (parameterValue === undefined) {
+                    state.toolParameters[key] = value;
+                }
+                else if (typeof parameterValue === 'string') {
+                    state.toolParameters[key] = parameterValue + value;
+                }
+                else {
+                    parameterValue[parameterValue.length - 1] += value;
+                }
+            }
 
-    yield {
-        status: 'success',
-        label: `${state.messages.size} messages`,
-    };
+            const parameters = stringifyToolCallParameters(state.toolName, state.toolParameters);
+            yield {
+                content: parameters ? `${state.toolName} ${maxLength(parameters)}` : state.toolName,
+                messages: [...state.messages.values()],
+            };
+        }
+        else if (chunk.value.type === 'toolEnd' && state.toolName) {
+            const parameters = stringifyToolCallParameters(state.toolName, state.toolParameters);
+            yield {
+                content: parameters ? `${state.toolName} ${maxLength(parameters)}` : state.toolName,
+                messages: [...state.messages.values()],
+            };
+        }
+    }
 }
