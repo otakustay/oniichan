@@ -7,6 +7,7 @@ export interface EvalConfig {
     actorModel: string;
     coderModel: string;
     evalDirectory: string;
+    reportFile: string;
 }
 
 export interface Context {

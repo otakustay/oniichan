@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises';
+import {existsSync} from 'node:fs';
 import path from 'node:path';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
 import {stringifyError} from '@oniichan/shared/error';
@@ -6,7 +8,7 @@ import type {FixtureConfig, ShellSetup} from '../fixtures';
 import type {EvalConfig} from '../server';
 import {createFixtureSource} from '../source';
 import {createFixtureMatcher} from '../matcher';
-import type {FixtureMatcherConfig, FixtureMatchResult} from '../matcher';
+import type {FixtureMatcherConfig, FixtureMatcherItem} from '../matcher';
 import {createKernel} from './kernel';
 import {consumeChunkStream} from './utils';
 import type {EvalMessage} from './utils';
@@ -18,10 +20,22 @@ export interface RunnerInit {
     config: EvalConfig;
 }
 
+interface RunnerMatchResult {
+    name: string;
+    minScore: number;
+    maxScore: number;
+    score: number;
+    items: FixtureMatcherItem[];
+}
+
 export interface RunnerResult {
     fixtureName: string;
+    matches: RunnerMatchResult[];
     messages: string[];
-    result: FixtureMatchResult;
+}
+
+function stringifyMessageContent({reasoning, content}: EvalMessage) {
+    return (reasoning ? `<think>\n${reasoning}\n</think>\n\n` : '') + content;
 }
 
 export class FixtureRunner {
@@ -49,30 +63,37 @@ export class FixtureRunner {
         try {
             const cwd = await this.runFixture();
 
-            const matchResult = {
-                passed: 0,
-                failed: 0,
-            };
+            const matches: RunnerMatchResult[] = [];
             for (const matcher of this.fixture.tests) {
                 const result = await this.runMatch(cwd, matcher);
-                if (result.score < matcher.minScore) {
-                    matchResult.failed++;
-                }
-                else {
-                    matchResult.passed++;
-                }
+                const match: RunnerMatchResult = {
+                    name: matcher.name,
+                    minScore: 0,
+                    maxScore: result.totalScore,
+                    score: result.score,
+                    items: result.items,
+                };
+                matches.push(match);
             }
 
             if (!this.verbose) {
+                const failed = matches.filter(v => v.score < v.minScore);
                 const messageCount = `${this.messages.length} messages`;
-                const failedMatches = matchResult.failed
-                    ? `${matchResult.failed}/${matchResult.failed + matchResult.passed} failed`
+                const failedMatches = failed.length
+                    ? `${failed.length}/${matches.length} failed`
                     : '';
                 await this.spinner.update(
-                    matchResult.failed ? 'fail' : 'success',
+                    failed.length ? 'fail' : 'success',
                     `${this.fixture.name} (${[messageCount, failedMatches].filter(v => !!v).join(' ')})`
                 );
             }
+
+            const result: RunnerResult = {
+                fixtureName: this.fixture.name,
+                matches,
+                messages: this.messages.map(stringifyMessageContent),
+            };
+            await this.writeReport(result);
         }
         catch (ex) {
             if (!this.verbose) {
@@ -163,5 +184,20 @@ export class FixtureRunner {
         }
 
         return result;
+    }
+
+    private async writeReport(result: RunnerResult) {
+        const current = await this.readReport();
+        current.push(result);
+        await fs.writeFile(this.config.reportFile, JSON.stringify(current, null, 2));
+    }
+
+    private async readReport(): Promise<RunnerResult[]> {
+        if (existsSync(this.config.reportFile)) {
+            const content = await fs.readFile(this.config.reportFile, 'utf8');
+            return JSON.parse(content) as RunnerResult[];
+        }
+
+        return [];
     }
 }

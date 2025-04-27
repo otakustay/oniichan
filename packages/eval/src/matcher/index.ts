@@ -4,7 +4,7 @@ import type {GitDiffMatcherConfig} from './gitDiff';
 import type {ShellMatcherConfig} from './shell';
 import ShellMatcher from './shell';
 
-export type {FixtureMatchResult} from './interface';
+export type {FixtureMatchResult, FixtureMatcherItem} from './interface';
 
 export type FixtureMatcherConfig = GitDiffMatcherConfig | ShellMatcherConfig;
 
