@@ -7,4 +7,9 @@ export {InboxCheckRollbackHandler, InboxRollbackHandler} from './rollback';
 export type {InboxCheckRollbackResponse, InboxRollbackCheckItem} from './rollback';
 export {InboxApproveToolHandler} from './approve';
 export type {InboxApproveToolRequest} from './approve';
-export type {InboxMessageIdentity, InboxMessageResponse, InboxRoundtripIdentity} from './handler';
+export type {
+    InboxMessageIdentity,
+    InboxMessageResponse,
+    InboxRoundtripIdentity,
+    InboxMessageReference,
+} from './handler';

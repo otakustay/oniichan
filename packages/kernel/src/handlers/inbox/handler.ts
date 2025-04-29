@@ -27,6 +27,11 @@ function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
         && chunk.type !== 'textInTool';
 }
 
+export interface InboxMessageReference {
+    type: 'file';
+    file: string;
+}
+
 export interface InboxMessageIdentity {
     threadUuid: string;
     messageUuid: string;
@@ -59,8 +64,14 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     private modelAccess = new ModelAccessHost(this.context.editorHost);
 
-    protected addReference(references: InboxPromptReference[]) {
-        this.references.push(...references);
+    protected async addReference(references: InboxMessageReference[]) {
+        const {editorHost} = this.context;
+        const readContent = async (input: InboxMessageReference): Promise<InboxPromptReference | null> => {
+            const content = await editorHost.call('readWorkspaceFile', input.file);
+            return content === null ? content : {...input, content};
+        };
+        const promptReferences = await Promise.all(references.map(readContent));
+        this.references.push(...promptReferences.filter(v => !!v));
     }
 
     protected async prepareEnvironment() {

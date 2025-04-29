@@ -124,6 +124,7 @@ export class FixtureRunner {
                     type: 'text',
                     content: this.fixture.query.text,
                 },
+                references: this.fixture.query.references,
             };
             const chunkStream = kernel.callStreaming(newUuid(), 'inboxSendMessage', input);
             for await (const {content, messages} of consumeChunkStream(chunkStream)) {

@@ -1,8 +1,10 @@
+import type {InboxMessageReference} from '@oniichan/kernel/protocol';
 import type {FixtureMatcherConfig} from '../matcher';
 import type {FixtureSourceConfig} from '../source';
 
 export interface FixtureQueryConfig {
     text: string;
+    references?: InboxMessageReference[];
 }
 
 export interface ShellSetup {

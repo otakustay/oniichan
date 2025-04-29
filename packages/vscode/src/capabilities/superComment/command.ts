@@ -63,7 +63,6 @@ export class SendToInboxCommand implements Disposable {
                 {
                     type: 'file',
                     file: relativeFilePath,
-                    content: editor.document.getText(),
                 },
             ],
         };

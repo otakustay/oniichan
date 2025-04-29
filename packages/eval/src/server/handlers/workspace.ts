@@ -39,8 +39,13 @@ export class ReadWorkspaceFileHandler extends RequestHandler<string, string | nu
     static readonly action = 'readWorkspaceFile';
 
     async *handleRequest(file: string): AsyncIterable<string | null> {
-        const content = await this.readFileContent(file);
-        yield content;
+        try {
+            const content = await this.readFileContent(file);
+            yield content;
+        }
+        catch {
+            return null;
+        }
     }
 }
 export class WriteWorkspaceFileHandler extends RequestHandler<WriteWorkspaceFileRequest, void> {

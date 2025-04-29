@@ -1,10 +1,9 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
-import type {InboxPromptReference} from '@oniichan/prompt';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {setRoundtripRequest} from '../../inbox';
 import {InboxRequestHandler} from './handler';
-import type {InboxMessageResponse} from './handler';
+import type {InboxMessageReference, InboxMessageResponse} from './handler';
 
 interface TextMessageBody {
     type: 'text';
@@ -18,7 +17,7 @@ export interface InboxSendMessageRequest {
     uuid: string;
     workingMode: MessageThreadWorkingMode;
     body: MessageBody;
-    references?: InboxPromptReference[];
+    references?: InboxMessageReference[];
 }
 
 export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessageRequest, InboxMessageResponse> {
@@ -51,7 +50,7 @@ export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessag
         this.thread = store.ensureThread(payload.threadUuid, payload.workingMode);
         setRoundtripRequest(this.roundtrip, payload.uuid, payload.body.content);
         this.thread.addRoundtrip(this.roundtrip);
-        this.addReference(payload.references ?? []);
+        await this.addReference(payload.references ?? []);
         store.moveThreadToTop(this.thread.uuid);
 
         yield* over(this.requestModelChat()).map(v => ({type: 'value', value: v} as const));
