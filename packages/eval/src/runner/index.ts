@@ -9,7 +9,7 @@ import type {EvalConfig} from '../server';
 import {createFixtureSource} from '../source';
 import {createFixtureMatcher} from '../matcher';
 import type {FixtureMatcherConfig, FixtureMatcherItem} from '../matcher';
-import {createKernel} from './kernel';
+import {createKernel} from '../core';
 import {consumeChunkStream} from './utils';
 import type {EvalMessage} from './utils';
 import {ConcurrentSpinner, DefaultSpinner} from './spinner';

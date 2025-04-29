@@ -9,12 +9,12 @@ This works only in macOS (or maybe Linux).
 To run all test cases, use:
 
 ```
-tsx src/main.ts
+tsx src/eval.ts
 ```
 
-If you want to run one or some specific test cases, modify `src/main.ts` to filter test cases by their names.
+If you want to run one or some specific test cases, modify `src/eval.ts` to filter test cases by their names.
 
-## Report
+### Report
 
 Each test case will list its result in the console, this is an example:
 
@@ -30,3 +30,13 @@ Each test case will list its result in the console, this is an example:
   ✔ distribution-score 1/1
     ✔ score: 1.0
 ```
+
+## Visual Test
+
+You can utilize `send.ts` to visually test a query for Inbox system.
+
+```
+tsx src/send.ts --cwd=/path/to/working/space --query="user query"
+```
+
+This also align with configuration file.

@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import {rgPath} from '@vscode/ripgrep';
 import {DirectPort} from '@otakustay/ipc';
 import type {Port} from '@otakustay/ipc';
@@ -39,4 +40,25 @@ export async function createKernel(cwd: string, config: EvalConfig) {
     await startKernelServer(port);
     const kernelClient = await startKernelClient(port);
     return kernelClient;
+}
+
+interface UserConfig extends Omit<EvalConfig, 'evalDirectory'> {
+    evalDirectory: string;
+}
+
+interface ConfigDefault {
+    reportFile: string;
+}
+
+export async function createConfiguration(file: string, defaults: ConfigDefault) {
+    const baseDirectory = path.resolve(__dirname, '..', '..');
+    const configFileContent = await fs.readFile(path.join(baseDirectory, file), {encoding: 'utf-8'});
+    const userConfig = JSON.parse(configFileContent) as UserConfig;
+    const evalDirectory = userConfig.evalDirectory ?? path.resolve(__dirname, 'fixtures', 'tmp');
+    const config: EvalConfig = {
+        ...userConfig,
+        evalDirectory,
+        reportFile: path.resolve(evalDirectory, defaults.reportFile),
+    };
+    return config;
 }
