@@ -68,7 +68,7 @@ export class FixtureRunner {
                 const result = await this.runMatch(cwd, matcher);
                 const match: RunnerMatchResult = {
                     name: matcher.name,
-                    minScore: 0,
+                    minScore: matcher.minScore,
                     maxScore: result.totalScore,
                     score: result.score,
                     items: result.items,

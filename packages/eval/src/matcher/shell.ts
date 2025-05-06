@@ -1,6 +1,6 @@
 import type {BaseMatcherConfig, FixtureMatcher, FixtureMatchResult} from './interface';
 
-export interface ShellMatchItem {
+interface ShellMatchItem {
     text: string;
     score: number;
 }

@@ -1,6 +1,6 @@
 import type {FixtureMatcher, FixtureMatchResult, BaseMatcherConfig} from './interface';
 
-export interface GitDiffFile {
+interface GitDiffFile {
     type: 'modify' | 'add' | 'delete' | 'rename' | 'unknown';
     path: string;
     score: number;
