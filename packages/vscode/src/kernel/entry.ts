@@ -1,5 +1,5 @@
 import type {MessagePort} from 'node:worker_threads';
-import { parentPort, workerData} from 'node:worker_threads';
+import {parentPort, workerData} from 'node:worker_threads';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, Port} from '@otakustay/ipc';
 import {KernelServer} from '@oniichan/kernel/server';
@@ -54,7 +54,7 @@ async function main() {
 
     if (!binaryDirectory) {
         console.error(`Binary directory is not specified`);
-        process.exit(400);
+        process.exit(4);
     }
 
     try {
@@ -69,7 +69,7 @@ async function main() {
     }
     catch (ex) {
         console.error(`Failed to start kernel in worker: ${stringifyError(ex)}`);
-        process.exit(500);
+        process.exit(5);
     }
 }
 

@@ -25,7 +25,7 @@ async function main() {
 
     if (!targetFixtures.length) {
         console.error('No fixture to evaluate');
-        process.exit(404);
+        process.exit(4);
     }
 
     const limit = pLimit(argv.concurrent ? 10 : 1);

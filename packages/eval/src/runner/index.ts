@@ -60,6 +60,13 @@ export class FixtureRunner {
     }
 
     async run() {
+        const runnable = await this.checkCondition();
+
+        if (!runnable) {
+            await this.spinner.update('fail', `${this.fixture.name} (skipped)`);
+            return;
+        }
+
         try {
             const cwd = await this.runFixture();
 
@@ -100,6 +107,23 @@ export class FixtureRunner {
                 await this.spinner.update('fail', `${this.fixture.name} (${stringifyError(ex)})`);
             }
         }
+    }
+
+    private async checkCondition() {
+        const {execa} = await import('execa');
+        for (const when of this.fixture.when ?? []) {
+            try {
+                const {exitCode} = await execa('whcih', [when.command]);
+                if (exitCode !== 0) {
+                    return false;
+                }
+            }
+            catch {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private async runFixture() {
