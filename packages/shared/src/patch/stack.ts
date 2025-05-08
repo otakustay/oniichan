@@ -3,7 +3,7 @@ import {patchContent} from './patch';
 import type {PatchAction, PatchResult} from './patch';
 import {PatchParseError} from './parse';
 import {diffCount} from './utils';
-import type {FileEditAction, FileEditData} from './utils';
+import type {FileEditAction, FileEditData, FileEditResult} from './utils';
 
 function applyEdit(action: PatchAction, oldContent: string, patch: string): PatchResult {
     switch (action) {
@@ -31,16 +31,7 @@ function nextAction(previousEditAction: FileEditAction, patchAction: PatchAction
     return patchAction === 'delete' ? 'delete' : 'edit';
 }
 
-export function stackFileEdit(previous: FileEditData, action: PatchAction, patch: string): FileEditData {
-    if (previous.type === 'error') {
-        return {
-            type: 'error',
-            errorType: 'unknown',
-            file: previous.file,
-            message: previous.errorType === 'patchError' ? 'Previous patch is invalid' : 'Previous patch is invalid',
-        };
-    }
-
+export function stackFileEdit(previous: FileEditResult, action: PatchAction, patch: string): FileEditData {
     if (previous.type === 'delete' && action === 'patch') {
         return {
             type: 'error',

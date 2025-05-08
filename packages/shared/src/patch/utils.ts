@@ -39,7 +39,7 @@ export function diffCount(oldContent: string, newContent: string) {
 }
 
 export function createFileEdit(file: string, content: string | null, action: PatchAction, patch: string): FileEditData {
-    const mockEdit: FileEditData = {
+    const mockEdit: FileEditResult = {
         file,
         type: content === null ? 'delete' : 'create',
         oldContent: '',
@@ -56,7 +56,6 @@ export function mergeFileEdits(edits: FileEditData[]): FileEditData {
             return y;
         }
 
-        // TODO: This can cause infinite error loop
         if (x.type === 'error') {
             return {
                 type: 'error',

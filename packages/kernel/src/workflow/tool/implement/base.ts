@@ -1,7 +1,7 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {Logger} from '@oniichan/shared/logger';
 import {createFileEdit, stackFileEdit} from '@oniichan/shared/patch';
-import type {FileEditData, PatchAction} from '@oniichan/shared/patch';
+import type {FileEditData, FileEditResult, PatchAction} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import type {ParsedToolCallMessageChunkOf, RawToolCallParameter, ToolUseResultType} from '@oniichan/shared/inbox';
@@ -121,13 +121,14 @@ export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
         }
     }
 
-    private getEditStackForFile(file: string): FileEditData[] {
+    private getEditStackForFile(file: string): FileEditResult[] {
         const messages = this.roundtrip.toMessages();
         return messages
             .filter((v: InboxMessage): v is InboxToolCallMessage => v.type === 'toolCall')
             .map(v => v.findToolCallChunkStrict())
             .filter(isFileEditToolCallChunk)
             .flatMap(v => v.executionData ?? [])
+            .filter(v => v.type !== 'error')
             .filter(v => v.file === file);
     }
 }
