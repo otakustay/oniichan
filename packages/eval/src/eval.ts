@@ -11,7 +11,7 @@ const command = yargs(hideBin(process.argv))
     .option('concurrent', {type: 'boolean', demandOption: false, default: false})
     .option('report', {type: 'string', demandOption: false})
     .option('config', {type: 'string', demandOption: false, default: 'config.json'})
-    .option('only', {type: 'string', demandOption: false});
+    .option('only', {type: 'string', array: true, demandOption: false});
 
 async function main() {
     const {default: pLimit} = await import('p-limit');
@@ -21,7 +21,8 @@ async function main() {
 
     await fs.rm(config.reportFile, {force: true});
 
-    const targetFixtures = argv.only ? fixtures.filter(v => v.name === argv.only) : fixtures;
+    const onlyKeywords = argv.only;
+    const targetFixtures = onlyKeywords ? fixtures.filter(v => onlyKeywords.some(k => v.name.includes(k))) : fixtures;
 
     if (!targetFixtures.length) {
         console.error('No fixture to evaluate');

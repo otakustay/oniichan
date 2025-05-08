@@ -4,6 +4,7 @@ import breezeForestAddDistribution from './data/breezeForestAddDistribution';
 import mallAddWeChatPay from './data/mallAddWeChatPay';
 import addEnumAndHandler from './data/addEnumAndHandler';
 import goFixOom from './data/goFixOom';
+import addApiPrefix from './data/addApiPrefix';
 
 export type {FixtureQueryConfig, FixtureConfig, ShellSetup};
 
@@ -13,4 +14,5 @@ export const fixtures: FixtureConfig[] = [
     breezeForestAddDistribution,
     mallAddWeChatPay,
     goFixOom,
+    addApiPrefix,
 ];
