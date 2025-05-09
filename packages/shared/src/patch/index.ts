@@ -8,6 +8,7 @@ export {
     mergeFileEdits,
     revertFileEdit,
     diffCount,
+    findFirstEditLine,
 } from './utils';
 export type {
     FileEditAction,

@@ -86,3 +86,9 @@ export function revertFileEdit(edit: FileEditResult): FileEditResult {
         insertedCount: edit.deletedCount,
     };
 }
+
+export function findFirstEditLine(oldContent: string, newContent: string): number {
+    const oleLines = oldContent.split('\n');
+    const newLines = newContent.split('\n');
+    return newLines.findIndex((v, i) => v !== oleLines[i]);
+}

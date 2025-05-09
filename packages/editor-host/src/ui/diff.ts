@@ -1,6 +1,6 @@
 import path from 'node:path';
-import type { Disposable} from 'vscode';
-import {commands, Uri, window, workspace} from 'vscode';
+import type {Disposable} from 'vscode';
+import {commands, Position, Range, TextEditorRevealType, Uri, window, workspace} from 'vscode';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {Logger} from '@oniichan/shared/logger';
@@ -20,6 +20,7 @@ export interface DiffViewInput {
     file: string;
     oldContent: string;
     newContent: string;
+    scrollToLine: number;
 }
 
 export interface DiffViewState {
@@ -92,6 +93,14 @@ export class DiffViewManager implements Disposable {
             formatDiffViewTitle(input.file),
             {preview: true}
         );
+
+        if (input.scrollToLine >= 0) {
+            const position = new Position(input.scrollToLine, 0);
+            window.activeTextEditor?.revealRange(
+                new Range(position, position),
+                TextEditorRevealType.InCenterIfOutsideViewport
+            );
+        }
     }
 
     async close(file: string) {

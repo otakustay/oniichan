@@ -1,8 +1,8 @@
-import type { Uri} from 'vscode';
+import type {Uri} from 'vscode';
 import {Position, Range, window, workspace, WorkspaceEdit} from 'vscode';
 import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {revertFileEdit} from '@oniichan/shared/patch';
+import {findFirstEditLine, revertFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {RequestHandler} from './handler';
 
@@ -114,6 +114,10 @@ export class RenderDiffViewHandler extends DiffRequestHandler<FileEditResult, vo
                 file: payload.file,
                 oldContent: payload.oldContent,
                 newContent: payload.newContent,
+                // Using onlye the first changed line is not very accurate,
+                // this may cuase condition where a large change block only shows up a part in editor,
+                // but this is very fast and efficient
+                scrollToLine: findFirstEditLine(payload.oldContent, payload.newContent),
             };
             await diffViewManager.open(options);
 
