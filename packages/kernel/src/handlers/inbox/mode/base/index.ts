@@ -1,16 +1,59 @@
 import {over} from '@otakustay/async-iterator';
 import type {InboxPromptReference} from '@oniichan/prompt';
 import type {Logger} from '@oniichan/shared/logger';
-import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
+import type {ChatInputPayload, ModelFeature, ModelResponse} from '@oniichan/shared/model';
 import {isAbortError} from '@oniichan/shared/error';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
-import type {AssistantRole, MessageInputChunk, ReasoningMessageChunk} from '@oniichan/shared/inbox';
+import type {
+    AssistantRole,
+    MessageInputChunk,
+    MessageThreadWorkingMode,
+    ReasoningMessageChunk,
+} from '@oniichan/shared/inbox';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
-import type {ModelAccessHost, ModelChatOptions} from '../../../core/model';
-import type {EditorHost} from '../../../core/editor';
-import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../../../inbox';
+import type {ModelAccessHost, ModelChatOptions} from '../../../../core/model';
+import type {EditorHost} from '../../../../core/editor';
+import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../../../../inbox';
+import {SystemPromptGenerator} from '../prompt';
+import type {SystemPromptGeneratorInit} from '../prompt';
+
+export type {
+    ReadFileParameter,
+    ReadDirectoryParameter,
+    FindFilesByGlobParameter,
+    FindFilesByRegExpParameter,
+    WriteFileParameter,
+    PatchFileParameter,
+    DeleteFileParameter,
+    BrowserPreviewParameter,
+    RunCommandParameter,
+    AskFollowupQuestionParameter,
+    AttemptCompletionParameter,
+    CompleteTaskParameter,
+    PlanTaskType,
+    PlanTaskStatus,
+    PlanTask,
+    CreatePlanParameter,
+    SemanticEditCodeParameter,
+} from './tool';
+export {
+    readFile,
+    readDirectory,
+    findFilesByGlob,
+    findFilesByRegExp,
+    writeFile,
+    patchFile,
+    deleteFile,
+    browserPreview,
+    runCommand,
+    askFollowupQuestion,
+    attemptCompletion,
+    completeTask,
+    createPlan,
+    semanticEditCode,
+} from './tool';
 
 export interface ChatCapabilityProviderInit {
     logger: Logger;
@@ -103,9 +146,32 @@ export abstract class ChatCapabilityProvider {
         }
     }
 
+    protected async provideSystemPrompt(): Promise<string> {
+        const tasks = [
+            this.provideWorkingMode(),
+            this.provideAssistantRole(),
+            this.provideModelFeature(),
+        ] as const;
+        const [workingMode, role, modelFeature] = await Promise.all(tasks);
+        const generatorInit: SystemPromptGeneratorInit = {
+            role,
+            workingMode,
+            modelFeature,
+            logger: this.logger,
+            references: this.references,
+            editorHost: this.editorHost,
+        };
+        const generator = new SystemPromptGenerator(generatorInit);
+        return generator.renderSystemPrompt();
+    }
+
+    protected provideModelFeature(): Promise<ModelFeature> {
+        return this.modelAccess.getModelFeature();
+    }
+
     protected abstract provideModelName(): Promise<string | undefined>;
 
-    protected abstract provideSystemPrompt(): Promise<string>;
+    protected abstract provideWorkingMode(): Promise<MessageThreadWorkingMode>;
 
     protected abstract provideChatMessages(): Promise<ChatInputPayload[]>;
 

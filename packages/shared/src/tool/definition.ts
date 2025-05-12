@@ -9,21 +9,33 @@ export interface ParameterInfo {
     [k: string]: unknown;
 }
 
-export type ToolName =
-    | 'read_file'
-    | 'read_directory'
-    | 'find_files_by_glob'
-    | 'find_files_by_regex'
-    | 'write_file'
-    | 'patch_file'
-    | 'delete_file'
-    | 'run_command'
-    | 'browser_preview'
-    | 'attempt_completion'
-    | 'ask_followup_question'
-    | 'complete_task'
-    | 'create_plan'
-    | 'semantic_edit_code';
+const toolNames = [
+    'read_file',
+    'read_directory',
+    'find_files_by_glob',
+    'find_files_by_regex',
+    'write_file',
+    'patch_file',
+    'delete_file',
+    'run_command',
+    'browser_preview',
+    'attempt_completion',
+    'ask_followup_question',
+    'complete_task',
+    'create_plan',
+    'semantic_edit_code',
+] as const;
+
+export type ToolName = typeof toolNames[number];
+
+export function isToolName(name: string): name is ToolName {
+    // type guard function
+    return toolNames.includes(name as ToolName);
+}
+
+export function isEditToolName(name: ToolName) {
+    return name === 'delete_file' || name === 'patch_file' || name === 'write_file';
+}
 
 export type ToolSupportTarget = AssistantRole | [mode: MessageThreadWorkingMode, role: AssistantRole];
 
@@ -32,7 +44,8 @@ export interface ToolDescription {
     description: string;
     parameters: ParameterInfo;
     usage: string;
-    supported: ToolSupportTarget[];
+    // TODO: remove supported property
+    supported?: ToolSupportTarget[];
 }
 
 export const readFileParameters = {
@@ -508,14 +521,6 @@ export const builtinTools: ToolDescription[] = [
         supported: [['henshin', 'actor']],
     },
 ];
-
-export function isToolName(name: string): name is ToolName {
-    return builtinTools.some(tool => tool.name === name);
-}
-
-export function isEditToolName(name: ToolName) {
-    return name === 'delete_file' || name === 'patch_file' || name === 'write_file';
-}
 
 export interface ModelToolCallInput {
     name: ToolName;

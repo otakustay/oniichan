@@ -101,7 +101,7 @@ export function renderToolSection(view: InboxPromptView) {
         }
     };
     for (const tool of builtinTools) {
-        if (tool.supported.some(isSupported)) {
+        if ((tool.supported ?? []).some(isSupported)) {
             available.include(tool.name);
         }
     }

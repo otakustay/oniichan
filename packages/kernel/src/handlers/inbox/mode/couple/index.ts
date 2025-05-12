@@ -1,13 +1,11 @@
 import {createModelClient} from '@oniichan/shared/model';
-import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
-import type {AssistantRole, MessageInputChunk} from '@oniichan/shared/inbox';
+import type {ChatInputPayload, ModelFeature, ModelResponse} from '@oniichan/shared/model';
+import type {AssistantRole, MessageInputChunk, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import type {ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
-import {ChatCapabilityProvider} from './base';
-import {SystemPromptGenerator} from './prompt';
-import type {SystemPromptGeneratorInit} from './prompt';
+import {ChatCapabilityProvider} from '../base';
 
 function toolRequireCoder(toolName: ToolName) {
     return toolName === 'write_file' || toolName === 'patch_file';
@@ -19,10 +17,6 @@ async function* iterable(text: string): AsyncIterable<string> {
 
 export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
     private useCoderModel = false;
-
-    async provideAssistantRole(): Promise<AssistantRole> {
-        return 'standalone';
-    }
 
     async *provideChatStream(): AsyncIterable<MessageInputChunk> {
         const controller = new AbortController();
@@ -40,6 +34,10 @@ export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
         }
     }
 
+    async provideAssistantRole(): Promise<AssistantRole> {
+        return 'standalone';
+    }
+
     protected async provideModelName(): Promise<string | undefined> {
         return this.useCoderModel ? this.config.coderModel || this.config.actorModel : this.config.actorModel;
     }
@@ -53,20 +51,15 @@ export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
         return messages.map(v => v.toChatInputPayload());
     }
 
-    protected async provideSystemPrompt(): Promise<string> {
+    protected async provideWorkingMode(): Promise<MessageThreadWorkingMode> {
+        return 'normal';
+    }
+
+    protected async provideModelFeature(): Promise<ModelFeature> {
         const modelName = await this.provideModelName() ?? this.config.actorModel;
         // A fake client to get the model feature
         const client = createModelClient({modelName, apiKey: 'fake'});
-        const generatorInit: SystemPromptGeneratorInit = {
-            role: 'standalone',
-            workingMode: 'normal',
-            modelFeature: client.getModelFeature(),
-            logger: this.logger,
-            references: this.references,
-            editorHost: this.editorHost,
-        };
-        const generator = new SystemPromptGenerator(generatorInit);
-        return generator.renderSystemPrompt();
+        return client.getModelFeature();
     }
 
     protected async *consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {
