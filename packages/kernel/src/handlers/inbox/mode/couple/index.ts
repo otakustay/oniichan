@@ -1,3 +1,4 @@
+import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import type {AssistantRole, MessageInputChunk, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
@@ -7,6 +8,7 @@ import {discard} from '@oniichan/shared/iterable';
 import {ChatCapabilityProvider} from '../base/provider';
 import type {ChatRole} from '../base/provider';
 import type {InboxAssistantTextMessage, InboxMessage} from '../../../../inbox';
+import {renderCommonObjective} from '../base/prompt';
 
 class CoupleActorRole implements ChatRole {
     private readonly actorModelName: string;
@@ -24,7 +26,8 @@ class CoupleActorRole implements ChatRole {
     }
 
     provideObjective(): string {
-        throw new Error('Method not implemented.');
+        const feature = getModelFeature(this.actorModelName);
+        return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {
@@ -59,7 +62,8 @@ class CoupleCoderRole implements ChatRole {
     }
 
     provideObjective(): string {
-        throw new Error('Method not implemented.');
+        const feature = getModelFeature(this.coderModelName || this.actorModelName);
+        return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {

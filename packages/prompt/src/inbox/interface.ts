@@ -1,5 +1,4 @@
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import type {ModelFeature} from '@oniichan/shared/model';
 
 export interface InboxPromptReference {
     type: 'file';
@@ -12,7 +11,7 @@ export interface InboxPromptView {
     role: AssistantRole;
     projectStructure: string;
     projectStructureTruncated: boolean;
-    modelFeature: ModelFeature;
     customRules: string;
     references: InboxPromptReference[];
+    objectiveInstruction: string;
 }

@@ -1,11 +1,19 @@
+import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import type {ToolDescription} from '@oniichan/shared/tool';
 import {ChatCapabilityProvider} from '../base/provider';
 import type {ChatRole} from '../base/provider';
 import type {InboxMessage} from '../../../../inbox';
+import {renderCommonObjective} from '../base/prompt';
 
 class StandaloneRole implements ChatRole {
+    private readonly defaultModelName: string;
+
+    constructor(defaultModelName: string) {
+        this.defaultModelName = defaultModelName;
+    }
+
     provideModelOverride(): string | undefined {
         return undefined;
     }
@@ -15,7 +23,8 @@ class StandaloneRole implements ChatRole {
     }
 
     provideObjective(): string {
-        throw new Error('Method not implemented.');
+        const feature = getModelFeature(this.defaultModelName);
+        return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {
@@ -33,6 +42,6 @@ export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
     }
 
     protected getChatRole(): ChatRole {
-        return new StandaloneRole();
+        return new StandaloneRole(this.config.defaultModel);
     }
 }

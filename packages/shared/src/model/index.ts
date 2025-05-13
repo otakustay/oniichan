@@ -14,6 +14,7 @@ export type {
     ModelStreamingResponse,
     ChatInputPayload,
 } from './interface';
+export {getModelFeature} from './feature';
 export type {ModelFeature} from './feature';
 
 function validateModelConfiguration(config: ModelConfiguration): void {

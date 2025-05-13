@@ -87,6 +87,7 @@ const DEFAULT_DENIED_COMMAND_LIST = [
 export interface InboxConfig {
     automaticRunCommand: boolean;
     exceptionCommandList: string[];
+    defaultModel: string;
     plannerModel: string;
     actorModel: string;
     coderModel: string | null;
@@ -99,17 +100,20 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const {logger} = this.context;
         logger.info('Start');
 
-        const config = workspace.getConfiguration('oniichan.inbox');
-        const automaticRunCommand = config.get<boolean>('automaticRunCommand');
-        const exceptionCommandList = config.get<string[]>('exceptionCommandList');
-        const plannerModel = config.get<string>('plannerModel');
-        const actorModel = config.get<string>('actorModel');
-        const coderModel = config.get<string>('coderModel');
+        const model = workspace.getConfiguration('oniichan.model');
+        const defaultModel = model.get<string>('modelName');
+        const inbox = workspace.getConfiguration('oniichan.inbox');
+        const automaticRunCommand = inbox.get<boolean>('automaticRunCommand');
+        const exceptionCommandList = inbox.get<string[]>('exceptionCommandList');
+        const plannerModel = inbox.get<string>('plannerModel');
+        const actorModel = inbox.get<string>('actorModel');
+        const coderModel = inbox.get<string>('coderModel');
         const result: InboxConfig = {
             automaticRunCommand: automaticRunCommand ?? false,
             exceptionCommandList: exceptionCommandList?.length
                 ? exceptionCommandList
                 : (automaticRunCommand ? DEFAULT_DENIED_COMMAND_LIST : []),
+            defaultModel: defaultModel ?? '',
             plannerModel: plannerModel ?? '',
             actorModel: actorModel ?? '',
             coderModel: coderModel ?? null,

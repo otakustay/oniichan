@@ -57,6 +57,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     private inboxConfig: InboxConfig = {
         automaticRunCommand: false,
         exceptionCommandList: [],
+        defaultModel: '',
         plannerModel: '',
         actorModel: '',
         coderModel: null,

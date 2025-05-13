@@ -1,7 +1,7 @@
 import {over} from '@otakustay/async-iterator';
 import type {InboxPromptReference} from '@oniichan/prompt';
 import type {Logger} from '@oniichan/shared/logger';
-import {createModelClient} from '@oniichan/shared/model';
+import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload, ModelFeature, ModelResponse} from '@oniichan/shared/model';
 import {isAbortError} from '@oniichan/shared/error';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
@@ -126,15 +126,13 @@ export abstract class ChatCapabilityProvider {
 
     protected async getSystemPrompt(): Promise<string> {
         const role = this.getChatRole();
-        const model = role.provideModelOverride();
-        const feature = await this.getModelFeature(model);
         const generatorInit: SystemPromptGeneratorInit = {
             workingMode: this.getWorkingMode(),
             role: role.provideRoleName(),
-            modelFeature: feature,
             logger: this.logger,
             references: this.references,
             editorHost: this.editorHost,
+            objectiveInstruction: role.provideObjective(),
         };
         const generator = new SystemPromptGenerator(generatorInit);
         return generator.renderSystemPrompt();
@@ -153,8 +151,7 @@ export abstract class ChatCapabilityProvider {
 
     protected async getModelFeature(override: string | undefined): Promise<ModelFeature> {
         if (override) {
-            const client = createModelClient({modelName: override, apiKey: 'fake'});
-            return client.getModelFeature();
+            return getModelFeature(override);
         }
 
         return this.modelAccess.getModelFeature();
