@@ -1,11 +1,76 @@
-import {createModelClient} from '@oniichan/shared/model';
-import type {ChatInputPayload, ModelFeature, ModelResponse} from '@oniichan/shared/model';
+import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import type {AssistantRole, MessageInputChunk, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {StreamingToolParser} from '@oniichan/shared/tool';
-import type {ToolName} from '@oniichan/shared/tool';
+import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
-import {ChatCapabilityProvider} from '../base';
+import {ChatCapabilityProvider} from '../base/provider';
+import type {ChatRole} from '../base/provider';
+import type {InboxAssistantTextMessage, InboxMessage} from '../../../../inbox';
+
+class CoupleActorRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    constructor(actorModelName: string) {
+        this.actorModelName = actorModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        // Couple mode always behaves as standalone
+        return 'standalone';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(v => v.toChatInputPayload());
+    }
+}
+
+class CoupleCoderRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    private readonly coderModelName: string | null;
+
+    private readonly partialReply: InboxAssistantTextMessage;
+
+    constructor(actorModelName: string, coderModelName: string | null, reply: InboxAssistantTextMessage) {
+        this.actorModelName = actorModelName;
+        this.coderModelName = coderModelName;
+        this.partialReply = reply;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.coderModelName || this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        // Couple mode always behaves as standalone
+        return 'standalone';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return [...messages, this.partialReply].map(v => v.toChatInputPayload());
+    }
+}
 
 function toolRequireCoder(toolName: ToolName) {
     return toolName === 'write_file' || toolName === 'patch_file';
@@ -17,6 +82,20 @@ async function* iterable(text: string): AsyncIterable<string> {
 
 export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
     private useCoderModel = false;
+
+    protected getWorkingMode(): MessageThreadWorkingMode {
+        return 'couple';
+    }
+
+    protected getChatRole(): ChatRole {
+        if (this.useCoderModel) {
+            const reply = this.roundtrip.getLatestTextMessageStrict();
+            return new CoupleCoderRole(this.config.actorModel, this.config.coderModel, reply);
+        }
+        else {
+            return new CoupleActorRole(this.config.actorModel);
+        }
+    }
 
     async *provideChatStream(): AsyncIterable<MessageInputChunk> {
         const controller = new AbortController();
@@ -32,34 +111,6 @@ export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
                 return;
             }
         }
-    }
-
-    async provideAssistantRole(): Promise<AssistantRole> {
-        return 'standalone';
-    }
-
-    protected async provideModelName(): Promise<string | undefined> {
-        return this.useCoderModel ? this.config.coderModel || this.config.actorModel : this.config.actorModel;
-    }
-
-    protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        const messages = this.getInboxMessages();
-        if (this.useCoderModel) {
-            const reply = this.roundtrip.getLatestTextMessageStrict();
-            messages.push(reply);
-        }
-        return messages.map(v => v.toChatInputPayload());
-    }
-
-    protected async provideWorkingMode(): Promise<MessageThreadWorkingMode> {
-        return 'normal';
-    }
-
-    protected async provideModelFeature(): Promise<ModelFeature> {
-        const modelName = await this.provideModelName() ?? this.config.actorModel;
-        // A fake client to get the model feature
-        const client = createModelClient({modelName, apiKey: 'fake'});
-        return client.getModelFeature();
     }
 
     protected async *consumeChatStream(chatStream: AsyncIterable<ModelResponse>): AsyncIterable<MessageInputChunk> {

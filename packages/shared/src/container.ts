@@ -66,3 +66,21 @@ export class DependencyContainer<M extends BaseMap<M> = Record<string, never>> {
         return next;
     }
 }
+
+export class LazyContainer<T> {
+    private readonly factory: () => Promise<T>;
+
+    private value: T | null = null;
+
+    constructor(factory: () => Promise<T>) {
+        this.factory = factory;
+    }
+
+    async getInstance() {
+        if (!this.value) {
+            this.value = await this.factory();
+        }
+
+        return this.value;
+    }
+}

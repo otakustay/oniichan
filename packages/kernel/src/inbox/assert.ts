@@ -1,3 +1,4 @@
+import {isBreakpointToolName} from '@oniichan/shared/tool';
 import type {ToolName} from '@oniichan/shared/tool';
 import type {ParsedToolCallMessageChunk, ParsedToolCallMessageChunkOf} from '@oniichan/shared/inbox';
 import type {InboxAssistantMessage, InboxAssistantTextMessage, InboxMessage, InboxToolCallMessage} from './interface';
@@ -34,6 +35,10 @@ export function isAssistantMessage(message: Message): message is AssistantMessag
 
 export function isToolCallMessage(message: Message): message is ToolCallMessage {
     return message.type === 'toolCall';
+}
+
+export function isBreakpoingToolCallMessage(message: Message): message is ToolCallMessage {
+    return isToolCallMessage(message) && isBreakpointToolName(message.findToolCallChunkStrict().toolName);
 }
 
 export function isToolCallMessageOf<N extends ToolName>(message: Message, tool: N): message is ToolCallMessage<N> {

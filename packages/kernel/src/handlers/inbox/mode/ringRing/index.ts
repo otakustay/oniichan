@@ -1,52 +1,128 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
+import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../../../inbox';
-import {ChatCapabilityProvider} from '../base';
+import {ChatCapabilityProvider} from '../base/provider';
+import type {ChatRole} from '../base/provider';
+
+class RingRingPlannerRole implements ChatRole {
+    private readonly plannerModelName: string;
+
+    constructor(plannerModelName: string) {
+        this.plannerModelName = plannerModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.plannerModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'planner';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(v => v.toChatInputPayload());
+    }
+}
+
+function serializeExecutorMessage(message: InboxMessage): ChatInputPayload {
+    switch (message.type) {
+        case 'userRequest':
+            return message.toChatInputPayload({hideUserRequest: true});
+        case 'toolCall':
+            return message.toChatInputPayload({hidePlanDetail: true});
+        default:
+            return message.toChatInputPayload();
+    }
+}
+
+class RingRingActorRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    constructor(actorModelName: string) {
+        this.actorModelName = actorModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'actor';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(serializeExecutorMessage);
+    }
+}
+
+class RingRingCoderRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    private readonly coderModelName: string | null;
+
+    constructor(actorModelName: string, coderModelName: string | null) {
+        this.actorModelName = actorModelName;
+        this.coderModelName = coderModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'coder';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(serializeExecutorMessage);
+    }
+}
 
 export class RingRingChatCapabilityProvider extends ChatCapabilityProvider {
-    async provideAssistantRole(): Promise<AssistantRole> {
+    protected getWorkingMode(): MessageThreadWorkingMode {
+        return 'ringRing';
+    }
+
+    protected getChatRole(): ChatRole {
         const messages = this.thread.toMessages();
 
         // Only user request message, the first reply should be in plan mode
         if (messages.every(v => v.type === 'userRequest' || v.type === 'assistantText')) {
-            return 'planner';
+            return new RingRingPlannerRole(this.config.plannerModel);
         }
 
         const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
         const executingTask = plan.arguments.tasks.find(v => v.status === 'executing');
-        return executingTask ? (executingTask.taskType === 'coding' ? 'coder' : 'actor') : 'planner';
-    }
-
-    protected async provideModelName(): Promise<string | undefined> {
-        const role = await this.provideAssistantRole();
-        switch (role) {
-            case 'planner':
-                return this.config.plannerModel;
-            case 'actor':
-                return this.config.actorModel;
-            case 'coder':
-                return this.config.coderModel || this.config.actorModel;
+        if (executingTask) {
+            return executingTask.taskType === 'coding'
+                ? new RingRingCoderRole(this.config.actorModel, this.config.coderModel)
+                : new RingRingActorRole(this.config.actorModel);
         }
-    }
-
-    protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        const messages = this.getInboxMessages();
-        const role = await this.provideAssistantRole();
-        const isPlanExecutor = role === 'actor' || role === 'coder';
-        const messageToChatInputPayload = (message: InboxMessage): ChatInputPayload => {
-            switch (message.type) {
-                case 'userRequest':
-                    return message.toChatInputPayload({hideUserRequest: isPlanExecutor});
-                case 'toolCall':
-                    return message.toChatInputPayload({hidePlanDetail: isPlanExecutor});
-                default:
-                    return message.toChatInputPayload();
-            }
-        };
-        return messages.map(messageToChatInputPayload);
-    }
-
-    protected async provideWorkingMode(): Promise<MessageThreadWorkingMode> {
-        return 'ringRing';
+        return new RingRingPlannerRole(this.config.plannerModel);
     }
 }

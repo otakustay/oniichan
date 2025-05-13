@@ -25,6 +25,7 @@ export {
     assertToolCallMessage,
     isAssistantMessage,
     isToolCallMessage,
+    isBreakpoingToolCallMessage,
     isToolCallMessageOf,
     assertToolCallType,
 } from './assert';

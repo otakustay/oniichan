@@ -6,7 +6,7 @@ import {uniqueBy} from '@oniichan/shared/array';
 import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import type {EditorHost} from '../../../core/editor';
+import type {EditorHost} from '../../../../core/editor';
 
 export interface SystemPromptGeneratorInit {
     role: AssistantRole;

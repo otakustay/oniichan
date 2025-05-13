@@ -87,7 +87,7 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     protected async *requestModelChat(): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
         const provider = this.createContextProvider();
-        const role = await provider.provideAssistantRole();
+        const role = provider.provideAssistantRole();
 
         const reply = this.roundtrip.startTextResponse(newUuid(), role);
         this.pushStoreUpdate();

@@ -1,21 +1,38 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {ChatCapabilityProvider} from '../base';
+import type {ToolDescription} from '@oniichan/shared/tool';
+import {ChatCapabilityProvider} from '../base/provider';
+import type {ChatRole} from '../base/provider';
+import type {InboxMessage} from '../../../../inbox';
 
-export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
-    async provideAssistantRole(): Promise<AssistantRole> {
-        return 'standalone';
-    }
-
-    protected async provideModelName(): Promise<string | undefined> {
+class StandaloneRole implements ChatRole {
+    provideModelOverride(): string | undefined {
         return undefined;
     }
 
-    protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        return this.getInboxMessages().map(v => v.toChatInputPayload());
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
     }
 
-    protected async provideWorkingMode(): Promise<MessageThreadWorkingMode> {
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'standalone';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(v => v.toChatInputPayload());
+    }
+}
+
+export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
+    protected getWorkingMode(): MessageThreadWorkingMode {
         return 'normal';
+    }
+
+    protected getChatRole(): ChatRole {
+        return new StandaloneRole();
     }
 }

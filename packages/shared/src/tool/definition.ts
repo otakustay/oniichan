@@ -37,6 +37,19 @@ export function isEditToolName(name: ToolName) {
     return name === 'delete_file' || name === 'patch_file' || name === 'write_file';
 }
 
+/**
+ * Some tools represents a breakpoint in a roundtrip, which means we can switch role after this tool call.
+ *
+ * @param name The name of tool
+ * @returns If the tool name represents a breakpoint in a single roundtrip
+ */
+export function isBreakpointToolName(name: ToolName) {
+    return name === 'attempt_completion'
+        || name === 'complete_task'
+        || name === 'create_plan'
+        || name === 'semantic_edit_code';
+}
+
 export type ToolSupportTarget = AssistantRole | [mode: MessageThreadWorkingMode, role: AssistantRole];
 
 export interface ToolDescription {

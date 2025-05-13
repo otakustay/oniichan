@@ -16,6 +16,7 @@ export {
     builtinTools,
     isToolName,
     isEditToolName,
+    isBreakpointToolName,
 } from './definition';
 export type {
     ParameterInfo,

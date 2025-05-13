@@ -10,6 +10,7 @@ export interface ModelChatOptions {
 }
 
 export interface ModelAccess {
+    getModelName(): Promise<string>;
     getModelFeature(): Promise<ModelFeature>;
     chat(options: ModelChatOptions): Promise<ModelTextResponse>;
     chatStreaming(options: ModelChatOptions): AsyncIterable<ModelResponse>;

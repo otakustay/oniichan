@@ -1,38 +1,82 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {isToolCallMessageOf} from '../../../../inbox';
+import type {ToolDescription} from '@oniichan/shared/tool';
+import {isBreakpoingToolCallMessage} from '../../../../inbox';
 import type {InboxMessage} from '../../../../inbox';
-import {ChatCapabilityProvider} from '../base';
+import {ChatCapabilityProvider} from '../base/provider';
+import type {ChatRole} from '../base/provider';
+
+class HenshinActorRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    constructor(actorModelName: string) {
+        this.actorModelName = actorModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'actor';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(v => v.toChatInputPayload());
+    }
+}
+
+class HenshinCoderRole implements ChatRole {
+    private readonly actorModelName: string;
+
+    private readonly coderModelName: string | null;
+
+    constructor(actorModelName: string, coderModelName: string | null) {
+        this.actorModelName = actorModelName;
+        this.coderModelName = coderModelName;
+    }
+
+    provideModelOverride(): string | undefined {
+        return this.coderModelName || this.actorModelName;
+    }
+
+    provideToolSet(): ToolDescription[] {
+        throw new Error('Method not implemented.');
+    }
+
+    provideObjective(): string {
+        throw new Error('Method not implemented.');
+    }
+
+    provideRoleName(): AssistantRole {
+        return 'coder';
+    }
+
+    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
+        return messages.map(v => v.toChatInputPayload());
+    }
+}
 
 export class HenshinChatCapabilityProvider extends ChatCapabilityProvider {
-    async provideAssistantRole(): Promise<AssistantRole> {
+    protected getWorkingMode(): MessageThreadWorkingMode {
+        return 'henshin';
+    }
+
+    protected getChatRole(): ChatRole {
         const messages = this.thread.toMessages();
-        const isStop = (message: InboxMessage) => {
-            return isToolCallMessageOf(message, 'semantic_edit_code') || isToolCallMessageOf(message, 'complete_task');
-        };
-        const lastStop = messages.findLast(isStop);
+        const lastStop = messages.findLast(isBreakpoingToolCallMessage);
         const toolName = lastStop?.findToolCallChunkStrict().toolName;
         // Always use actor to start the work
-        return toolName === 'semantic_edit_code' ? 'coder' : 'actor';
-    }
-
-    protected async provideModelName(): Promise<string | undefined> {
-        const role = await this.provideAssistantRole();
-        switch (role) {
-            case 'actor':
-                return this.config.actorModel;
-            case 'coder':
-                return this.config.coderModel || this.config.actorModel;
-            default:
-                throw new Error(`Henshin mode does not support role ${role}`);
-        }
-    }
-
-    protected async provideChatMessages(): Promise<ChatInputPayload[]> {
-        return this.getInboxMessages().map(v => v.toChatInputPayload());
-    }
-
-    protected async provideWorkingMode(): Promise<MessageThreadWorkingMode> {
-        return 'henshin';
+        return toolName === 'semantic_edit_code'
+            ? new HenshinCoderRole(this.config.actorModel, this.config.coderModel)
+            : new HenshinActorRole(this.config.actorModel);
     }
 }

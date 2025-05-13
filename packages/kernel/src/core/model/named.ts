@@ -8,6 +8,10 @@ export class NamedModelAccess implements ModelAccess {
         this.client = client;
     }
 
+    async getModelName(): Promise<string> {
+        return this.client.getModelName();
+    }
+
     async getModelFeature(): Promise<ModelFeature> {
         return this.client.getModelFeature();
     }
