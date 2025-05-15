@@ -5,22 +5,18 @@ import {stringifyError} from '@oniichan/shared/error';
 import {uniqueBy} from '@oniichan/shared/array';
 import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
-import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import type {EditorHost} from '../../../../core/editor';
+import type {ChatRole} from './provider';
 
 export interface SystemPromptGeneratorInit {
-    role: AssistantRole;
-    workingMode: MessageThreadWorkingMode;
+    role: ChatRole;
     logger: Logger;
     references: InboxPromptReference[];
     editorHost: EditorHost;
-    objectiveInstruction: string;
 }
 
 export class SystemPromptGenerator {
-    private role: AssistantRole;
-
-    private workingMode: MessageThreadWorkingMode;
+    private role: ChatRole;
 
     private logger: Logger;
 
@@ -28,26 +24,21 @@ export class SystemPromptGenerator {
 
     private editorHost: EditorHost;
 
-    private objectiveInstruction: string;
-
     constructor(init: SystemPromptGeneratorInit) {
         this.logger = init.logger.with({source: 'SystemPromptGenerator'});
         this.role = init.role;
-        this.workingMode = init.workingMode;
         this.references = init.references;
         this.editorHost = init.editorHost;
-        this.objectiveInstruction = init.objectiveInstruction;
     }
 
     async renderSystemPrompt(): Promise<string> {
         const view: InboxPromptView = {
-            role: this.role,
-            mode: this.workingMode,
             projectStructure: '',
             projectStructureTruncated: false,
             customRules: '',
             references: [],
-            objectiveInstruction: this.objectiveInstruction,
+            objectiveInstruction: this.role.provideObjective(),
+            tools: this.role.provideToolSet(),
         };
 
         try {

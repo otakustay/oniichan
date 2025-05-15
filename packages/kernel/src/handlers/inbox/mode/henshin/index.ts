@@ -10,7 +10,7 @@ export class HenshinChatCapabilityProvider extends ChatCapabilityProvider {
         return 'henshin';
     }
 
-    protected getChatRole(): ChatRole {
+    provideChatRole(): ChatRole {
         const messages = this.thread.toMessages();
         const lastStop = messages.findLast(isBreakpoingToolCallMessage);
         const toolName = lastStop?.findToolCallChunkStrict().toolName;

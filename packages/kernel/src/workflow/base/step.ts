@@ -14,6 +14,8 @@ import type {
     InboxWorkflowOriginMessage,
     InboxWorkflowSourceMessage,
 } from '../../inbox';
+// TODO: move tool implementation to role
+import type {ChatRole} from '../../handlers/inbox/mode';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;
@@ -25,6 +27,7 @@ export interface WorkflowStepInit {
     thread: InboxMessageThread;
     roundtrip: InboxRoundtrip;
     inboxConfig: InboxConfig;
+    role: ChatRole;
     // tool
     commandExecutor: CommandExecutor;
     telemetry: FunctionUsageTelemetry;
@@ -39,6 +42,8 @@ export abstract class WorkflowStep {
     protected readonly thread: InboxMessageThread;
 
     protected readonly roundtrip: InboxRoundtrip;
+
+    protected readonly role: ChatRole;
 
     protected readonly editorHost: EditorHost;
 
@@ -55,6 +60,7 @@ export abstract class WorkflowStep {
     constructor(init: WorkflowStepInit) {
         this.thread = init.thread;
         this.roundtrip = init.roundtrip;
+        this.role = init.role;
         this.taskId = init.taskId;
         this.telemetry = init.telemetry;
         this.modelAccess = init.modelAccess;

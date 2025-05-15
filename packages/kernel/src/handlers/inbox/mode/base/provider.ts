@@ -76,13 +76,10 @@ export abstract class ChatCapabilityProvider {
         yield* this.chat();
     }
 
-    provideAssistantRole(): AssistantRole {
-        const role = this.getChatRole();
-        return role.provideRoleName();
-    }
+    abstract provideChatRole(): ChatRole;
 
     protected async *chat(overrides?: Partial<ModelChatOptions>): AsyncIterable<MessageInputChunk> {
-        const role = this.getChatRole();
+        const role = this.provideChatRole();
         const messages = role.provideSerializedMessages(this.getInboxMessages());
         const systemPrompt = await this.getSystemPrompt();
         const controller = new AbortController();
@@ -125,14 +122,12 @@ export abstract class ChatCapabilityProvider {
     }
 
     protected async getSystemPrompt(): Promise<string> {
-        const role = this.getChatRole();
+        const role = this.provideChatRole();
         const generatorInit: SystemPromptGeneratorInit = {
-            workingMode: this.getWorkingMode(),
-            role: role.provideRoleName(),
+            role: role,
             logger: this.logger,
             references: this.references,
             editorHost: this.editorHost,
-            objectiveInstruction: role.provideObjective(),
         };
         const generator = new SystemPromptGenerator(generatorInit);
         return generator.renderSystemPrompt();
@@ -168,6 +163,4 @@ export abstract class ChatCapabilityProvider {
     }
 
     protected abstract getWorkingMode(): MessageThreadWorkingMode;
-
-    protected abstract getChatRole(): ChatRole;
 }

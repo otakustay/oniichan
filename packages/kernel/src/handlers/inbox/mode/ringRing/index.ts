@@ -10,7 +10,7 @@ export class RingRingChatCapabilityProvider extends ChatCapabilityProvider {
         return 'ringRing';
     }
 
-    protected getChatRole(): ChatRole {
+    provideChatRole(): ChatRole {
         const messages = this.thread.toMessages();
 
         // Only user request message, the first reply should be in plan mode

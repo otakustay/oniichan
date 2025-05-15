@@ -2,7 +2,6 @@ import Ajv from 'ajv';
 import type {Schema, ValidateFunction} from 'ajv';
 import {renderFixToolCallPrompt} from '@oniichan/prompt';
 import type {FixToolCallView} from '@oniichan/prompt';
-import {builtinTools} from '@oniichan/shared/tool';
 import {WorkflowValidator} from '../base';
 import type {WorkflowStepInit} from '../base';
 import {assertAssistantTextMessage, createDetachedUserRequestMessage} from '../../inbox';
@@ -164,7 +163,7 @@ export class ToolWorkflowValidator extends WorkflowValidator {
         const source = this.getWorkflowSourceMessageStrict();
         assertAssistantTextMessage(source);
         const input = source.findToolCallChunkStrict();
-        const tool = builtinTools.find(v => v.name === input.toolName);
+        const tool = this.role.provideToolSet().find(v => v.name === input.toolName);
 
         if (!tool) {
             throw new Error(`This message contains a tool call chunk with unsupported tool name ${input.toolName}`);

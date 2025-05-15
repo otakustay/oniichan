@@ -5,6 +5,7 @@ import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxAssistantTextMessage, InboxMessage} from '../../../../inbox';
 import {renderCommonObjective} from '../base/prompt';
 import type {ChatRole} from '../base/provider';
+import {pickSharedTools} from '../base/tool';
 
 export class CoupleCoderRole implements ChatRole {
     private readonly actorModelName: string;
@@ -24,7 +25,11 @@ export class CoupleCoderRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        throw new Error('Method not implemented.');
+        // Coder is triggered inside `write_file` and `patch_file` tool
+        return pickSharedTools(
+            'write_file',
+            'patch_file'
+        );
     }
 
     provideObjective(): string {

@@ -4,6 +4,7 @@ import type {AssistantRole} from '@oniichan/shared/inbox';
 import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../../../inbox';
 import type {ChatRole} from '../base/provider';
+import {pickSharedTools} from '../base/tool';
 
 export class HenshinActorRole implements ChatRole {
     private readonly actorModelName: string;
@@ -17,7 +18,17 @@ export class HenshinActorRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        throw new Error('Method not implemented.');
+        return pickSharedTools(
+            'read_file',
+            'read_directory',
+            'find_files_by_glob',
+            'find_files_by_regex',
+            'run_command',
+            'browser_preview',
+            'semantic_edit_code',
+            'attempt_completion',
+            'ask_followup_question'
+        );
     }
 
     provideObjective(): string {

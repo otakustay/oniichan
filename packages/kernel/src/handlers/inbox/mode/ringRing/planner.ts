@@ -4,6 +4,7 @@ import type {AssistantRole} from '@oniichan/shared/inbox';
 import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../../../inbox';
 import type {ChatRole} from '../base/provider';
+import {pickSharedTools} from '../base/tool';
 
 export class RingRingPlannerRole implements ChatRole {
     private readonly plannerModelName: string;
@@ -17,7 +18,10 @@ export class RingRingPlannerRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        throw new Error('Method not implemented.');
+        return pickSharedTools(
+            'create_plan',
+            'attempt_completion'
+        );
     }
 
     provideObjective(): string {

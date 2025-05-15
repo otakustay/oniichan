@@ -1,4 +1,4 @@
-import type {AssistantRole, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
+import type {ToolDescription} from '@oniichan/shared/tool';
 
 export interface InboxPromptReference {
     type: 'file';
@@ -7,11 +7,10 @@ export interface InboxPromptReference {
 }
 
 export interface InboxPromptView {
-    mode: MessageThreadWorkingMode;
-    role: AssistantRole;
     projectStructure: string;
     projectStructureTruncated: boolean;
     customRules: string;
     references: InboxPromptReference[];
     objectiveInstruction: string;
+    tools: ToolDescription[];
 }

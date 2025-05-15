@@ -4,6 +4,7 @@ import type {AssistantRole} from '@oniichan/shared/inbox';
 import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../../../inbox';
 import type {ChatRole} from '../base/provider';
+import {pickSharedTools} from '../base/tool';
 import {serializeExecutorMessage} from './utils';
 
 export class RingRingActorRole implements ChatRole {
@@ -18,7 +19,14 @@ export class RingRingActorRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        throw new Error('Method not implemented.');
+        return pickSharedTools(
+            'read_file',
+            'read_directory',
+            'find_files_by_glob',
+            'find_files_by_regex',
+            'browser_preview',
+            'complete_task'
+        );
     }
 
     provideObjective(): string {

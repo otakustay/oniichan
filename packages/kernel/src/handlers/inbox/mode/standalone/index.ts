@@ -8,7 +8,7 @@ export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
         return 'normal';
     }
 
-    protected getChatRole(): ChatRole {
+    provideChatRole(): ChatRole {
         return new StandaloneRole(this.config.defaultModel);
     }
 }

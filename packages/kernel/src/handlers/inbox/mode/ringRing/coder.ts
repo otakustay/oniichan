@@ -5,6 +5,7 @@ import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../../../inbox';
 import type {ChatRole} from '../base/provider';
 import {renderCommonObjective} from '../base/prompt';
+import {pickSharedTools} from '../base/tool';
 import {serializeExecutorMessage} from './utils';
 
 export class RingRingCoderRole implements ChatRole {
@@ -22,7 +23,18 @@ export class RingRingCoderRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        throw new Error('Method not implemented.');
+        return pickSharedTools(
+            'read_file',
+            'read_directory',
+            'find_files_by_glob',
+            'find_files_by_regex',
+            'write_file',
+            'patch_file',
+            'delete_file',
+            'run_command',
+            'browser_preview',
+            'complete_task'
+        );
     }
 
     provideObjective(): string {

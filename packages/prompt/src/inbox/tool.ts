@@ -1,7 +1,5 @@
 import dedent from 'dedent';
-import type {ToolDescription, ToolName, ToolSupportTarget} from '@oniichan/shared/tool';
-import {builtinTools} from '@oniichan/shared/tool';
-import {IncludeExclude} from '@oniichan/shared/array';
+import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxPromptView} from './interface';
 
 const prefix = dedent`
@@ -90,33 +88,11 @@ function renderItem(item: ToolDescription) {
 }
 
 export function renderToolSection(view: InboxPromptView) {
-    const available = new IncludeExclude<ToolName>();
-    const isSupported = (target: ToolSupportTarget) => {
-        if (typeof target === 'string') {
-            return target === view.role;
-        }
-        else {
-            const [mode, role] = target;
-            return mode === view.mode && role === view.role;
-        }
-    };
-    for (const tool of builtinTools) {
-        if ((tool.supported ?? []).some(isSupported)) {
-            available.include(tool.name);
-        }
-    }
-
-    if (view.projectStructure) {
-        available.exclude('browser_preview');
-    }
-
-    const tools = builtinTools.filter(v => available.allow(v.name));
-
-    if (tools.length) {
+    if (view.tools.length) {
         const parts = [
             prefix,
             '## Available tools',
-            ...tools.map(renderItem),
+            ...view.tools.map(renderItem),
             guideline,
         ];
         return parts.join('\n\n');

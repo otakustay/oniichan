@@ -88,9 +88,9 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
     protected async *requestModelChat(): AsyncIterable<InboxMessageResponse> {
         const {logger} = this.context;
         const provider = this.createContextProvider();
-        const role = provider.provideAssistantRole();
+        const role = provider.provideChatRole();
 
-        const reply = this.roundtrip.startTextResponse(newUuid(), role);
+        const reply = this.roundtrip.startTextResponse(newUuid(), role.provideRoleName());
         this.pushStoreUpdate();
 
         logger.trace('RequestModelStart', {threadUuid: this.thread.uuid, replyMessageUuid: reply.uuid});
@@ -129,9 +129,12 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
 
     protected async detectWorkflowRunner() {
         const {logger, editorHost, commandExecutor} = this.context;
+        const provider = this.createContextProvider();
+        const chatRole = provider.provideChatRole();
         const detectorInit: WorkflowStepInit = {
             thread: this.thread,
             taskId: this.getTaskId(),
+            role: chatRole,
             telemetry: this.telemetry,
             modelAccess: this.modelAccess,
             roundtrip: this.roundtrip,

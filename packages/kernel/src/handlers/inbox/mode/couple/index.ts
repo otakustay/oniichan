@@ -24,7 +24,7 @@ export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
         return 'couple';
     }
 
-    protected getChatRole(): ChatRole {
+    provideChatRole(): ChatRole {
         if (this.useCoderModel) {
             const reply = this.roundtrip.getLatestTextMessageStrict();
             return new CoupleCoderRole(this.config.actorModel, this.config.coderModel, reply);
