@@ -5,6 +5,7 @@ import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
 import {pickSharedTools} from '../tool';
+import {createPlan} from './tool';
 
 export class RingRingPlannerRole implements ChatRole {
     private readonly plannerModelName: string;
@@ -18,10 +19,10 @@ export class RingRingPlannerRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(
-            'create_plan',
-            'attempt_completion'
-        );
+        return [
+            ...pickSharedTools('attempt_completion'),
+            createPlan,
+        ];
     }
 
     provideObjective(): string {

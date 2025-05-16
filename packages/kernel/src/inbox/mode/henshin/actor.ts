@@ -5,6 +5,7 @@ import type {ToolDescription} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
 import {pickSharedTools} from '../tool';
+import {semanticEditCode} from './tool';
 
 export class HenshinActorRole implements ChatRole {
     private readonly actorModelName: string;
@@ -18,17 +19,19 @@ export class HenshinActorRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(
-            'read_file',
-            'read_directory',
-            'find_files_by_glob',
-            'find_files_by_regex',
-            'run_command',
-            'browser_preview',
-            'semantic_edit_code',
-            'attempt_completion',
-            'ask_followup_question'
-        );
+        return [
+            ...pickSharedTools(
+                'read_file',
+                'read_directory',
+                'find_files_by_glob',
+                'find_files_by_regex',
+                'run_command',
+                'browser_preview',
+                'attempt_completion',
+                'ask_followup_question'
+            ),
+            semanticEditCode,
+        ];
     }
 
     provideObjective(): string {

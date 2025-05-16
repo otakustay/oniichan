@@ -7,6 +7,7 @@ import type {ChatRole} from '../interface';
 import {renderCommonObjective} from '../prompt';
 import {pickSharedTools} from '../tool';
 import {serializeExecutorMessage} from './utils';
+import {completeTask} from './tool';
 
 export class RingRingCoderRole implements ChatRole {
     private readonly actorModelName: string;
@@ -23,18 +24,20 @@ export class RingRingCoderRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(
-            'read_file',
-            'read_directory',
-            'find_files_by_glob',
-            'find_files_by_regex',
-            'write_file',
-            'patch_file',
-            'delete_file',
-            'run_command',
-            'browser_preview',
-            'complete_task'
-        );
+        return [
+            ...pickSharedTools(
+                'read_file',
+                'read_directory',
+                'find_files_by_glob',
+                'find_files_by_regex',
+                'write_file',
+                'patch_file',
+                'delete_file',
+                'run_command',
+                'browser_preview'
+            ),
+            completeTask,
+        ];
     }
 
     provideObjective(): string {

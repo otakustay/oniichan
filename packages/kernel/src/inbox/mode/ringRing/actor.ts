@@ -6,6 +6,7 @@ import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
 import {pickSharedTools} from '../tool';
 import {serializeExecutorMessage} from './utils';
+import {completeTask} from './tool';
 
 export class RingRingActorRole implements ChatRole {
     private readonly actorModelName: string;
@@ -19,14 +20,16 @@ export class RingRingActorRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(
-            'read_file',
-            'read_directory',
-            'find_files_by_glob',
-            'find_files_by_regex',
-            'browser_preview',
-            'complete_task'
-        );
+        return [
+            ...pickSharedTools(
+                'read_file',
+                'read_directory',
+                'find_files_by_glob',
+                'find_files_by_regex',
+                'browser_preview'
+            ),
+            completeTask,
+        ];
     }
 
     provideObjective(): string {

@@ -6,6 +6,7 @@ import type {InboxMessage} from '../../interface';
 import {renderCommonObjective} from '../prompt';
 import type {ChatRole} from '../interface';
 import {pickSharedTools} from '../tool';
+import {completeCoderTask} from './tool';
 
 export class HenshinCoderRole implements ChatRole {
     private readonly actorModelName: string;
@@ -22,18 +23,20 @@ export class HenshinCoderRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(
-            'read_file',
-            'read_directory',
-            'find_files_by_glob',
-            'find_files_by_regex',
-            'write_file',
-            'patch_file',
-            'delete_file',
-            'run_command',
-            'browser_preview',
-            'complete_task'
-        );
+        return [
+            ...pickSharedTools(
+                'read_file',
+                'read_directory',
+                'find_files_by_glob',
+                'find_files_by_regex',
+                'write_file',
+                'patch_file',
+                'delete_file',
+                'run_command',
+                'browser_preview'
+            ),
+            completeCoderTask,
+        ];
     }
 
     provideObjective(): string {
