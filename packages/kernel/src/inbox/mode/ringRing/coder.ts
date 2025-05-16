@@ -1,21 +1,25 @@
-import type {AssistantRole} from '@oniichan/shared/inbox';
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
+import type {AssistantRole} from '@oniichan/shared/inbox';
 import type {ToolDescription} from '@oniichan/shared/tool';
-import type {InboxMessage} from '../../../../inbox';
-import {renderCommonObjective} from '../base/prompt';
-import type {ChatRole} from '../base/provider';
-import {pickSharedTools} from '../base/tool';
+import type {InboxMessage} from '../../interface';
+import type {ChatRole} from '../interface';
+import {renderCommonObjective} from '../prompt';
+import {pickSharedTools} from '../tool';
+import {serializeExecutorMessage} from './utils';
 
-export class StandaloneRole implements ChatRole {
-    private readonly defaultModelName: string;
+export class RingRingCoderRole implements ChatRole {
+    private readonly actorModelName: string;
 
-    constructor(defaultModelName: string) {
-        this.defaultModelName = defaultModelName;
+    private readonly coderModelName: string | null;
+
+    constructor(actorModelName: string, coderModelName: string | null) {
+        this.actorModelName = actorModelName;
+        this.coderModelName = coderModelName;
     }
 
     provideModelOverride(): string | undefined {
-        return undefined;
+        return this.coderModelName || this.actorModelName;
     }
 
     provideToolSet(): ToolDescription[] {
@@ -29,21 +33,20 @@ export class StandaloneRole implements ChatRole {
             'delete_file',
             'run_command',
             'browser_preview',
-            'attempt_completion',
-            'ask_followup_question'
+            'complete_task'
         );
     }
 
     provideObjective(): string {
-        const feature = getModelFeature(this.defaultModelName);
+        const feature = getModelFeature(this.actorModelName);
         return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {
-        return 'standalone';
+        return 'coder';
     }
 
     provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
-        return messages.map(v => v.toChatInputPayload());
+        return messages.map(serializeExecutorMessage);
     }
 }

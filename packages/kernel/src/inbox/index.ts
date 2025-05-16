@@ -29,3 +29,10 @@ export {
     isToolCallMessageOf,
     assertToolCallType,
 } from './assert';
+export {
+    StandaloneChatCapabilityProvider,
+    RingRingChatCapabilityProvider,
+    CoupleChatCapabilityProvider,
+    HenshinChatCapabilityProvider,
+} from './mode';
+export type {ChatCapabilityProvider, ChatCapabilityProviderInit, ChatRole} from './mode';

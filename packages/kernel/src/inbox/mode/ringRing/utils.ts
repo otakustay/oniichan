@@ -1,5 +1,5 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
-import type {InboxMessage} from '../../../../inbox';
+import type {InboxMessage} from '../../interface';
 
 export function serializeExecutorMessage(message: InboxMessage): ChatInputPayload {
     switch (message.type) {

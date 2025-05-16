@@ -1,9 +1,9 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {ChatCapabilityProvider} from '../base/provider';
-import type {ChatRole} from '../base/provider';
+import {BaseChatCapabilityProvider} from '../provider';
+import type {ChatRole} from '../interface';
 import {StandaloneRole} from './role';
 
-export class StandaloneChatCapabilityProvider extends ChatCapabilityProvider {
+export class StandaloneChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {
         return 'normal';
     }

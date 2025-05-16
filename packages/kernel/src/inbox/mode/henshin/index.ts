@@ -1,11 +1,11 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {isBreakpoingToolCallMessage} from '../../../../inbox';
-import {ChatCapabilityProvider} from '../base/provider';
-import type {ChatRole} from '../base/provider';
+import {isBreakpoingToolCallMessage} from '../../assert';
+import {BaseChatCapabilityProvider} from '../provider';
+import type {ChatRole} from '../interface';
 import {HenshinActorRole} from './actor';
 import {HenshinCoderRole} from './coder';
 
-export class HenshinChatCapabilityProvider extends ChatCapabilityProvider {
+export class HenshinChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {
         return 'henshin';
     }

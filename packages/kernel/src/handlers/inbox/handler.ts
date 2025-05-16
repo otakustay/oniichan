@@ -15,8 +15,8 @@ import {
     HenshinChatCapabilityProvider,
     RingRingChatCapabilityProvider,
     StandaloneChatCapabilityProvider,
-} from './mode';
-import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from './mode';
+} from '../../inbox';
+import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from '../../inbox';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
     // For every type that "will stream very freauently", we don't flush them immediately

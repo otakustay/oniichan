@@ -13,9 +13,8 @@ import type {
     InboxRoundtrip,
     InboxWorkflowOriginMessage,
     InboxWorkflowSourceMessage,
+    ChatRole,
 } from '../../inbox';
-// TODO: move tool implementation to role
-import type {ChatRole} from '../../handlers/inbox/mode';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;

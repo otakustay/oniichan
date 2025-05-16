@@ -1,4 +1,5 @@
-export type {ChatCapabilityProvider, ChatCapabilityProviderInit, ChatRole} from './base/provider';
+export type {ChatCapabilityProviderInit} from './provider';
+export type {ChatCapabilityProvider, ChatRole} from './interface';
 export {StandaloneChatCapabilityProvider} from './standalone';
 export {RingRingChatCapabilityProvider} from './ringRing';
 export {CoupleChatCapabilityProvider} from './couple';

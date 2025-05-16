@@ -4,8 +4,8 @@ import {StreamingToolParser} from '@oniichan/shared/tool';
 import type {ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
-import {ChatCapabilityProvider} from '../base/provider';
-import type {ChatRole} from '../base/provider';
+import {BaseChatCapabilityProvider} from '../provider';
+import type {ChatRole} from '../interface';
 import {CoupleActorRole} from './actor';
 import {CoupleCoderRole} from './coder';
 
@@ -17,7 +17,7 @@ async function* iterable(text: string): AsyncIterable<string> {
     yield text;
 }
 
-export class CoupleChatCapabilityProvider extends ChatCapabilityProvider {
+export class CoupleChatCapabilityProvider extends BaseChatCapabilityProvider {
     private useCoderModel = false;
 
     protected getWorkingMode(): MessageThreadWorkingMode {

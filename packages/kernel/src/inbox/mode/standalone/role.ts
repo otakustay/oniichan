@@ -2,20 +2,20 @@ import type {AssistantRole} from '@oniichan/shared/inbox';
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription} from '@oniichan/shared/tool';
-import type {InboxMessage} from '../../../../inbox';
-import {renderCommonObjective} from '../base/prompt';
-import type {ChatRole} from '../base/provider';
-import {pickSharedTools} from '../base/tool';
+import type {InboxMessage} from '../../interface';
+import {renderCommonObjective} from '../prompt';
+import type {ChatRole} from '../interface';
+import {pickSharedTools} from '../tool';
 
-export class CoupleActorRole implements ChatRole {
-    private readonly actorModelName: string;
+export class StandaloneRole implements ChatRole {
+    private readonly defaultModelName: string;
 
-    constructor(actorModelName: string) {
-        this.actorModelName = actorModelName;
+    constructor(defaultModelName: string) {
+        this.defaultModelName = defaultModelName;
     }
 
     provideModelOverride(): string | undefined {
-        return this.actorModelName;
+        return undefined;
     }
 
     provideToolSet(): ToolDescription[] {
@@ -35,12 +35,11 @@ export class CoupleActorRole implements ChatRole {
     }
 
     provideObjective(): string {
-        const feature = getModelFeature(this.actorModelName);
+        const feature = getModelFeature(this.defaultModelName);
         return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {
-        // Couple mode always behaves as standalone
         return 'standalone';
     }
 

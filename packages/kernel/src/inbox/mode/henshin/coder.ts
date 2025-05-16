@@ -2,22 +2,19 @@ import type {AssistantRole} from '@oniichan/shared/inbox';
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription} from '@oniichan/shared/tool';
-import type {InboxAssistantTextMessage, InboxMessage} from '../../../../inbox';
-import {renderCommonObjective} from '../base/prompt';
-import type {ChatRole} from '../base/provider';
-import {pickSharedTools} from '../base/tool';
+import type {InboxMessage} from '../../interface';
+import {renderCommonObjective} from '../prompt';
+import type {ChatRole} from '../interface';
+import {pickSharedTools} from '../tool';
 
-export class CoupleCoderRole implements ChatRole {
+export class HenshinCoderRole implements ChatRole {
     private readonly actorModelName: string;
 
     private readonly coderModelName: string | null;
 
-    private readonly partialReply: InboxAssistantTextMessage;
-
-    constructor(actorModelName: string, coderModelName: string | null, reply: InboxAssistantTextMessage) {
+    constructor(actorModelName: string, coderModelName: string | null) {
         this.actorModelName = actorModelName;
         this.coderModelName = coderModelName;
-        this.partialReply = reply;
     }
 
     provideModelOverride(): string | undefined {
@@ -25,24 +22,30 @@ export class CoupleCoderRole implements ChatRole {
     }
 
     provideToolSet(): ToolDescription[] {
-        // Coder is triggered inside `write_file` and `patch_file` tool
         return pickSharedTools(
+            'read_file',
+            'read_directory',
+            'find_files_by_glob',
+            'find_files_by_regex',
             'write_file',
-            'patch_file'
+            'patch_file',
+            'delete_file',
+            'run_command',
+            'browser_preview',
+            'complete_task'
         );
     }
 
     provideObjective(): string {
-        const feature = getModelFeature(this.coderModelName || this.actorModelName);
+        const feature = getModelFeature(this.actorModelName);
         return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
     provideRoleName(): AssistantRole {
-        // Couple mode always behaves as standalone
-        return 'standalone';
+        return 'coder';
     }
 
     provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
-        return [...messages, this.partialReply].map(v => v.toChatInputPayload());
+        return messages.map(v => v.toChatInputPayload());
     }
 }

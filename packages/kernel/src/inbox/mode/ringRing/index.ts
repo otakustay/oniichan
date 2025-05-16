@@ -1,11 +1,11 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {ChatCapabilityProvider} from '../base/provider';
-import type {ChatRole} from '../base/provider';
+import {BaseChatCapabilityProvider} from '../provider';
+import type {ChatRole} from '../interface';
 import {RingRingPlannerRole} from './planner';
 import {RingRingActorRole} from './actor';
 import {RingRingCoderRole} from './coder';
 
-export class RingRingChatCapabilityProvider extends ChatCapabilityProvider {
+export class RingRingChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {
         return 'ringRing';
     }

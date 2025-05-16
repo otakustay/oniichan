@@ -2,36 +2,19 @@ import {over} from '@otakustay/async-iterator';
 import type {InboxPromptReference} from '@oniichan/prompt';
 import type {Logger} from '@oniichan/shared/logger';
 import {getModelFeature} from '@oniichan/shared/model';
-import type {ChatInputPayload, ModelFeature, ModelResponse} from '@oniichan/shared/model';
+import type {ModelFeature, ModelResponse} from '@oniichan/shared/model';
 import {isAbortError} from '@oniichan/shared/error';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
-import type {
-    AssistantRole,
-    MessageInputChunk,
-    MessageThreadWorkingMode,
-    ReasoningMessageChunk,
-} from '@oniichan/shared/inbox';
+import type {MessageInputChunk, MessageThreadWorkingMode, ReasoningMessageChunk} from '@oniichan/shared/inbox';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {StreamingToolParser} from '@oniichan/shared/tool';
-import type {ToolDescription} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
-import type {ModelAccessHost, ModelChatOptions} from '../../../../core/model';
-import type {EditorHost} from '../../../../core/editor';
-import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../../../../inbox';
+import type {ModelAccessHost, ModelChatOptions} from '../../core/model';
+import type {EditorHost} from '../../core/editor';
+import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../interface';
 import {SystemPromptGenerator} from './prompt';
 import type {SystemPromptGeneratorInit} from './prompt';
-
-export interface ChatRole {
-    provideModelOverride(): string | undefined;
-
-    provideToolSet(): ToolDescription[];
-
-    provideObjective(): string;
-
-    provideRoleName(): AssistantRole;
-
-    provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[];
-}
+import type {ChatCapabilityProvider, ChatRole} from './interface';
 
 export interface ChatCapabilityProviderInit {
     logger: Logger;
@@ -44,7 +27,7 @@ export interface ChatCapabilityProviderInit {
     telemetry: FunctionUsageTelemetry;
 }
 
-export abstract class ChatCapabilityProvider {
+export abstract class BaseChatCapabilityProvider implements ChatCapabilityProvider {
     protected readonly logger: Logger;
 
     protected readonly references: InboxPromptReference[];
