@@ -1,10 +1,10 @@
 import type {WriteFileParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class WriteFileToolImplement extends ToolImplementBase<WriteFileParameter> {
+export class WriteFileToolImplement extends ToolProviderBase<WriteFileParameter> {
     async executeApprove(args: WriteFileParameter): Promise<ToolExecuteResult> {
         const chunk = this.getToolCallChunkStrict('write_file');
         const fileEdit = await this.applyFileEdit(args.path, 'write', args.content);

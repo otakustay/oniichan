@@ -29,6 +29,7 @@ export {
     isToolCallMessageOf,
     assertToolCallType,
 } from './assert';
+export type {ToolExecuteResult, ToolProviderInit} from './mode';
 export {
     StandaloneChatCapabilityProvider,
     RingRingChatCapabilityProvider,

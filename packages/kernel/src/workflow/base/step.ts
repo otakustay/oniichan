@@ -48,6 +48,10 @@ export abstract class WorkflowStep {
 
     protected readonly logger: Logger;
 
+    protected readonly commandExecutor: CommandExecutor;
+
+    protected readonly inboxConfig: InboxConfig;
+
     private readonly telemetry: FunctionUsageTelemetry;
 
     private readonly taskId: string;
@@ -64,6 +68,8 @@ export abstract class WorkflowStep {
         this.telemetry = init.telemetry;
         this.modelAccess = init.modelAccess;
         this.editorHost = init.editorHost;
+        this.commandExecutor = init.commandExecutor;
+        this.inboxConfig = init.inboxConfig;
         this.logger = init.logger.with({source: new.target.name, taskId: this.taskId});
         this.onUpdateThread = init.onUpdateThread;
     }

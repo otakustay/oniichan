@@ -285,7 +285,7 @@ const definitions = [
 ] as const satisfies ToolDescription[];
 const sharedTools = new Map(definitions.map(v => [v.name, v]));
 
-type SharedToolName = typeof definitions[number]['name'];
+export type SharedToolName = typeof definitions[number]['name'];
 
 export function pickSharedTools(...names: SharedToolName[]): ToolDescription[] {
     return names.map(v => sharedTools.get(v)).filter(v => !!v);

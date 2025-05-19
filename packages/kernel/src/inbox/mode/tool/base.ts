@@ -11,7 +11,7 @@ import type {EditorHost} from '../../../core/editor';
 import {assertToolCallMessage, assertToolCallType} from '../../../inbox';
 import type {InboxMessage, InboxMessageThread, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
 
-export interface ToolImplementInit {
+export interface ToolProviderInit {
     thread: InboxMessageThread;
     roundtrip: InboxRoundtrip;
     editorHost: EditorHost;
@@ -27,7 +27,19 @@ export interface ToolExecuteResult {
     executionData: Record<string, string | number | null>;
 }
 
-export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
+export interface ToolProvider<A = unknown, E = Partial<A>> {
+    requireUserApprove(): boolean;
+
+    executeReject(): Promise<string>;
+
+    executeApprove(args: A): Promise<ToolExecuteResult>;
+
+    extractParameters(generated: Record<string, RawToolCallParameter>): E;
+
+    parseParameters(extracted: E): A;
+}
+
+export abstract class ToolProviderBase<A = unknown, E = Partial<A>> implements ToolProvider<A, E> {
     protected readonly thread: InboxMessageThread;
 
     protected readonly roundtrip: InboxRoundtrip;
@@ -40,7 +52,7 @@ export abstract class ToolImplementBase<A = unknown, E = Partial<A>> {
 
     protected readonly inboxConfig: InboxConfig;
 
-    constructor(init: ToolImplementInit) {
+    constructor(init: ToolProviderInit) {
         this.thread = init.thread;
         this.roundtrip = init.roundtrip;
         this.editorHost = init.editorHost;

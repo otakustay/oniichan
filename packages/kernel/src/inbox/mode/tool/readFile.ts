@@ -3,15 +3,15 @@ import type {ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ensureArray} from '@oniichan/shared/array';
-import {resultMarkdown} from '../utils';
-import {ToolImplementBase} from './base';
+import {resultMarkdown} from './utils';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 
 interface Extracted {
     path: string[];
 }
 
-export class ReadFileToolImplement extends ToolImplementBase<ReadFileParameter, Extracted> {
+export class ReadFileToolImplement extends ToolProviderBase<ReadFileParameter, Extracted> {
     async executeApprove(args: ReadFileParameter): Promise<ToolExecuteResult> {
         const contents = await Promise.all(args.paths.map(v => this.read(v)));
         return {

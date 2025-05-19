@@ -1,26 +1,10 @@
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {assertToolCallMessage, createToolUseMessage} from '../../inbox';
 import {WorkflowExecutor} from '../base';
-import type {WorkflowStepInit, WorkflowExecuteResult} from '../base';
-import {ToolImplement} from './implement';
-import type {ToolExecuteResult, ToolImplementInit} from './implement';
+import type {WorkflowExecuteResult} from '../base';
+import type {ToolProviderInit, ToolExecuteResult} from '../../inbox';
 
 export class ToolWorkflowExecutor extends WorkflowExecutor {
-    private readonly implement: ToolImplement;
-
-    constructor(init: WorkflowStepInit) {
-        super(init);
-        const implementInit: ToolImplementInit = {
-            thread: this.thread,
-            roundtrip: this.roundtrip,
-            editorHost: init.editorHost,
-            logger: init.logger,
-            commandExecutor: init.commandExecutor,
-            inboxConfig: init.inboxConfig,
-        };
-        this.implement = new ToolImplement(implementInit);
-    }
-
     async executeWorkflow(): Promise<WorkflowExecuteResult> {
         const origin = this.getToolCallMessage();
         const status = origin.getWorkflowOriginStatus();
@@ -41,10 +25,24 @@ export class ToolWorkflowExecutor extends WorkflowExecutor {
         }
     }
 
-    private async checkAutoApprove(): Promise<WorkflowExecuteResult> {
+    private createToolImplement() {
         const origin = this.getToolCallMessage();
         const chunk = origin.findToolCallChunkStrict();
-        const requireApprove = this.implement.requireUserApprove(chunk.toolName);
+        const init: ToolProviderInit = {
+            thread: this.thread,
+            roundtrip: this.roundtrip,
+            editorHost: this.editorHost,
+            logger: this.logger,
+            commandExecutor: this.commandExecutor,
+            inboxConfig: this.inboxConfig,
+        };
+        return this.role.provideToolImplement(chunk.toolName, init);
+    }
+
+    private async checkAutoApprove(): Promise<WorkflowExecuteResult> {
+        const origin = this.getToolCallMessage();
+        const implement = this.createToolImplement();
+        const requireApprove = implement.requireUserApprove();
 
         if (requireApprove) {
             return {finished: true};
@@ -58,8 +56,9 @@ export class ToolWorkflowExecutor extends WorkflowExecutor {
         const origin = this.getToolCallMessage();
         const chunk = origin.findToolCallChunkStrict();
         origin.markWorkflowOriginStatus('executing');
+        const implement = this.createToolImplement();
         try {
-            const result = await this.implement.executeApprove(chunk.toolName, chunk.arguments);
+            const result = await implement.executeApprove(chunk.arguments);
             origin.markWorkflowOriginStatus(result.type === 'success' ? 'completed' : 'failed');
             return this.handleFinishAndContinue(result);
         }
@@ -75,9 +74,9 @@ export class ToolWorkflowExecutor extends WorkflowExecutor {
 
     private async runReject(): Promise<WorkflowExecuteResult> {
         const origin = this.getToolCallMessage();
-        const chunk = origin.findToolCallChunkStrict();
+        const implement = this.createToolImplement();
         try {
-            const message = await this.implement.executeReject(chunk.toolName);
+            const message = await implement.executeReject();
             origin.markWorkflowOriginStatus('userRejected');
             const result: ToolExecuteResult = {
                 type: 'rejected',

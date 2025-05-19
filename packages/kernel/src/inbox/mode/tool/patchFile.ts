@@ -2,7 +2,7 @@ import dedent from 'dedent';
 import type {PatchFileParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ensureArray} from '@oniichan/shared/array';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
@@ -11,7 +11,7 @@ interface Extracted {
     patch: string[];
 }
 
-export class PatchFilesToolImplement extends ToolImplementBase<PatchFileParameter, Extracted> {
+export class PatchFileToolImplement extends ToolProviderBase<PatchFileParameter, Extracted> {
     async executeApprove(args: PatchFileParameter): Promise<ToolExecuteResult> {
         const chunk = this.getToolCallChunkStrict('patch_file');
         const fileEdit = await this.applyFileEdit(args.path, 'patch', args.patches.join('\n'));

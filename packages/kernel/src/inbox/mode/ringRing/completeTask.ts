@@ -1,37 +1,37 @@
-import dedent from 'dedent';
-import type {CompleteTaskParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
-import type {ToolExecuteResult} from './base';
-import {asString} from './utils';
+import type {CompleteTaskParameter, ToolDescription} from '@oniichan/shared/tool';
+import dedent from 'dedent';
+import type {ToolExecuteResult} from '../tool';
+import {ToolProviderBase, asString} from '../tool';
+
+export const completeTask: ToolDescription = {
+    name: 'complete_task',
+    description:
+        'When you confirm the task given is completed, use this tool to finish your work, provide a confidence value. This tool is a hidden tool, user will not get any insight when this tool get executed, so do not leak the tool name or its paramters outside the tool call XML tag.',
+    parameters: {
+        type: 'object',
+        properties: {
+            confidence: {
+                type: 'number',
+                description:
+                    'The confidence value as you regard yourself completely fulfilled this task, an integer from 0 to 100, larger number means more confident',
+            },
+        },
+        required: ['confidence'],
+    },
+    usage: dedent`
+        <complete_task>
+            <confidence>87</confidence>
+        </complete_task>
+    `,
+};
 
 interface Extracted {
     confidence: number | undefined;
 }
 
-export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskParameter, Extracted> {
+export class CompleteTaskToolImplement extends ToolProviderBase<CompleteTaskParameter, Extracted> {
     async executeApprove(): Promise<ToolExecuteResult> {
-        if (this.thread.getWorkingMode() === 'ringRing') {
-            return this.executeRingRingMode();
-        }
-
-        return this.executeUniversal();
-    }
-
-    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
-        const confidence = parseInt(asString(generated.confidence) ?? '', 10);
-        return {
-            confidence: isNaN(confidence) ? undefined : confidence,
-        };
-    }
-
-    parseParameters(extracted: Extracted): CompleteTaskParameter {
-        return {
-            confidence: extracted.confidence ?? 0,
-        };
-    }
-
-    private async executeRingRingMode(): Promise<ToolExecuteResult> {
         const plan = this.roundtrip.findLastToolCallChunkByToolNameStrict('create_plan');
         const executingIndex = plan.arguments.tasks.findIndex(v => v.status === 'executing');
         plan.arguments.tasks[executingIndex].status = 'completed';
@@ -80,16 +80,16 @@ export class CompleteTaskToolImplement extends ToolImplementBase<CompleteTaskPar
         };
     }
 
-    private async executeUniversal(): Promise<ToolExecuteResult> {
+    extractParameters(generated: Record<string, RawToolCallParameter>): Extracted {
+        const confidence = parseInt(asString(generated.confidence) ?? '', 10);
         return {
-            type: 'success',
-            finished: false,
-            executionData: {},
-            template: dedent`
-                Now you should examine the changes made in assigned task, and determine if the user's request is fully satisfied.
+            confidence: isNaN(confidence) ? undefined : confidence,
+        };
+    }
 
-                If the original request is not fully completed, you should continue working on it, otherwise you can finish by using the "attempt_completion" tool.
-            `,
+    parseParameters(extracted: Extracted): CompleteTaskParameter {
+        return {
+            confidence: extracted.confidence ?? 0,
         };
     }
 }

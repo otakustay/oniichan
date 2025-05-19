@@ -3,10 +3,8 @@ import type {Schema, ValidateFunction} from 'ajv';
 import {renderFixToolCallPrompt} from '@oniichan/prompt';
 import type {FixToolCallView} from '@oniichan/prompt';
 import {WorkflowValidator} from '../base';
-import type {WorkflowStepInit} from '../base';
 import {assertAssistantTextMessage, createDetachedUserRequestMessage} from '../../inbox';
-import {ToolImplement} from './implement';
-import type {ToolImplementInit} from './implement';
+import type {ToolProviderInit} from '../../inbox';
 
 const ajv = new Ajv();
 
@@ -65,27 +63,21 @@ function formatErrorMessage(error: ValidationError) {
 }
 
 export class ToolWorkflowValidator extends WorkflowValidator {
-    private readonly implement: ToolImplement;
-
-    constructor(init: WorkflowStepInit) {
-        super(init);
-        const implementInit: ToolImplementInit = {
-            thread: this.thread,
-            roundtrip: this.roundtrip,
-            editorHost: init.editorHost,
-            logger: init.logger,
-            commandExecutor: init.commandExecutor,
-            inboxConfig: init.inboxConfig,
-        };
-        this.implement = new ToolImplement(implementInit);
-    }
-
     async validateWorkflow(): Promise<boolean> {
         const source = this.getWorkflowSourceMessageStrict();
         assertAssistantTextMessage(source);
         const tool = this.getToolDefinition();
         const chunk = source.findToolCallChunkStrict();
-        const extracted = this.implement.extractArguments(tool.name, chunk.arguments);
+        const init: ToolProviderInit = {
+            thread: this.thread,
+            roundtrip: this.roundtrip,
+            editorHost: this.editorHost,
+            logger: this.logger,
+            commandExecutor: this.commandExecutor,
+            inboxConfig: this.inboxConfig,
+        };
+        const implement = this.role.provideToolImplement(tool.name, init);
+        const extracted = implement.extractArguments(chunk.arguments);
         const validateResult = this.validateArguments(tool.parameters, extracted);
 
         if (validateResult.type === 'valid') {

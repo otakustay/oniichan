@@ -3,11 +3,11 @@ import dedent from 'dedent';
 import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class GlobFilesToolImplement extends ToolImplementBase<FindFilesByGlobParameter> {
+export class GlobFilesToolImplement extends ToolProviderBase<FindFilesByGlobParameter> {
     async executeApprove(args: FindFilesByGlobParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');

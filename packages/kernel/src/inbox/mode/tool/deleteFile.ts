@@ -1,10 +1,10 @@
 import type {DeleteFileParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class DeleteFileToolImplement extends ToolImplementBase<DeleteFileParameter> {
+export class DeleteFileToolImplement extends ToolProviderBase<DeleteFileParameter> {
     async executeApprove(args: DeleteFileParameter): Promise<ToolExecuteResult> {
         const chunk = this.getToolCallChunkStrict('delete_file');
         // It's a redundant check, but doesn't hit performance much

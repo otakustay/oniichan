@@ -4,11 +4,11 @@ import type {ReadDirectoryParameter} from '@oniichan/shared/tool';
 import type {FileEntry} from '@oniichan/editor-host/protocol';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class ReadDirectoryToolImplement extends ToolImplementBase<ReadDirectoryParameter> {
+export class ReadDirectoryToolImplement extends ToolProviderBase<ReadDirectoryParameter> {
     async executeApprove(args: ReadDirectoryParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');

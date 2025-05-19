@@ -1,10 +1,10 @@
 import type {AskFollowupQuestionParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class AskFollowupQuestionToolImplement extends ToolImplementBase<AskFollowupQuestionParameter> {
+export class AskFollowupQuestionToolImplement extends ToolProviderBase<AskFollowupQuestionParameter> {
     async executeApprove(): Promise<ToolExecuteResult> {
         return {
             type: 'success',

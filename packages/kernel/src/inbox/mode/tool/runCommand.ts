@@ -2,7 +2,7 @@ import dedent from 'dedent';
 import type {RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
@@ -18,7 +18,7 @@ function findCommandNames(script: string): string[] {
         .filter(v => typeof v === 'string');
 }
 
-export class RunCommandToolImplement extends ToolImplementBase<RunCommandParameter> {
+export class RunCommandToolImplement extends ToolProviderBase<RunCommandParameter> {
     async executeApprove(args: RunCommandParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');

@@ -1,10 +1,10 @@
 import type {AttemptCompletionParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class AttemptCompletionToolImplement extends ToolImplementBase<AttemptCompletionParameter> {
+export class AttemptCompletionToolImplement extends ToolProviderBase<AttemptCompletionParameter> {
     async executeApprove(): Promise<ToolExecuteResult> {
         return {
             type: 'success',

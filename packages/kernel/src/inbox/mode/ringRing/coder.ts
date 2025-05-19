@@ -1,22 +1,39 @@
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole} from '@oniichan/shared/inbox';
-import type {ToolDescription} from '@oniichan/shared/tool';
+import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
 import {renderCommonObjective} from '../prompt';
-import {pickSharedTools} from '../tool';
+import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool';
+import {pickSharedTools, ToolImplementFactory} from '../tool';
 import {serializeExecutorMessage} from './utils';
-import {completeTask} from './tool';
+import {completeTask, CompleteTaskToolImplement} from './completeTask';
+
+const tools: SharedToolName[] = [
+    'read_file',
+    'read_directory',
+    'find_files_by_glob',
+    'find_files_by_regex',
+    'write_file',
+    'patch_file',
+    'delete_file',
+    'run_command',
+    'browser_preview',
+];
 
 export class RingRingCoderRole implements ChatRole {
     private readonly actorModelName: string;
 
     private readonly coderModelName: string | null;
 
+    private readonly toolFactory = new ToolImplementFactory();
+
     constructor(actorModelName: string, coderModelName: string | null) {
         this.actorModelName = actorModelName;
         this.coderModelName = coderModelName;
+        this.toolFactory.registerShared(...tools);
+        this.toolFactory.register('complete_task', CompleteTaskToolImplement);
     }
 
     provideModelOverride(): string | undefined {
@@ -25,19 +42,13 @@ export class RingRingCoderRole implements ChatRole {
 
     provideToolSet(): ToolDescription[] {
         return [
-            ...pickSharedTools(
-                'read_file',
-                'read_directory',
-                'find_files_by_glob',
-                'find_files_by_regex',
-                'write_file',
-                'patch_file',
-                'delete_file',
-                'run_command',
-                'browser_preview'
-            ),
+            ...pickSharedTools(...tools),
             completeTask,
         ];
+    }
+
+    provideToolImplement(toolName: ToolName, init: ToolProviderInit): ToolImplement {
+        return this.toolFactory.create(toolName, init);
     }
 
     provideObjective(): string {

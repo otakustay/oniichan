@@ -1,17 +1,23 @@
 import dedent from 'dedent';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {AssistantRole} from '@oniichan/shared/inbox';
-import type {ToolDescription} from '@oniichan/shared/tool';
+import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
-import {pickSharedTools} from '../tool';
-import {createPlan} from './tool';
+import type {ToolImplement} from '../tool';
+import {pickSharedTools, ToolImplementFactory} from '../tool';
+import type {ToolProviderInit} from '../tool';
+import {createPlan, CreatePlanToolImplement} from './createPlan';
 
 export class RingRingPlannerRole implements ChatRole {
     private readonly plannerModelName: string;
 
+    private readonly toolFactory = new ToolImplementFactory();
+
     constructor(plannerModelName: string) {
         this.plannerModelName = plannerModelName;
+        this.toolFactory.registerShared('attempt_completion');
+        this.toolFactory.register('create_plan', CreatePlanToolImplement);
     }
 
     provideModelOverride(): string | undefined {
@@ -23,6 +29,10 @@ export class RingRingPlannerRole implements ChatRole {
             ...pickSharedTools('attempt_completion'),
             createPlan,
         ];
+    }
+
+    provideToolImplement(toolName: ToolName, init: ToolProviderInit): ToolImplement {
+        return this.toolFactory.create(toolName, init);
     }
 
     provideObjective(): string {

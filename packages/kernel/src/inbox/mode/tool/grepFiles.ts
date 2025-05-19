@@ -3,7 +3,7 @@ import unixify from 'unixify';
 import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
@@ -47,7 +47,7 @@ interface ConsumeState {
     current: GrepResult | null;
 }
 
-export class GrepFilesToolImplement extends ToolImplementBase<FindFilesByRegExpParameter> {
+export class GrepFilesToolImplement extends ToolProviderBase<FindFilesByRegExpParameter> {
     private linesCount = 0;
 
     private readonly results: GrepResult[] = [];

@@ -1,10 +1,10 @@
 import type {BrowserPreviewParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolImplementBase} from './base';
+import {ToolProviderBase} from './base';
 import type {ToolExecuteResult} from './base';
 import {asString} from './utils';
 
-export class BrowserPreviewToolImplement extends ToolImplementBase<BrowserPreviewParameter> {
+export class BrowserPreviewToolImplement extends ToolProviderBase<BrowserPreviewParameter> {
     async executeApprove(args: BrowserPreviewParameter): Promise<ToolExecuteResult> {
         const response = await fetch(args.url);
 
