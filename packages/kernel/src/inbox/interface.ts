@@ -20,7 +20,6 @@ import type {
     MessageThreadPersistData,
     MessageThreadWorkingMode,
     ParsedToolCallMessageChunkOf,
-    AssistantRole,
 } from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
 
@@ -29,7 +28,7 @@ export interface InboxRoundtrip {
     getRequestText(): string;
     getStatus(): RoundtripStatus;
     markStatus(status: RoundtripStatus): void;
-    startTextResponse(messageUuid: string, role: AssistantRole): InboxAssistantTextMessage;
+    startTextResponse(messageUuid: string, role: string): InboxAssistantTextMessage;
     startWorkflowResponse(origin: InboxOriginMessageBase): InboxWorkflow;
     hasMessage(messageUuid: string): boolean;
     findMessageByUuid(messageUuid: string): InboxMessage | null;
@@ -92,6 +91,7 @@ export interface ToolCallMessageToChatInpytPayloadOptions {
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export interface InboxToolCallMessage<N extends ToolName = ToolName> extends InboxOriginMessageBase<'toolCall'> {
     toMessageData(): ToolCallMessageData;
+    getRole(): string;
     findToolCallChunkStrict(): ParsedToolCallMessageChunkOf<N>;
     toChatInputPayload(options?: ToolCallMessageToChatInpytPayloadOptions): ChatInputPayload;
 }

@@ -1,4 +1,3 @@
-import type {AssistantRole} from '@oniichan/shared/inbox';
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
@@ -46,7 +45,7 @@ export class CoupleCoderRole implements ChatRole {
         return renderCommonObjective({requireThinking: feature.requireToolThinking});
     }
 
-    provideRoleName(): AssistantRole {
+    provideRoleName(): string {
         return 'coder';
     }
 

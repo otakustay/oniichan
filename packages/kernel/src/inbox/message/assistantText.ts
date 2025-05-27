@@ -7,7 +7,6 @@ import type {
     MessageInputChunk,
     WorkflowSourceChunkStatus,
     ToolCallMessageChunk,
-    AssistantRole,
 } from '@oniichan/shared/inbox';
 import type {InboxRoundtrip, InboxAssistantTextMessage} from '../interface';
 import {MessageBase} from './base';
@@ -16,7 +15,7 @@ import {chunksToModelText} from './utils';
 export class AssistantTextMessage extends MessageBase<'assistantText'> implements InboxAssistantTextMessage {
     private readonly chunks: AssistantTextMessageContentChunk[] = [];
 
-    private readonly role: AssistantRole = 'standalone';
+    private readonly role: string = 'standalone';
 
     static from(data: AssistantTextMessageData, roundtrip: InboxRoundtrip) {
         const message = new AssistantTextMessage(data.uuid, data.role, roundtrip);
@@ -24,7 +23,7 @@ export class AssistantTextMessage extends MessageBase<'assistantText'> implement
         return message;
     }
 
-    constructor(uuid: string, role: AssistantRole, roundtrip: InboxRoundtrip) {
+    constructor(uuid: string, role: string, roundtrip: InboxRoundtrip) {
         super(uuid, 'assistantText', roundtrip);
         this.role = role;
     }

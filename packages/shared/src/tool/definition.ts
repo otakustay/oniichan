@@ -1,5 +1,5 @@
 import type {JSONSchema7} from 'json-schema';
-import type {RawToolCallParameter, AssistantRole, MessageThreadWorkingMode} from '../inbox';
+import type {RawToolCallParameter} from '../inbox';
 
 export interface ParameterInfo {
     type: 'object';
@@ -44,20 +44,17 @@ export function isEditToolName(name: ToolName) {
  */
 export function isBreakpointToolName(name: ToolName) {
     return name === 'attempt_completion'
+        || name === 'ask_followup_question'
         || name === 'complete_task'
         || name === 'create_plan'
         || name === 'semantic_edit_code';
 }
-
-export type ToolSupportTarget = AssistantRole | [mode: MessageThreadWorkingMode, role: AssistantRole];
 
 export interface ToolDescription {
     name: ToolName;
     description: string;
     parameters: ParameterInfo;
     usage: string;
-    // TODO: remove supported property
-    supported?: ToolSupportTarget[];
 }
 
 export interface ReadFileParameter {

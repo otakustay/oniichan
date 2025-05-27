@@ -15,6 +15,7 @@ import {
     HenshinChatCapabilityProvider,
     RingRingChatCapabilityProvider,
     StandaloneChatCapabilityProvider,
+    SenpaiChatCapabilityProvider,
 } from '../../inbox';
 import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from '../../inbox';
 
@@ -206,6 +207,8 @@ export abstract class InboxRequestHandler<I, O> extends RequestHandler<I, O> {
                 return new CoupleChatCapabilityProvider(providerInit);
             case 'henshin':
                 return new HenshinChatCapabilityProvider(providerInit);
+            case 'senpai':
+                return new SenpaiChatCapabilityProvider(providerInit);
             default:
                 assertNever<string>(workingMode, v => `Unknown working mode ${v}`);
         }

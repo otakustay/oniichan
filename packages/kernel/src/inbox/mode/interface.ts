@@ -1,4 +1,4 @@
-import type {AssistantRole, MessageInputChunk} from '@oniichan/shared/inbox';
+import type {MessageInputChunk} from '@oniichan/shared/inbox';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../interface';
@@ -13,7 +13,7 @@ export interface ChatRole {
 
     provideObjective(): string;
 
-    provideRoleName(): AssistantRole;
+    provideRoleName(): string;
 
     provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[];
 }

@@ -1,8 +1,6 @@
 import type {ToolParsedChunk, ContentTagName} from '../tool';
 import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
 
-export type AssistantRole = 'standalone' | 'planner' | 'actor' | 'coder';
-
 export interface ReasoningMessageChunk {
     type: 'reasoning';
     content: string;
@@ -54,13 +52,13 @@ export interface AssistantResponseMessageData extends MessageDataBase {
 
 export interface AssistantTextMessageData extends MessageDataBase {
     type: 'assistantText';
-    role: AssistantRole;
+    role: string;
     chunks: AssistantTextMessageContentChunk[];
 }
 
 export interface ToolCallMessageData extends MessageDataBase {
     type: 'toolCall';
-    role: AssistantRole;
+    role: string;
     chunks: ToolCallMessageContentChunk[];
 }
 

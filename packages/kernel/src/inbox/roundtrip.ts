@@ -1,6 +1,5 @@
 import {assertHasValue, assertNever} from '@oniichan/shared/error';
 import type {
-    AssistantRole,
     ParsedToolCallMessageChunkOf,
     RoundtripData,
     RoundtripMessageData,
@@ -82,7 +81,7 @@ export class Roundtrip implements InboxRoundtrip {
         }
     }
 
-    startTextResponse(messageUuid: string, role: AssistantRole) {
+    startTextResponse(messageUuid: string, role: string) {
         const response: RoundtripMessageResponse = {
             type: 'message',
             message: new AssistantTextMessage(messageUuid, role, this),

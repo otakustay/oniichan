@@ -1,6 +1,6 @@
 import dedent from 'dedent';
 import type {ChatInputPayload} from '@oniichan/shared/model';
-import type {AssistantRole} from '@oniichan/shared/inbox';
+
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
 import type {InboxMessage} from '../../interface';
 import type {ChatRole} from '../interface';
@@ -120,7 +120,7 @@ export class RingRingPlannerRole implements ChatRole {
         `;
     }
 
-    provideRoleName(): AssistantRole {
+    provideRoleName(): string {
         return 'planner';
     }
 

@@ -35,5 +35,6 @@ export {
     RingRingChatCapabilityProvider,
     CoupleChatCapabilityProvider,
     HenshinChatCapabilityProvider,
+    SenpaiChatCapabilityProvider,
 } from './mode';
 export type {ChatCapabilityProvider, ChatCapabilityProviderInit, ChatRole} from './mode';

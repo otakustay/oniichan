@@ -1,7 +1,7 @@
 import type {AssistantMessageData, UserRequestMessageData} from './message';
 import type {RoundtripData, RoundtripStatus} from './roundtrip';
 
-export type MessageThreadWorkingMode = 'normal' | 'ringRing' | 'couple' | 'henshin';
+export type MessageThreadWorkingMode = 'normal' | 'ringRing' | 'couple' | 'henshin' | 'senpai';
 
 export interface RoundtripMessageData {
     status: RoundtripStatus;

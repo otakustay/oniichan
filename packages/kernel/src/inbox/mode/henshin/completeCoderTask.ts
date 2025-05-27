@@ -20,10 +20,10 @@ export const completeCoderTask: ToolDescription = {
         required: ['confidence'],
     },
     usage: dedent`
-            <complete_task>
-                <confidence>87</confidence>
-            </complete_task>
-        `,
+        <complete_task>
+            <confidence>87</confidence>
+        </complete_task>
+    `,
 };
 
 interface Extracted {

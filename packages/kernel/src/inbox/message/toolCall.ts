@@ -5,7 +5,6 @@ import type {
     ToolCallMessageContentChunk,
     WorkflowChunkStatus,
     ParsedToolCallMessageChunkOf,
-    AssistantRole,
 } from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
 import {assertHasValue} from '@oniichan/shared/error';
@@ -18,7 +17,7 @@ type Name = ToolName;
 export class ToolCallMessage<N extends Name = Name> extends MessageBase<'toolCall'> implements InboxToolCallMessage<N> {
     private readonly chunks: ToolCallMessageContentChunk[] = [];
 
-    private readonly role: AssistantRole;
+    private readonly role: string;
 
     static from(data: ToolCallMessageData, roundtrip: InboxRoundtrip) {
         const message = new ToolCallMessage(roundtrip, data);
@@ -29,6 +28,10 @@ export class ToolCallMessage<N extends Name = Name> extends MessageBase<'toolCal
         super(source.uuid, 'toolCall', roundtrip);
         this.role = source.role;
         this.restore(source);
+    }
+
+    getRole() {
+        return this.role;
     }
 
     toChatInputPayload(options?: ToolCallMessageToChatInpytPayloadOptions): ChatInputPayload {

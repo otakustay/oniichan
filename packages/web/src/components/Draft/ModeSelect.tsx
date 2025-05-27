@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import {SiCircle} from 'react-icons/si';
 import {RiHeartsLine} from 'react-icons/ri';
 import {IoSwapHorizontalOutline} from 'react-icons/io5';
+import {FaUserCheck} from 'react-icons/fa';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import Avatar from '@/components/Avatar';
 import Rating from '@/components/Rating';
@@ -45,6 +46,13 @@ const DESCRIPTION_BY_MODE: Record<MessageThreadWorkingMode, ModeDescription> = {
         cost: 3,
         standard: 'V3 (actor) + Claude (coder)',
         text: 'Actor transforms to coder when coding task appears, write better code than couple mode.',
+    },
+    senpai: {
+        speed: 3,
+        quality: 5,
+        cost: 5,
+        standard: 'V3 (actor) + V3 (reviewer)',
+        text: 'Reviewer helps to check the result of task to seize better quality.',
     },
 };
 
@@ -173,6 +181,13 @@ export default function ModeSelect({onSelect}: Props) {
                 <Item
                     icon={<SiCircle />}
                     workingMode="ringRing"
+                    onSelect={onSelect}
+                    onHover={setHover}
+                    onLeave={leave}
+                />
+                <Item
+                    icon={<FaUserCheck />}
+                    workingMode="senpai"
                     onSelect={onSelect}
                     onHover={setHover}
                     onLeave={leave}

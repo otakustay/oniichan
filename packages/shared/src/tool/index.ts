@@ -22,7 +22,6 @@ export type {
     ModelToolCallInputWithSource,
     ToolDescription,
     ToolName,
-    ToolSupportTarget,
 } from './definition';
 export {StreamingToolParser} from './parse';
 export type {ToolParsedChunk, ContentTagName} from './parse';

@@ -6,6 +6,7 @@ import {renderCommonObjective} from '../prompt';
 import type {ChatRole} from '../interface';
 import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool';
 import {pickSharedTools, ToolImplementFactory} from '../tool';
+import {completeActorTask, CompleteActorTaskToolImplement} from './completeActorTask';
 
 const tools: SharedToolName[] = [
     'read_file',
@@ -18,10 +19,9 @@ const tools: SharedToolName[] = [
     'run_command',
     'browser_preview',
     'attempt_completion',
-    'ask_followup_question',
 ];
 
-export class StandaloneRole implements ChatRole {
+export class SenpaiActorRole implements ChatRole {
     private readonly defaultModelName: string;
 
     private readonly toolFactory = new ToolImplementFactory();
@@ -29,14 +29,15 @@ export class StandaloneRole implements ChatRole {
     constructor(defaultModelName: string) {
         this.defaultModelName = defaultModelName;
         this.toolFactory.registerShared(...tools);
+        this.toolFactory.register('attempt_completion', CompleteActorTaskToolImplement);
     }
 
     provideModelOverride(): string | undefined {
-        return undefined;
+        return this.defaultModelName;
     }
 
     provideToolSet(): ToolDescription[] {
-        return pickSharedTools(...tools);
+        return [...pickSharedTools(...tools), completeActorTask];
     }
 
     provideToolImplement(toolName: ToolName, init: ToolProviderInit): ToolImplement {
@@ -49,7 +50,7 @@ export class StandaloneRole implements ChatRole {
     }
 
     provideRoleName(): string {
-        return 'standalone';
+        return 'actor';
     }
 
     provideSerializedMessages(messages: InboxMessage[]): ChatInputPayload[] {
