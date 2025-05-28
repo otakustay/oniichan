@@ -1,6 +1,6 @@
 # Change Log
 
-[UNRELEASED]
+## [3.7.0] - 2025-05-28
 
 - Added Henshin mode, where Oniichan can intelligently switch to different role to complete different tasks.
 - Added Senpai mode, which performs more active validation after task completion to improve quality.
@@ -10,7 +10,7 @@
 
 - Incorrect file edits would cause subsequent edits to the same file to consistently fail.
 
-[3.6.0] - 2025-04-09
+## [3.6.0] - 2025-04-09
 
 ### Added
 
@@ -24,7 +24,7 @@
 - Fixed background color when using `#` to reference files in mail input box in dark theme.
 - Fixed inability to use `#` to reference files when sending mail messages after first opening the sidebar.
 
-[3.5.0] - 2025-03-21
+## [3.5.0] - 2025-03-21
 
 ### Added
 
@@ -35,7 +35,7 @@
 
 - Fixed issue where parsing order was incorrect when read and write tasks intersect in the plan.
 
-[3.4.0] - 2025-03-18
+## [3.4.0] - 2025-03-18
 
 ### Added
 
@@ -45,7 +45,7 @@
 
 - Removed experimental "Deep Think" feature, which was terrible in both experience and production quality.
 
-[3.3.0] - 2025-02-27
+## [3.3.0] - 2025-02-27
 
 ### Added
 
@@ -59,7 +59,7 @@
 
 - Fixed issue of losing some directories when extracting project file structure.
 
-[3.2.0] - 2025-02-24
+## [3.2.0] - 2025-02-24
 
 ### Added
 
@@ -69,7 +69,7 @@
 
 - Resolved issue where "Compose New Message" command couldn't pop up editor when Oniichan sidebar was never opened.
 
-[3.1.0] - 2025-02-23
+## [3.1.0] - 2025-02-23
 
 ### Added
 
