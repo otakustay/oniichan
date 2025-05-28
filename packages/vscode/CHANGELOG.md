@@ -1,284 +1,294 @@
 # Change Log
 
+[UNRELEASED]
+
+- Added Henshin mode, where Oniichan can intelligently switch to different role to complete different tasks.
+- Added Senpai mode, which performs more active validation after task completion to improve quality.
+- When opening the diff view, it automatically scrolls to the first change block.
+
+### Fixed
+
+- Incorrect file edits would cause subsequent edits to the same file to consistently fail.
+
 [3.6.0] - 2025-04-09
 
 ### Added
 
-- 在邮件系统中，变更的文件汇总区域有更大的点击范围来查看文件变更。
-- 使用OpenRouter接口获取准确的模型用量等数据，通过“Open Oniichan Data Folder”命令并打开`model-usage.jsonl`可以看到详情。
-- 通过尽早地中断无用的模型响应流，节约更多的模型花费。
+- In the mail system, the file changes summary area has a larger clickable range for viewing file changes.
+- Use OpenRouter interface to obtain accurate model usage data, view details by using "Open Oniichan Data Folder" command and opening `model-usage.jsonl`.
+- Save more model costs by early termination of useless model response streams.
 
 ### Fixed
 
-- 暗色主题下邮件输入框的文字颜色错误。
-- 暗色主题下邮件输入框使用`#`引用文件时的背景色错误。
-- 首次打开侧边栏后发送邮件消息无法使用`#`引用文件。
+- Fixed text color in mail input box in dark theme.
+- Fixed background color when using `#` to reference files in mail input box in dark theme.
+- Fixed inability to use `#` to reference files when sending mail messages after first opening the sidebar.
 
 [3.5.0] - 2025-03-21
 
 ### Added
 
-- 邮件系统新增了Couple模式，这是一个以成本为核心但依然保持代码生成质量的模式，参考[Use Couple Mode To Dramatically Reduce Cost](https://github.com/otakustay/oniichan/discussions/41)了解详细情况。
-- 模型具备一次读取多个文件的能力，继续省钱～
+- Added Couple mode to the mail system, a cost-focused mode that maintains code generation quality, see [Use Couple Mode To Dramatically Reduce Cost](https://github.com/otakustay/oniichan/discussions/41) for details.
+- Model now has the ability to read multiple files at once, continuing to save money~
 
 ### Fixed
 
-- 修复计划中读和写任务交叉时，解析后顺序错误的问题。
+- Fixed issue where parsing order was incorrect when read and write tasks intersect in the plan.
 
 [3.4.0] - 2025-03-18
 
 ### Added
 
-- 邮件系统增加一个Ring Ring模式，将任务分为规划、行动、编程三部分处理，这个模式在成本上有极大的优势，参考[Announcing RingRing Mode](https://github.com/otakustay/oniichan/discussions/39)了解详细情况。
+- Added Ring Ring mode to the mail system, which divides tasks into planning, action, and programming parts. This mode has significant cost advantages, see [Announcing RingRing Mode](https://github.com/otakustay/oniichan/discussions/39) for details.
 
 ### Removed
 
-- 移除实验中的“Deep Think”功能，无论在体验上还是生产质量上都非常糟糕。
+- Removed experimental "Deep Think" feature, which was terrible in both experience and production quality.
 
 [3.3.0] - 2025-02-27
 
 ### Added
 
-- 增加一个“Initialize Project Config`命令快速在项目下初始化Oniichan的配置文件。
-- 现在你可以使用Rules来控制邮件系统的回复效果了，修改`.oniichan/rules/default.omd`即可。
-- 可以直接在代码编辑器里写出来需求，再使用“Send This Line To Inbox”命令直接发送到邮件系统，如果在注释中编写，使用“`”符号还能自动补全文件内的元素。
-- 增加一个配置控制自动执行大模型生成的命令，同时你可以排除一些命令，这些命令将在选择自动执行时变成手动确认，非自动执行时变成自动执行，在设置中搜索`oniichan.inbox`来查找配置。
-- 当配置自动执行命令并未设置排除列表时，内置一系列高危命令为手动确认执行。
+- Added "Initialize Project Config" command to quickly initialize Oniichan configuration file in the project.
+- Now you can use Rules to control mail system response effects by modifying `.oniichan/rules/default.omd`.
+- You can write requirements directly in the code editor and use "Send This Line To Inbox" command to send to the mail system. When writing in comments, use "`" symbol to auto-complete elements in the file.
+- Added configuration to control automatic execution of large model generated commands. You can exclude certain commands which will require manual confirmation when auto-execution is selected, and auto-execute when not selected. Search for `oniichan.inbox` in settings to find configuration.
+- When auto-execute commands configuration has no exclusion list, a series of high-risk commands are built-in for manual confirmation.
 
 ### Fixed
 
-- 修复提取项目文件结构时丢失部分目录的问题。
+- Fixed issue of losing some directories when extracting project file structure.
 
 [3.2.0] - 2025-02-24
 
 ### Added
 
-- 邮件系统支持在一次对话中回滚到历史的消息状态，撤销所有新消息的文件编辑。
+- Mail system supports rolling back to historical message states in one conversation, undoing all file edits from new messages.
 
 ### Fixed
 
-- 解决在从未打开Oniichan侧边栏时，调用“Compose New Message”命令无法弹出编辑器的问题。
+- Resolved issue where "Compose New Message" command couldn't pop up editor when Oniichan sidebar was never opened.
 
 [3.1.0] - 2025-02-23
 
 ### Added
 
-- 邮件系统增加了“深度思考”的选项，在使用任何模型时都可以引入DeepSeek R1做前置思考。
+- Added "deep thinking" option to mail system, introducing DeepSeek R1 for preliminary thinking when using any model.
 
 ### Fixed
 
-- 坏掉的脚手架功能已经修复了。
-- 不再让模型有任何机会一次回复使用多个工具。
-- 解决对工作区的文件增删的追踪错误的问题。
+- Fixed broken scaffold functionality.
+- No longer allowing models any chance to use multiple tools in one response.
+- Fixed issue with tracking file additions and deletions in workspace.
 
 ## [3.0.1] - 2025-02-21
 
 ### Fixed
 
-- 邮件消息的文件编辑生成过程中隐藏审查入口。
-- 重新优化了安装包的体积。
+- Hide review entry during file edit generation in mail messages.
+- Re-optimized installation package size.
 
 ## [3.0.0] - 2025-02-21
 
 ### Breaking
 
-- 邮件系统从这个版本开始，会主动修改项目的文件内容，可以通过“Reject”来撤销修改。
+- Starting from this version, the mail system will actively modify project file content, changes can be undone through "Reject".
 
 ### Added
 
-- 邮件系统会跟踪推荐的代码是否被采纳，如果回复消息时有文件内容与推荐的不同，会给出提示。
-- 在写邮件的时候，可以用`#`来引用文件和目录。
-- 邮件系统中模型输出的项目内文件名现在可以点击并打开啦。
-- 优化了一把项目文件结构的处理，现在模型会更准确地知道项目下文件和目录的结构与分布，提供更准确的生成。
-- 邮件消息的最顶部增加了一轮任务中文件编辑的汇总，可以依次查看，并支持单个或全部采纳、撤销。
+- Mail system tracks whether recommended code is adopted, providing notifications if file content differs from recommendations when replying.
+- Can use `#` to reference files and directories when writing mail.
+- Model-output project file names in mail system are now clickable and can be opened.
+- Optimized project file structure processing, models now have more accurate knowledge of project file and directory structure and distribution, providing more accurate generation.
+- Added file edit summary at the top of mail messages for each task round, supporting sequential review and individual or bulk adoption/rollback.
 
 ### Fixed
 
-- 解决了因为脑子不好使导致的插件安装包过大的问题。
-- 优化了消息中代码块的样式。
+- Resolved issue of oversized plugin installation package due to poor implementation.
+- Optimized code block styles in messages.
 
 ## [2.4.0] - 2025-02-18
 
 ### Added
 
-- 模型检索文件内容会更加精准、快速。
-- 采纳后的文件编辑有更友好的界面显示。
-- 支持一次对话中对同一个文件做出多次修改。
+- Model file content retrieval is more precise and faster.
+- More friendly interface display for adopted file edits.
+- Support multiple modifications to the same file in one conversation.
 
 ### Fixed
 
-- 提高了插件的稳定性，在致命错误时可以得到一定程度的恢复。
-- 修复某些代码编辑看不到差异也无法采纳的情况。
-- 解决在浏览器中打开邮件系统，关闭页面后内存残留的问题。
+- Improved plugin stability with some recovery capability during fatal errors.
+- Fixed cases where code edits couldn't be viewed or adopted.
+- Resolved memory residue issues when closing mail system in browser.
 
 ## [2.3.0] - 2025-02-16
 
 ### Added
 
-- Oniichan编辑文件以前会记住一个快照，每一个修改都可以重复审查和应用。
-- 支持DeepSeek R1模型的深度思考过程，再多思考Oniichan要烧坏了脑子。
-- 优化执行命令行任务时的UI展示效果，让命令更加突出一些，免得错过了重要的东西。
-- 彻底地重写了模型编辑文件的策略和逻辑，现在每一次编辑会作为一个存档点，文件编辑前后的内容会被保存下来，即便文件被其它方式修改，也不会影响编辑结果了。
+- Oniichan now remembers snapshots before editing files, each modification can be reviewed and applied repeatedly.
+- Supports DeepSeek R1 model's deep thinking process, more thinking might fry Oniichan's brain.
+- Optimized UI display for command line task execution, making commands more prominent to avoid missing important things.
+- Completely rewrote model file editing strategy and logic, each edit now serves as a checkpoint with file content saved before and after editing, unaffected by other modifications.
 
 ### Fixed
 
-- 查看或采纳文件编辑时，如果文件已经被修改，会提示报错，不修改文件。
-- 正式回归邮件系统的交互，最新的消息会置于最顶上。
-- 修复回复一个邮件时会界面报错的问题。
-- 优化关键字查找文件、通配符查找文件的实现效果。
-- 对于模型产生的无法正确编辑文件的补丁，增加了内部的修复流程，生成的补丁会更稳定准确。
-- 解决了编辑文件展示的添加、删除行数错误的问题。
+- Shows error prompt without modifying file when viewing or adopting file edits if file has been modified.
+- Formally restored mail system interaction, latest messages appear at top.
+- Fixed interface error when replying to mail.
+- Optimized implementation of keyword and wildcard file search.
+- Added internal repair process for model-generated patches that can't correctly edit files, generating more stable and accurate patches.
+- Fixed incorrect line count display for added and deleted lines in file edits.
 
 ## [2.2.0] - 2025-02-13
 
 ### Added
 
-- 在空无一物的目录下使用邮件系统时，Oniichan会认真地给你创建一个工程化的项目结构了，一拍脑袋瞎写的日子一去不复返。
-- 同样在空目录下创建Web应用时，Oniichan会自己帮你打开浏览器预览效果。
-- 仔细看看邮件系统里的消息，现在Oniichan会把它正在做的事情偷偷写在最后面哦。
+- When using mail system in empty directory, Oniichan will seriously create an engineered project structure, no more random writing.
+- Similarly, when creating web applications in empty directory, Oniichan will automatically open browser preview.
+- Look carefully at messages in mail system, Oniichan now secretly writes what it's doing at the end.
 
 ### Fixed
 
-- 再次好好地调教了一下邮件系统编辑代码的稳定性，偶尔会见到的“Not Appliable”这样的错误应该基本不会再见到了。
-- 在执行命令时，有一些死活不退出的命令（什么起个服务器啦之类的）能够被发现并更快地进入下一步。
+- Further improved mail system code editing stability, occasional "Not Appliable" errors should rarely appear.
+- Better handling of non-exiting commands (like starting servers) during execution, allowing faster progression to next step.
 
 ## [2.1.1] - 2025-02-10
 
 ### Fixed
 
-- 优化版本升级时的配置迁移，不再额外创建出`.vscode`目录来。
-- 略微调整了工具执行命令行任务时的超时，让模型能更准确地知道执行结果。
+- Optimized configuration migration during version upgrade, no longer creating extra `.vscode` directory.
+- Slightly adjusted tool command line task timeout for more accurate execution results.
 
 ## [2.1.0] - 2025-02-07
 
 ### Added
 
-- 似乎好像加了不少的工具给模型，现在你亲爱的Oniichan有小半个自动写代码的效果了，不过小心它会自动执行命令哦。
-- 增加了一个导出当前邮箱内数据的功能，你可以用`Export Inbox Data`命令来获取数据。
+- Seems like added quite a few tools for the model, your dear Oniichan now has semi-automatic code writing capability, but be careful of automatic command execution.
+- Added functionality to export current inbox data using `Export Inbox Data` command.
 
 ### Fixed
 
-- 完全重写了工具调用的模式，工具的使用和效果应该也许八成有很大的优化。
+- Completely rewrote tool invocation pattern, tool usage and effects should have major improvements.
 
 ## [2.0.0] - 2025-01-15
 
 ### Removed
 
-- 放过小的吧，实在写不动了，把模型提供方限制到只支持OpenRouter一家了。
+- Give the little one a break, can't write anymore, restricted model provider to support only OpenRouter.
 
 ## [1.9.0] - 2025-01-14
 
 ### Added
 
-- 在网页中打开Oniichan的话有左右分栏的布局了，大屏幕就是要有大屏幕的爽。
-- 邮箱系统中使用`SHIFT + N`新建消息，`SHIFT + R`回复消息。
+- Split-pane layout when opening Oniichan in web, big screens deserve big screen enjoyment.
+- Use `SHIFT + N` for new message, `SHIFT + R` for reply in inbox system.
 
 ### Fixed
 
-- 终于让模型吐diff格式了，再也不用一个大文件搞的钱包心疼，也不用担心模型偷懒省略代码了。
-- 狠狠地教训了一下模型，现在不是Claude的模型也会在调用工具的时候给出一些思考过程。
-- 解决了一下模型生成过程中消息会在收件箱里乱跳的毛病。
+- Finally got models to output diff format, no more wallet pain from large files or worry about models skipping code.
+- Strictly trained models, now non-Claude models also provide thinking process when calling tools.
+- Fixed message jumping issue in inbox during model generation.
 
 ## [1.8.0] - 2025-01-06
 
 ### Added
 
-- Oniichan给邮件系统加了一个内置的系统提示词，至于效果好坏嘛慢慢调整。
-- Inbox现在具备类似Composer的功能了，可以编辑、创建、删除文件哦，生成质量上稍微有点小问题，先放出来玩玩啦。
+- Oniichan added built-in system prompts to mail system, effectiveness to be gradually adjusted.
+- Inbox now has Composer-like functionality, can edit, create, delete files, slight quality issues but released for testing.
 
 ## [1.7.0] - 2025-01-02
 
 ### Added
 
-- 在邮箱系统中，为大模型添加读取文件、读取目录、查找文件3个工具。
+- Added read file, read directory, find file tools for large models in inbox system.
 
 ### Fixed
 
-- 发送邮件后，输入框会自动清空。
-- 重启插件时，创建的线程会被正确清理。
+- Input box auto-clears after sending mail.
+- Threads properly cleaned up when restarting plugin.
 
 ## [1.6.1] - 2024-12-26
 
 ### Added
 
-- 小小地补一下市场页面上的插件功能说明。
+- Minor supplement to plugin functionality description on marketplace page.
 
 ## [1.6.0] - 2024-12-26
 
 ### Added
 
-- 一个以电子邮件为交互形态的大模型对话系统，可以在侧边栏、独立标签、浏览器中打开，具体参考[邮件系统](https://github.com/otakustay/oniichan/wiki/%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F)。
+- An email-based large model dialogue system, accessible in sidebar, standalone tab, or browser, see [Mail System](https://github.com/otakustay/oniichan/wiki/%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F).
 
 ### Removed
 
-原有的`Open Oniichan Webview`命令将不再显示模型用量的信息，由邮件系统的界面代替。
+Original `Open Oniichan Webview` command no longer shows model usage information, replaced by mail system interface.
 
 ## [1.5.0] - 2024-12-19
 
 ### Added
 
-- 在Output面板中加上了Oniichan的日志输出，就算用不了也能看看发生了什么。
-- 增加了一个生成骨架代码的功能，新建一个文件后使用`Generate Scaffold Code`命令触发，会自动生成依赖导入和类、方法的定义，具体请参考[骨架代码生成文档](https://github.com/otakustay/oniichan/wiki/%E9%AA%A8%E6%9E%B6%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90)。
+- Added Oniichan log output in Output panel to track issues.
+- Added scaffold code generation feature, triggered by `Generate Scaffold Code` command after creating new file, automatically generates dependency imports and class/method definitions, see [Scaffold Code Generation Documentation](https://github.com/otakustay/oniichan/wiki/%E9%AA%A8%E6%9E%B6%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90).
 
 ### Fixed
 
-- 优化了任务过程中的资源管理，尽力避免任务结束资源没释放、加载动画没消失的情况。
+- Optimized task process resource management to avoid resource retention and loading animation persistence.
 
 ## [1.4.0] - 2024-12-10
 
 ### Added
 
-- 内置了一个`Open Oniichan Webview`命令打开Web面板，但我相信你不会需要这个的。
-- 当你在一行正常的代码上触发语义化改写时，会尝试去修复这一行上的报错，要不试试看到波浪线就改写一发。
+- Built-in `Open Oniichan Webview` command to open Web panel, though you probably won't need it.
+- When triggering semantic rewrite on normal code line, attempts to fix errors on that line, try rewriting when you see wavy lines.
 
 ### Fixed
 
-- 语义化改写设置为自动触发时，加上了一个更严格的触发判断，至少在我自己破产以前搞定了，具体规则可以参考[自动触发规则](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99#%E8%87%AA%E5%8A%A8%E8%A7%A6%E5%8F%91%E8%A7%84%E5%88%99)。
+- Added stricter trigger judgment for automatic semantic rewrite, fixed before personal bankruptcy, see [Automatic Trigger Rules](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99#%E8%87%AA%E5%8A%A8%E8%A7%A6%E5%8F%91%E8%A7%84%E5%88%99).
 
 ## [1.3.0] - 2024-12-09
 
 ### Added
 
-- 可以从状态栏打开Oniichan的Web面板，暂时支持查看模型调用记录。
+- Can open Oniichan Web panel from status bar, currently supports viewing model call records.
 
 ### Fixed
 
-- 现在处于第一行时，语义化改写功能也会触发了。
-- 用量数据的记录最新的会出现在最前面，只要`head`一下就能找看到啦。
-- 日志记录的格式现在更加规范，当然你应该不需要关注这点。
+- Semantic rewrite now triggers when on first line.
+- Latest usage data appears first, easily found with `head`.
+- More standardized log record format, though you probably don't need to care about this.
 
 ## [1.2.0] - 2024-12-08
 
 ### Added
 
-- 努力把功能使用和模型调用的数据记录在本地了，要查要统计咋都行。
-- 增加了一个`Open Oniichan Data Folder`命令，方便看看都存了些啥玩意，具体请看[数据存储](https://github.com/otakustay/oniichan/wiki/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8)。
+- Successfully recorded feature usage and model call data locally for querying and statistics.
+- Added `Open Oniichan Data Folder` command for easy data access, see [Data Storage](https://github.com/otakustay/oniichan/wiki/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8).
 
 ## [1.1.1] - 2024-12-07
 
 ### Fixed
 
-- 汗流浃背地赶紧修复了一处日志会把你的API Key打印出来的问题。
+- Quickly fixed issue where logs could expose your API Key.
 
 ## [1.1.0] - 2024-12-07
 
 ### Added
 
-- 支持了使用OpenAI或Anthropic形式的API，并可以自选模型，使用ChatGPT、Claude或者三方OpenRouter都毫无压力。
+- Supports OpenAI or Anthropic-style APIs with model selection, seamlessly works with ChatGPT, Claude, or third-party OpenRouter.
 
 ## [1.0.1] - 2024-12-06
 
 ### Added
 
-- 精心（？）制作（？？）了插件的图标，现在亲爱的欧尼酱栩栩如生了。
+- Carefully(?) crafted(??) plugin icon, now dear Oniichan looks lifelike.
 
 ### Fixed
 
-- 切换编辑器标签页后，插件的语义化改写功能不会再莫名其妙失效了。
+- Semantic rewrite functionality no longer mysteriously fails after switching editor tabs.
 
 ## [1.0.0] - 2024-12-06
 
 ### Added
 
-- 完成插件的基础实现与[模型配置](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE)。
-- 支持[语义化改写](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99)。
+- Completed basic plugin implementation and [model configuration](https://github.com/otakustay/oniichan/wiki/%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE).
+- Supports [semantic rewrite](https://github.com/otakustay/oniichan/wiki/%E8%AF%AD%E4%B9%89%E5%8C%96%E6%94%B9%E5%86%99).
