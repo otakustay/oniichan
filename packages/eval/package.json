@@ -4,6 +4,7 @@
   "version": "3.7.0",
   "description": "Shared elements without any platform dependencies",
   "scripts": {
+    "build": "tsc",
     "lint": "eslint --max-warnings=0 --fix src"
   },
   "dependencies": {

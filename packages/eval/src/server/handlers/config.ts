@@ -41,6 +41,7 @@ export class GetInboxConfigHandler extends RequestHandler<void, InboxConfig> {
         const result: InboxConfig = {
             automaticRunCommand: true,
             exceptionCommandList: [],
+            defaultModel: config.defaultModel,
             plannerModel: config.plannerModel,
             actorModel: config.actorModel,
             coderModel: config.coderModel,
