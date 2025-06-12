@@ -77,9 +77,7 @@ export class LazyContainer<T> {
     }
 
     async getInstance() {
-        if (!this.value) {
-            this.value = await this.factory();
-        }
+        this.value ??= await this.factory();
 
         return this.value;
     }

@@ -113,9 +113,7 @@ export class LoadingManager implements Disposable {
     }
 
     private startAnimation() {
-        if (!this.timer) {
-            this.timer = setTimeout(() => this.updateLoadingStateOnAnimation(), 40);
-        }
+        this.timer ??= setTimeout(() => this.updateLoadingStateOnAnimation(), 40);
     }
 
     private stopAnimation() {

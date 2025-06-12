@@ -30,5 +30,8 @@
     "production": [
       "!{projectRoot}/**/__tests__/*"
     ]
+  },
+  "tui": {
+    "enabled": false
   }
 }

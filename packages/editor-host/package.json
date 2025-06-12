@@ -27,7 +27,7 @@
     "@otakustay/ipc": "^2.5.0",
     "@otakustay/text-pin": "^1.0.0",
     "nanoid": "^5.1.5",
-    "open": "^10.1.0",
+    "open": "^10.1.2",
     "strip-ansi": "^7.1.0"
   }
 }
