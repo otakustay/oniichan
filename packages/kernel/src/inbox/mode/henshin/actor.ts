@@ -14,6 +14,7 @@ const tools: SharedToolName[] = [
     'find_files_by_glob',
     'find_files_by_regex',
     'run_command',
+    'evaluate_code',
     'browser_preview',
     'attempt_completion',
     'ask_followup_question',

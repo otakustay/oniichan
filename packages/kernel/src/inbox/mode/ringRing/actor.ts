@@ -14,6 +14,7 @@ const tools: SharedToolName[] = [
     'read_directory',
     'find_files_by_glob',
     'find_files_by_regex',
+    'evaluate_code',
     'browser_preview',
 ];
 

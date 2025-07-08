@@ -13,6 +13,7 @@ export type {
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
     CompleteTaskParameter,
+    EvaluateCodeParameter,
     PlanTaskType,
     PlanTaskStatus,
     PlanTask,

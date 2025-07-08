@@ -17,6 +17,7 @@ const tools: SharedToolName[] = [
     'patch_file',
     'delete_file',
     'run_command',
+    'evaluate_code',
     'browser_preview',
 ];
 

@@ -6,11 +6,13 @@ import {
     IoFolderOpenOutline,
     IoCodeSlashOutline,
     IoSearchOutline,
+    IoTerminalOutline,
 } from 'react-icons/io5';
 import {trimPathString} from '@oniichan/shared/string';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import type {ParsedToolCallMessageChunk} from '@oniichan/shared/inbox';
 import ActBar from '@/components/ActBar';
+import SourceCode from '@/components/SourceCode';
 import Markdown from '@/components//Markdown';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
@@ -144,6 +146,17 @@ export default function ParsedToolUsage({input}: Props) {
                 file={input.arguments.path ?? ''}
                 patch={patch}
                 edit={input.executionData}
+            />
+        );
+    }
+
+    if (input.toolName === 'evaluate_code') {
+        return (
+            <ActBar
+                mode="contrast"
+                icon={<IoTerminalOutline />}
+                content={<ActionLabel>Evaluate Code</ActionLabel>}
+                richContent={<SourceCode code={input.arguments.code} language="javascript" />}
             />
         );
     }

@@ -1,7 +1,7 @@
 import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
-import type {InboxAssistantTextMessage, InboxMessage} from '../../interface';
+import type {InboxMessage} from '../../interface';
 import {renderCommonObjective} from '../prompt';
 import type {ChatRole} from '../interface';
 import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool';
@@ -10,6 +10,7 @@ import {pickSharedTools, ToolImplementFactory} from '../tool';
 const tools: SharedToolName[] = [
     'write_file',
     'patch_file',
+    'evaluate_code',
 ];
 
 export class CoupleCoderRole implements ChatRole {
@@ -17,14 +18,11 @@ export class CoupleCoderRole implements ChatRole {
 
     private readonly coderModelName: string | null;
 
-    private readonly partialReply: InboxAssistantTextMessage;
-
     private readonly toolFactory = new ToolImplementFactory();
 
-    constructor(actorModelName: string, coderModelName: string | null, reply: InboxAssistantTextMessage) {
+    constructor(actorModelName: string, coderModelName: string | null) {
         this.actorModelName = actorModelName;
         this.coderModelName = coderModelName;
-        this.partialReply = reply;
         this.toolFactory.registerShared(...tools);
     }
 

@@ -1,6 +1,12 @@
 import type {ComponentType} from 'react';
 import styled from '@emotion/styled';
-import {IoDocumentTextOutline, IoFolderOpenOutline, IoSearchOutline, IoExitOutline} from 'react-icons/io5';
+import {
+    IoDocumentTextOutline,
+    IoFolderOpenOutline,
+    IoSearchOutline,
+    IoExitOutline,
+    IoTerminalOutline,
+} from 'react-icons/io5';
 import {isEditToolName} from '@oniichan/shared/tool';
 import type {PlanTask, PlanTaskType} from '@oniichan/shared/tool';
 import {ensureString, trimPathString} from '@oniichan/shared/string';
@@ -8,6 +14,7 @@ import {ensureArray} from '@oniichan/shared/array';
 import type {RawToolCallParameter, ToolCallMessageChunk} from '@oniichan/shared/inbox';
 import ActBar from '@/components/ActBar';
 import Markdown from '@/components//Markdown';
+import SourceCode from '@/components/SourceCode';
 import FileEdit from './FileEdit';
 import PreviewUrl from './PreviewUrl';
 import CommandRun from './CommandRun';
@@ -96,6 +103,17 @@ export default function TextToolUsage({input}: Props) {
                         <ParameterLabel>{renderFilesLabel(ensureArray(input.arguments.path))}</ParameterLabel>
                     </>
                 }
+            />
+        );
+    }
+
+    if (input.toolName === 'evaluate_code') {
+        return (
+            <ActBar
+                mode="contrast"
+                icon={<IoTerminalOutline />}
+                content={<ActionLabel>Evaluate Code</ActionLabel>}
+                richContent={<SourceCode code={ensureString(input.arguments.code)} language="javascript" />}
             />
         );
     }

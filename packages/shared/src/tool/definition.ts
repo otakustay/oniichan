@@ -17,6 +17,7 @@ const toolNames = [
     'patch_file',
     'delete_file',
     'run_command',
+    'evaluate_code',
     'browser_preview',
     'attempt_completion',
     'ask_followup_question',
@@ -96,6 +97,11 @@ export interface BrowserPreviewParameter {
 
 export interface RunCommandParameter {
     command: string;
+}
+
+export interface EvaluateCodeParameter {
+    code: string;
+    cwd?: string;
 }
 
 export interface AskFollowupQuestionParameter {

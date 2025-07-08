@@ -13,6 +13,7 @@ import {ReadDirectoryToolImplement} from './readDirectory';
 import {ReadFileToolImplement} from './readFile';
 import {RunCommandToolImplement} from './runCommand';
 import {WriteFileToolImplement} from './writeFile';
+import {EvaluateCodeToolImplement} from './evaluateCode';
 
 type ToolProviderClass = new(init: ToolProviderInit) => ToolProvider;
 
@@ -28,6 +29,7 @@ const shared: Record<SharedToolName, ToolProviderClass> = {
     read_file: ReadFileToolImplement,
     run_command: RunCommandToolImplement,
     write_file: WriteFileToolImplement,
+    evaluate_code: EvaluateCodeToolImplement,
 };
 
 export class ToolImplement {

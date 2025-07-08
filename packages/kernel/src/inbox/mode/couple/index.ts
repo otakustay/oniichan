@@ -10,7 +10,7 @@ import {CoupleActorRole} from './actor';
 import {CoupleCoderRole} from './coder';
 
 function toolRequireCoder(toolName: ToolName) {
-    return toolName === 'write_file' || toolName === 'patch_file';
+    return toolName === 'write_file' || toolName === 'patch_file' || toolName === 'evaluate_code';
 }
 
 async function* iterable(text: string): AsyncIterable<string> {
@@ -25,13 +25,9 @@ export class CoupleChatCapabilityProvider extends BaseChatCapabilityProvider {
     }
 
     provideChatRole(): ChatRole {
-        if (this.useCoderModel) {
-            const reply = this.roundtrip.getLatestTextMessageStrict();
-            return new CoupleCoderRole(this.config.actorModel, this.config.coderModel, reply);
-        }
-        else {
-            return new CoupleActorRole(this.config.actorModel);
-        }
+        return this.useCoderModel
+            ? new CoupleCoderRole(this.config.actorModel, this.config.coderModel)
+            : new CoupleActorRole(this.config.actorModel);
     }
 
     async *provideChatStream(): AsyncIterable<MessageInputChunk> {

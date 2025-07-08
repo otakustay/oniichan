@@ -9,6 +9,7 @@ import type {
     PatchFileParameter,
     DeleteFileParameter,
     RunCommandParameter,
+    EvaluateCodeParameter,
     BrowserPreviewParameter,
     AttemptCompletionParameter,
     AskFollowupQuestionParameter,
@@ -90,6 +91,11 @@ export interface RunCommandToolCallMessageChunk extends ParsedToolCallMessageChu
     arguments: RunCommandParameter;
 }
 
+export interface EvaluateCodeToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
+    toolName: 'evaluate_code';
+    arguments: EvaluateCodeParameter;
+}
+
 export interface BrowserPreviewToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
     toolName: 'browser_preview';
     arguments: BrowserPreviewParameter;
@@ -129,6 +135,7 @@ export type ParsedToolCallMessageChunk =
     | PatchFileToolCallMessageChunk
     | DeleteFileToolCallMessageChunk
     | RunCommandToolCallMessageChunk
+    | EvaluateCodeToolCallMessageChunk
     | BrowserPreviewToolCallMessageChunk
     | AttemptCompletionToolCallMessageChunk
     | AskFollowupQuestionToolCallMessageChunk

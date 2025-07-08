@@ -244,6 +244,53 @@ export const runCommand = {
     `,
 } as const satisfies ToolDescription;
 
+export const evaluateCode = {
+    name: 'evaluate_code',
+    description: dedent`
+        This tool is to run a NodeJS code inside a specified directory, you'll be responded with the output of the code.
+
+        To be short, it's creating a JavaScript file with code you provided and run it using \`node some.js\`, note the created JavaScript file will be deleted after its run.
+
+        Use this tool actively in these conditions:
+
+        1. When an operation is hard to archive through a single shell command, a standalone NodeJS script provides more flexibility.
+        2. When it is neccessary to observe multiple files or directories and the full content of them are not important, write a code to find matches from those files, output a simpler result.
+        3. When NodeJS API is more stable and suitable to parse or process data like JSON or structured string.
+        4. When math calculations are involved in task, programming code produces accurate result.
+
+        The code provided to this tool should align with following rules:
+
+        1. Use ESM as module system, e.g. use \`import\` instead of \`require\`.
+        2. All NodeJS built-in modules are available, prefix them with \`node:\`, e.g. \`import fs from \`node:fs/promises\`.
+        3. Top level await is allowed, e.g. you can write \`await\` directly without IIFE.
+        4. No third-party package is installed, use pure JavaScript and native NodeJS API only.
+        5. Do not write any comment, the code is not visible to anyone and is deleted after a single run.
+    `,
+    parameters: {
+        type: 'object',
+        properties: {
+            code: {
+                type: 'string',
+                description: 'Full code to run in a NodeJS environment',
+            },
+            cwd: {
+                type: 'string',
+                description:
+                    'Working directory to run the code, should be relative to workspace, default to the root of current workspace',
+            },
+        },
+        required: ['code'],
+    },
+    usage: dedent`
+        <evaluate_code>
+            import fs from 'node:fs/promises';
+
+            const content = await fs.readFile('package.json', 'utf-8');
+            console.log(content.includes('"react"') ? 'yes' : 'no');
+        </evaluate_code>
+    `,
+} as const satisfies ToolDescription;
+
 export const askFollowupQuestion = {
     name: 'ask_followup_question',
     description:
@@ -304,7 +351,8 @@ const definitions = [
     browserPreview,
     askFollowupQuestion,
     attemptCompletion,
-];
+    evaluateCode,
+] as const satisfies ToolDescription[];
 
 const sharedTools = new Map(definitions.map(v => [v.name, v]));
 
