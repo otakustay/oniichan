@@ -8,7 +8,7 @@ import {getLanguageConfig} from '@oniichan/shared/language';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
 import type {TaskContainer} from '@oniichan/editor-host/utils/task';
 import {Logger} from '@oniichan/shared/logger';
-import {KernelClient} from '../../kernel';
+import {KernelClient} from '../../kernel/index.js';
 
 export interface Dependency {
     [Logger.containerKey]: Logger;

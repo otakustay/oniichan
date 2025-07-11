@@ -1,7 +1,7 @@
 import {getDefaultStore} from 'jotai';
 import {RequestHandler} from '@otakustay/ipc';
-import {ipcAtom} from '../atoms/ipc';
-import {editingAtom} from '../atoms/draft';
+import {ipcAtom} from '../atoms/ipc/index.js';
+import {editingAtom} from '../atoms/draft.js';
 
 export class ComposeNewMessageHandler extends RequestHandler<void, void> {
     static readonly action = 'composeNewMessage';

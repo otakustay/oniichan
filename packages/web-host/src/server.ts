@@ -1,8 +1,8 @@
 import {Server} from '@otakustay/ipc';
-import {ComposeNewMessageHandler} from './handlers/compose';
-import {UpdateThreadListHandler} from './handlers/thread';
-import type {WebHostProtocol} from './protocol';
-import {UpdateWorkspaceStateHandler} from './handlers/workspace';
+import {ComposeNewMessageHandler} from './handlers/compose.js';
+import {UpdateThreadListHandler} from './handlers/thread.js';
+import type {WebHostProtocol} from './protocol.js';
+import {UpdateWorkspaceStateHandler} from './handlers/workspace.js';
 
 export class WebHostServer extends Server<WebHostProtocol> {
     static readonly namespace = '-> web';

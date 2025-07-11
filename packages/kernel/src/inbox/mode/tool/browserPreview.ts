@@ -1,8 +1,8 @@
 import type {BrowserPreviewParameter} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
-import {asString} from './utils';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
+import {asString} from './utils.js';
 
 export class BrowserPreviewToolImplement extends ToolProviderBase<BrowserPreviewParameter> {
     async executeApprove(args: BrowserPreviewParameter): Promise<ToolExecuteResult> {

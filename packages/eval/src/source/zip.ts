@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import decompress from 'decompress';
-import type {FixtureSource} from './interface';
+import type {FixtureSource} from './interface.js';
 
 const archiveBaseDirectory = path.resolve(__dirname, '..', 'fixtures', 'archives');
 

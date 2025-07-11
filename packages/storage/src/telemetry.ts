@@ -2,7 +2,7 @@ import pRetry from 'p-retry';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import type {ChatInputPayload, ModelRequestDetail, ModelStreamingResponse} from '@oniichan/shared/model';
 import {newUuid} from '@oniichan/shared/id';
-import {createJsonlStore} from './jsonl';
+import {createJsonlStore} from './jsonl.js';
 
 export interface ModelUsageRecord {
     uuid: string;

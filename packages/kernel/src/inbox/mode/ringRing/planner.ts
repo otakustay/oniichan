@@ -2,12 +2,12 @@ import dedent from 'dedent';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
-import type {InboxMessage} from '../../interface';
-import type {ChatRole} from '../interface';
-import type {ToolImplement} from '../tool';
-import {pickSharedTools, ToolImplementFactory} from '../tool';
-import type {ToolProviderInit} from '../tool';
-import {createPlan, CreatePlanToolImplement} from './createPlan';
+import type {InboxMessage} from '../../interface.js';
+import type {ChatRole} from '../interface.js';
+import type {ToolImplement} from '../tool/index.js';
+import {pickSharedTools, ToolImplementFactory} from '../tool/index.js';
+import type {ToolProviderInit} from '../tool/index.js';
+import {createPlan, CreatePlanToolImplement} from './createPlan.js';
 
 export class RingRingPlannerRole implements ChatRole {
     private readonly plannerModelName: string;

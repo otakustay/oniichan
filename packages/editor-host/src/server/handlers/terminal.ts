@@ -1,5 +1,5 @@
-import type {ExecuteStatus} from '../../utils/terminal';
-import {RequestHandler} from './handler';
+import type {ExecuteStatus} from '../../utils/terminal/index.js';
+import {RequestHandler} from './handler.js';
 
 export interface ExecuteTerminalRequest {
     command: string;

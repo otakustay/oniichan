@@ -1,7 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
-import type {FixtureSource} from './interface';
+import {execa} from 'execa';
+import type {FixtureSource} from './interface.js';
 
 export interface GitHubFixtureSourceConfig {
     type: 'github';
@@ -33,7 +34,6 @@ export class GitHubFixtureSource implements FixtureSource {
     }
 
     private async setupExists(targetDirectory: string) {
-        const {execa} = await import('execa');
         const {stdout: originUrl} = await execa(
             'git',
             ['remote', 'get-url', 'origin'],
@@ -58,7 +58,6 @@ export class GitHubFixtureSource implements FixtureSource {
     }
 
     private async setupEmpty(targetDirectory: string) {
-        const {execa} = await import('execa');
         await fs.mkdir(targetDirectory, {recursive: true});
         await execa('git', ['init'], {cwd: targetDirectory});
         await execa('git', ['remote', 'add', 'origin', this.source.repo], {cwd: targetDirectory});

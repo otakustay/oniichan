@@ -1,4 +1,5 @@
 import {directories as defaultIgnoreDirectories} from 'ignore-by-default';
+import {globbyStream} from 'globby';
 
 export async function* streamingListEntries(root: string): AsyncIterable<string> {
     const options = {
@@ -9,7 +10,6 @@ export async function* streamingListEntries(root: string): AsyncIterable<string>
         onlyFiles: false,
         dot: true,
     };
-    const {globbyStream} = await import('globby');
     for await (const file of globbyStream('**', options)) {
         yield file.toString();
     }

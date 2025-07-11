@@ -1,8 +1,8 @@
-export type {ToolExecuteResult, ToolProviderInit} from './base';
-export {ToolProviderBase} from './base';
-export type {ToolProvider} from './base';
-export {ToolImplement, ToolImplementFactory} from './implement';
-export type {SharedToolName} from './shared';
+export type {ToolExecuteResult, ToolProviderInit} from './base.js';
+export {ToolProviderBase} from './base.js';
+export type {ToolProvider} from './base.js';
+export {ToolImplement, ToolImplementFactory} from './implement.js';
+export type {SharedToolName} from './shared.js';
 export {
     pickSharedTools,
     readFile,
@@ -16,5 +16,5 @@ export {
     browserPreview,
     attemptCompletion,
     askFollowupQuestion,
-} from './shared';
-export {asString} from './utils';
+} from './shared.js';
+export {asString} from './utils.js';

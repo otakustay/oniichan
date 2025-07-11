@@ -1,4 +1,4 @@
-import type {ParsedPatch} from './parse';
+import type {ParsedPatch} from './parse.js';
 
 function strictLineEqual(left: string, right: string) {
     return left === right;

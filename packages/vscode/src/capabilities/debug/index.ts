@@ -1,2 +1,2 @@
-export {OpenDataFolderCommand} from './openDataFolder';
-export {ExportInboxCommand} from './exportInbox';
+export {OpenDataFolderCommand} from './openDataFolder.js';
+export {ExportInboxCommand} from './exportInbox.js';

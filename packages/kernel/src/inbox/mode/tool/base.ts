@@ -6,10 +6,10 @@ import {stringifyError} from '@oniichan/shared/error';
 import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import type {ParsedToolCallMessageChunkOf, RawToolCallParameter, ToolUseResultType} from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
-import type {CommandExecutor} from '../../../core/command';
-import type {EditorHost} from '../../../core/editor';
-import {assertToolCallMessage, assertToolCallType} from '../../../inbox';
-import type {InboxMessage, InboxMessageThread, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox';
+import type {CommandExecutor} from '../../../core/command.js';
+import type {EditorHost} from '../../../core/editor.js';
+import {assertToolCallMessage, assertToolCallType} from '../../../inbox/index.js';
+import type {InboxMessage, InboxMessageThread, InboxRoundtrip, InboxToolCallMessage} from '../../../inbox/index.js';
 
 export interface ToolProviderInit {
     thread: InboxMessageThread;

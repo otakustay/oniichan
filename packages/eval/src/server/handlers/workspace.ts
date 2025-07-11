@@ -3,7 +3,7 @@ import path from 'node:path';
 import {streamingListEntries, WorkspaceFileStructure} from '@oniichan/shared/dir';
 import type {TreeifyResult} from '@oniichan/shared/dir';
 import type {FindFilesRequest, WriteWorkspaceFileRequest} from '@oniichan/editor-host/protocol';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class FindFilesHandler extends RequestHandler<FindFilesRequest, string[]> {
     static readonly action = 'findFiles';

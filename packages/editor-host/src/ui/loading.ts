@@ -1,8 +1,8 @@
 import {window, Range, Position, OverviewRulerLane, ThemeColor, Disposable, workspace} from 'vscode';
 import type {DecorationRenderOptions, TextDocumentChangeEvent} from 'vscode';
 import {LinePin} from '@otakustay/text-pin';
-import {TextEditorReference} from '../utils/editor';
-import {DisposableAbortSignal} from '../utils/task';
+import {TextEditorReference} from '../utils/editor.js';
+import {DisposableAbortSignal} from '../utils/task.js';
 
 const decorationOptions: DecorationRenderOptions = {
     overviewRulerColor: new ThemeColor('editorOverviewRuler.infoForeground'),

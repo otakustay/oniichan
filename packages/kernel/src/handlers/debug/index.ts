@@ -1,1 +1,1 @@
-export {ExportInboxHandler} from './export';
+export {ExportInboxHandler} from './export.js';

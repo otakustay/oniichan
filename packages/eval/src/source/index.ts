@@ -1,8 +1,8 @@
-import type {FixtureSource} from './interface';
-import {GitHubFixtureSource} from './github';
-import type {GitHubFixtureSourceConfig} from './github';
-import {ZipFixtureSource} from './zip';
-import type {ZipFixtureSourceConfig} from './zip';
+import type {FixtureSource} from './interface.js';
+import {GitHubFixtureSource} from './github.js';
+import type {GitHubFixtureSourceConfig} from './github.js';
+import {ZipFixtureSource} from './zip.js';
+import type {ZipFixtureSourceConfig} from './zip.js';
 
 export type FixtureSourceConfig = GitHubFixtureSourceConfig | ZipFixtureSourceConfig;
 

@@ -1,9 +1,9 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {isBreakpoingToolCallMessage} from '../../assert';
-import {BaseChatCapabilityProvider} from '../provider';
-import type {ChatRole} from '../interface';
-import {SenpaiActorRole} from './actor';
-import {SenpaiReviewerRole} from './reviewer';
+import {isBreakpoingToolCallMessage} from '../../assert.js';
+import {BaseChatCapabilityProvider} from '../provider.js';
+import type {ChatRole} from '../interface.js';
+import {SenpaiActorRole} from './actor.js';
+import {SenpaiReviewerRole} from './reviewer.js';
 
 export class SenpaiChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {

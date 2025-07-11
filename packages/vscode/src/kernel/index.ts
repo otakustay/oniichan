@@ -13,7 +13,8 @@ import {Logger} from '@oniichan/shared/logger';
 import type {LogEntry} from '@oniichan/shared/logger';
 import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {stringifyError} from '@oniichan/shared/error';
-import {WebConnection} from '../capabilities/web';
+import {currentDirectory} from '../utils/path.js';
+import {WebConnection} from '../capabilities/web/index.js';
 
 class WorkerPort implements Port, Disposable {
     private readonly worker: Worker;
@@ -176,7 +177,7 @@ export async function startKernel(container: DependencyContainer<StartDependency
 
     const worker = new Worker(
         // After build, this code runs in `extension.js`, kernel entry lives at `kernel/entry.js`
-        path.join(__dirname, 'kernel', 'entry.js'),
+        path.join(currentDirectory(import.meta.url), 'kernel', 'entry.js'),
         {workerData: {privateBinaryDirectory: binaryDirectory}}
     );
     const {threadId} = worker;

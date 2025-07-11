@@ -9,8 +9,8 @@ import {EditorHostClient} from '@oniichan/editor-host/client';
 import {ThreadStore, CommandExecutor} from '@oniichan/kernel';
 import {Logger, ConsoleLogger} from '@oniichan/shared/logger';
 import {KernelClient} from '@oniichan/kernel/client';
-import {EvalEditorHostServer} from '../server';
-import type {EvalConfig} from '../server';
+import {EvalEditorHostServer} from '../server/index.js';
+import type {EvalConfig} from '../server/index.js';
 
 async function startEditorServer(port: Port, config: EvalConfig, cwd: string) {
     const logger = new ConsoleLogger('EditorHost');

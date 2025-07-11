@@ -1,5 +1,6 @@
 import {commands, Disposable, window} from 'vscode';
 import {dataDirectory} from '@oniichan/shared/dir';
+import open from 'open';
 
 const WIKI_LINK = 'https://github.com/otakustay/oniichan/wiki/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8';
 
@@ -15,7 +16,6 @@ export class OpenDataFolderCommand extends Disposable {
                 const directory = await dataDirectory();
 
                 if (directory) {
-                    const {default: open} = await import('open');
                     await open(directory);
                 }
                 else {

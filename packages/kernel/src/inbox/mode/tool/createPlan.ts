@@ -1,7 +1,7 @@
 import dedent from 'dedent';
 import type {CreatePlanParameter, PlanTask} from '@oniichan/shared/tool';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
 
 interface Extracted {
     read: string[];

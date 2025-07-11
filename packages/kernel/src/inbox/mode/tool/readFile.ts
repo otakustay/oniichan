@@ -3,9 +3,9 @@ import type {ReadFileParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ensureArray} from '@oniichan/shared/array';
-import {resultMarkdown} from './utils';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
+import {resultMarkdown} from './utils.js';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
 
 interface Extracted {
     path: string[];

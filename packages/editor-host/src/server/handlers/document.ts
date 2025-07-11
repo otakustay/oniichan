@@ -1,6 +1,6 @@
 import type {Diagnostic} from 'vscode';
 import { DiagnosticSeverity, languages, Uri, window} from 'vscode';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class GetDocumentTextHandler extends RequestHandler<string, string> {
     static readonly action = 'getDocumentText';

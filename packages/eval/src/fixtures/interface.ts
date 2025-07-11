@@ -1,6 +1,6 @@
 import type {InboxMessageReference} from '@oniichan/kernel/protocol';
-import type {FixtureMatcherConfig} from '../matcher';
-import type {FixtureSourceConfig} from '../source';
+import type {FixtureMatcherConfig} from '../matcher/index.js';
+import type {FixtureSourceConfig} from '../source/index.js';
 
 export interface FixtureQueryConfig {
     text: string;

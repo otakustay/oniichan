@@ -2,10 +2,10 @@ import {isFileEditToolCallChunk} from '@oniichan/shared/inbox';
 import {diffCount, revertFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import {stringifyError} from '@oniichan/shared/error';
-import {isAssistantMessage, isToolCallMessage} from '../../inbox';
-import type {InboxMessage} from '../../inbox';
-import {InboxRequestHandler} from './handler';
-import type {InboxMessageIdentity} from './handler';
+import {isAssistantMessage, isToolCallMessage} from '../../inbox/index.js';
+import type {InboxMessage} from '../../inbox/index.js';
+import {InboxRequestHandler} from './handler.js';
+import type {InboxMessageIdentity} from './handler.js';
 
 interface InboxRollbackAppliable {
     file: string;

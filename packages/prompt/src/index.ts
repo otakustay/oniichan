@@ -1,8 +1,8 @@
-export {renderInboxSystemPrompt} from './inbox';
-export type {InboxPromptView, InboxPromptReference} from './inbox';
-export {renderFixToolCallPrompt} from './fixToolCall';
-export type {FixToolCallView} from './fixToolCall';
-export {renderScaffoldPrompt} from './scaffold';
-export type {ScaffoldView, ScaffoldSnippetView} from './scaffold';
-export {renderSemanticRewritePrompt} from './semanticRewrite';
-export type {SemanticRewriteView, SemanticRewriteSnippetView} from './semanticRewrite';
+export {renderInboxSystemPrompt} from './inbox/index.js';
+export type {InboxPromptView, InboxPromptReference} from './inbox/index.js';
+export {renderFixToolCallPrompt} from './fixToolCall/index.js';
+export type {FixToolCallView} from './fixToolCall/index.js';
+export {renderScaffoldPrompt} from './scaffold/index.js';
+export type {ScaffoldView, ScaffoldSnippetView} from './scaffold/index.js';
+export {renderSemanticRewritePrompt} from './semanticRewrite/index.js';
+export type {SemanticRewriteView, SemanticRewriteSnippetView} from './semanticRewrite/index.js';

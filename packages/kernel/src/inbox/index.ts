@@ -9,7 +9,7 @@ export type {
     InboxUserRequestMessage,
     InboxWorkflow,
     InboxMessageThread,
-} from './interface';
+} from './interface.js';
 export {
     createEmptyAssistantTextMessage,
     createEmptyMessageThread,
@@ -18,8 +18,8 @@ export {
     transferToToolCallMessage,
     createDetachedUserRequestMessage,
     setRoundtripRequest,
-} from './factory';
-export {ThreadStore} from './store';
+} from './factory.js';
+export {ThreadStore} from './store.js';
 export {
     assertAssistantTextMessage,
     assertToolCallMessage,
@@ -28,13 +28,13 @@ export {
     isBreakpoingToolCallMessage,
     isToolCallMessageOf,
     assertToolCallType,
-} from './assert';
-export type {ToolExecuteResult, ToolProviderInit} from './mode';
+} from './assert.js';
+export type {ToolExecuteResult, ToolProviderInit} from './mode/index.js';
 export {
     StandaloneChatCapabilityProvider,
     RingRingChatCapabilityProvider,
     CoupleChatCapabilityProvider,
     HenshinChatCapabilityProvider,
     SenpaiChatCapabilityProvider,
-} from './mode';
-export type {ChatCapabilityProvider, ChatCapabilityProviderInit, ChatRole} from './mode';
+} from './mode/index.js';
+export type {ChatCapabilityProvider, ChatCapabilityProviderInit, ChatRole} from './mode/index.js';

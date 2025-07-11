@@ -1,5 +1,5 @@
-import {applyPatch} from './apply';
-import {parsePatchString} from './parse';
+import {applyPatch} from './apply.js';
+import {parsePatchString} from './parse.js';
 
 export type PatchAction = 'write' | 'patch' | 'delete';
 

@@ -1,4 +1,5 @@
-import {RequestHandler} from './handler';
+import open from 'open';
+import {RequestHandler} from './handler.js';
 
 export class OpenUrlHandler extends RequestHandler<string, void> {
     static readonly action = 'openUrl';
@@ -8,7 +9,6 @@ export class OpenUrlHandler extends RequestHandler<string, void> {
         const {logger} = this.context;
         logger.info('Start', {url});
 
-        const {default: open} = await import('open');
         // It's really complicated to open an externally hosted URL in VSCode webview, use browser application instead
         await open(url);
 

@@ -1,5 +1,5 @@
-import type {AssistantTextMessageData, UserRequestMessageData} from './message';
-import type {WorkflowData} from './workflow';
+import type {AssistantTextMessageData, UserRequestMessageData} from './message.js';
+import type {WorkflowData} from './workflow.js';
 
 interface RoundtripMessageResponseData {
     type: 'message';

@@ -1,5 +1,5 @@
 import {AsyncIteratorController} from '@otakustay/async-iterator';
-import {counter} from './promise';
+import {counter} from './promise.js';
 
 export function merge<X, Y>(x: AsyncIterable<X>, y: AsyncIterable<Y>): AsyncIterable<X | Y> {
     const controller = new AsyncIteratorController<X | Y>();

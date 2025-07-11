@@ -1,12 +1,13 @@
 {
   "private": true,
   "name": "oniichan",
+  "type": "module",
   "displayName": "Oniichan Coding Assistant",
   "publisher": "otakustay",
   "description": "谁不爱写代码的时候有个可靠的欧尼酱陪着你呢",
   "version": "3.7.0",
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
@@ -217,9 +218,9 @@
     "url": "https://github.com/otakustay/oniichan"
   },
   "devDependencies": {
-    "@fastify/http-proxy": "^11.1.2",
+    "@fastify/http-proxy": "^11.3.0",
     "@fastify/static": "^8.2.0",
-    "@fastify/websocket": "^11.1.0",
+    "@fastify/websocket": "^11.2.0",
     "@oniichan/editor-host": "workspace:*",
     "@oniichan/kernel": "workspace:*",
     "@oniichan/shared": "workspace:*",
@@ -228,13 +229,13 @@
     "@oniichan/web-host": "workspace:*",
     "@otakustay/ipc": "^2.5.0",
     "@otakustay/text-pin": "^1.0.0",
-    "@types/node": "20.x",
-    "@types/vscode": "1.95.x",
+    "@types/node": "22.x",
+    "@types/vscode": "1.102.0",
     "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.18.1",
     "detect-port": "^2.1.0",
-    "esbuild": "^0.25.5",
-    "fastify": "^5.3.3",
+    "esbuild": "^0.25.6",
+    "fastify": "^5.4.0",
     "open": "^10.1.2"
   }
 }

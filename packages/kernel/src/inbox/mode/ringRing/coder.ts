@@ -2,13 +2,13 @@ import {getModelFeature} from '@oniichan/shared/model';
 import type {ChatInputPayload} from '@oniichan/shared/model';
 
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
-import type {InboxMessage} from '../../interface';
-import type {ChatRole} from '../interface';
-import {renderCommonObjective} from '../prompt';
-import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool';
-import {pickSharedTools, ToolImplementFactory} from '../tool';
-import {serializeExecutorMessage} from './utils';
-import {completeTask, CompleteTaskToolImplement} from './completeTask';
+import type {InboxMessage} from '../../interface.js';
+import type {ChatRole} from '../interface.js';
+import {renderCommonObjective} from '../prompt.js';
+import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool/index.js';
+import {pickSharedTools, ToolImplementFactory} from '../tool/index.js';
+import {serializeExecutorMessage} from './utils.js';
+import {completeTask, CompleteTaskToolImplement} from './completeTask.js';
 
 const tools: SharedToolName[] = [
     'read_file',

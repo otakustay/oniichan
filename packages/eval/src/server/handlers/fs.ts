@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
+import {globby} from 'globby';
 import type {GlobEntry} from 'globby';
 import type {FileEntry, ReadDirectoryRequest} from '@oniichan/editor-host/protocol';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';
@@ -14,7 +15,6 @@ export class ReadFileHandler extends RequestHandler<string, string> {
 }
 
 async function walkDirectory(cwd: string, path: string, depth: number): Promise<FileEntry[]> {
-    const {globby} = await import('globby');
     const entries = await globby(
         path ? `${path}/*` : '*',
         {

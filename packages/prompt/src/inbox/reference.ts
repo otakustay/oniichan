@@ -1,4 +1,4 @@
-import type {InboxPromptReference, InboxPromptView} from './interface';
+import type {InboxPromptReference, InboxPromptView} from './interface.js';
 
 function renderFileReference(reference: InboxPromptReference) {
     const lines = [

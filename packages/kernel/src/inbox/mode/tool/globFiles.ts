@@ -3,9 +3,9 @@ import dedent from 'dedent';
 import type {FindFilesByGlobParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
-import {asString} from './utils';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
+import {asString} from './utils.js';
 
 export class GlobFilesToolImplement extends ToolProviderBase<FindFilesByGlobParameter> {
     async executeApprove(args: FindFilesByGlobParameter): Promise<ToolExecuteResult> {

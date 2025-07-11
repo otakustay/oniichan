@@ -1,7 +1,7 @@
 import {describe, expect, test} from 'vitest';
 import dedent from 'dedent';
-import {StreamXmlParser} from '../xml';
-import type {XmlParsedChunk} from '../xml';
+import {StreamXmlParser} from '../xml.js';
+import type {XmlParsedChunk} from '../xml.js';
 
 async function* tokenize(content: string): AsyncIterable<string> {
     const tokens = content.split(/([^a-zA-Z0-9]+)/);

@@ -1,5 +1,5 @@
-import type {ModelConfiguration, ModelClient} from './interface';
-import {OpenRouterModelClient} from './openRouter';
+import type {ModelConfiguration, ModelClient} from './interface.js';
+import {OpenRouterModelClient} from './openRouter.js';
 
 export type {
     ChatUserMessagePayload,
@@ -13,9 +13,9 @@ export type {
     ModelResponse,
     ModelStreamingResponse,
     ChatInputPayload,
-} from './interface';
-export {getModelFeature} from './feature';
-export type {ModelFeature} from './feature';
+} from './interface.js';
+export {getModelFeature} from './feature.js';
+export type {ModelFeature} from './feature.js';
 
 function validateModelConfiguration(config: ModelConfiguration): void {
     if (!config.modelName) {

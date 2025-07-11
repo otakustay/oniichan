@@ -1,3 +1,4 @@
+import ora from 'ora';
 import type {Ora} from 'ora';
 import Spinnies from 'spinnies';
 export type TaskStatus = 'running' | 'success' | 'fail';
@@ -17,10 +18,7 @@ export class DefaultSpinner implements Spinner {
     }
 
     async update(status: TaskStatus, message: string) {
-        if (!this.ora) {
-            const {default: ora} = await import('ora');
-            this.ora = ora({text: message, indent: this.indent, hideCursor: false, discardStdin: false}).start();
-        }
+        this.ora ??= ora({text: message, indent: this.indent, hideCursor: false, discardStdin: false}).start();
 
         switch (status) {
             case 'running':

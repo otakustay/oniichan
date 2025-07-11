@@ -1,4 +1,4 @@
-import type {FixtureConfig} from '../interface';
+import type {FixtureConfig} from '../interface.js';
 
 const fixture: FixtureConfig = {
     name: 'go-fix-oom',

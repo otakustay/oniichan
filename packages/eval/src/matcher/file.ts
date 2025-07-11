@@ -1,5 +1,5 @@
 import {readFile, access} from 'fs/promises';
-import type {FixtureMatcher, FixtureMatchResult, BaseMatcherConfig} from './interface';
+import type {FixtureMatcher, FixtureMatchResult, BaseMatcherConfig} from './interface.js';
 
 interface FileMatchItem {
     path: string;

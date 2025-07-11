@@ -1,6 +1,6 @@
-import {assertAssistantTextMessage, transferToToolCallMessage} from '../../inbox';
-import type {InboxWorkflowOriginMessage, ToolProviderInit} from '../../inbox';
-import {WorkflowInitializer} from '../base';
+import {assertAssistantTextMessage, transferToToolCallMessage} from '../../inbox/index.js';
+import type {InboxWorkflowOriginMessage, ToolProviderInit} from '../../inbox/index.js';
+import {WorkflowInitializer} from '../base/index.js';
 
 export class ToolWorkflowInitializer extends WorkflowInitializer {
     async createWorkflowOrigin(): Promise<InboxWorkflowOriginMessage> {

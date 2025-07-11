@@ -1,2 +1,2 @@
-export {CommandExecutor} from './core/command';
-export {ThreadStore} from './inbox';
+export {CommandExecutor} from './core/command.js';
+export {ThreadStore} from './inbox/index.js';

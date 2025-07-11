@@ -1,8 +1,8 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolUseMessageData, ToolUseResultType} from '@oniichan/shared/inbox';
 import {formatStringTemplate} from '@oniichan/shared/string';
-import type {InboxRoundtrip, InboxToolUseMessage} from '../interface';
-import {MessageBase} from './base';
+import type {InboxRoundtrip, InboxToolUseMessage} from '../interface.js';
+import {MessageBase} from './base.js';
 
 export interface ToolUseInit {
     type: ToolUseResultType;

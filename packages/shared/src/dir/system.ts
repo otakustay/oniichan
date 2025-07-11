@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import os from 'node:os';
+import {isGitIgnored} from 'globby';
 import {directories as defaultIgnoreDirectories} from 'ignore-by-default';
 
 const APP_DIR = 'oniichan-coding-assitant';
@@ -94,7 +95,6 @@ export async function globalConfigDirectory(...children: string[]) {
 }
 
 export async function createGitIgnoreFilter(cwd: string) {
-    const {isGitIgnored} = await import('globby');
     const filter = await isGitIgnored({cwd});
     return (file: string) => filter(file);
 }

@@ -6,9 +6,9 @@ import type {EvaluateCodeParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {tmpDirectory} from '@oniichan/shared/dir';
-import {asString, resultMarkdown} from './utils';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
+import {asString, resultMarkdown} from './utils.js';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
 
 export class EvaluateCodeToolImplement extends ToolProviderBase<EvaluateCodeParameter> {
     async executeApprove(args: EvaluateCodeParameter): Promise<ToolExecuteResult> {

@@ -9,7 +9,7 @@ import {TextEditorReference} from '@oniichan/editor-host/utils/editor';
 import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {Logger} from '@oniichan/shared/logger';
 import {TaskContext} from '@oniichan/editor-host/utils/task';
-import {KernelClient} from '../../kernel';
+import {KernelClient} from '../../kernel/index.js';
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;

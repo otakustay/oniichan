@@ -1,8 +1,8 @@
 import {commands, window, workspace} from 'vscode';
 import type {InputBoxOptions} from 'vscode';
 import type {ModelConfiguration} from '@oniichan/shared/model';
-import {getModelConfig} from '../../utils/config';
-import {RequestHandler} from './handler';
+import {getModelConfig} from '../../utils/config.js';
+import {RequestHandler} from './handler.js';
 
 interface NotConfiguredAction {
     title: string;

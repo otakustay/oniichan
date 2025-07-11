@@ -4,7 +4,7 @@ import {tmpDirectory} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
 import {findFirstEditLine, revertFileEdit} from '@oniichan/shared/patch';
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export type AppliableState = 'appliable' | 'error' | 'conflict' | 'applied';
 

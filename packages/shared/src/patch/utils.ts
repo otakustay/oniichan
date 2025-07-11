@@ -1,6 +1,6 @@
 import {diffLines} from 'diff';
-import type {PatchAction} from './patch';
-import {stackFileEdit} from './stack';
+import type {PatchAction} from './patch.js';
+import {stackFileEdit} from './stack.js';
 
 export type FileEditAction = 'create' | 'delete' | 'edit';
 

@@ -1,8 +1,8 @@
 import type {WorkflowData, WorkflowStatus} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import {deserializeMessage, ToolCallMessage} from './message';
-import type {AssistantTextMessage} from './message';
-import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface';
+import {deserializeMessage, ToolCallMessage} from './message/index.js';
+import type {AssistantTextMessage} from './message/index.js';
+import type {InboxMessage, InboxRoundtrip, InboxWorkflow, InboxWorkflowOriginMessage} from './interface.js';
 
 export type WorkflowOriginMessage = AssistantTextMessage | ToolCallMessage;
 

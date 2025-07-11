@@ -1,9 +1,9 @@
 import {createModelClient, isModelConfigValid} from '@oniichan/shared/model';
 import {LazyContainer} from '@oniichan/shared/container';
 import type {ModelFeature, ModelResponse, ModelTextResponse} from '@oniichan/shared/model';
-import type {EditorHost} from '../editor';
-import type {ModelAccess, ModelChatOptions} from './interface';
-import {NamedModelAccess} from './named';
+import type {EditorHost} from '../editor.js';
+import type {ModelAccess, ModelChatOptions} from './interface.js';
+import {NamedModelAccess} from './named.js';
 
 export type {ModelChatOptions};
 

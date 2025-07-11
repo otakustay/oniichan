@@ -4,7 +4,7 @@ import {existsSync} from 'node:fs';
 import {createReadStream} from 'node:fs';
 import readline from 'node:readline';
 import {dataDirectory} from '@oniichan/shared/dir';
-import {ReferenceCount} from './reference';
+import {ReferenceCount} from './reference.js';
 
 export interface JsonlStore<T> extends AsyncDisposable {
     add(this: JsonlStore<T>, data: T): Promise<void>;

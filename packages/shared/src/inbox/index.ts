@@ -18,7 +18,7 @@ export type {
     AssistantTextMessageContentChunk,
     ToolCallMessageContentChunk,
     ToolUseResultType,
-} from './message';
+} from './message.js';
 export {
     assertTaggedChunk,
     assertToolCallChunk,
@@ -26,10 +26,10 @@ export {
     extractFileEdits,
     isContentfulChunk,
     isParsedToolCallChunk,
-} from './utils';
+} from './utils.js';
 export {
     isFileEditToolCallChunk,
-} from './tool';
+} from './tool.js';
 export type {
     WorkflowSourceChunkStatus,
     WorkflowChunkStatus,
@@ -49,12 +49,12 @@ export type {
     AskFollowupQuestionToolCallMessageChunk,
     CompleteTaskToolCallMessageChunk,
     RawToolCallParameter,
-} from './tool';
-export type {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip';
+} from './tool.js';
+export type {RoundtripStatus, RoundtripData, RoundtripResponseData} from './roundtrip.js';
 export type {
     MessageThreadData,
     MessageThreadPersistData,
     RoundtripMessageData,
     MessageThreadWorkingMode,
-} from './thread';
-export type {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow';
+} from './thread.js';
+export type {WorkflowStatus, WorkflowData, WorkflowOriginMessageData} from './workflow.js';

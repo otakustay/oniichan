@@ -1,9 +1,9 @@
-import {WorkflowRunner} from '../base';
-import type {WorkflowStepInit} from '../base';
-import {ToolWorkflowDetector} from './detector';
-import {ToolWorkflowExecutor} from './executor';
-import {ToolWorkflowInitializer} from './initializer';
-import {ToolWorkflowValidator} from './validator';
+import {WorkflowRunner} from '../base/index.js';
+import type {WorkflowStepInit} from '../base/index.js';
+import {ToolWorkflowDetector} from './detector.js';
+import {ToolWorkflowExecutor} from './executor.js';
+import {ToolWorkflowInitializer} from './initializer.js';
+import {ToolWorkflowValidator} from './validator.js';
 
 export class ToolWorkflowRunner extends WorkflowRunner {
     constructor(init: WorkflowStepInit) {

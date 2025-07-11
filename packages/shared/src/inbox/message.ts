@@ -1,5 +1,5 @@
-import type {ToolParsedChunk, ContentTagName} from '../tool';
-import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
+import type {ToolParsedChunk, ContentTagName} from '../tool/index.js';
+import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool.js';
 
 export interface ReasoningMessageChunk {
     type: 'reasoning';

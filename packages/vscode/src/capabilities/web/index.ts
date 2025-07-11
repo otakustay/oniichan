@@ -1,6 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import {commands, Disposable, StatusBarAlignment, Uri, ViewColumn, window} from 'vscode';
+import {window, commands, Disposable, StatusBarAlignment, Uri, ViewColumn} from 'vscode';
+import open from 'open';
 import type {WebviewViewProvider, ExtensionContext, StatusBarItem, Webview, WebviewView} from 'vscode';
 import {isExecutionMessage} from '@otakustay/ipc';
 import type {ExecutionMessage, Port} from '@otakustay/ipc';
@@ -13,10 +14,11 @@ import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import {newUuid} from '@oniichan/shared/id';
 import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import type {KernelClient} from '../../kernel';
-import {WebAppServer} from './server';
-import {establishIpc} from './ipc';
-import {WebConnection} from './connection';
+import {currentDirectory} from '../../utils/path.js';
+import type {KernelClient} from '../../kernel/index.js';
+import {WebAppServer} from './server.js';
+import {establishIpc} from './ipc.js';
+import {WebConnection} from './connection.js';
 
 export {WebConnection};
 
@@ -92,7 +94,12 @@ export class WebApp implements Disposable, WebviewViewProvider {
         this.container = container
             .bind(Logger, () => logger.with({source: 'WebApp'}), {singleton: true});
         // File is `dist/extension.ts`, reference to `dist/web`, this always works in production mode
-        this.webAppServer = new WebAppServer(this.container, {staticDirectory: path.join(__dirname, 'web')});
+        this.webAppServer = new WebAppServer(
+            this.container,
+            {
+                staticDirectory: path.join(currentDirectory(import.meta.url), 'web'),
+            }
+        );
         const context = this.container.get('ExtensionContext');
         this.assetUri = Uri.joinPath(
             context.extensionUri,
@@ -185,7 +192,6 @@ export class WebApp implements Disposable, WebviewViewProvider {
         const openWebAppCommand = commands.registerCommand(
             OPEN_WEB_APP_COMMAND,
             async () => {
-                const {default: open} = await import('open');
                 if (this.webAppServer.port) {
                     await open(`http://127.0.0.1:${this.webAppServer.port}`);
                 }

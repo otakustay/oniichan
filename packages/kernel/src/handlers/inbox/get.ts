@@ -1,6 +1,6 @@
 import type {MessageThreadData} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {RequestHandler} from '../handler';
+import {RequestHandler} from '../handler.js';
 
 export class InboxGetThreadListHandler extends RequestHandler<void, MessageThreadData[]> {
     static readonly action = 'inboxGetThreadList';

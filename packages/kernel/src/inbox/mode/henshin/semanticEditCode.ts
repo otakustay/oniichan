@@ -1,8 +1,8 @@
 import dedent from 'dedent';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import type {SemanticEditCodeParameter, ToolDescription} from '@oniichan/shared/tool';
-import {ToolProviderBase, asString} from '../tool';
-import type {ToolExecuteResult} from '../tool';
+import {ToolProviderBase, asString} from '../tool/index.js';
+import type {ToolExecuteResult} from '../tool/index.js';
 
 export const semanticEditCode: ToolDescription = {
     name: 'semantic_edit_code',

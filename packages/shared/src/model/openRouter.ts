@@ -6,6 +6,8 @@ import type {
     OpenRouterProvider,
     OpenRouterProviderSettings,
 } from '@openrouter/ai-sdk-provider';
+import {getModelFeature} from './feature.js';
+import type {ModelFeature} from './feature.js';
 import type {
     ModelChatOptions,
     ModelClient,
@@ -14,9 +16,7 @@ import type {
     ModelStreamingResponse,
     ModelTextResponse,
     ModelRequestDetail,
-} from './interface';
-import {getModelFeature} from './feature';
-import type {ModelFeature} from './feature';
+} from './interface.js';
 
 interface OpenRouterGeneration {
     id: string;

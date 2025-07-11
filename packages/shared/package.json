@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/shared",
+  "type": "module",
   "version": "3.7.0",
   "description": "Shared elements without any platform dependencies",
   "exports": {
@@ -31,7 +32,7 @@
     "@openrouter/ai-sdk-provider": "^0.7.1",
     "@otakustay/async-iterator": "^1.1.1",
     "@types/json-schema": "^7.0.15",
-    "ai": "^4.3.16",
+    "ai": "^4.3.18",
     "dedent": "^1.6.0",
     "diff": "^8.0.2",
     "globby": "^14.1.0",
@@ -39,8 +40,8 @@
   },
   "devDependencies": {
     "@types/ignore-by-default": "^0.0.0",
-    "@types/node": "20.x",
-    "vite": "^6.3.5",
-    "vitest": "^3.2.3"
+    "@types/node": "22.x",
+    "vite": "^7.0.4",
+    "vitest": "^3.2.4"
   }
 }

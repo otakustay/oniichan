@@ -1,7 +1,7 @@
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {UserRequestMessageData} from '@oniichan/shared/inbox';
-import type {InboxRoundtrip, InboxUserRequestMessage, UserRequestMessageToChatInpytPayloadOptions} from '../interface';
-import {MessageBase} from './base';
+import type {InboxRoundtrip, InboxUserRequestMessage, UserRequestMessageToChatInpytPayloadOptions} from '../interface.js';
+import {MessageBase} from './base.js';
 
 export class UserRequestMessage extends MessageBase<'userRequest'> implements InboxUserRequestMessage {
     static from(data: UserRequestMessageData, roundtrip: InboxRoundtrip) {

@@ -12,11 +12,11 @@ import type {
     InboxToolCallMessage,
     InboxMessageThread,
     InboxUserRequestMessage,
-} from './interface';
-import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage} from './message';
-import type {ToolUseInit} from './message';
-import {Roundtrip} from './roundtrip';
-import {MessageThread} from './thread';
+} from './interface.js';
+import {ToolUseMessage, AssistantTextMessage, ToolCallMessage, UserRequestMessage} from './message/index.js';
+import type {ToolUseInit} from './message/index.js';
+import {Roundtrip} from './roundtrip.js';
+import {MessageThread} from './thread.js';
 
 export function setRoundtripRequest(roundtrip: InboxRoundtrip, uuid: string, content: string): InboxUserRequestMessage {
     const message = new UserRequestMessage(uuid, roundtrip, content);

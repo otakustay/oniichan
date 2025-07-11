@@ -1,6 +1,6 @@
 import type {MessageThreadPersistData, MessageThreadData, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {MessageThread} from './thread';
-import type {InboxMessageThread} from './interface';
+import {MessageThread} from './thread.js';
+import type {InboxMessageThread} from './interface.js';
 
 export class ThreadStore {
     static readonly containerKey = 'ThreadStore';

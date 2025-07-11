@@ -1,9 +1,9 @@
-import {renderRuleSection} from './rule';
-import {renderFormatSection} from './format';
-import {renderToolSection} from './tool';
-import {renderStructureSection} from './structure';
-import {renderReferenceSection} from './reference';
-import type {InboxPromptView, InboxPromptReference} from './interface';
+import {renderRuleSection} from './rule.js';
+import {renderFormatSection} from './format.js';
+import {renderToolSection} from './tool.js';
+import {renderStructureSection} from './structure.js';
+import {renderReferenceSection} from './reference.js';
+import type {InboxPromptView, InboxPromptReference} from './interface.js';
 
 export type {InboxPromptView, InboxPromptReference};
 

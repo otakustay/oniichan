@@ -7,8 +7,8 @@ import type {
     RoundtripStatus,
 } from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
-import {AssistantTextMessage, UserRequestMessage} from './message';
-import {Workflow} from './workflow';
+import {AssistantTextMessage, UserRequestMessage} from './message/index.js';
+import {Workflow} from './workflow.js';
 import type {
     InboxAssistantTextMessage,
     InboxMessage,
@@ -16,8 +16,8 @@ import type {
     InboxToolCallMessage,
     InboxWorkflow,
     InboxWorkflowOriginMessage,
-} from './interface';
-import {isAssistantMessage, isToolCallMessageOf} from './assert';
+} from './interface.js';
+import {isAssistantMessage, isToolCallMessageOf} from './assert.js';
 
 interface RoundtripMessageResponse {
     type: 'message';

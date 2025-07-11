@@ -1,10 +1,11 @@
-import Ajv from 'ajv';
+import {Ajv} from 'ajv';
 import type {Schema, ValidateFunction} from 'ajv';
 import {renderFixToolCallPrompt} from '@oniichan/prompt';
+import pRetry from 'p-retry';
 import type {FixToolCallView} from '@oniichan/prompt';
-import {WorkflowValidator} from '../base';
-import {assertAssistantTextMessage, createDetachedUserRequestMessage} from '../../inbox';
-import type {ToolProviderInit} from '../../inbox';
+import {WorkflowValidator} from '../base/index.js';
+import {assertAssistantTextMessage, createDetachedUserRequestMessage} from '../../inbox/index.js';
+import type {ToolProviderInit} from '../../inbox/index.js';
 
 const ajv = new Ajv();
 
@@ -84,7 +85,6 @@ export class ToolWorkflowValidator extends WorkflowValidator {
             return true;
         }
 
-        const {default: pRetry} = await import('p-retry');
         try {
             const newChunk = await pRetry(() => this.fixInputError(validateResult), {retries: 3});
             source.replaceToolCallChunk(newChunk);

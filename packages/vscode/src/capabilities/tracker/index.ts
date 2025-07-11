@@ -1,1 +1,1 @@
-export {WorkspaceTracker} from './workspace';
+export {WorkspaceTracker} from './workspace.js';

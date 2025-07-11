@@ -5,8 +5,8 @@ export {
     createGitIgnoreFilter,
     shouldDirectoryExcludedFromSearch,
     tmpDirectory,
-} from './system';
-export {streamingListEntries} from './list';
-export {WorkspaceFileStructure} from './tree';
-export type {TreeifyResult} from './tree';
-export {projectConfig, projectCompiledConfig, projectRulesDirectory, projectRules} from './project';
+} from './system.js';
+export {streamingListEntries} from './list.js';
+export {WorkspaceFileStructure} from './tree.js';
+export type {TreeifyResult} from './tree.js';
+export {projectConfig, projectCompiledConfig, projectRulesDirectory, projectRules} from './project.js';

@@ -14,7 +14,8 @@
         "npm: watch:web-types",
         "npm: watch:web-host",
         "npm: watch:web-serve",
-        "npm: watch:prompt"
+        "npm: watch:prompt",
+        "npm: watch:eval"
       ],
       "presentation": {
         "reveal": "always"
@@ -141,6 +142,17 @@
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "label": "npm: watch:prompt",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "watch:eval",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:eval",
       "presentation": {
         "reveal": "never"
       }

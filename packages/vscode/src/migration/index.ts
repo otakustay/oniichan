@@ -1,5 +1,5 @@
 import {stringifyError} from '@oniichan/shared/error';
-import v2 from './v2';
+import v2 from './v2.js';
 
 const migrations: Array<[string, () => Promise<void>]> = [
     ['v2', v2],

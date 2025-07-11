@@ -1,7 +1,7 @@
 import {test, expect} from 'vitest';
 import dedent from 'dedent';
-import {StreamingToolParser} from '../parse';
-import type {RawToolCallParameter} from '../../inbox';
+import {StreamingToolParser} from '../parse.js';
+import type {RawToolCallParameter} from '../../inbox/index.js';
 
 async function* tokenize(content: string): AsyncIterable<string> {
     const tokens = content.split(/([^a-zA-Z0-9]+)/);

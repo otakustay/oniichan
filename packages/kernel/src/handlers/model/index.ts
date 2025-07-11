@@ -1,8 +1,8 @@
 import type {ChatInputPayload, ModelResponse} from '@oniichan/shared/model';
 import {ModelUsageTelemetry} from '@oniichan/storage/telemetry';
 import {newUuid} from '@oniichan/shared/id';
-import {ModelAccessHost} from '../../core/model';
-import {RequestHandler} from '../handler';
+import {ModelAccessHost} from '../../core/model/index.js';
+import {RequestHandler} from '../handler.js';
 
 export class ModelChatHandler extends RequestHandler<ChatInputPayload[], ModelResponse> {
     static readonly action = 'modelChat';

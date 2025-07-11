@@ -1,7 +1,7 @@
 import {getDefaultStore} from 'jotai';
 import {RequestHandler} from '@otakustay/ipc';
 import type {MessageThreadData} from '@oniichan/shared/inbox';
-import {activeTheadUuidAtom, messageThreadListAtom} from '../atoms/inbox';
+import {activeTheadUuidAtom, messageThreadListAtom} from '../atoms/inbox.js';
 
 export class UpdateThreadListHandler extends RequestHandler<MessageThreadData[], void> {
     static readonly action = 'updateThreadList';

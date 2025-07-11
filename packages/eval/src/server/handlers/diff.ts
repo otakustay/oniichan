@@ -1,6 +1,6 @@
 import type {FileEditData, FileEditResult} from '@oniichan/shared/patch';
 import type {AcceptFileEditRequest, AppliableState} from '@oniichan/editor-host/protocol';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class CheckEditAppliableHandler extends RequestHandler<FileEditData[], AppliableState> {
     static readonly action = 'checkEditAppliable';

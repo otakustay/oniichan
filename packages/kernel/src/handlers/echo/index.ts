@@ -1,4 +1,4 @@
-import {RequestHandler} from '../handler';
+import {RequestHandler} from '../handler.js';
 
 export class EchoHandler extends RequestHandler<string, string> {
     static readonly action = 'echo';

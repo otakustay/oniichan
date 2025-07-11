@@ -1,5 +1,6 @@
 import path from 'node:path';
 import type {Disposable} from 'vscode';
+import {nanoid} from 'nanoid';
 import {commands, Position, Range, TextEditorRevealType, Uri, window, workspace} from 'vscode';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {tmpDirectory} from '@oniichan/shared/dir';
@@ -69,7 +70,6 @@ export class DiffViewManager implements Disposable {
             throw new Error('Unable to use temp directory');
         }
 
-        const {nanoid} = await import('nanoid');
         const extension = path.extname(input.file);
         const oldFile = path.join(directory, nanoid() + extension);
         const newFile = path.join(directory, nanoid() + extension);

@@ -1,6 +1,6 @@
-import {ToolWorkflowRunner} from './tool';
-import {WorkflowRunner} from './base';
-import type {WorkflowStepInit} from './base';
+import {ToolWorkflowRunner} from './tool/index.js';
+import {WorkflowRunner} from './base/index.js';
+import type {WorkflowStepInit} from './base/index.js';
 
 export {WorkflowRunner};
 export type {WorkflowStepInit};

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type {DocumentLine, LineDiagnostic} from '@oniichan/editor-host/protocol';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class GetDocumentTextHandler extends RequestHandler<string, string> {
     static readonly action = 'getDocumentText';

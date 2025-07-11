@@ -9,12 +9,12 @@ import type {MessageInputChunk, MessageThreadWorkingMode, ReasoningMessageChunk}
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {StreamingToolParser} from '@oniichan/shared/tool';
 import {duplicate, merge} from '@oniichan/shared/iterable';
-import type {ModelAccessHost, ModelChatOptions} from '../../core/model';
-import type {EditorHost} from '../../core/editor';
-import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../interface';
-import {SystemPromptGenerator} from './prompt';
-import type {SystemPromptGeneratorInit} from './prompt';
-import type {ChatCapabilityProvider, ChatRole} from './interface';
+import type {ModelAccessHost, ModelChatOptions} from '../../core/model/index.js';
+import type {EditorHost} from '../../core/editor.js';
+import type {InboxMessage, InboxMessageThread, InboxRoundtrip} from '../interface.js';
+import {SystemPromptGenerator} from './prompt.js';
+import type {SystemPromptGeneratorInit} from './prompt.js';
+import type {ChatCapabilityProvider, ChatRole} from './interface.js';
 
 export interface ChatCapabilityProviderInit {
     logger: Logger;

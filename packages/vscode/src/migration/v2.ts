@@ -1,4 +1,4 @@
-import {deleteConfiguration} from './utils';
+import {deleteConfiguration} from './utils.js';
 
 export default async function migrate() {
     deleteConfiguration('oniichan.model.apiStyle');

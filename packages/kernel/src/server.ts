@@ -3,10 +3,10 @@ import type {ExecutionRequest} from '@otakustay/ipc';
 import {EditorHostClient} from '@oniichan/editor-host/client';
 import {Logger} from '@oniichan/shared/logger';
 import type {DependencyContainer} from '@oniichan/shared/container';
-import type {Context} from './handlers/handler';
-import type {KernelProtocol} from './protocol';
-import {CommandExecutor} from './core/command';
-import {EchoHandler} from './handlers/echo';
+import type {Context} from './handlers/handler.js';
+import type {KernelProtocol} from './protocol.js';
+import {CommandExecutor} from './core/command.js';
+import {EchoHandler} from './handlers/echo/index.js';
 import {
     InboxSendMessageHandler,
     InboxMarkRoundtripStatusHandler,
@@ -15,14 +15,14 @@ import {
     InboxCheckRollbackHandler,
     InboxRollbackHandler,
     InboxApproveToolHandler,
-} from './handlers/inbox';
-import {ModelChatHandler} from './handlers/model';
-import {ScaffoldHandler} from './handlers/scaffold';
-import {SemanticRewriteHandler} from './handlers/semanticRewrite';
-import {ModelTelemetryHandler} from './handlers/telemetry';
-import {ExportInboxHandler} from './handlers/debug';
-import {ThreadStore} from './inbox';
-import {InitializeProjectConfigHandler} from './handlers/config';
+} from './handlers/inbox/index.js';
+import {ModelChatHandler} from './handlers/model/index.js';
+import {ScaffoldHandler} from './handlers/scaffold/index.js';
+import {SemanticRewriteHandler} from './handlers/semanticRewrite/index.js';
+import {ModelTelemetryHandler} from './handlers/telemetry/index.js';
+import {ExportInboxHandler} from './handlers/debug/index.js';
+import {ThreadStore} from './inbox/index.js';
+import {InitializeProjectConfigHandler} from './handlers/config/index.js';
 
 interface Dependency {
     [CommandExecutor.containerKey]: CommandExecutor;

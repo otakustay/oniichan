@@ -2,10 +2,10 @@ import type {ChatUserMessagePayload} from '@oniichan/shared/model';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import {renderScaffoldPrompt} from '@oniichan/prompt';
 import {over} from '@otakustay/async-iterator';
-import {ModelAccessHost} from '../../core/model';
-import type {EditorHost} from '../../core/editor';
-import {consumeModelResponse} from './parse';
-import type {ParsedChunk} from './parse';
+import {ModelAccessHost} from '../../core/model/index.js';
+import type {EditorHost} from '../../core/editor.js';
+import {consumeModelResponse} from './parse.js';
+import type {ParsedChunk} from './parse.js';
 
 export interface ScaffoldSnippet {
     path: string;

@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
-import {fixtures} from './fixtures';
-import type {FixtureConfig} from './fixtures';
-import {FixtureRunner} from './runner';
-import type {RunnerInit} from './runner';
-import {createConfiguration} from './core';
+import {fixtures} from './fixtures/index.js';
+import type {FixtureConfig} from './fixtures/index.js';
+import {FixtureRunner} from './runner/index.js';
+import type {RunnerInit} from './runner/index.js';
+import {createConfiguration} from './core/index.js';
 
 const command = yargs(hideBin(process.argv))
     .option('concurrent', {type: 'boolean', demandOption: false, default: false})

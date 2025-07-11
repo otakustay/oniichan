@@ -1,7 +1,7 @@
 import type {MessageThreadData, MessageThreadPersistData, MessageThreadWorkingMode} from '@oniichan/shared/inbox';
 import {assertHasValue} from '@oniichan/shared/error';
-import type {InboxMessageThread, InboxRoundtrip} from './interface';
-import {Roundtrip} from './roundtrip';
+import type {InboxMessageThread, InboxRoundtrip} from './interface.js';
+import {Roundtrip} from './roundtrip.js';
 
 /**
  * A thread is a collection of roundtrips, this includes one or more user requests.

@@ -2,12 +2,12 @@ import dedent from 'dedent';
 
 import type {ChatInputPayload} from '@oniichan/shared/model';
 import type {ToolDescription, ToolName} from '@oniichan/shared/tool';
-import type {InboxMessage} from '../../interface';
-import type {ChatRole} from '../interface';
-import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool';
-import {pickSharedTools, ToolImplementFactory} from '../tool';
-import {isToolCallMessageOf} from '../../assert';
-import {RejectReviewToolImplement} from './rejectReview';
+import type {InboxMessage} from '../../interface.js';
+import type {ChatRole} from '../interface.js';
+import type {ToolImplement, SharedToolName, ToolProviderInit} from '../tool/index.js';
+import {pickSharedTools, ToolImplementFactory} from '../tool/index.js';
+import {isToolCallMessageOf} from '../../assert.js';
+import {RejectReviewToolImplement} from './rejectReview.js';
 
 interface SerializeState {
     context: 'user' | 'actor' | 'reviewer';

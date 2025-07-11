@@ -2,7 +2,7 @@ import path from 'node:path';
 import {Uri, workspace} from 'vscode';
 import {stringifyError} from '@oniichan/shared/error';
 import type {TreeifyResult} from '@oniichan/shared/dir';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export interface FindFilesRequest {
     glob: string;

@@ -1,5 +1,5 @@
-import type {AssistantMessageData, UserRequestMessageData} from './message';
-import type {RoundtripData, RoundtripStatus} from './roundtrip';
+import type {AssistantMessageData, UserRequestMessageData} from './message.js';
+import type {RoundtripData, RoundtripStatus} from './roundtrip.js';
 
 export type MessageThreadWorkingMode = 'normal' | 'ringRing' | 'couple' | 'henshin' | 'senpai';
 

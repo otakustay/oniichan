@@ -1,6 +1,6 @@
 import {Client} from '@otakustay/ipc';
 import type {Port} from '@otakustay/ipc';
-import type {WebHostProtocol} from './protocol';
+import type {WebHostProtocol} from './protocol.js';
 
 export class WebHostClient extends Client<WebHostProtocol> {
     static readonly namespace = '-> web';

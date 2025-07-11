@@ -1,4 +1,4 @@
-export {isToolName, isEditToolName, isBreakpointToolName} from './definition';
+export {isToolName, isEditToolName, isBreakpointToolName} from './definition.js';
 export type {
     ParameterInfo,
     ReadFileParameter,
@@ -23,6 +23,6 @@ export type {
     ModelToolCallInputWithSource,
     ToolDescription,
     ToolName,
-} from './definition';
-export {StreamingToolParser} from './parse';
-export type {ToolParsedChunk, ContentTagName} from './parse';
+} from './definition.js';
+export {StreamingToolParser} from './parse.js';
+export type {ToolParsedChunk, ContentTagName} from './parse.js';

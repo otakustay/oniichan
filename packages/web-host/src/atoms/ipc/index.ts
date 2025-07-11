@@ -1,8 +1,8 @@
 import {atom, useAtomValue} from 'jotai';
 import {KernelClient} from '@oniichan/kernel/client';
 import {EditorHostClient} from '@oniichan/editor-host/client';
-import {WebHostServer} from '../../server';
-import {WebSocketPort, VscodeMessagePort} from './port';
+import {WebHostServer} from '../../server.js';
+import {WebSocketPort, VscodeMessagePort} from './port.js';
 
 export interface Ipc {
     kernel: KernelClient;

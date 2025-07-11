@@ -1,12 +1,12 @@
-import type {FixtureMatcher} from './interface';
-import {GitDiffMatcher} from './gitDiff';
-import type {GitDiffMatcherConfig} from './gitDiff';
-import type {ShellMatcherConfig} from './shell';
-import ShellMatcher from './shell';
-import {FileMatcher} from './file';
-import type {FileMatcherConfig} from './file';
+import type {FixtureMatcher} from './interface.js';
+import {GitDiffMatcher} from './gitDiff.js';
+import type {GitDiffMatcherConfig} from './gitDiff.js';
+import type {ShellMatcherConfig} from './shell.js';
+import ShellMatcher from './shell.js';
+import {FileMatcher} from './file.js';
+import type {FileMatcherConfig} from './file.js';
 
-export type {FixtureMatchResult, FixtureMatcherItem} from './interface';
+export type {FixtureMatchResult, FixtureMatcherItem} from './interface.js';
 
 export type FixtureMatcherConfig = GitDiffMatcherConfig | ShellMatcherConfig | FileMatcherConfig;
 

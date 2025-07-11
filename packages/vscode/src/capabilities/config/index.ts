@@ -1,2 +1,2 @@
-export {InitializeProjectConfigCommand} from './initializeProjectConfig';
-export {OmdCompletion} from './completion';
+export {InitializeProjectConfigCommand} from './initializeProjectConfig.js';
+export {OmdCompletion} from './completion.js';

@@ -1,8 +1,8 @@
-import {assertNever} from '../error';
-import type {FileEditData} from '../patch';
-import type {TaggedMessageChunk, MessageData, MessageViewChunk} from './message';
-import {isFileEditToolCallChunk} from './tool';
-import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool';
+import {assertNever} from '../error.js';
+import type {FileEditData} from '../patch/index.js';
+import type {TaggedMessageChunk, MessageData, MessageViewChunk} from './message.js';
+import {isFileEditToolCallChunk} from './tool.js';
+import type {ToolCallMessageChunk, ParsedToolCallMessageChunk} from './tool.js';
 
 export function isParsedToolCallChunk(chunk: MessageViewChunk): chunk is ParsedToolCallMessageChunk {
     return chunk.type === 'parsedToolCall';

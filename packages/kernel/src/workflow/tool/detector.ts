@@ -1,6 +1,6 @@
-import {assertAssistantTextMessage} from '../../inbox';
-import type {InboxWorkflowOriginMessage, InboxWorkflowSourceMessage} from '../../inbox';
-import {WorkflowDetector} from '../base';
+import {assertAssistantTextMessage} from '../../inbox/index.js';
+import type {InboxWorkflowOriginMessage, InboxWorkflowSourceMessage} from '../../inbox/index.js';
+import {WorkflowDetector} from '../base/index.js';
 
 export class ToolWorkflowDetector extends WorkflowDetector {
     detectWorkflow(source: InboxWorkflowSourceMessage): boolean {

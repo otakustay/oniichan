@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import {test, expect} from 'vitest';
-import {patchContent} from '../patch';
+import {patchContent} from '../patch.js';
 
 async function readFixture(name: string) {
     const files = ['old.txt', 'new.txt', 'patch.txt'].map(v => path.join(__dirname, 'fixtures', name, v));

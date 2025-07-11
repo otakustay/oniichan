@@ -1,4 +1,4 @@
-import {WorkflowStep} from './step';
+import {WorkflowStep} from './step.js';
 
 export interface WorkflowExecuteResult {
     /** Whether we should automatically request LLM again on workflow completion */

@@ -1,9 +1,9 @@
 import {over} from '@otakustay/async-iterator';
 import {stringifyError} from '@oniichan/shared/error';
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {setRoundtripRequest} from '../../inbox';
-import {InboxRequestHandler} from './handler';
-import type {InboxMessageReference, InboxMessageResponse} from './handler';
+import {setRoundtripRequest} from '../../inbox/index.js';
+import {InboxRequestHandler} from './handler.js';
+import type {InboxMessageReference, InboxMessageResponse} from './handler.js';
 
 interface TextMessageBody {
     type: 'text';

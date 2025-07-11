@@ -8,9 +8,9 @@ import type {
 } from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
 import {assertHasValue} from '@oniichan/shared/error';
-import type {InboxRoundtrip, InboxToolCallMessage, ToolCallMessageToChatInpytPayloadOptions} from '../interface';
-import {MessageBase} from './base';
-import {chunksToModelText} from './utils';
+import type {InboxRoundtrip, InboxToolCallMessage, ToolCallMessageToChatInpytPayloadOptions} from '../interface.js';
+import {MessageBase} from './base.js';
+import {chunksToModelText} from './utils.js';
 
 type Name = ToolName;
 

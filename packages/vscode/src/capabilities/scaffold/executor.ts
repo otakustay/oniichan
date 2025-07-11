@@ -10,8 +10,8 @@ import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {stringifyError} from '@oniichan/shared/error';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import type {FunctionUsageResult} from '@oniichan/storage/telemetry';
-import {KernelClient} from '../../kernel';
-import {ScaffoldCodeWriter} from './writer';
+import {KernelClient} from '../../kernel/index.js';
+import {ScaffoldCodeWriter} from './writer.js';
 
 const LOADING_TEXT =
     'Oniichan is generating the scaffold for you! Please don\'t touch or close the file... (｡>﹏<｡) Delete this line to stop the task desu~';

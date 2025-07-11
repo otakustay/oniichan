@@ -3,21 +3,21 @@ import type {InboxPromptReference} from '@oniichan/prompt';
 import type {MessageInputChunk} from '@oniichan/shared/inbox';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
-import {ModelAccessHost} from '../../core/model';
-import {createEmptyMessageThread, createEmptyRoundtrip} from '../../inbox';
-import type {InboxRoundtrip} from '../../inbox';
-import {WorkflowDetector} from '../../workflow';
-import type {WorkflowStepInit, WorkflowRunner} from '../../workflow';
-import type {InboxMessageThread} from '../../inbox';
-import {RequestHandler} from '../handler';
+import {ModelAccessHost} from '../../core/model/index.js';
+import {createEmptyMessageThread, createEmptyRoundtrip} from '../../inbox/index.js';
+import type {InboxRoundtrip} from '../../inbox/index.js';
+import {WorkflowDetector} from '../../workflow/index.js';
+import type {WorkflowStepInit, WorkflowRunner} from '../../workflow/index.js';
+import type {InboxMessageThread} from '../../inbox/index.js';
+import {RequestHandler} from '../handler.js';
 import {
     CoupleChatCapabilityProvider,
     HenshinChatCapabilityProvider,
     RingRingChatCapabilityProvider,
     StandaloneChatCapabilityProvider,
     SenpaiChatCapabilityProvider,
-} from '../../inbox';
-import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from '../../inbox';
+} from '../../inbox/index.js';
+import type {ChatCapabilityProvider, ChatCapabilityProviderInit} from '../../inbox/index.js';
 
 function isChunkAbleToFlushImmediately(chunk: MessageInputChunk) {
     // For every type that "will stream very freauently", we don't flush them immediately

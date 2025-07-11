@@ -8,7 +8,7 @@ import {stringifyError} from '@oniichan/shared/error';
 import type {WebHostClient} from '@oniichan/web-host/client';
 import type {WorkspaceState} from '@oniichan/web-host/atoms/workspace';
 import {streamingListEntries, WorkspaceFileStructure} from '@oniichan/shared/dir';
-import {WebConnection} from '../web';
+import {WebConnection} from '../web/index.js';
 
 function addTrailingSlash(value: string) {
     return value.endsWith('/') ? value : value + '/';

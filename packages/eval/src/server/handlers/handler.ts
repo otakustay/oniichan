@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import {RequestHandler as BaseRequestHandler} from '@otakustay/ipc';
 import type {ExecutionRequest, Port} from '@otakustay/ipc';
-import type {Context} from '../interface';
+import type {Context} from '../interface.js';
 
 export abstract class RequestHandler<I, O> extends BaseRequestHandler<I, O, Context> {
     constructor(port: Port, request: ExecutionRequest, context: Context) {

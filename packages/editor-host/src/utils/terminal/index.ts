@@ -1,10 +1,11 @@
 import { window} from 'vscode';
 import type {Terminal,Disposable} from 'vscode';
+import stripAnsi from 'strip-ansi';
 import {wait, waitCondition} from '@oniichan/shared/promise';
 import {Logger} from '@oniichan/shared/logger';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {defer} from '@oniichan/shared/promise';
-import {isLongRunningCommand} from './detection';
+import {isLongRunningCommand} from './detection.js';
 
 function extractExecutionOutput(content: string) {
     const fullOutputContent = /\]633;C([\s\S]*?)\]633;D/.exec(content)?.at(1);
@@ -138,7 +139,6 @@ export class ExecutionTerminal implements Disposable {
     }
 
     private async parseCommandOutput() {
-        const {default: stripAnsi} = await import('strip-ansi');
         const rawContent = this.output.join('');
         const commandOutput = extractExecutionOutput(rawContent);
         const cleanedContent = stripAnsi(commandOutput);

@@ -3,9 +3,9 @@ import unixify from 'unixify';
 import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
-import {asString} from './utils';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
+import {asString} from './utils.js';
 
 // For each match, its a `begin - context - match - context - end` sequence,
 // so a maximum of 1000 lines contains 200 search results

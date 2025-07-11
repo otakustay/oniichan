@@ -1,8 +1,8 @@
 import dedent from 'dedent';
 import type {ToolDescription} from '@oniichan/shared/tool';
-import {attemptCompletion} from '../tool';
-import type {ToolExecuteResult} from '../tool';
-import {AttemptCompletionToolImplement} from '../tool/attemptCompletion';
+import {attemptCompletion} from '../tool/index.js';
+import type {ToolExecuteResult} from '../tool/index.js';
+import {AttemptCompletionToolImplement} from '../tool/attemptCompletion.js';
 
 export const completeActorTask: ToolDescription = {
     ...attemptCompletion,

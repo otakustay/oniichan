@@ -1,6 +1,6 @@
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import type {ModelConfiguration} from '@oniichan/shared/model';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class GetModelConfigHandler extends RequestHandler<string, ModelConfiguration> {
     static readonly action = 'getModelConfig';

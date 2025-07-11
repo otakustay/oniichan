@@ -1,8 +1,8 @@
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import type {CompleteTaskParameter, ToolDescription} from '@oniichan/shared/tool';
 import dedent from 'dedent';
-import type {ToolExecuteResult} from '../tool';
-import {ToolProviderBase, asString} from '../tool';
+import type {ToolExecuteResult} from '../tool/index.js';
+import {ToolProviderBase, asString} from '../tool/index.js';
 
 export const completeTask: ToolDescription = {
     name: 'complete_task',

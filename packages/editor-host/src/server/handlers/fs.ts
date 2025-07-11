@@ -1,6 +1,6 @@
 import {FileType, Uri, workspace} from 'vscode';
 import {createGitIgnoreFilter, shouldDirectoryExcludedFromSearch} from '@oniichan/shared/dir';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class ReadFileHandler extends RequestHandler<string, string> {
     static readonly action = 'readFile';

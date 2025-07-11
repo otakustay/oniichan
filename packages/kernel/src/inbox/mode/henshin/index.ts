@@ -1,9 +1,9 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {isBreakpoingToolCallMessage} from '../../assert';
-import {BaseChatCapabilityProvider} from '../provider';
-import type {ChatRole} from '../interface';
-import {HenshinActorRole} from './actor';
-import {HenshinCoderRole} from './coder';
+import {isBreakpoingToolCallMessage} from '../../assert.js';
+import {BaseChatCapabilityProvider} from '../provider.js';
+import type {ChatRole} from '../interface.js';
+import {HenshinActorRole} from './actor.js';
+import {HenshinCoderRole} from './coder.js';
 
 export class HenshinChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {

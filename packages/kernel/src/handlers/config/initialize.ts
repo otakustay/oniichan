@@ -2,7 +2,7 @@ import path from 'node:path';
 import dedent from 'dedent';
 import {projectConfig, projectRules} from '@oniichan/shared/dir';
 import {stringifyError} from '@oniichan/shared/error';
-import {RequestHandler} from '../handler';
+import {RequestHandler} from '../handler.js';
 
 const GIT_IGNORE = dedent`
     tmp

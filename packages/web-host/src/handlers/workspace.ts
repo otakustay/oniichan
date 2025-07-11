@@ -1,7 +1,7 @@
 import {getDefaultStore} from 'jotai';
 import {RequestHandler} from '@otakustay/ipc';
-import {workspaceFilesAtom} from '../atoms/workspace';
-import type {WorkspaceState} from '../atoms/workspace';
+import {workspaceFilesAtom} from '../atoms/workspace.js';
+import type {WorkspaceState} from '../atoms/workspace.js';
 
 export class UpdateWorkspaceStateHandler extends RequestHandler<Partial<WorkspaceState>, void> {
     static readonly action = 'updateWorkspaceState';

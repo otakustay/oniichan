@@ -4,8 +4,8 @@ import type {Logger} from '@oniichan/shared/logger';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {newUuid} from '@oniichan/shared/id';
-import type {KernelClient} from '../../kernel';
-import {ScaffoldExecutor} from './executor';
+import type {KernelClient} from '../../kernel/index.js';
+import {ScaffoldExecutor} from './executor.js';
 
 export interface Dependency {
     [Logger.containerKey]: Logger;

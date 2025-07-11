@@ -1,8 +1,8 @@
-import {assertNever} from '../error';
-import {StreamXmlParser} from '../string';
-import type {XmlParseTagEndChunk, XmlParseTagStartChunk, XmlParseTextChunk} from '../string';
-import {isToolName} from './definition';
-import type {ToolName} from './definition';
+import {assertNever} from '../error.js';
+import {StreamXmlParser} from '../string/index.js';
+import type {XmlParseTagEndChunk, XmlParseTagStartChunk, XmlParseTextChunk} from '../string/index.js';
+import {isToolName} from './definition.js';
+import type {ToolName} from './definition.js';
 
 interface TextChunk {
     type: 'text';

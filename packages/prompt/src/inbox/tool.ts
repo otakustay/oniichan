@@ -1,6 +1,6 @@
 import dedent from 'dedent';
 import type {ToolDescription} from '@oniichan/shared/tool';
-import type {InboxPromptView} from './interface';
+import type {InboxPromptView} from './interface.js';
 
 const prefix = dedent`
     # Tool

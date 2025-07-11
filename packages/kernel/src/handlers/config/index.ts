@@ -1,1 +1,1 @@
-export {InitializeProjectConfigHandler} from './initialize';
+export {InitializeProjectConfigHandler} from './initialize.js';

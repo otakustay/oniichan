@@ -2,20 +2,20 @@ import {Server} from '@otakustay/ipc';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {Logger} from '@oniichan/shared/logger';
 import {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import {LoadingManager} from '../ui/loading';
-import {DiffViewManager} from '../ui/diff';
-import {ResourceManager} from '../utils/resource';
-import {TerminalManager} from '../utils/terminal';
-import type {Context} from './interface';
+import {LoadingManager} from '../ui/loading.js';
+import {DiffViewManager} from '../ui/diff.js';
+import {ResourceManager} from '../utils/resource.js';
+import {TerminalManager} from '../utils/terminal/index.js';
+import type {Context} from './interface.js';
 import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
     OpenDocumentHandler,
-} from './handlers/document';
-import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
-import type {EditorHostProtocol} from './protocol';
+} from './handlers/document.js';
+import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config.js';
+import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs.js';
+import type {EditorHostProtocol} from './protocol.js';
 import {
     DeleteWorkspaceFileHandler,
     FindFilesHandler,
@@ -23,10 +23,10 @@ import {
     GetWorkspaceStructureHandler,
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
-} from './handlers/workspace';
-import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
-import {ExecuteTerminalHandler} from './handlers/terminal';
-import {OpenUrlHandler} from './handlers/external';
+} from './handlers/workspace.js';
+import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff.js';
+import {ExecuteTerminalHandler} from './handlers/terminal.js';
+import {OpenUrlHandler} from './handlers/external.js';
 
 export interface EditorHostDependency {
     [LoadingManager.containerKey]: LoadingManager;

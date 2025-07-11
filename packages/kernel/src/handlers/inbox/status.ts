@@ -1,8 +1,8 @@
 import {extractFileEdits} from '@oniichan/shared/inbox';
 import type {RoundtripStatus} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {InboxRequestHandler} from './handler';
-import type {InboxMessageIdentity, InboxRoundtripIdentity} from './handler';
+import {InboxRequestHandler} from './handler.js';
+import type {InboxMessageIdentity, InboxRoundtripIdentity} from './handler.js';
 
 export interface InboxMarkRoundtripStatusRequest extends InboxMessageIdentity {
     status: RoundtripStatus;

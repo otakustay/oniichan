@@ -1,7 +1,7 @@
 import childProcess from 'node:child_process';
 import type {ChildProcess} from 'node:child_process';
 import type {ExecuteStatus, ExecuteTerminalRequest, ExecuteTerminalResponse} from '@oniichan/editor-host/protocol';
-import {RequestHandler} from './handler';
+import {RequestHandler} from './handler.js';
 
 export class ExecuteTerminalHandler extends RequestHandler<ExecuteTerminalRequest, ExecuteTerminalResponse> {
     static readonly action = 'executeTerminal';

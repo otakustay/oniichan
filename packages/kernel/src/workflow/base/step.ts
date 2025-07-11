@@ -2,11 +2,11 @@ import type {Logger} from '@oniichan/shared/logger';
 import type {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
 import type {InboxConfig} from '@oniichan/editor-host/protocol';
 import {StreamingToolParser} from '@oniichan/shared/tool';
-import {createEmptyAssistantTextMessage} from '../../inbox';
-import type {CommandExecutor} from '../../core/command';
-import type {ModelAccessHost} from '../../core/model';
-import type {ModelChatOptions} from '../../core/model';
-import type {EditorHost} from '../../core/editor';
+import {createEmptyAssistantTextMessage} from '../../inbox/index.js';
+import type {CommandExecutor} from '../../core/command.js';
+import type {ModelAccessHost} from '../../core/model/index.js';
+import type {ModelChatOptions} from '../../core/model/index.js';
+import type {EditorHost} from '../../core/editor.js';
 import type {
     InboxMessage,
     InboxMessageThread,
@@ -14,7 +14,7 @@ import type {
     InboxWorkflowOriginMessage,
     InboxWorkflowSourceMessage,
     ChatRole,
-} from '../../inbox';
+} from '../../inbox/index.js';
 
 async function* iterable(content: string): AsyncIterable<string> {
     yield content;

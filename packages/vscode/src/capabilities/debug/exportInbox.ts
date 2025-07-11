@@ -1,7 +1,7 @@
 import {commands, Disposable, window, workspace} from 'vscode';
 import type {DependencyContainer} from '@oniichan/shared/container';
 import {newUuid} from '@oniichan/shared/id';
-import {KernelClient} from '../../kernel';
+import {KernelClient} from '../../kernel/index.js';
 
 interface Dependency {
     [KernelClient.containerKey]: KernelClient;

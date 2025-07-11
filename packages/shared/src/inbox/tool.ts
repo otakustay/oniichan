@@ -1,4 +1,4 @@
-import type {FileEditData} from '../patch';
+import type {FileEditData} from '../patch/index.js';
 import type {
     ToolName,
     ReadFileParameter,
@@ -16,7 +16,7 @@ import type {
     CompleteTaskParameter,
     CreatePlanParameter,
     SemanticEditCodeParameter,
-} from '../tool';
+} from '../tool/index.js';
 
 export type WorkflowSourceChunkStatus =
     | 'generating'

@@ -1,10 +1,12 @@
 {
   "private": true,
   "name": "@oniichan/eval",
+  "type": "module",
   "version": "3.7.0",
   "description": "Shared elements without any platform dependencies",
   "scripts": {
     "build": "tsc",
+    "watch": "tsc --watch",
     "lint": "eslint --max-warnings=0 --fix src"
   },
   "dependencies": {
@@ -22,9 +24,9 @@
   "devDependencies": {
     "@oniichan/editor-host": "workspace:*",
     "@types/decompress": "^4.2.7",
-    "@types/node": "20.x",
+    "@types/node": "22.x",
     "@types/spinnies": "^0.5.3",
     "@types/yargs": "^17.0.33",
-    "@vscode/ripgrep": "^1.15.13"
+    "@vscode/ripgrep": "^1.15.14"
   }
 }

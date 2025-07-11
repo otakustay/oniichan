@@ -7,16 +7,16 @@ import {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskManager} from '@oniichan/editor-host/utils/task';
 import {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import type {ResourceManagerDependency} from '@oniichan/editor-host/utils/resource';
-import {ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug';
-import {OutputChannelProvider, OutputLogger} from './capabilities/logger';
-import {ScaffoldCommand} from './capabilities/scaffold';
-import {SemanticRewriteCommand} from './capabilities/semanticRewrite';
-import {WebApp, WebConnection} from './capabilities/web';
-import {WorkspaceTracker} from './capabilities/tracker';
-import {InitializeProjectConfigCommand, OmdCompletion} from './capabilities/config';
-import {SuperComment} from './capabilities/superComment';
-import {startKernel} from './kernel';
-import {migrate} from './migration';
+import {ExportInboxCommand, OpenDataFolderCommand} from './capabilities/debug/index.js';
+import {OutputChannelProvider, OutputLogger} from './capabilities/logger/index.js';
+import {ScaffoldCommand} from './capabilities/scaffold/index.js';
+import {SemanticRewriteCommand} from './capabilities/semanticRewrite/index.js';
+import {WebApp, WebConnection} from './capabilities/web/index.js';
+import {WorkspaceTracker} from './capabilities/tracker/index.js';
+import {InitializeProjectConfigCommand, OmdCompletion} from './capabilities/config/index.js';
+import {SuperComment} from './capabilities/superComment/index.js';
+import {startKernel} from './kernel/index.js';
+import {migrate} from './migration/index.js';
 
 class VscodeExtensionResourceManager extends ResourceManager {
     private readonly extensionContext: ExtensionContext;

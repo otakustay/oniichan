@@ -1,4 +1,4 @@
-import type {ModelFeature} from './feature';
+import type {ModelFeature} from './feature.js';
 
 export interface ChatUserMessagePayload {
     role: 'user';

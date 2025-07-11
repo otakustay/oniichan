@@ -1,7 +1,7 @@
 import dedent from 'dedent';
 import type {CreatePlanParameter, PlanTask, ToolDescription} from '@oniichan/shared/tool';
-import {ToolProviderBase} from '../tool';
-import type {ToolExecuteResult} from '../tool';
+import {ToolProviderBase} from '../tool/index.js';
+import type {ToolExecuteResult} from '../tool/index.js';
 
 export const createPlan: ToolDescription = {
     name: 'create_plan',

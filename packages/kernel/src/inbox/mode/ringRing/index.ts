@@ -1,9 +1,9 @@
 import type {MessageThreadWorkingMode} from '@oniichan/shared/inbox';
-import {BaseChatCapabilityProvider} from '../provider';
-import type {ChatRole} from '../interface';
-import {RingRingPlannerRole} from './planner';
-import {RingRingActorRole} from './actor';
-import {RingRingCoderRole} from './coder';
+import {BaseChatCapabilityProvider} from '../provider.js';
+import type {ChatRole} from '../interface.js';
+import {RingRingPlannerRole} from './planner.js';
+import {RingRingActorRole} from './actor.js';
+import {RingRingCoderRole} from './coder.js';
 
 export class RingRingChatCapabilityProvider extends BaseChatCapabilityProvider {
     protected getWorkingMode(): MessageThreadWorkingMode {

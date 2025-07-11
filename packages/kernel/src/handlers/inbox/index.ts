@@ -1,15 +1,15 @@
-export {InboxSendMessageHandler} from './send';
-export type {InboxSendMessageRequest} from './send';
-export {InboxMarkRoundtripStatusHandler, InboxCheckEditHandler} from './status';
-export type {InboxMarkRoundtripStatusRequest, InboxCheckEditResponse} from './status';
-export {InboxGetThreadListHandler} from './get';
-export {InboxCheckRollbackHandler, InboxRollbackHandler} from './rollback';
-export type {InboxCheckRollbackResponse, InboxRollbackCheckItem} from './rollback';
-export {InboxApproveToolHandler} from './approve';
-export type {InboxApproveToolRequest} from './approve';
+export {InboxSendMessageHandler} from './send.js';
+export type {InboxSendMessageRequest} from './send.js';
+export {InboxMarkRoundtripStatusHandler, InboxCheckEditHandler} from './status.js';
+export type {InboxMarkRoundtripStatusRequest, InboxCheckEditResponse} from './status.js';
+export {InboxGetThreadListHandler} from './get.js';
+export {InboxCheckRollbackHandler, InboxRollbackHandler} from './rollback.js';
+export type {InboxCheckRollbackResponse, InboxRollbackCheckItem} from './rollback.js';
+export {InboxApproveToolHandler} from './approve.js';
+export type {InboxApproveToolRequest} from './approve.js';
 export type {
     InboxMessageIdentity,
     InboxMessageResponse,
     InboxRoundtripIdentity,
     InboxMessageReference,
-} from './handler';
+} from './handler.js';

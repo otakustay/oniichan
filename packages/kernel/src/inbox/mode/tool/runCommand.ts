@@ -2,9 +2,9 @@ import dedent from 'dedent';
 import type {RunCommandParameter} from '@oniichan/shared/tool';
 import {assertNever, stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolProviderBase} from './base';
-import type {ToolExecuteResult} from './base';
-import {asString} from './utils';
+import {ToolProviderBase} from './base.js';
+import type {ToolExecuteResult} from './base.js';
+import {asString} from './utils.js';
 
 const DEFAULT_COMMAND_TIMEOUT = 5 * 60 * 1000;
 

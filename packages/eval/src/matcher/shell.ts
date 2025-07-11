@@ -1,4 +1,5 @@
-import type {BaseMatcherConfig, FixtureMatcher, FixtureMatchResult} from './interface';
+import {execa} from 'execa';
+import type {BaseMatcherConfig, FixtureMatcher, FixtureMatchResult} from './interface.js';
 
 interface ShellMatchItem {
     text: string;
@@ -22,7 +23,6 @@ export default class ShellMatcher implements FixtureMatcher {
     }
 
     async runMatch(): Promise<FixtureMatchResult> {
-        const {execa} = await import('execa');
         const script = Array.isArray(this.config.script) ? this.config.script.join('\n') : this.config.script;
         try {
             const {stdout} = await execa(script, {shell: true, cwd: this.cwd});

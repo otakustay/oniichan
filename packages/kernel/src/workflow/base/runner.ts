@@ -1,10 +1,10 @@
 import {stringifyError} from '@oniichan/shared/error';
-import {WorkflowStep} from './step';
-import type {WorkflowStepInit} from './step';
-import type {WorkflowDetector} from './detector';
-import type {WorkflowValidator} from './validator';
-import type {WorkflowInitializer} from './initializer';
-import type {WorkflowExecutor} from './executor';
+import {WorkflowStep} from './step.js';
+import type {WorkflowStepInit} from './step.js';
+import type {WorkflowDetector} from './detector.js';
+import type {WorkflowValidator} from './validator.js';
+import type {WorkflowInitializer} from './initializer.js';
+import type {WorkflowExecutor} from './executor.js';
 
 interface WorkflowRunnerChildren {
     detector: WorkflowDetector;

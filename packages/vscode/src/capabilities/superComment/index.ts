@@ -3,9 +3,9 @@ import { languages} from 'vscode';
 import type {TaskManager} from '@oniichan/editor-host/utils/task';
 import type {Logger} from '@oniichan/shared/logger';
 import type {DependencyContainer} from '@oniichan/shared/container';
-import type {KernelClient} from '../../kernel';
-import {SuperCommentCompletionProvider} from './completion';
-import {SendToInboxCommand} from './command';
+import type {KernelClient} from '../../kernel/index.js';
+import {SuperCommentCompletionProvider} from './completion.js';
+import {SendToInboxCommand} from './command.js';
 
 export interface Dependency {
     [Logger.containerKey]: Logger;

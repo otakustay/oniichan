@@ -1,8 +1,8 @@
 import {assertNever, stringifyError} from '@oniichan/shared/error';
-import {assertToolCallMessage, createToolUseMessage} from '../../inbox';
-import {WorkflowExecutor} from '../base';
-import type {WorkflowExecuteResult} from '../base';
-import type {ToolProviderInit, ToolExecuteResult} from '../../inbox';
+import {assertToolCallMessage, createToolUseMessage} from '../../inbox/index.js';
+import {WorkflowExecutor} from '../base/index.js';
+import type {WorkflowExecuteResult} from '../base/index.js';
+import type {ToolProviderInit, ToolExecuteResult} from '../../inbox/index.js';
 
 export class ToolWorkflowExecutor extends WorkflowExecutor {
     async executeWorkflow(): Promise<WorkflowExecuteResult> {

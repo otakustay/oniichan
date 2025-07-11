@@ -15,9 +15,9 @@ import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
 import type {Logger} from '@oniichan/shared/logger';
 import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
-import type {KernelClient} from '../../kernel';
-import {establishIpc} from './ipc';
-import type {WebConnection} from './connection';
+import type {KernelClient} from '../../kernel/index.js';
+import {establishIpc} from './ipc.js';
+import type {WebConnection} from './connection.js';
 
 class WebSocketPort implements Port {
     private readonly socket: WebSocket;

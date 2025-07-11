@@ -1,19 +1,20 @@
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import path from 'node:path';
+import {execa} from 'execa';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
 import {stringifyError} from '@oniichan/shared/error';
 import {newUuid} from '@oniichan/shared/id';
-import type {FixtureConfig, ShellSetup} from '../fixtures';
-import type {EvalConfig} from '../server';
-import {createFixtureSource} from '../source';
-import {createFixtureMatcher} from '../matcher';
-import type {FixtureMatcherConfig, FixtureMatcherItem} from '../matcher';
-import {createKernel} from '../core';
-import {consumeChunkStream} from './utils';
-import type {EvalMessage} from './utils';
-import {ConcurrentSpinner, DefaultSpinner} from './spinner';
-import type {Spinner} from './spinner';
+import type {FixtureConfig, ShellSetup} from '../fixtures/index.js';
+import type {EvalConfig} from '../server/index.js';
+import {createFixtureSource} from '../source/index.js';
+import {createFixtureMatcher} from '../matcher/index.js';
+import type {FixtureMatcherConfig, FixtureMatcherItem} from '../matcher/index.js';
+import {createKernel} from '../core/index.js';
+import {consumeChunkStream} from './utils.js';
+import type {EvalMessage} from './utils.js';
+import {ConcurrentSpinner, DefaultSpinner} from './spinner.js';
+import type {Spinner} from './spinner.js';
 
 export interface RunnerInit {
     concurrent: boolean;
@@ -110,7 +111,6 @@ export class FixtureRunner {
     }
 
     private async checkCondition() {
-        const {execa} = await import('execa');
         for (const when of this.fixture.when ?? []) {
             try {
                 const {exitCode} = await execa('whcih', [when.command]);
@@ -170,7 +170,6 @@ export class FixtureRunner {
     }
 
     private async runSetupScript(cwd: string, item: string | string[] | ShellSetup) {
-        const {execa} = await import('execa');
         if (typeof item === 'string') {
             await execa(item, {cwd});
         }

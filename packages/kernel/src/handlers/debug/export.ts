@@ -1,6 +1,6 @@
 import type {MessageThreadPersistData} from '@oniichan/shared/inbox';
 import {FunctionUsageTelemetry} from '@oniichan/storage/telemetry';
-import {RequestHandler} from '../handler';
+import {RequestHandler} from '../handler.js';
 
 export class ExportInboxHandler extends RequestHandler<void, MessageThreadPersistData[]> {
     static readonly action = 'debugExportInbox';

@@ -1,5 +1,5 @@
 import type {ModelClient, ModelResponse, ModelFeature, ModelTextResponse} from '@oniichan/shared/model';
-import type {ModelChatOptions, ModelAccess} from './interface';
+import type {ModelChatOptions, ModelAccess} from './interface.js';
 
 export class NamedModelAccess implements ModelAccess {
     private readonly client: ModelClient;

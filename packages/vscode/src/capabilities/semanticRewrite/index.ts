@@ -8,8 +8,8 @@ import {getSemanticRewriteConfiguration} from '@oniichan/editor-host/utils/confi
 import {Logger} from '@oniichan/shared/logger';
 import type {LoadingManager} from '@oniichan/editor-host/ui/loading';
 import {TaskContext, TaskManager} from '@oniichan/editor-host/utils/task';
-import type {KernelClient} from '../../kernel';
-import {LineWorker} from './worker';
+import type {KernelClient} from '../../kernel/index.js';
+import {LineWorker} from './worker.js';
 
 function isNewLineOnly(event: TextDocumentChangeEvent): boolean {
     const changedText = event.contentChanges.at(-1)?.text ?? '';

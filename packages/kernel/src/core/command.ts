@@ -1,5 +1,6 @@
 import path from 'node:path';
 import {existsSync} from 'node:fs';
+import {execa} from 'execa';
 import {over} from '@otakustay/async-iterator';
 import {toLines} from '@oniichan/shared/string';
 
@@ -23,7 +24,6 @@ export class CommandExecutor {
     }
 
     async *executeStream(command: string, args: string[], options: ExecuteCommandOptions): AsyncIterable<string> {
-        const {execa} = await import('execa');
         const process = execa(
             path.join(this.binaryDirectory, command),
             args,

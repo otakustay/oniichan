@@ -1,4 +1,5 @@
-import type {FixtureMatcher, FixtureMatchResult, BaseMatcherConfig} from './interface';
+import {execa} from 'execa';
+import type {BaseMatcherConfig, FixtureMatcher, FixtureMatchResult} from './interface.js';
 
 interface GitDiffFile {
     type: 'modify' | 'add' | 'delete' | 'rename' | 'unknown';
@@ -22,7 +23,6 @@ export class GitDiffMatcher implements FixtureMatcher {
     }
 
     async runMatch(): Promise<FixtureMatchResult> {
-        const {execa} = await import('execa');
         await execa('git', ['add', '.'], {cwd: this.cwd});
 
         const result: FixtureMatchResult = {
@@ -42,7 +42,6 @@ export class GitDiffMatcher implements FixtureMatcher {
     }
 
     private async getDiffStatus() {
-        const {execa} = await import('execa');
         const {stdout: text} = await execa('git', ['status', '--short'], {cwd: this.cwd});
         const files: GitDiffFile[] = [];
         for (const line of text.trim().split('\n')) {

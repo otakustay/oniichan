@@ -8,9 +8,9 @@ import type {
     WorkflowSourceChunkStatus,
     ToolCallMessageChunk,
 } from '@oniichan/shared/inbox';
-import type {InboxRoundtrip, InboxAssistantTextMessage} from '../interface';
-import {MessageBase} from './base';
-import {chunksToModelText} from './utils';
+import type {InboxRoundtrip, InboxAssistantTextMessage} from '../interface.js';
+import {MessageBase} from './base.js';
+import {chunksToModelText} from './utils.js';
 
 export class AssistantTextMessage extends MessageBase<'assistantText'> implements InboxAssistantTextMessage {
     private readonly chunks: AssistantTextMessageContentChunk[] = [];

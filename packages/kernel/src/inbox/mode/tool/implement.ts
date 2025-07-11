@@ -1,19 +1,19 @@
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import type {ToolName} from '@oniichan/shared/tool';
-import type {ToolExecuteResult, ToolProvider, ToolProviderInit} from './base';
-import type {SharedToolName} from './shared';
-import {AskFollowupQuestionToolImplement} from './askFollowupQuestion';
-import {AttemptCompletionToolImplement} from './attemptCompletion';
-import {BrowserPreviewToolImplement} from './browserPreview';
-import {DeleteFileToolImplement} from './deleteFile';
-import {GlobFilesToolImplement} from './globFiles';
-import {GrepFilesToolImplement} from './grepFiles';
-import {PatchFileToolImplement} from './patchFile';
-import {ReadDirectoryToolImplement} from './readDirectory';
-import {ReadFileToolImplement} from './readFile';
-import {RunCommandToolImplement} from './runCommand';
-import {WriteFileToolImplement} from './writeFile';
-import {EvaluateCodeToolImplement} from './evaluateCode';
+import type {ToolExecuteResult, ToolProvider, ToolProviderInit} from './base.js';
+import type {SharedToolName} from './shared.js';
+import {AskFollowupQuestionToolImplement} from './askFollowupQuestion.js';
+import {AttemptCompletionToolImplement} from './attemptCompletion.js';
+import {BrowserPreviewToolImplement} from './browserPreview.js';
+import {DeleteFileToolImplement} from './deleteFile.js';
+import {GlobFilesToolImplement} from './globFiles.js';
+import {GrepFilesToolImplement} from './grepFiles.js';
+import {PatchFileToolImplement} from './patchFile.js';
+import {ReadDirectoryToolImplement} from './readDirectory.js';
+import {ReadFileToolImplement} from './readFile.js';
+import {RunCommandToolImplement} from './runCommand.js';
+import {WriteFileToolImplement} from './writeFile.js';
+import {EvaluateCodeToolImplement} from './evaluateCode.js';
 
 type ToolProviderClass = new(init: ToolProviderInit) => ToolProvider;
 

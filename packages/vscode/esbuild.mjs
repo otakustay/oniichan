@@ -34,7 +34,10 @@ try {
             'src/kernel/entry.ts',
         ],
         bundle: true,
-        format: 'cjs',
+        format: 'esm',
+        banner: {
+            js: 'import {createRequire} from "module";\nconst require = createRequire(import.meta.url);',
+        },
         minify: production,
         sourcemap: !production,
         keepNames: true,
@@ -43,15 +46,6 @@ try {
         outdir: 'dist',
         external: ['vscode'],
         logLevel: 'silent',
-        banner: {
-            js: 'const _importMetaUrl=require(\'url\').pathToFileURL(__filename)',
-        },
-        define: {
-            'import.meta.url': '_importMetaUrl',
-        },
-        loader: {
-            '.prompt': 'text',
-        },
         plugins: [
             /* add to the end of plugins array */
             esbuildProblemMatcherPlugin,

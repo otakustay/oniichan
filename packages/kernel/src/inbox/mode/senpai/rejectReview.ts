@@ -1,7 +1,7 @@
 import type {AskFollowupQuestionParameter, ToolDescription} from '@oniichan/shared/tool';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
-import {ToolProviderBase, asString, askFollowupQuestion} from '../tool';
-import type {ToolExecuteResult} from '../tool';
+import {ToolProviderBase, asString, askFollowupQuestion} from '../tool/index.js';
+import type {ToolExecuteResult} from '../tool/index.js';
 
 export const rejectReview: ToolDescription = {
     ...askFollowupQuestion,

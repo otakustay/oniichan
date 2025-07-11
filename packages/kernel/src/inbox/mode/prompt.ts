@@ -5,8 +5,8 @@ import {stringifyError} from '@oniichan/shared/error';
 import {uniqueBy} from '@oniichan/shared/array';
 import type {Logger} from '@oniichan/shared/logger';
 import {projectRules} from '@oniichan/shared/dir';
-import type {EditorHost} from '../../core/editor';
-import type {ChatRole} from './interface';
+import type {EditorHost} from '../../core/editor.js';
+import type {ChatRole} from './interface.js';
 
 export interface SystemPromptGeneratorInit {
     role: ChatRole;

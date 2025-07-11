@@ -2,7 +2,7 @@ import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 import {newUuid} from '@oniichan/shared/id';
 import type {InboxSendMessageRequest} from '@oniichan/kernel/protocol';
-import {createKernel, createConfiguration} from './core';
+import {createKernel, createConfiguration} from './core/index.js';
 
 const command = yargs(hideBin(process.argv))
     .option('cwd', {type: 'string', demandOption: true})

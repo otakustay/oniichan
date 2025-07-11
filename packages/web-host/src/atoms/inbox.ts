@@ -19,8 +19,8 @@ import type {
     MessageThreadWorkingMode,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
-import {useIpcValue} from './ipc';
-import {useEditingValue, useSetDraftContent, useSetEditing} from './draft';
+import {useIpcValue} from './ipc/index.js';
+import {useEditingValue, useSetDraftContent, useSetEditing} from './draft.js';
 
 export const messageThreadListAtom = atom<MessageThreadData[]>([]);
 

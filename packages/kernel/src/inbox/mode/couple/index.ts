@@ -4,10 +4,10 @@ import {StreamingToolParser} from '@oniichan/shared/tool';
 import type {ToolName} from '@oniichan/shared/tool';
 import {over} from '@otakustay/async-iterator';
 import {discard} from '@oniichan/shared/iterable';
-import {BaseChatCapabilityProvider} from '../provider';
-import type {ChatRole} from '../interface';
-import {CoupleActorRole} from './actor';
-import {CoupleCoderRole} from './coder';
+import {BaseChatCapabilityProvider} from '../provider.js';
+import type {ChatRole} from '../interface.js';
+import {CoupleActorRole} from './actor.js';
+import {CoupleCoderRole} from './coder.js';
 
 function toolRequireCoder(toolName: ToolName) {
     return toolName === 'write_file' || toolName === 'patch_file' || toolName === 'evaluate_code';

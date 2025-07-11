@@ -1,15 +1,15 @@
 import {Server} from '@otakustay/ipc';
 import type {Logger} from '@oniichan/shared/logger';
 import type {EditorHostProtocol} from '@oniichan/editor-host/protocol';
-import type {Context, EvalConfig} from './interface';
+import type {Context, EvalConfig} from './interface.js';
 import {
     GetDocumentDiagnosticAtLineHandler,
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
     OpenDocumentHandler,
-} from './handlers/document';
-import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config';
-import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs';
+} from './handlers/document.js';
+import {GetInboxConfigHandler, GetModelConfigHandler, RequestModelConfigureHandler} from './handlers/config.js';
+import {CheckFileExistsHandler, CreateDirectoryHandler, ReadDirectoryHandler, ReadFileHandler} from './handlers/fs.js';
 import {
     DeleteWorkspaceFileHandler,
     FindFilesHandler,
@@ -17,10 +17,10 @@ import {
     GetWorkspaceStructureHandler,
     ReadWorkspaceFileHandler,
     WriteWorkspaceFileHandler,
-} from './handlers/workspace';
-import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
-import {ExecuteTerminalHandler} from './handlers/terminal';
-import {OpenUrlHandler} from './handlers/external';
+} from './handlers/workspace.js';
+import {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff.js';
+import {ExecuteTerminalHandler} from './handlers/terminal.js';
+import {OpenUrlHandler} from './handlers/external.js';
 
 export interface EvalEditorHostInit {
     cwd: string;

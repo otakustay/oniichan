@@ -7,8 +7,8 @@ import type {DiffViewManager} from '@oniichan/editor-host/ui/diff';
 import type {Logger} from '@oniichan/shared/logger';
 import type {WorkspaceFileStructure} from '@oniichan/shared/dir';
 import type {ResourceManager} from '@oniichan/editor-host/utils/resource';
-import {KernelClient} from '../../kernel';
-import type {WebConnection} from './connection';
+import {KernelClient} from '../../kernel/index.js';
+import type {WebConnection} from './connection.js';
 
 class BridgeHandler extends RequestHandler<any, any, any> {
     private readonly upstream: Client<any>;

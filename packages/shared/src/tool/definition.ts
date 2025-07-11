@@ -1,5 +1,5 @@
 import type {JSONSchema7} from 'json-schema';
-import type {RawToolCallParameter} from '../inbox';
+import type {RawToolCallParameter} from '../inbox/index.js';
 
 export interface ParameterInfo {
     type: 'object';

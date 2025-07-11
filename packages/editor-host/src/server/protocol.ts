@@ -4,14 +4,14 @@ import type {
     GetDocumentLanguageIdHandler,
     GetDocumentTextHandler,
     OpenDocumentHandler,
-} from './handlers/document';
-import type {GetModelConfigHandler, GetInboxConfigHandler, RequestModelConfigureHandler} from './handlers/config';
+} from './handlers/document.js';
+import type {GetModelConfigHandler, GetInboxConfigHandler, RequestModelConfigureHandler} from './handlers/config.js';
 import type {
     ReadDirectoryHandler,
     ReadFileHandler,
     CheckFileExistsHandler,
     CreateDirectoryHandler,
-} from './handlers/fs';
+} from './handlers/fs.js';
 import type {
     GetWorkspaceRootHandler,
     FindFilesHandler,
@@ -19,18 +19,18 @@ import type {
     WriteWorkspaceFileHandler,
     DeleteWorkspaceFileHandler,
     GetWorkspaceStructureHandler,
-} from './handlers/workspace';
-import type {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff';
-import type {ExecuteTerminalHandler} from './handlers/terminal';
-import type {OpenUrlHandler} from './handlers/external';
+} from './handlers/workspace.js';
+import type {CheckEditAppliableHandler, AcceptFileEditHandler, RenderDiffViewHandler} from './handlers/diff.js';
+import type {ExecuteTerminalHandler} from './handlers/terminal.js';
+import type {OpenUrlHandler} from './handlers/external.js';
 
-export type {DocumentLine, LineDiagnostic} from './handlers/document';
-export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs';
-export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace';
-export type {AppliableState, AcceptFileEditRequest} from './handlers/diff';
-export type {InboxConfig} from './handlers/config';
-export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal';
-export type {ExecuteStatus} from '../utils/terminal';
+export type {DocumentLine, LineDiagnostic} from './handlers/document.js';
+export type {FileEntry, FileEntryType, ReadDirectoryRequest} from './handlers/fs.js';
+export type {WriteWorkspaceFileRequest, FindFilesRequest} from './handlers/workspace.js';
+export type {AppliableState, AcceptFileEditRequest} from './handlers/diff.js';
+export type {InboxConfig} from './handlers/config.js';
+export type {ExecuteTerminalRequest, ExecuteTerminalResponse} from './handlers/terminal.js';
+export type {ExecuteStatus} from '../utils/terminal/index.js';
 
 export type EditorHostProtocol = ProtocolOf<
     | typeof GetDocumentTextHandler

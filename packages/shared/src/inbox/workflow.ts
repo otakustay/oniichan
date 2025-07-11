@@ -1,4 +1,4 @@
-import type {MessageData, ToolCallMessageData} from './message';
+import type {MessageData, ToolCallMessageData} from './message.js';
 
 export type WorkflowStatus = 'running' | 'completed' | 'failed';
 

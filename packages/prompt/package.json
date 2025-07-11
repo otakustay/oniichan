@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "@oniichan/prompt",
+  "type": "module",
   "version": "3.7.0",
   "description": "Prompts for all capabilities",
   "exports": {
@@ -19,6 +20,6 @@
     "dedent": "^1.6.0"
   },
   "devDependencies": {
-    "@types/node": "20.x"
+    "@types/node": "22.x"
   }
 }
