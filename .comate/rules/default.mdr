@@ -25,6 +25,7 @@ For each package, `src` directory contains all source code writting in TypeScrip
 2. Make types as strong as possible.
 3. Get rid of `let` declaration when possible, when a mutable variable is required, try to use an object const variable instead.
 4. It's better to group related variables in one object.
+5. Omit uneccessary comments in generated code.
 
 ## Terminal Command
 

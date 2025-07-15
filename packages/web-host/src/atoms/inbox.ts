@@ -17,6 +17,7 @@ import type {
     RoundtripMessageData,
     AssistantMessageData,
     MessageThreadWorkingMode,
+    UserRequestMessageData,
 } from '@oniichan/shared/inbox';
 import {assertNever} from '@oniichan/shared/error';
 import {useIpcValue} from './ipc/index.js';
@@ -343,9 +344,35 @@ export function useSendMessageToThread(threadUuid: string) {
     const setEditing = useSetEditing();
     const setDraftContent = useSetDraftContent();
     const workingMode = useWorkingModeSubmitValue();
+    const threads = useMessageThreadListValue();
+
     return async (uuid: string, content: string) => {
         setEditing(null);
         setDraftContent('');
+
+        const existingThread = threads.find(t => t.uuid === threadUuid);
+        if (!existingThread) {
+            const userMessage: UserRequestMessageData = {
+                uuid,
+                type: 'userRequest',
+                content,
+                createdAt: now(),
+            };
+
+            const newThread: MessageThreadData = {
+                uuid: threadUuid,
+                workingMode,
+                roundtrips: [
+                    {
+                        status: 'running',
+                        request: userMessage,
+                        responses: [],
+                    },
+                ],
+            };
+            setMessageThreadList(threads => [newThread, ...threads]);
+        }
+
         const request: InboxSendMessageRequest = {
             threadUuid,
             uuid,
@@ -355,6 +382,7 @@ export function useSendMessageToThread(threadUuid: string) {
                 content: content,
             },
         };
+
         for await (const chunk of ipc.kernel.callStreaming(uuid, 'inboxSendMessage', request)) {
             setMessageThreadList(appendResponseMessageBy(threadUuid, chunk.replyUuid, chunk.value));
         }

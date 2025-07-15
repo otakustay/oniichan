@@ -52,6 +52,7 @@ export class InboxSendMessageHandler extends InboxRequestHandler<InboxSendMessag
         this.thread.addRoundtrip(this.roundtrip);
         await this.addReference(payload.references ?? []);
         store.moveThreadToTop(this.thread.uuid);
+        this.pushStoreUpdate(this.thread.uuid);
 
         yield* over(this.requestModelChat()).map(v => ({type: 'value', value: v} as const));
     }
