@@ -1,6 +1,7 @@
+import path from 'node:path';
 import dedent from 'dedent';
 import unixify from 'unixify';
-import type {FindFilesByRegExpParameter} from '@oniichan/shared/tool';
+import type {SearchInWorkspaceParameter} from '@oniichan/shared/tool';
 import {stringifyError} from '@oniichan/shared/error';
 import type {RawToolCallParameter} from '@oniichan/shared/inbox';
 import {ToolProviderBase} from './base.js';
@@ -47,12 +48,11 @@ interface ConsumeState {
     current: GrepResult | null;
 }
 
-export class GrepFilesToolImplement extends ToolProviderBase<FindFilesByRegExpParameter> {
+export class SearchInWorkspaceToolImplement extends ToolProviderBase<SearchInWorkspaceParameter> {
     private linesCount = 0;
-
     private readonly results: GrepResult[] = [];
 
-    async executeApprove(args: FindFilesByRegExpParameter): Promise<ToolExecuteResult> {
+    async executeApprove(args: SearchInWorkspaceParameter): Promise<ToolExecuteResult> {
         try {
             const root = await this.editorHost.call('getWorkspaceRoot');
 
@@ -61,66 +61,119 @@ export class GrepFilesToolImplement extends ToolProviderBase<FindFilesByRegExpPa
                     type: 'success',
                     finished: false,
                     executionData: {},
-                    template: 'No open workspace, you cannot read any file or directory now',
+                    template: 'No open workspace, you cannot search any file or directory now.',
                 };
             }
 
-            const binaryName = process.platform.startsWith('win') ? 'rg.exe' : 'rg';
-
-            if (!this.commandExecutor.has(binaryName)) {
-                return {
-                    type: 'error',
-                    finished: false,
-                    executionData: {},
-                    template:
-                        'User\'s operating system does not have grep installed, it\'s impossible to search files by regexp, please try other methods to locate files, and do not use this tool again.',
-                };
+            // If only glob is provided (no regex), use simple file listing
+            if (args.glob && !args.regex) {
+                return await this.executeGlobSearch(args, root);
             }
 
-            // `rg` automatically respects `.gitignore` so we don't need any special handling of file exclusion
-            const commandLineArgs = [
-                '-e',
-                args.regex,
-                '--context',
-                '1',
-                '--json',
-                args.path,
-            ];
-            if (args.glob) {
-                commandLineArgs.push('--glob', args.glob);
+            // If regex is provided, use ripgrep search
+            if (args.regex) {
+                return await this.executeRegexSearch(args, root);
             }
-            this.logger.trace('ExecuteGrepStart', {args: commandLineArgs});
-            const stream = this.commandExecutor.executeStream(
-                binaryName,
-                commandLineArgs,
-                {cwd: root, maxLines: 1000, includeErrorOutput: false}
-            );
-            await this.consumeRipGrepOutput(stream);
 
-            this.logger.trace(
-                'ExecuteGrepFinish',
-                {
-                    regex: args.regex,
-                    path: args.path,
-                    count: this.results.length,
-                    truncated: this.linesCount >= MAX_LINES,
-                }
-            );
-
-            return this.constructResponse();
-        }
-        catch (ex) {
-            this.logger.error('ExecuteGrepFail', {reason: stringifyError(ex)});
             return {
                 type: 'error',
                 finished: false,
-                executionData: {regex: args.regex, message: stringifyError(ex)},
-                template: 'Unable to find files with regex `{{args.regex}}`: {{message}}.',
+                executionData: {},
+                template:
+                    'You must provide either `glob` pattern for file listing or `regex` pattern for content search.',
+            };
+        }
+        catch (ex) {
+            return {
+                type: 'error',
+                finished: false,
+                executionData: {message: stringifyError(ex)},
+                template: 'Unable to search in workspace: {{message}}.',
             };
         }
     }
 
-    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<FindFilesByRegExpParameter> {
+    private async executeGlobSearch(args: SearchInWorkspaceParameter, root: string): Promise<ToolExecuteResult> {
+        const glob = args.glob ?? '';
+        const files = await this.editorHost.call('findFiles', {glob, limit: 200});
+
+        if (files.length) {
+            return {
+                type: 'success',
+                finished: false,
+                executionData: {glob, content: files.map(v => path.relative(root, v)).join('\n')},
+                template: dedent`
+                    Files matching glob {{glob}}:
+
+                    \`\`\`
+                    {{content}}
+                    \`\`\`
+                `,
+            };
+        }
+
+        return {
+            type: 'success',
+            finished: false,
+            executionData: {glob},
+            template: 'There are no files matching glob `{{glob}}`.',
+        };
+    }
+
+    private async executeRegexSearch(args: SearchInWorkspaceParameter, root: string): Promise<ToolExecuteResult> {
+        const binaryName = process.platform.startsWith('win') ? 'rg.exe' : 'rg';
+
+        if (!this.commandExecutor.has(binaryName)) {
+            return {
+                type: 'error',
+                finished: false,
+                executionData: {},
+                template:
+                    'User\'s operating system does not have ripgrep (rg) installed, it\'s impossible to search files by regex, please try other methods to locate files, and do not use regex search again.',
+            };
+        }
+
+        // Reset state for this search
+        this.linesCount = 0;
+        this.results.length = 0;
+
+        // `rg` automatically respects `.gitignore` so we don't need any special handling of file exclusion
+        const regex = args.regex ?? '';
+        const commandLineArgs = [
+            '-e',
+            regex,
+            '--context',
+            '1',
+            '--json',
+            args.path ?? '.',
+        ];
+        if (args.glob) {
+            commandLineArgs.push('--glob', args.glob);
+        }
+
+        this.logger.trace('ExecuteSearchStart', {args: commandLineArgs});
+        const stream = this.commandExecutor.executeStream(
+            binaryName,
+            commandLineArgs,
+            {cwd: root, maxLines: 1000, includeErrorOutput: false}
+        );
+        await this.consumeRipGrepOutput(stream);
+
+        this.logger.trace(
+            'ExecuteSearchFinish',
+            {
+                regex: args.regex,
+                path: args.path,
+                glob: args.glob,
+                count: this.results.length,
+                truncated: this.linesCount >= MAX_LINES,
+            }
+        );
+
+        return this.constructRegexResponse();
+    }
+
+    extractParameters(generated: Record<string, RawToolCallParameter>): Partial<SearchInWorkspaceParameter> {
         return {
             path: asString(generated.path, true),
             glob: asString(generated.glob, true),
@@ -128,11 +181,11 @@ export class GrepFilesToolImplement extends ToolProviderBase<FindFilesByRegExpPa
         };
     }
 
-    parseParameters(extracted: Partial<FindFilesByRegExpParameter>): FindFilesByRegExpParameter {
+    parseParameters(extracted: Partial<SearchInWorkspaceParameter>): SearchInWorkspaceParameter {
         return {
-            path: extracted.path ?? '',
-            regex: extracted.regex ?? '',
+            path: extracted.path,
             glob: extracted.glob,
+            regex: extracted.regex,
         };
     }
 
@@ -171,19 +224,20 @@ export class GrepFilesToolImplement extends ToolProviderBase<FindFilesByRegExpPa
         }
     }
 
-    private constructResponse(): ToolExecuteResult {
+    private constructRegexResponse(): ToolExecuteResult {
         if (!this.results.length) {
             return {
                 type: 'success',
                 finished: false,
                 executionData: {},
-                template: 'There are no files matching this regex',
+                template: 'There are no files matching this regex pattern.',
             };
         }
 
         const title = this.linesCount >= MAX_LINES
-            ? 'We have too many results for grep, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
-            : 'This is stdout of grep command:';
+            ? 'We have too many results for the search, this is some of them, you may use a more accurate search pattern if this output does not satisfy your needs:'
+            : 'Search results:';
+
         // This constructs output into native `grep` style, here is an example:
         //
         // ```

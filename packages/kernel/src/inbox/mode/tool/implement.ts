@@ -6,8 +6,7 @@ import {AskFollowupQuestionToolImplement} from './askFollowupQuestion.js';
 import {AttemptCompletionToolImplement} from './attemptCompletion.js';
 import {BrowserPreviewToolImplement} from './browserPreview.js';
 import {DeleteFileToolImplement} from './deleteFile.js';
-import {GlobFilesToolImplement} from './globFiles.js';
-import {GrepFilesToolImplement} from './grepFiles.js';
+import {SearchInWorkspaceToolImplement} from './searchInWorkspace.js';
 import {PatchFileToolImplement} from './patchFile.js';
 import {ReadDirectoryToolImplement} from './readDirectory.js';
 import {ReadFileToolImplement} from './readFile.js';
@@ -22,8 +21,7 @@ const shared: Record<SharedToolName, ToolProviderClass> = {
     attempt_completion: AttemptCompletionToolImplement,
     browser_preview: BrowserPreviewToolImplement,
     delete_file: DeleteFileToolImplement,
-    find_files_by_glob: GlobFilesToolImplement,
-    find_files_by_regex: GrepFilesToolImplement,
+    search_in_workspace: SearchInWorkspaceToolImplement,
     patch_file: PatchFileToolImplement,
     read_directory: ReadDirectoryToolImplement,
     read_file: ReadFileToolImplement,

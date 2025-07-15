@@ -27,10 +27,8 @@ function stringifyToolCallParameters(name: ToolName, parameters: Record<string, 
             return (asArray(parameters.read).length + asArray(parameters.coding).length).toString();
         case 'delete_file':
             return asString(parameters.path);
-        case 'find_files_by_glob':
-            return asString(parameters.glob);
-        case 'find_files_by_regex':
-            return asString(parameters.regex);
+        case 'search_in_workspace':
+            return asString(parameters.glob) || asString(parameters.regex);
         case 'patch_file':
             return asString(parameters.path);
         case 'read_directory':

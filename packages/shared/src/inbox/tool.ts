@@ -3,8 +3,7 @@ import type {
     ToolName,
     ReadFileParameter,
     ReadDirectoryParameter,
-    FindFilesByGlobParameter,
-    FindFilesByRegExpParameter,
+    SearchInWorkspaceParameter,
     WriteFileParameter,
     PatchFileParameter,
     DeleteFileParameter,
@@ -58,14 +57,9 @@ export interface ReadDirectoryToolCallMessageChunk extends ParsedToolCallMessage
     arguments: ReadDirectoryParameter;
 }
 
-export interface FindFilesByGlobToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
-    toolName: 'find_files_by_glob';
-    arguments: FindFilesByGlobParameter;
-}
-
-export interface FindFilesByRegExpToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
-    toolName: 'find_files_by_regex';
-    arguments: FindFilesByRegExpParameter;
+export interface SearchInWorkspaceToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
+    toolName: 'search_in_workspace';
+    arguments: SearchInWorkspaceParameter;
 }
 
 export interface WriteFileToolCallMessageChunk extends ParsedToolCallMessageChunkBase {
@@ -129,8 +123,7 @@ export interface SemanticEditCodeToolCallMessageChunk extends ParsedToolCallMess
 export type ParsedToolCallMessageChunk =
     | ReadFileToolCallMessageChunk
     | ReadDirectoryToolCallMessageChunk
-    | FindFilesByGlobToolCallMessageChunk
-    | FindFilesByRegExpToolCallMessageChunk
+    | SearchInWorkspaceToolCallMessageChunk
     | WriteFileToolCallMessageChunk
     | PatchFileToolCallMessageChunk
     | DeleteFileToolCallMessageChunk

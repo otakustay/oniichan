@@ -11,8 +11,7 @@ import {semanticEditCode, SemanticEditCodeToolImplement} from './semanticEditCod
 const tools: SharedToolName[] = [
     'read_file',
     'read_directory',
-    'find_files_by_glob',
-    'find_files_by_regex',
+    'search_in_workspace',
     'run_command',
     'evaluate_code',
     'browser_preview',

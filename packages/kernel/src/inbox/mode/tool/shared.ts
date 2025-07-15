@@ -50,53 +50,59 @@ export const readDirectory = {
     `,
 } as const satisfies ToolDescription;
 
-export const findFilesByGlob = {
-    name: 'find_files_by_glob',
-    description: `Find files matching a glob pattern`,
-    parameters: {
-        type: 'object',
-        properties: {
-            glob: {
-                type: 'string',
-                description: 'The glob pattern to match files',
-            },
-        },
-        required: ['glob'],
-    },
-    usage: dedent`
-        <find_files_by_glob>
-            <glob>src/common/**/*.{ts,tsx}</glob>
-        </find_files_by_glob>
-    `,
-} as const satisfies ToolDescription;
-
-export const findFilesByRegex = {
-    name: 'find_files_by_regex',
-    description: 'Find files matching a regular expression',
+export const searchInWorkspace = {
+    name: 'search_in_workspace',
+    description:
+        'Search for files or content in the workspace. Can be used to find files by glob pattern or search file content using regex patterns.',
     parameters: {
         type: 'object',
         properties: {
             path: {
                 type: 'string',
-                description: 'The path to the directory you want to search for, must be a relative path',
-            },
-            regex: {
-                type: 'string',
-                description: 'A regular expression to match file content',
+                description:
+                    'The path to the directory you want to search in, must be a relative path. Defaults to current directory if not specified.',
             },
             glob: {
                 type: 'string',
                 description:
-                    'Glob pattern to match searched files, search for all text files when this parameter is not provided',
+                    'Glob pattern to match file names/paths. Use this for finding files by name patterns, use this parameter with a relative full path when search in a single file.',
+            },
+            regex: {
+                type: 'string',
+                description:
+                    'Regular expression to search file content. Use this to find files containing specific text patterns.',
             },
         },
-        required: ['path', 'regex'],
+        required: [],
+        additionalProperties: false,
     },
     usage: dedent`
-        <find_files_by_regex>
+        Search for files by glob pattern
+
+        <search_in_workspace>
+            <glob>src/common/**/*.{ts,tsx}</glob>
+        </search_in_workspace>
+
+        Search for content using regex
+
+        <search_in_workspace>
             <regex>export function [A-Z][a-zA-Z0-9]*\\(</regex>
             <path>src/common</path>
-        </find_files_by_regex>
+        </search_in_workspace>
+
+        Search with both glob and regex
+
+        <search_in_workspace>
+            <regex>interface.*Props</regex>
+            <glob>**/*.tsx</glob>
+        </search_in_workspace>
+
+        Search in a single file
+
+        <search_in_workspace>
+            <glob>src/greeting.ts</glob>
+            <regex>export function [A-Z][a-zA-Z0-9]*\\(</regex>
+        </search_in_workspace>
     `,
 } as const satisfies ToolDescription;
 
@@ -125,7 +131,8 @@ export const writeFile = {
             export function hello() {
                 return "hello";
             }
-            </content></write_file>
+            </content>
+        </write_file>
     `,
 } as const satisfies ToolDescription;
 
@@ -342,8 +349,7 @@ export const attemptCompletion = {
 const definitions = [
     readFile,
     readDirectory,
-    findFilesByGlob,
-    findFilesByRegex,
+    searchInWorkspace,
     writeFile,
     patchFile,
     deleteFile,

@@ -11,8 +11,7 @@ import {completeActorTask, CompleteActorTaskToolImplement} from './completeActor
 const tools: SharedToolName[] = [
     'read_file',
     'read_directory',
-    'find_files_by_glob',
-    'find_files_by_regex',
+    'search_in_workspace',
     'write_file',
     'patch_file',
     'delete_file',

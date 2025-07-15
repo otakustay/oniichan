@@ -6,8 +6,7 @@ function resolveTextFromChunk(chunk: MessageViewChunk | null): string {
         switch (chunk.toolName) {
             case 'read_file':
             case 'read_directory':
-            case 'find_files_by_glob':
-            case 'find_files_by_regex':
+            case 'search_in_workspace':
                 return 'Oniichan is analyzing your project...';
             case 'write_file':
             case 'patch_file':

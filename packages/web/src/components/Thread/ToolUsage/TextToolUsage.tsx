@@ -56,10 +56,13 @@ function renderLabelContent(input: ToolCallMessageChunk): [ComponentType, string
                 trimPathString(ensureString(input.arguments.path)),
                 ensureString(input.arguments.path),
             ];
-        case 'find_files_by_glob':
-            return [IoSearchOutline, 'Find files', ensureString(input.arguments.glob), ''];
-        case 'find_files_by_regex':
-            return [IoSearchOutline, 'Grep', ensureString(input.arguments.regex), ''];
+        case 'search_in_workspace':
+            return [
+                IoSearchOutline,
+                'Search workspace',
+                ensureString(input.arguments.glob) || ensureString(input.arguments.regex),
+                '',
+            ];
         case 'complete_task':
             return [IoExitOutline, 'Finish', `Confidence ${input.arguments.confidence}`, ''];
         default:

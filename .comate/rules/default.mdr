@@ -1,0 +1,39 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+## Project Description
+
+This workspace is a VSCode extension utilizing LLM to generate code in various environment, it's a monorepo containing following packages (in `packages` directory):
+
+- `shared`: Code for shared use, including model access, utility functions, shared types, etc.
+- `prompt`: Manages prompt words for all features.
+- `kernel`: Contains the core logic decoupled from the VSCode API. It is designed to work in independent environments (threads, processes, or even remotely).
+- `editor-host`: Exposes the VSCode capabilities needed by the core logic to the `kernel` module.
+- `storage`: Provides the ability to persist data locally. Anything related to persistence must use the functions here; writing files or databases directly is not allowed.
+- `web`: A React application that communicates with the server via WebSocket after being packaged. You can open a web page through the plugin to use it.
+- `web-host`: Exposes capabilities in the web system for IDE, `kernel`, etc., essentially services for externally controlling page elements.
+- `vscode`: Source code for the VSCode extension.
+- `eval`: An independent CLI that reuses the `kernel` module for automated task evaluation, equivalent to a headless version of the actual IDE plugin.
+
+For each package, `src` directory contains all source code writting in TypeScript, compiled output resides in `dist` directory.
+
+## Coding Convention
+
+1. Always use TypeScript.
+2. Make types as strong as possible.
+3. Get rid of `let` declaration when possible, when a mutable variable is required, try to use an object const variable instead.
+4. It's better to group related variables in one object.
+
+## Terminal Command
+
+1. The `git` command usually have pager enabled and require human interaction, get rid of that when executing `git`.
+2. Do not use `rm` to delete file, use corresponding tools.
+
+## Working Guideline
+
+1. Never touch `dist` directories, they are always useless.
+2. Do not modify `tsconfig.json` or `tsconfig.*.json`, tell me what to do if changes are required in these files.
+3. Never modify `src/inbox/mode/tool/shared.ts`, this is a magic file that will always fail for editing, tell me how to modify it if needed, I'll apply changes manually.
+4. It's always better to run build on the completion of a task, build output will provide you useful information, try to guarantee the success of `npm run build`.
